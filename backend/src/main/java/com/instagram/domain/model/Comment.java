@@ -14,6 +14,7 @@ public class Comment {
     private CommentStatus status;
     private Instant createdAt;
     private Instant updatedAt;
+    private boolean isLikedByCurrentUser;
 
     private Comment() {
 
@@ -76,6 +77,11 @@ public class Comment {
             return this;
         }
 
+        public Builder isLikedByCurrentUser(boolean isLikedByCurrentUser) {
+            comment.isLikedByCurrentUser = isLikedByCurrentUser;
+            return this;
+        }
+
         public Comment build() {
             if (comment.id == null)
                 throw new IllegalArgumentException("id is required");
@@ -102,7 +108,8 @@ public class Comment {
                 .replyCount(replyCount)
                 .status(status)
                 .createdAt(createdAt)
-                .updatedAt(updatedAt);
+                .updatedAt(updatedAt)
+                .isLikedByCurrentUser(isLikedByCurrentUser);
     }
 
     public Comment withEdit(String newContent) {
@@ -132,6 +139,7 @@ public class Comment {
                 .status(CommentStatus.ACTIVE)
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
+                .isLikedByCurrentUser(false)
                 .build();
     }
 
@@ -173,6 +181,14 @@ public class Comment {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public boolean isLikedByCurrentUser() {
+        return isLikedByCurrentUser;
+    }
+
+    public Comment withIsLikedByCurrentUser(boolean isLikedByCurrentUser) {
+        return this.copy().isLikedByCurrentUser(isLikedByCurrentUser).build();
     }
 
 }

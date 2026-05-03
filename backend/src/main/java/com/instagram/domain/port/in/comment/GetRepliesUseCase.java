@@ -8,6 +8,6 @@ import com.instagram.domain.model.Comment;
 public interface GetRepliesUseCase {
     List<Comment> getReplies(Query query);
 
-    record Query(UUID commentId, int page, int size) {
+    record Query(UUID commentId, UUID currentUserId, int page, int size) {
     }
 }

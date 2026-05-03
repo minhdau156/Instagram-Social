@@ -238,4 +238,9 @@ public class UserService implements RegisterUserUseCase, LoginUseCase, RefreshTo
 
         return userRepository.save(updated);
     }
+
+    public User getUserById(UUID userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> UserNotFoundException.withId(userId));
+    }
 }

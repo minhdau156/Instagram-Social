@@ -2,6 +2,7 @@ package com.instagram.application.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,13 +14,16 @@ import org.springframework.stereotype.Service;
 
 import com.instagram.domain.exception.CommentNotFoundException;
 import com.instagram.domain.exception.UnauthorizedCommentAccessException;
+import com.instagram.domain.exception.UserNotFoundException;
 import com.instagram.domain.model.Comment;
+import com.instagram.domain.model.User;
 import com.instagram.domain.port.in.comment.AddCommentUseCase;
 import com.instagram.domain.port.in.comment.DeleteCommentUseCase;
 import com.instagram.domain.port.in.comment.EditCommentUseCase;
 import com.instagram.domain.port.in.comment.GetCommentsUseCase;
 import com.instagram.domain.port.in.comment.GetRepliesUseCase;
 import com.instagram.domain.port.out.CommentRepository;
+import com.instagram.domain.port.out.LikeRepository;
 import com.instagram.domain.port.out.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -34,16 +38,27 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
 
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final LikeRepository likeRepository;
 
-    public CommentService(CommentRepository commentRepository, UserRepository userRepository) {
+    public CommentService(CommentRepository commentRepository, UserRepository userRepository,
+            LikeRepository likeRepository) {
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
+        this.likeRepository = likeRepository;
     }
 
     @Override
+    @Transactional
     public List<Comment> getReplies(GetRepliesUseCase.Query query) {
-        return commentRepository.findByParentId(query.commentId(), PageRequest.of(query.page(), query.size()))
+        List<Comment> comments = commentRepository
+                .findByParentId(query.commentId(), PageRequest.of(query.page(), query.size()))
                 .getContent();
+        User currentUser = userRepository.findById(query.currentUserId())
+                .orElseThrow(() -> new UserNotFoundException(query.currentUserId().toString()));
+        return comments.stream().map(comment -> {
+            boolean isLikedByCurrentUser = this.likeRepository.hasLikedComment(comment.getId(), currentUser.getId());
+            return comment.withIsLikedByCurrentUser(isLikedByCurrentUser);
+        }).toList();
     }
 
     @Override
@@ -102,8 +117,18 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
     }
 
     @Override
+    @Transactional
     public List<Comment> getComments(GetCommentsUseCase.Query query) {
-        return commentRepository.findByPostId(query.postId(), PageRequest.of(query.page(), query.size())).getContent();
+        List<Comment> comments = commentRepository
+                .findByPostId(query.postId(), PageRequest.of(query.page(), query.size())).getContent();
+
+        User currentUser = userRepository.findById(query.currentUserId())
+                .orElseThrow(() -> new UserNotFoundException(query.currentUserId().toString()));
+
+        return comments.stream().map(comment -> {
+            boolean isLikedByCurrentUser = this.likeRepository.hasLikedComment(comment.getId(), currentUser.getId());
+            return comment.withIsLikedByCurrentUser(isLikedByCurrentUser);
+        }).toList();
     }
 
     private List<String> extractMentions(String content) {
