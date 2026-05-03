@@ -1,20 +1,17 @@
-# Current Feature: TASK-4.9 — Unit & Integration Tests: Likes
+# Current Feature
 
 ## Status
 Not Started
 
 ## Goals
-- Write comprehensive unit tests for `LikeService` using Mockito (no Spring context).
-- Write integration tests for `LikePersistenceAdapter` using `@DataJpaTest` to verify database operations.
-- Write REST API tests for `LikeController` using `@WebMvcTest` and `MockMvc` with authentication support.
+<!-- Add feature goals here -->
 
 ## Notes
-- Test names should end in `Test` for unit tests and `IT` for integration tests.
-- Controller tests must use `@WithMockUser` for authentication and `@MockBean` for use-cases.
-- Verify both post and comment interaction flows, including all exception paths (`AlreadyLikedException`, `NotLikedException`).
+<!-- Add feature notes here -->
 
 ## History
 
+- TASK-4.9 — Unit & Integration Tests: Likes
 - TASK-4.8 — REST Controller: LikeController
 - TASK-4.7 — Persistence Adapter: LikePersistenceAdapter
 - TASK-4.6 — JPA Entities & Repositories: Likes
