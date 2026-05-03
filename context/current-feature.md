@@ -97,3 +97,4 @@ Not Started
 - TASK-4.12 — Out-Port: CommentRepository
 - TASK-4.13 — In-Ports: Comment Use Cases
 - TASK-4.15 — JPA Entity & Repository: Comment
+- TASK-4.16 — Persistence Adapter: CommentPersistenceAdapter
