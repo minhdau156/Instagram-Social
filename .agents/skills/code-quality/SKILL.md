@@ -1,6 +1,6 @@
 ---
 name: code-quality
-description: Comprehensive code review for Java - clean code principles, API contracts, null safety, exception handling, and performance. Use when user says "review code", "refactor", "check API", or before merging changes.
+description: Comprehensive code review for Java - clean code principles, API contracts, null safety, exception handling, performance, and Spring Data JPA repository annotations (@Query, @Modifying, @Transactional). Use when user says "review code", "refactor", "check API", "review repository", or before merging changes.
 ---
 
 # Code Quality Review Skill
@@ -289,6 +289,71 @@ Page<User> users = userRepository.findAll(PageRequest.of(0, 20));
 
 ---
 
+## Spring Data JPA Repository Review
+
+Apply when reviewing any `JpaRepository` interface with `@Query`, `@Modifying`, or `@Transactional`.
+
+### @Query — JPQL vs Native
+
+**Rule:** Default to JPQL. Use `nativeQuery = true` only for DB-specific features (CTEs, window functions).
+
+| | JPQL | Native |
+|---|---|---|
+| Operates on | Entity field names | Table/column names |
+| DB portable | ✅ | ❌ |
+| `Page<T>` auto-COUNT | ✅ | ⚠️ requires `countQuery` |
+| Complex SQL | ❌ | ✅ |
+
+**Flags:**
+- Native used for a plain `WHERE` filter → use JPQL
+- `Page<T>` + `nativeQuery = true` with no `countQuery` → runtime error
+- JPQL uses column name instead of entity field (`post_id` vs `postId`)
+- `:placeholder` doesn't match `@Param("name")`
+
+---
+
+### @Modifying — Required for DML
+
+**Rule:** Every `UPDATE` / `DELETE` / `INSERT` `@Query` must have `@Modifying`.
+
+```java
+// ❌ → InvalidDataAccessApiUsageException
+@Query("UPDATE CommentJpaEntity c SET c.isDeleted = true WHERE c.id = :id")
+void softDelete(@Param("id") UUID id);
+
+// ✅ add clearAutomatically = true if entity is re-read in the same tx
+@Modifying(clearAutomatically = true)
+@Query("UPDATE CommentJpaEntity c SET c.isDeleted = true WHERE c.id = :id")
+void softDelete(@Param("id") UUID id);
+```
+
+**Flags:**
+- `UPDATE`/`DELETE` without `@Modifying` → runtime exception
+- `@Modifying` on a `SELECT` → unnecessary
+- Missing `clearAutomatically = true` when entity is re-read after bulk update
+- Return type is not `void` or `int`
+
+---
+
+### @Transactional — Transaction Ownership
+
+**Rule:** `@Modifying` always needs an active transaction.
+
+| Scenario | Where to place `@Transactional` |
+|---|---|
+| Single DML, no business logic | Repository method |
+| Multiple DML ops (atomic) | Service / adapter method |
+| Read-only | `@Transactional(readOnly = true)` on service |
+
+**Flags:**
+- `@Modifying` with no `@Transactional` anywhere in the chain → `TransactionRequiredException`
+- `@Transactional` on a `private` method → AOP proxy can't intercept it
+- `@Transactional(readOnly = true)` wrapping a write → silent failure or exception
+- Multiple `@Modifying` calls in separate transactions where atomicity is required
+
+---
+
+
 ## Review Output Format
 
 ```markdown
@@ -328,6 +393,9 @@ Page<User> users = userRepository.findAll(PageRequest.of(0, 20));
 | **Transactions** | Multi-step writes without @Transactional |
 | **Performance** | N+1 queries, loading all data, missing indexes |
 | **Clean Code** | Code duplication, magic numbers, unclear names |
+| **@Query** | Native used for simple filter, JPQL uses column not field name, `@Param` mismatch |
+| **@Modifying** | Missing on UPDATE/DELETE, no `clearAutomatically` when re-reading updated entity |
+| **@Transactional** | Missing on @Modifying call chain, on private method, readOnly=true with writes |
 
 ---
 

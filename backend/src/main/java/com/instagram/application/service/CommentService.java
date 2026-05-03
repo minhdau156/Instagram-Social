@@ -22,6 +22,8 @@ import com.instagram.domain.port.in.comment.GetRepliesUseCase;
 import com.instagram.domain.port.out.CommentRepository;
 import com.instagram.domain.port.out.UserRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class CommentService implements AddCommentUseCase, EditCommentUseCase,
         DeleteCommentUseCase,
@@ -45,6 +47,7 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
     }
 
     @Override
+    @Transactional
     public void deleteComment(DeleteCommentUseCase.Command command) {
         Comment comment = this.commentRepository.findById(command.commentId())
                 .orElseThrow(() -> new CommentNotFoundException(command.commentId()));
@@ -61,6 +64,7 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
     }
 
     @Override
+    @Transactional
     public Comment editComment(EditCommentUseCase.Command command) {
         Comment comment = this.commentRepository.findById(command.commentId())
                 .orElseThrow(() -> new CommentNotFoundException(command.commentId()));
@@ -70,7 +74,7 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
         }
         Comment editComment = comment.withEdit(command.newContent());
         this.commentRepository.save(editComment);
-        
+
         List<String> mentions = extractMentions(command.newContent());
         if (!mentions.isEmpty()) {
             log.info("Extracted mentions in edited comment {}: {}", editComment.getId(), mentions);
@@ -80,6 +84,7 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
     }
 
     @Override
+    @Transactional
     public Comment addComment(AddCommentUseCase.Command command) {
         Comment newComment = Comment.of(command.postId(), command.userId(), command.content(), command.parentId());
         this.commentRepository.save(newComment);

@@ -26,7 +26,7 @@ backend/src/main/java/com/instagram/adapter/out/persistence/
 
 ### `CommentJpaEntity.java`
 
-- [ ] Create `CommentJpaEntity.java`:
+- [x] Create `CommentJpaEntity.java`:
   ```java
   @Entity
   @Table(name = "comments")
@@ -46,7 +46,7 @@ backend/src/main/java/com/instagram/adapter/out/persistence/
       @JoinColumn(name = "parent_id")
       private CommentJpaEntity parent;  // nullable
 
-      @Column(name = "content", nullable = false, length = 2200)
+      @Column(name = "body", nullable = false, length = 2200)
       private String content;
 
       @Column(name = "like_count", nullable = false)
@@ -70,13 +70,13 @@ backend/src/main/java/com/instagram/adapter/out/persistence/
       // no-arg constructor, all-args constructor, getters
   }
   ```
-- [ ] Implement `equals()` and `hashCode()` based on `id`
-- [ ] Add `toDomain()` method that maps `CommentJpaEntity` → `Comment` domain object
-- [ ] Add static `fromDomain(Comment)` factory method
+- [x] Implement `equals()` and `hashCode()` based on `id`
+- [x] Add `toDomain()` method that maps `CommentJpaEntity` → `Comment` domain object
+- [x] Add static `fromDomain(Comment)` factory method
 
 ### `CommentJpaRepository.java`
 
-- [ ] Create repository interface:
+- [x] Create repository interface:
   ```java
   public interface CommentJpaRepository extends JpaRepository<CommentJpaEntity, UUID> {
 
@@ -114,4 +114,4 @@ backend/src/main/java/com/instagram/adapter/out/persistence/
   }
   ```
 
-- [ ] Verify `CommentStatus` enum is importable from the domain model in the persistence layer (or create a JPA-specific copy if your architecture requires it)
+- [x] Verify `CommentStatus` enum is importable from the domain model in the persistence layer (or create a JPA-specific copy if your architecture requires it)
