@@ -67,9 +67,11 @@ class LikeServiceTest {
     }
 
     @Test
-    void like_Success() {
+    void like_notYetLiked_savesAndIncrementsCount() {
         LikePostUseCase.Command command = new LikePostUseCase.Command(postId, userId);
         when(likeRepository.hasLikedPost(postId, userId)).thenReturn(false);
+        doNothing().when(likeRepository).likePost(postId, userId);
+        doNothing().when(postRepository).incrementLikeCount(postId);
 
         likeService.like(command);
 
@@ -78,7 +80,7 @@ class LikeServiceTest {
     }
 
     @Test
-    void like_AlreadyLiked() {
+    void like_alreadyLiked_throwsAlreadyLikedException() {
         LikePostUseCase.Command command = new LikePostUseCase.Command(postId, userId);
         when(likeRepository.hasLikedPost(postId, userId)).thenReturn(true);
 
@@ -89,9 +91,11 @@ class LikeServiceTest {
     }
 
     @Test
-    void unlike_Success() {
+    void unlike_hasLiked_deletesAndDecrementsCount() {
         UnlikePostUseCase.Command command = new UnlikePostUseCase.Command(postId, userId);
         when(likeRepository.hasLikedPost(postId, userId)).thenReturn(true);
+        doNothing().when(likeRepository).unlikePost(postId, userId);
+        doNothing().when(postRepository).decrementLikeCount(postId);
 
         likeService.unlike(command);
 
@@ -100,7 +104,7 @@ class LikeServiceTest {
     }
 
     @Test
-    void unlike_NotLiked() {
+    void unlike_notLikedYet_throwsNotLikedException() {
         UnlikePostUseCase.Command command = new UnlikePostUseCase.Command(postId, userId);
         when(likeRepository.hasLikedPost(postId, userId)).thenReturn(false);
 
@@ -111,9 +115,11 @@ class LikeServiceTest {
     }
 
     @Test
-    void likeComment_Success() {
+    void likeComment_notLikedYet_SavesAndIncrementsCount() {
         LikeCommentUseCase.Command command = new LikeCommentUseCase.Command(commentId, userId);
         when(likeRepository.hasLikedComment(commentId, userId)).thenReturn(false);
+        doNothing().when(likeRepository).likeComment(commentId, userId);
+        doNothing().when(commentRepository).incrementLikeCount(commentId);
 
         likeService.likeComment(command);
 
@@ -122,7 +128,7 @@ class LikeServiceTest {
     }
 
     @Test
-    void likeComment_AlreadyLiked() {
+    void likeComment_alreadyLiked_throwsAlreadyLikedException() {
         LikeCommentUseCase.Command command = new LikeCommentUseCase.Command(commentId, userId);
         when(likeRepository.hasLikedComment(commentId, userId)).thenReturn(true);
 
@@ -133,9 +139,11 @@ class LikeServiceTest {
     }
 
     @Test
-    void unlikeComment_Success() {
+    void unlikeComment_hasLiked_deletesAndDecrementsCount() {
         UnlikeCommentUseCase.Command command = new UnlikeCommentUseCase.Command(commentId, userId);
         when(likeRepository.hasLikedComment(commentId, userId)).thenReturn(true);
+        doNothing().when(likeRepository).unlikeComment(commentId, userId);
+        doNothing().when(commentRepository).decrementLikeCount(commentId);
 
         likeService.unlikeComment(command);
 
@@ -144,7 +152,7 @@ class LikeServiceTest {
     }
 
     @Test
-    void unlikeComment_NotLiked() {
+    void unlikeComment_notLikedYet_throwsNotLikedException() {
         UnlikeCommentUseCase.Command command = new UnlikeCommentUseCase.Command(commentId, userId);
         when(likeRepository.hasLikedComment(commentId, userId)).thenReturn(false);
 
@@ -183,7 +191,7 @@ class LikeServiceTest {
         when(userRepository.findAllByIds(likerIds)).thenReturn(List.of(user));
         when(followRepository.findByFollowerIdAndFollowingId(requestingUserId, userId)).thenReturn(Optional.of(follow));
 
-        List<UserSummary> summaries = likeService.getLikers(query);
+        List<UserSummary> summaries = likeService.getPostLikers(query);
 
         assertEquals(1, summaries.size());
         UserSummary summary = summaries.get(0);

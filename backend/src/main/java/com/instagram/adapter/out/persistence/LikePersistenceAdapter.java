@@ -26,16 +26,15 @@ public class LikePersistenceAdapter implements LikeRepository {
     private final PostLikeJpaRepository postLikeJpaRepository;
     private final PostJpaRepository postJpaRepository;
     private final CommentLikeJpaRepository commentLikeJpaRepository;
-    private final CommentJpaRepository commentJpaRepository;
+    // private final CommentJpaRepository commentJpaRepository;
 
     public LikePersistenceAdapter(PostLikeJpaRepository postLikeJpaRepository,
             PostJpaRepository postJpaRepository,
-            CommentLikeJpaRepository commentLikeJpaRepository,
-            CommentJpaRepository commentJpaRepository) {
+            CommentLikeJpaRepository commentLikeJpaRepository) {
         this.postLikeJpaRepository = postLikeJpaRepository;
         this.postJpaRepository = postJpaRepository;
         this.commentLikeJpaRepository = commentLikeJpaRepository;
-        this.commentJpaRepository = commentJpaRepository;
+        // this.commentJpaRepository = commentJpaRepository;
     }
 
     @Override
