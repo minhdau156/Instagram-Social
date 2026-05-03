@@ -1,22 +1,13 @@
-# Current Feature: TASK-4.13 — In-Ports: Comment Use Cases
+# Current Feature
 
 ## Status
 Not Started
 
 ## Goals
-- Create `AddCommentUseCase` interface with nested `Command` record (`postId`, `userId`, `content`, `parentId`).
-- Create `EditCommentUseCase` interface with nested `Command` record (`commentId`, `userId`, `newContent`).
-- Create `DeleteCommentUseCase` interface with nested `Command` record (`commentId`, `userId`).
-- Create `GetCommentsUseCase` interface with nested `Query` record (`postId`, `page`, `size`) returning top-level active comments.
-- Create `GetRepliesUseCase` interface with nested `Query` record (`commentId`, `page`, `size`).
-- Ensure all `Command`/`Query` fields use domain-agnostic types (`UUID`, `int`, `String`).
-- Ensure nullable fields (`parentId` in `AddCommentUseCase.Command`) are documented with comments.
+<!-- Add goals here -->
 
 ## Notes
-- Location: `backend/src/main/java/com/instagram/domain/port/in/`
-- No Spring or JPA annotations allowed.
-- Each interface must declare exactly **one** method.
-- These are "driving" ports called by `CommentController` and implemented by `CommentService`.
+<!-- Add notes here -->
 
 
 ## History
@@ -106,3 +97,4 @@ Not Started
 - TASK-4.10 â€” Domain Model: Comment
 - TASK-4.11 - Domain Exceptions: Comment
 - TASK-4.12 — Out-Port: CommentRepository
+- TASK-4.13 — In-Ports: Comment Use Cases
