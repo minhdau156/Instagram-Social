@@ -1,17 +1,11 @@
-# Current Feature: Request / Response DTOs: Comment
+# Current Feature
 
 ## Status
 Not Started
 
 ## Goals
-- Create `AddCommentRequest` and `EditCommentRequest` DTOs with Bean Validation annotations. 
-- Create `CommentResponse` DTO with a static `from(Comment)` factory method.
-- Follow the structure of existing DTOs.
-- Place DTOs in `adapter/in/web/dto/request/` and `adapter/in/web/dto/response/`.
 
 ## Notes
-- `CommentResponse` will have fields like `username`, `avatarUrl`, `isLikedByCurrentUser` which will be populated later by the service layer or controller.
-- Consider adding an overloaded `from()` factory method for the enriched case.
 
 ## History
 - TASK-4.14 — Domain Service: CommentService
@@ -104,4 +98,4 @@ Not Started
 - TASK-4.13 — In-Ports: Comment Use Cases
 - TASK-4.15 — JPA Entity & Repository: Comment
 - TASK-4.16 — Persistence Adapter: CommentPersistenceAdapter
-
+- TASK-4.18 — Request / Response DTOs: Comment
