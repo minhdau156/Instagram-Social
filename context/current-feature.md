@@ -1,13 +1,19 @@
-# Current Feature
+# TASK-4.10 — Domain Model: Comment
 
 ## Status
 Not Started
 
 ## Goals
-<!-- Add feature goals here -->
+- Create the `Comment` domain entity representing a comment on a post, with support for nested replies (parent-child relationship).
+- Create the `CommentStatus` enum (ACTIVE, DELETED).
+- Implement a handwritten Builder pattern for `Comment`.
+- Implement business behavior (`withEdit`, `withSoftDelete`) as copy-returning methods.
 
 ## Notes
-<!-- Add feature notes here -->
+- Must live in `domain/model/` — no framework dependencies (no `@Entity`, `@Component`, or Lombok).
+- Fields map directly to the `comments` table in `schema.sql`.
+- `parentId` is nullable (null means top-level comment).
+- `likeCount` and `replyCount` are denormalized counters.
 
 ## History
 

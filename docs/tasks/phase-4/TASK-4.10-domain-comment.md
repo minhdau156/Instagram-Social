@@ -33,7 +33,7 @@ backend/src/main/java/com/instagram/domain/model/CommentStatus.java
 
 ### `CommentStatus.java`
 
-- [ ] Create `CommentStatus.java` enum:
+- [x] Create `CommentStatus.java` enum:
   ```java
   public enum CommentStatus {
       ACTIVE,
@@ -43,7 +43,7 @@ backend/src/main/java/com/instagram/domain/model/CommentStatus.java
 
 ### `Comment.java`
 
-- [ ] Create `Comment.java` with fields:
+- [x] Create `Comment.java` with fields:
   ```java
   private UUID id;
   private UUID postId;
@@ -57,15 +57,15 @@ backend/src/main/java/com/instagram/domain/model/CommentStatus.java
   private Instant updatedAt;
   ```
 
-- [ ] Implement private no-arg constructor (used by Builder only)
+- [x] Implement private no-arg constructor (used by Builder only)
 
-- [ ] Implement static inner `Builder` class with:
-  - [ ] Fluent setter methods returning `this` for each field
-  - [ ] `build()` that validates `id`, `postId`, `userId`, `content`, `status` are not null
+- [x] Implement static inner `Builder` class with:
+  - [x] Fluent setter methods returning `this` for each field
+  - [x] `build()` that validates `id`, `postId`, `userId`, `content`, `status` are not null
 
-- [ ] Implement a private `copy()` helper returning a mutable `Builder` copy
+- [x] Implement a private `copy()` helper returning a mutable `Builder` copy
 
-- [ ] Implement `withEdit(String newContent)`:
+- [x] Implement `withEdit(String newContent)`:
   ```java
   public Comment withEdit(String newContent) {
       return this.copy()
@@ -75,7 +75,7 @@ backend/src/main/java/com/instagram/domain/model/CommentStatus.java
   }
   ```
 
-- [ ] Implement `withSoftDelete()`:
+- [x] Implement `withSoftDelete()`:
   ```java
   public Comment withSoftDelete() {
       return this.copy()
@@ -86,7 +86,7 @@ backend/src/main/java/com/instagram/domain/model/CommentStatus.java
   }
   ```
 
-- [ ] Add static factory method `of(UUID postId, UUID userId, String content, UUID parentId)`:
+- [x] Add static factory method `of(UUID postId, UUID userId, String content, UUID parentId)`:
   ```java
   public static Comment of(UUID postId, UUID userId, String content, UUID parentId) {
       return new Builder()
@@ -104,16 +104,16 @@ backend/src/main/java/com/instagram/domain/model/CommentStatus.java
   }
   ```
 
-- [ ] Implement public getters for all fields (no setters)
+- [x] Implement public getters for all fields (no setters)
 
 ---
 
 ### Unit Tests — `CommentTest.java`
 
-- [ ] **`of_createsComment_withCorrectFields()`**
-- [ ] **`of_topLevelComment_hasNullParentId()`**
-- [ ] **`withEdit_returnsNewInstance_withUpdatedContent()`**
-- [ ] **`withEdit_doesNotMutateOriginal()`**
-- [ ] **`withSoftDelete_setsStatusToDeleted_andClearsContent()`**
-- [ ] **`withSoftDelete_doesNotMutateOriginal()`**
-- [ ] **`builder_throwsException_whenContentIsNull()`**
+- [x] **`of_createsComment_withCorrectFields()`**
+- [x] **`of_topLevelComment_hasNullParentId()`**
+- [x] **`withEdit_returnsNewInstance_withUpdatedContent()`**
+- [x] **`withEdit_doesNotMutateOriginal()`**
+- [x] **`withSoftDelete_setsStatusToDeleted_andClearsContent()`**
+- [x] **`withSoftDelete_doesNotMutateOriginal()`**
+- [x] **`builder_throwsException_whenContentIsNull()`**

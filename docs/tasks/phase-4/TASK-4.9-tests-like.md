@@ -26,36 +26,36 @@ backend/src/test/java/com/instagram/
 
 ### `LikeServiceTest.java` (Unit — Mockito)
 
-- [ ] Mock `LikeRepository`, `PostRepository`, `CommentRepository`, `UserRepository`
-- [ ] Create `LikeService` under test with mocked dependencies
+- [x] Mock `LikeRepository`, `PostRepository`, `CommentRepository`, `UserRepository`
+- [x] Create `LikeService` under test with mocked dependencies
 
-- [ ] **`likePost_notYetLiked_savesAndIncrementsCount()`**:
+- [x] **`likePost_notYetLiked_savesAndIncrementsCount()`**:
   - `hasLikedPost(...)` returns `false`
   - Verify `likeRepository.likePost(...)` is called
   - Verify `postRepository.incrementLikeCount(...)` is called
 
-- [ ] **`likePost_alreadyLiked_throwsAlreadyLikedException()`**:
+- [x] **`likePost_alreadyLiked_throwsAlreadyLikedException()`**:
   - `hasLikedPost(...)` returns `true`
   - Verify `AlreadyLikedException` is thrown
   - Verify `likeRepository.likePost(...)` is **NOT** called
 
-- [ ] **`unlikePost_liked_deletesAndDecrementsCount()`**:
+- [x] **`unlikePost_liked_deletesAndDecrementsCount()`**:
   - `hasLikedPost(...)` returns `true`
   - Verify `likeRepository.unlikePost(...)` is called
   - Verify `postRepository.decrementLikeCount(...)` is called
 
-- [ ] **`unlikePost_notLiked_throwsNotLikedException()`**:
+- [x] **`unlikePost_notLiked_throwsNotLikedException()`**:
   - `hasLikedPost(...)` returns `false`
   - Verify `NotLikedException` is thrown
 
-- [ ] **`likeComment_notYetLiked_savesAndIncrementsCount()`**:
+- [x] **`likeComment_notYetLiked_savesAndIncrementsCount()`**:
   - Same pattern as `likePost` for comment
 
-- [ ] **`likeComment_alreadyLiked_throwsAlreadyLikedException()`**
+- [x] **`likeComment_alreadyLiked_throwsAlreadyLikedException()`**
 
-- [ ] **`unlikeComment_liked_deletesAndDecrementsCount()`**
+- [x] **`unlikeComment_liked_deletesAndDecrementsCount()`**
 
-- [ ] **`getPostLikers_returnsPagedUserSummaries()`**:
+- [x] **`getPostLikers_returnsPagedUserSummaries()`**:
   - Stub `findPostLikerIds(...)` to return a list of UUIDs
   - Stub `userRepository.findAllByIds(...)` to return matching user records
   - Assert returned list matches expected usernames
@@ -64,59 +64,59 @@ backend/src/test/java/com/instagram/
 
 ### `LikePersistenceAdapterIT.java` (`@DataJpaTest`)
 
-- [ ] Annotate with `@DataJpaTest` and configure `TestEntityManager`
+- [x] Annotate with `@DataJpaTest` and configure `TestEntityManager`
 
-- [ ] **`likePost_persistsLikeRecord()`**:
+- [x] **`likePost_persistsLikeRecord()`**:
   - Call `adapter.likePost(postId, userId)` and flush
   - Assert `existsByIdPostIdAndIdUserId(postId, userId)` returns `true`
 
-- [ ] **`unlikePost_removesLikeRecord()`**:
+- [x] **`unlikePost_removesLikeRecord()`**:
   - Save a like then call `adapter.unlikePost(postId, userId)`
   - Assert record no longer exists
 
-- [ ] **`hasLikedPost_returnsTrueWhenLiked()`**
+- [x] **`hasLikedPost_returnsTrueWhenLiked()`**
 
-- [ ] **`hasLikedPost_returnsFalseWhenNotLiked()`**
+- [x] **`hasLikedPost_returnsFalseWhenNotLiked()`**
 
-- [ ] **`findPostLikerIds_returnsUserIdsSortedByCreatedAt()`**:
+- [x] **`findPostLikerIds_returnsUserIdsSortedByCreatedAt()`**:
   - Insert two likes at different timestamps
   - Assert they are returned in descending `createdAt` order
 
-- [ ] **`likeComment_persistsCommentLikeRecord()`**
+- [x] **`likeComment_persistsCommentLikeRecord()`**
 
-- [ ] **`hasLikedComment_returnsTrueWhenLiked()`**
+- [x] **`hasLikedComment_returnsTrueWhenLiked()`**
 
 ---
 
 ### `LikeControllerTest.java` (MockMvc)
 
-- [ ] Mock all use-case beans with `@MockBean`
-- [ ] Configure `MockMvc` with Spring Security test support
+- [x] Mock all use-case beans with `@MockBean`
+- [x] Configure `MockMvc` with Spring Security test support
 
-- [ ] **`POST /posts/{id}/like — 204 No Content`**:
+- [x] **`POST /posts/{id}/like — 204 No Content`**:
   - Use `@WithMockUser`
   - Stub `likePostUseCase.like(...)` to do nothing
   - Assert HTTP 204
 
-- [ ] **`POST /posts/{id}/like — 401 Unauthorized`**:
+- [x] **`POST /posts/{id}/like — 401 Unauthorized`**:
   - No authentication
   - Assert HTTP 401 or 403
 
-- [ ] **`POST /posts/{id}/like — 409 Conflict`**:
+- [x] **`POST /posts/{id}/like — 409 Conflict`**:
   - Stub `likePostUseCase.like(...)` to throw `AlreadyLikedException`
   - Assert HTTP 409
 
-- [ ] **`DELETE /posts/{id}/like — 204 No Content`**:
+- [x] **`DELETE /posts/{id}/like — 204 No Content`**:
   - Use `@WithMockUser`; assert HTTP 204
 
-- [ ] **`DELETE /posts/{id}/like — 404 Not Found`**:
+- [x] **`DELETE /posts/{id}/like — 404 Not Found`**:
   - Stub to throw `NotLikedException`
   - Assert HTTP 404
 
-- [ ] **`GET /posts/{id}/likers — 200 OK`**:
+- [x] **`GET /posts/{id}/likers — 200 OK`**:
   - No auth required; stub returns list of user summaries
   - Assert HTTP 200 and list is present in body
 
-- [ ] **`POST /comments/{id}/like — 204 No Content`**
+- [x] **`POST /comments/{id}/like — 204 No Content`**
 
-- [ ] **`DELETE /comments/{id}/like — 204 No Content`**
+- [x] **`DELETE /comments/{id}/like — 204 No Content`**
