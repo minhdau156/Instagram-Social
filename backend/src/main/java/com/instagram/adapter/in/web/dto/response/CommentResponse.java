@@ -36,6 +36,6 @@ public record CommentResponse(
                 comment.getStatus(),
                 comment.getCreatedAt(),
                 comment.getUpdatedAt(),
-                false);
+                comment.isLikedByCurrentUser());
     }
 }

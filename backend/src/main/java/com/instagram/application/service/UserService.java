@@ -27,6 +27,7 @@ import com.instagram.domain.port.in.RefreshTokenUseCase;
 import com.instagram.domain.port.in.RegisterUserUseCase;
 import com.instagram.domain.port.in.RequestPasswordResetUseCase;
 import com.instagram.domain.port.in.UpdateProfileUseCase;
+import com.instagram.domain.port.in.user.GetUserUseCase;
 import com.instagram.domain.port.out.EmailPort;
 import com.instagram.domain.port.out.FollowRepository;
 import com.instagram.domain.port.out.PasswordHashPort;
@@ -35,7 +36,8 @@ import com.instagram.domain.port.out.UserRepository;
 import com.instagram.domain.port.out.UserStatsRepository;
 
 @Service
-public class UserService implements RegisterUserUseCase, LoginUseCase, RefreshTokenUseCase, LogoutUseCase,
+public class UserService
+        implements GetUserUseCase, RegisterUserUseCase, LoginUseCase, RefreshTokenUseCase, LogoutUseCase,
         RequestPasswordResetUseCase, ConfirmPasswordResetUseCase, GetUserProfileUseCase, UpdateProfileUseCase {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
@@ -239,8 +241,9 @@ public class UserService implements RegisterUserUseCase, LoginUseCase, RefreshTo
         return userRepository.save(updated);
     }
 
-    public User getUserById(UUID userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> UserNotFoundException.withId(userId));
+    @Override
+    public User getUser(GetUserUseCase.Query query) {
+        return userRepository.findById(query.userId())
+                .orElseThrow(() -> UserNotFoundException.withId(query.userId()));
     }
 }
