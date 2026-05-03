@@ -23,12 +23,12 @@ backend/src/main/java/com/instagram/adapter/out/persistence/CommentPersistenceAd
 
 ## Checklist
 
-- [ ] Create `CommentPersistenceAdapter.java` annotated with `@Component`
-- [ ] Implement `CommentRepository`
-- [ ] Inject via constructor: `CommentJpaRepository`, `PostJpaRepository`
-- [ ] Declare all fields `private final`
+- [x] Create `CommentPersistenceAdapter.java` annotated with `@Component`
+- [x] Implement `CommentRepository`
+- [x] Inject via constructor: `CommentJpaRepository`, `PostJpaRepository`
+- [x] Declare all fields `private final`
 
-- [ ] Implement `save(Comment comment)`:
+- [x] Implement `save(Comment comment)`:
   ```java
   @Transactional
   public Comment save(Comment comment) {
@@ -37,7 +37,7 @@ backend/src/main/java/com/instagram/adapter/out/persistence/CommentPersistenceAd
   }
   ```
 
-- [ ] Implement `findById(UUID commentId)`:
+- [x] Implement `findById(UUID commentId)`:
   ```java
   public Optional<Comment> findById(UUID commentId) {
       return commentJpaRepository.findById(commentId)
@@ -45,7 +45,7 @@ backend/src/main/java/com/instagram/adapter/out/persistence/CommentPersistenceAd
   }
   ```
 
-- [ ] Implement `findByPostId(UUID postId, Pageable pageable)`:
+- [x] Implement `findByPostId(UUID postId, Pageable pageable)`:
   ```java
   public Page<Comment> findByPostId(UUID postId, Pageable pageable) {
       return commentJpaRepository.findTopLevelByPostId(postId, pageable)
@@ -53,7 +53,7 @@ backend/src/main/java/com/instagram/adapter/out/persistence/CommentPersistenceAd
   }
   ```
 
-- [ ] Implement `findByParentId(UUID parentId, Pageable pageable)`:
+- [x] Implement `findByParentId(UUID parentId, Pageable pageable)`:
   ```java
   public Page<Comment> findByParentId(UUID parentId, Pageable pageable) {
       return commentJpaRepository.findRepliesByParentId(parentId, pageable)
@@ -61,22 +61,22 @@ backend/src/main/java/com/instagram/adapter/out/persistence/CommentPersistenceAd
   }
   ```
 
-- [ ] Implement `incrementReplyCount(UUID parentCommentId)`:
+- [x] Implement `incrementReplyCount(UUID parentCommentId)`:
   - Annotate with `@Transactional`
   - Delegate to `commentJpaRepository.incrementReplyCount(parentCommentId)`
 
-- [ ] Implement `decrementReplyCount(UUID parentCommentId)`:
+- [x] Implement `decrementReplyCount(UUID parentCommentId)`:
   - Same pattern
 
-- [ ] Implement `incrementLikeCount(UUID commentId)`:
+- [x] Implement `incrementLikeCount(UUID commentId)`:
   - Delegate to `commentJpaRepository.incrementLikeCount(commentId)`
 
-- [ ] Implement `decrementLikeCount(UUID commentId)`:
+- [x] Implement `decrementLikeCount(UUID commentId)`:
   - Same pattern
 
-- [ ] Implement `incrementPostCommentCount(UUID postId)`:
+- [x] Implement `incrementPostCommentCount(UUID postId)`:
   - Delegate to `postJpaRepository.incrementCommentCount(postId)`
   - Ensure `PostJpaRepository` has this `@Modifying @Query` method (add it in TASK-4.6 or here)
 
-- [ ] Implement `decrementPostCommentCount(UUID postId)`:
+- [x] Implement `decrementPostCommentCount(UUID postId)`:
   - Delegate to `postJpaRepository.decrementCommentCount(postId)`

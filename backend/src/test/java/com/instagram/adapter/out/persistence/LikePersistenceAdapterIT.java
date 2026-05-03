@@ -34,12 +34,15 @@ public class LikePersistenceAdapterIT {
     @Autowired
     PostJpaRepository postJpaRepository;
 
+    @Autowired
+    CommentJpaRepository commentJpaRepository;
+
     LikePersistenceAdapter likePersistenceAdapter;
 
     @BeforeEach
     void setUp() {
         likePersistenceAdapter = new LikePersistenceAdapter(
-                postLikeJpaRepository, postJpaRepository, commentLikeJpaRepository);
+                postLikeJpaRepository, postJpaRepository, commentLikeJpaRepository, commentJpaRepository);
     }
 
     @Test

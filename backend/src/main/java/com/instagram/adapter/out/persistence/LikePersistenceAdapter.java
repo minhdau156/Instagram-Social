@@ -26,15 +26,15 @@ public class LikePersistenceAdapter implements LikeRepository {
     private final PostLikeJpaRepository postLikeJpaRepository;
     private final PostJpaRepository postJpaRepository;
     private final CommentLikeJpaRepository commentLikeJpaRepository;
-    // private final CommentJpaRepository commentJpaRepository;
+    private final CommentJpaRepository commentJpaRepository;
 
     public LikePersistenceAdapter(PostLikeJpaRepository postLikeJpaRepository,
             PostJpaRepository postJpaRepository,
-            CommentLikeJpaRepository commentLikeJpaRepository) {
+            CommentLikeJpaRepository commentLikeJpaRepository, CommentJpaRepository commentJpaRepository) {
         this.postLikeJpaRepository = postLikeJpaRepository;
         this.postJpaRepository = postJpaRepository;
         this.commentLikeJpaRepository = commentLikeJpaRepository;
-        // this.commentJpaRepository = commentJpaRepository;
+        this.commentJpaRepository = commentJpaRepository;
     }
 
     @Override
@@ -73,14 +73,14 @@ public class LikePersistenceAdapter implements LikeRepository {
         CommentLikeId id = new CommentLikeId(commentId, userId);
         CommentLikeJpaEntity commentLikeJpaEntity = new CommentLikeJpaEntity(id);
         commentLikeJpaRepository.save(commentLikeJpaEntity);
-        // commentJpaRepository.incrementLikeCount(commentId);
+        commentJpaRepository.incrementLikeCount(commentId);
     }
 
     @Override
     @Transactional
     public void unlikeComment(UUID commentId, UUID userId) {
         commentLikeJpaRepository.deleteByIdCommentIdAndIdUserId(commentId, userId);
-        // commentJpaRepository.decrementLikeCount(commentId);
+        commentJpaRepository.decrementLikeCount(commentId);
     }
 
     @Override
