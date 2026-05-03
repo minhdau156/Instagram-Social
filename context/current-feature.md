@@ -4,10 +4,8 @@
 Not Started
 
 ## Goals
-<!-- Add goals here -->
 
 ## Notes
-<!-- Add notes here -->
 
 ## History
 - TASK-4.14 — Domain Service: CommentService
@@ -98,3 +96,4 @@ Not Started
 - TASK-4.11 - Domain Exceptions: Comment
 - TASK-4.12 — Out-Port: CommentRepository
 - TASK-4.13 — In-Ports: Comment Use Cases
+- TASK-4.15 — JPA Entity & Repository: Comment
