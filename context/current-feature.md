@@ -1,16 +1,12 @@
-﻿# Current Feature: TASK-4.12 â€” Out-Port: CommentRepository
+# Current Feature
 
 ## Status
 Not Started
 
 ## Goals
-- Create `CommentRepository` interface in `domain/port/out/`
-- Ensure no Spring or JPA annotations are used
-- Use domain types for all method signatures (`UUID`, `Comment`, `Pageable`)
 
 ## Notes
-- `CommentRepository` is the out-port boundary contract between domain and persistence layers for comment operations.
-- Required methods: `save`, `findById`, `findByPostId`, `findByParentId`, `incrementReplyCount`, `decrementReplyCount`, `incrementLikeCount`, `decrementLikeCount`, `incrementPostCommentCount`, `decrementPostCommentCount`.
+
 
 ## History
 
@@ -98,3 +94,4 @@ Not Started
 - TASK-3.17 â€” Follow Components
 - TASK-4.10 â€” Domain Model: Comment
 - TASK-4.11 - Domain Exceptions: Comment
+- TASK-4.12 — Out-Port: CommentRepository
