@@ -29,29 +29,15 @@ backend/src/main/java/com/instagram/domain/exception/UnauthorizedCommentAccessEx
 
 ### `CommentNotFoundException.java`
 
-- [ ] Create `CommentNotFoundException extends RuntimeException`:
-  ```java
-  public class CommentNotFoundException extends RuntimeException {
-      public CommentNotFoundException(UUID commentId) {
-          super(String.format("Comment '%s' not found", commentId));
-      }
-  }
-  ```
+- [x] Create `CommentNotFoundException extends RuntimeException`:
 
 ### `UnauthorizedCommentAccessException.java`
 
-- [ ] Create `UnauthorizedCommentAccessException extends RuntimeException`:
-  ```java
-  public class UnauthorizedCommentAccessException extends RuntimeException {
-      public UnauthorizedCommentAccessException(UUID commentId, UUID userId) {
-          super(String.format("User '%s' is not authorized to modify comment '%s'", userId, commentId));
-      }
-  }
-  ```
+- [x] Create `UnauthorizedCommentAccessException extends RuntimeException`:
 
 ### `GlobalExceptionHandler` Update
 
-- [ ] In the existing `GlobalExceptionHandler.java`, add handlers:
+- [x] In the existing `GlobalExceptionHandler.java`, add handlers:
   ```java
   @ExceptionHandler(CommentNotFoundException.class)
   public ResponseEntity<ApiResponse<Void>> handleCommentNotFound(CommentNotFoundException ex) {

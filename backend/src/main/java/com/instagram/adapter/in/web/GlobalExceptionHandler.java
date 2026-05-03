@@ -4,12 +4,14 @@ import com.instagram.adapter.in.web.dto.response.ApiResponse;
 import com.instagram.domain.exception.AlreadyFollowingException;
 import com.instagram.domain.exception.AlreadyLikedException;
 import com.instagram.domain.exception.CannotFollowYourselfException;
+import com.instagram.domain.exception.CommentNotFoundException;
 import com.instagram.domain.exception.FollowRequestNotFoundException;
 import com.instagram.domain.exception.InvalidCredentialsException;
 import com.instagram.domain.exception.MediaUploadException;
 import com.instagram.domain.exception.NotLikedException;
 import com.instagram.domain.exception.PasswordResetTokenExpiredException;
 import com.instagram.domain.exception.PostNotFoundException;
+import com.instagram.domain.exception.UnauthorizedCommentAccessException;
 import com.instagram.domain.exception.UnauthorizedPostAccessException;
 import com.instagram.domain.exception.UserAlreadyExistsException;
 import com.instagram.domain.exception.UserNotFoundException;
@@ -145,6 +147,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleNotLiked(NotLikedException ex) {
         log.warn(ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCommentNotFound(CommentNotFoundException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(UnauthorizedCommentAccessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnauthorizedCommentAccess(
+            UnauthorizedCommentAccessException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
