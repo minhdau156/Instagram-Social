@@ -20,7 +20,7 @@ backend/src/main/java/com/instagram/domain/port/out/CommentRepository.java
 
 ## Checklist
 
-- [ ] Create `CommentRepository.java` interface with the following methods:
+- [x] Create `CommentRepository.java` interface with the following methods:
 
   ```java
   public interface CommentRepository {
@@ -81,5 +81,5 @@ backend/src/main/java/com/instagram/domain/port/out/CommentRepository.java
   }
   ```
 
-- [ ] Import `java.util.Optional`, `java.util.UUID`, `org.springframework.data.domain.Page`, `org.springframework.data.domain.Pageable`
-- [ ] Add Javadoc on each method explaining preconditions and what `Page<Comment>` excludes (DELETED status)
+- [x] Import `java.util.Optional`, `java.util.UUID`, `org.springframework.data.domain.Page`, `org.springframework.data.domain.Pageable`
+- [x] Add Javadoc on each method explaining preconditions and what `Page<Comment>` excludes (DELETED status)
