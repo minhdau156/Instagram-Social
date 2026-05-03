@@ -14,7 +14,7 @@ Define all use-case interfaces for the Comment feature. Each use case is a singl
 ## File Locations
 
 ```
-backend/src/main/java/com/instagram/domain/port/in/
+backend/src/main/java/com/instagram/domain/port/in/comment
 ├── AddCommentUseCase.java
 ├── EditCommentUseCase.java
 ├── DeleteCommentUseCase.java
@@ -28,7 +28,7 @@ backend/src/main/java/com/instagram/domain/port/in/
 
 ### `AddCommentUseCase.java`
 
-- [ ] Create interface:
+- [x] Create interface:
   ```java
   public interface AddCommentUseCase {
       Comment addComment(Command command);
@@ -44,7 +44,7 @@ backend/src/main/java/com/instagram/domain/port/in/
 
 ### `EditCommentUseCase.java`
 
-- [ ] Create interface:
+- [x] Create interface:
   ```java
   public interface EditCommentUseCase {
       Comment editComment(Command command);
@@ -55,7 +55,7 @@ backend/src/main/java/com/instagram/domain/port/in/
 
 ### `DeleteCommentUseCase.java`
 
-- [ ] Create interface:
+- [x] Create interface:
   ```java
   public interface DeleteCommentUseCase {
       void deleteComment(Command command);
@@ -66,7 +66,7 @@ backend/src/main/java/com/instagram/domain/port/in/
 
 ### `GetCommentsUseCase.java`
 
-- [ ] Create interface:
+- [x] Create interface:
   ```java
   public interface GetCommentsUseCase {
       Page<Comment> getComments(Query query);
@@ -78,7 +78,7 @@ backend/src/main/java/com/instagram/domain/port/in/
 
 ### `GetRepliesUseCase.java`
 
-- [ ] Create interface:
+- [x] Create interface:
   ```java
   public interface GetRepliesUseCase {
       Page<Comment> getReplies(Query query);
@@ -87,5 +87,5 @@ backend/src/main/java/com/instagram/domain/port/in/
   }
   ```
 
-- [ ] Verify that all `Command` / `Query` field types are `UUID`, `int`, `String`, or domain types only.
-- [ ] Ensure nullable fields (`parentId` in `AddCommentUseCase.Command`) are documented with a comment.
+- [x] Verify that all `Command` / `Query` field types are `UUID`, `int`, `String`, or domain types only.
+- [x] Ensure nullable fields (`parentId` in `AddCommentUseCase.Command`) are documented with a comment.
