@@ -1,17 +1,13 @@
-# Current Feature: TASK-4.11 — Domain Exceptions: Comment
+# Current Feature
 
 ## Status
 Not Started
 
 ## Goals
-- Create `CommentNotFoundException`
-- Create `UnauthorizedCommentAccessException`
-- Update `GlobalExceptionHandler` with handlers for these two new exceptions
+- 
 
 ## Notes
-- `CommentNotFoundException` is thrown when a comment with the given `commentId` does not exist.
-- `UnauthorizedCommentAccessException` is thrown when a user tries to edit or delete a comment they do not own (and is not an admin/moderator).
-- Exceptions must live in `domain/exception/`, extend `RuntimeException`, and have no Spring annotations.
+- 
 
 ## History
 
@@ -100,3 +96,4 @@ Not Started
 - TASK-3.16 - Custom Hooks
 - TASK-3.17 — Follow Components
 - TASK-4.10 — Domain Model: Comment
+- TASK-4.11 � Domain Exceptions: Comment
