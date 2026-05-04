@@ -1,18 +1,14 @@
-# TASK-4.19 — Unit & Integration Tests: Comments
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Write a comprehensive test suite for the Comment feature covering domain service logic, persistence adapter database operations, and REST controller HTTP contracts.
 
 ## Notes
-- Unit tests use Mockito — no Spring context loaded.
-- Persistence integration tests use `@DataJpaTest`.
-- Controller tests use `@WebMvcTest` or `@SpringBootTest` + `MockMvc` with `@MockBean` and `@WithMockUser`.
-- All test class names end with `Test` (unit) or `IT` (integration test).
 
 ## History
+- TASK-4.19 — Unit & Integration Tests: Comments
 - TASK-4.14 — Domain Service: CommentService
 
 - TASK-4.9 — Unit & Integration Tests: Likes
