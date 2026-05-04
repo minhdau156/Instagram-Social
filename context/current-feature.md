@@ -10,6 +10,7 @@ Not Started
 <!-- Add notes here -->
 
 ## History
+- TASK-4.21 — In-Ports: Save Use Cases
 - TASK-4.19 — Unit & Integration Tests: Comments
 - TASK-4.14 — Domain Service: CommentService
 
