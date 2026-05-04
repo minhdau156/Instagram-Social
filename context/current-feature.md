@@ -1,13 +1,18 @@
-# Current Feature
+# TASK-4.23 — Unit & Integration Tests: Saves
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- add goals here -->
+- Unit test `SavedPostService` covering save/unsave/getSavedPosts with exception paths
+- Integration test `SavedPostPersistenceAdapter` with `@DataJpaTest` (save, delete, exists, findByUserId ordered)
+- Controller test `SaveController` with `@WebMvcTest` + `@WithMockUser` (204, 401/403, 409, 200)
 
 ## Notes
-<!-- add notes here -->
+- Follow existing patterns: `@Import(SavedPostPersistenceAdapter.class)` + `@TestPropertySource` for IT
+- Controller: `@WebMvcTest(SaveController.class)` + `@Import(SecurityConfig.class)` matching CommentControllerTest
+- Use `@WithMockUser(username = "<valid-uuid>")` so `currentUserId()` can parse the username
+- Unauthenticated calls assert `status().is3xxRedirection()` (matches existing pattern in project)
 
 ## History
 - TASK-4.22 — Service, JPA, Adapter & Controller: Saves
