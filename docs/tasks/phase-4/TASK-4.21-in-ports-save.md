@@ -25,7 +25,7 @@ backend/src/main/java/com/instagram/domain/port/in/
 
 ### `SavePostUseCase.java`
 
-- [ ] Create interface:
+- [x] Create interface:
   ```java
   public interface SavePostUseCase {
       SavedPost save(Command command);
@@ -36,7 +36,7 @@ backend/src/main/java/com/instagram/domain/port/in/
 
 ### `UnsavePostUseCase.java`
 
-- [ ] Create interface:
+- [x] Create interface:
   ```java
   public interface UnsavePostUseCase {
       void unsave(Command command);
@@ -47,7 +47,7 @@ backend/src/main/java/com/instagram/domain/port/in/
 
 ### `GetSavedPostsUseCase.java`
 
-- [ ] Create interface:
+- [x] Create interface:
   ```java
   public interface GetSavedPostsUseCase {
       Page<SavedPost> getSavedPosts(Query query);
@@ -57,7 +57,7 @@ backend/src/main/java/com/instagram/domain/port/in/
   ```
   - The returned `Page<SavedPost>` contains `postId` references; the frontend or a separate post-enrichment step resolves the full `Post` objects.
 
-- [ ] Add domain exceptions (if needed):
+- [x] Add domain exceptions (if needed):
   - `AlreadySavedException` — when a user tries to save a post they've already saved
   - `NotSavedException` — when a user tries to unsave a post they haven't saved
   - These can be lightweight inner classes or separate files in `domain/exception/` following the same pattern as `AlreadyLikedException`
