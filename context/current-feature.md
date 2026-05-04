@@ -4,8 +4,10 @@
 Not Started
 
 ## Goals
+<!-- Add goals here -->
 
 ## Notes
+<!-- Add notes here -->
 
 ## History
 - TASK-4.19 — Unit & Integration Tests: Comments
@@ -101,3 +103,4 @@ Not Started
 - TASK-4.16 — Persistence Adapter: CommentPersistenceAdapter
 - TASK-4.18 — Request / Response DTOs: Comment
 - TASK-4.17 — REST Controller: Comment
+- TASK-4.20 — Domain Model & Out-Port: SavedPost
