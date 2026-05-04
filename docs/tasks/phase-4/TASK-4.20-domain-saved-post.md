@@ -24,7 +24,7 @@ backend/src/main/java/com/instagram/domain/port/out/SavedPostRepository.java
 
 ### `SavedPost.java`
 
-- [ ] Create `SavedPost.java` with fields:
+- [x] Create `SavedPost.java` with fields:
   ```java
   private UUID id;
   private UUID postId;
@@ -32,11 +32,11 @@ backend/src/main/java/com/instagram/domain/port/out/SavedPostRepository.java
   private Instant savedAt;
   ```
 
-- [ ] Implement private no-arg constructor (used by Builder only)
+- [x] Implement private no-arg constructor (used by Builder only)
 
-- [ ] Implement static inner `Builder` with fluent setters and `build()` that validates `id`, `postId`, `userId`
+- [x] Implement static inner `Builder` with fluent setters and `build()` that validates `id`, `postId`, `userId`
 
-- [ ] Add static factory method `of(UUID postId, UUID userId)`:
+- [x] Add static factory method `of(UUID postId, UUID userId)`:
   ```java
   public static SavedPost of(UUID postId, UUID userId) {
       return new Builder()
@@ -48,13 +48,13 @@ backend/src/main/java/com/instagram/domain/port/out/SavedPostRepository.java
   }
   ```
 
-- [ ] Implement public getters (no setters)
+- [x] Implement public getters (no setters)
 
 ---
 
 ### `SavedPostRepository.java`
 
-- [ ] Create `SavedPostRepository.java` interface:
+- [x] Create `SavedPostRepository.java` interface:
   ```java
   public interface SavedPostRepository {
 
@@ -81,12 +81,12 @@ backend/src/main/java/com/instagram/domain/port/out/SavedPostRepository.java
   }
   ```
 
-- [ ] Add Javadoc on each method
+- [x] Add Javadoc on each method
 
 ---
 
 ### Unit Tests — `SavedPostTest.java`
 
-- [ ] **`of_createsSavedPost_withCorrectFields()`**
-- [ ] **`builder_throwsException_whenPostIdIsNull()`**
-- [ ] **`builder_throwsException_whenUserIdIsNull()`**
+- [x] **`of_createsSavedPost_withCorrectFields()`**
+- [x] **`builder_throwsException_whenPostIdIsNull()`**
+- [x] **`builder_throwsException_whenUserIdIsNull()`**
