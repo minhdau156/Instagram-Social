@@ -14,25 +14,25 @@ import com.instagram.adapter.out.persistence.entity.CommentJpaEntity;
 
 public interface CommentJpaRepository extends JpaRepository<CommentJpaEntity, UUID> {
 
-    @Query("SELECT c FROM CommentJpaEntity c WHERE c.postId = :postId AND c.parentId IS NULL AND c.isDeleted = false ORDER BY c.createdAt ASC")
+    @Query("SELECT c FROM CommentJpaEntity c WHERE c.postId = :postId AND c.parent IS NULL AND c.isDeleted = false ORDER BY c.createdAt ASC")
     Page<CommentJpaEntity> findTopLevelByPostId(@Param("postId") UUID postId, Pageable pageable);
 
     @Query("SELECT c FROM CommentJpaEntity c WHERE c.parent.id = :parentId AND c.isDeleted = false ORDER BY c.createdAt ASC")
     Page<CommentJpaEntity> findRepliesByParentId(@Param("parentId") UUID parentId, Pageable pageable);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE CommentJpaEntity c SET c.replyCount = c.replyCount + 1 WHERE c.id = :id")
     void incrementReplyCount(@Param("id") UUID id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE CommentJpaEntity c SET c.replyCount = GREATEST(c.replyCount - 1, 0) WHERE c.id = :id")
     void decrementReplyCount(@Param("id") UUID id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE CommentJpaEntity c SET c.likeCount = c.likeCount + 1 WHERE c.id = :id")
     void incrementLikeCount(@Param("id") UUID id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE CommentJpaEntity c SET c.likeCount = GREATEST(c.likeCount - 1, 0) WHERE c.id = :id")
     void decrementLikeCount(@Param("id") UUID id);
 

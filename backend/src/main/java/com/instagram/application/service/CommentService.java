@@ -101,8 +101,8 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
     @Override
     @Transactional
     public Comment addComment(AddCommentUseCase.Command command) {
-        Comment newComment = Comment.of(command.postId(), command.userId(), command.content(), command.parentId());
-        this.commentRepository.save(newComment);
+        Comment comment = Comment.of(command.postId(), command.userId(), command.content(), command.parentId());
+        Comment newComment = this.commentRepository.save(comment);
         if (command.parentId() != null) {
             this.commentRepository.incrementReplyCount(command.parentId());
         }
@@ -110,7 +110,7 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
 
         List<String> mentions = extractMentions(command.content());
         if (!mentions.isEmpty()) {
-            log.info("Extracted mentions in new comment {}: {}", newComment.getId(), mentions);
+            log.info("Extracted mentions in new comment {}: {}", comment.getId(), mentions);
         }
 
         return newComment;
