@@ -3,12 +3,14 @@ package com.instagram.adapter.in.web;
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
 import com.instagram.domain.exception.AlreadyFollowingException;
 import com.instagram.domain.exception.AlreadyLikedException;
+import com.instagram.domain.exception.AlreadySavedException;
 import com.instagram.domain.exception.CannotFollowYourselfException;
 import com.instagram.domain.exception.CommentNotFoundException;
 import com.instagram.domain.exception.FollowRequestNotFoundException;
 import com.instagram.domain.exception.InvalidCredentialsException;
 import com.instagram.domain.exception.MediaUploadException;
 import com.instagram.domain.exception.NotLikedException;
+import com.instagram.domain.exception.NotSavedException;
 import com.instagram.domain.exception.PasswordResetTokenExpiredException;
 import com.instagram.domain.exception.PostNotFoundException;
 import com.instagram.domain.exception.UnauthorizedCommentAccessException;
@@ -160,6 +162,18 @@ public class GlobalExceptionHandler {
             UnauthorizedCommentAccessException ex) {
         log.warn(ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(AlreadySavedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAlreadySaved(AlreadySavedException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(NotSavedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotSaved(NotSavedException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

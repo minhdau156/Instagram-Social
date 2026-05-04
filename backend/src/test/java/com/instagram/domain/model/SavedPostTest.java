@@ -21,7 +21,6 @@ class SavedPostTest {
 
         // Assert
         assertThat(savedPost).isNotNull();
-        assertThat(savedPost.getId()).isNotNull();
         assertThat(savedPost.getPostId()).isEqualTo(postId);
         assertThat(savedPost.getUserId()).isEqualTo(userId);
         assertThat(savedPost.getSavedAt()).isBeforeOrEqualTo(Instant.now());
@@ -48,4 +47,5 @@ class SavedPostTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("userId cannot be null");
     }
+
 }

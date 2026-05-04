@@ -7,7 +7,7 @@ Implement the complete vertical slice for the Save (bookmark) feature: domain se
 ## Requirements
 
 - Follow the same layered patterns established in Phase 3 and in TASK-4.5/4.6/4.7/4.8.
-- Each class lives in its appropriate layer (`domain/service/`, `adapter/out/persistence/`, `adapter/in/web/`).
+- Each class lives in its appropriate layer (`application/service/`, `adapter/out/persistence/`, `adapter/in/web/`).
 - All layers use interfaces — no direct coupling between them.
 
 ---

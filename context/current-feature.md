@@ -1,17 +1,22 @@
-# Current Feature
+# TASK-4.22 — Service, JPA, Adapter & Controller: Saves
 
 ## Status
 Not Started
 
 ## Goals
-<!-- Add goals here -->
+- Create SavedPostService implementing SavePostUseCase, UnsavePostUseCase, GetSavedPostsUseCase
+- Create SavedPostJpaEntity and SavedPostJpaRepository
+- Create SavedPostPersistenceAdapter implementing SavedPostRepository
+- Create SaveController handling POST /api/v1/posts/{id}/save, DELETE /api/v1/posts/{id}/save, GET /api/v1/users/me/saved
+- Create SavedPostResponse DTO
 
 ## Notes
-<!-- Add notes here -->
+- Implement complete vertical slice: domain service, JPA entity/repo, persistence adapter, REST controller.
+- Check exceptions: `AlreadySavedException`, `NotSavedException`
+- Adhere to hexagonal architecture
 
 ## History
-- TASK-4.21 — In-Ports: Save Use Cases
-- TASK-4.19 — Unit & Integration Tests: Comments
+- TASK-4.21 - Input Ports: Saves
 - TASK-4.14 — Domain Service: CommentService
 
 - TASK-4.9 — Unit & Integration Tests: Likes
