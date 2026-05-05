@@ -15,7 +15,7 @@ Implement the complete vertical slice for the Share feature: in-port use case, d
 
 ### `SharePostUseCase.java` (In-Port)
 
-- [ ] Create in-port interface:
+- [x] Create in-port interface:
   ```java
   public interface SharePostUseCase {
       PostShare share(Command command);
@@ -33,18 +33,18 @@ Implement the complete vertical slice for the Share feature: in-port use case, d
 
 ### `ShareService.java` (Domain Service)
 
-- [ ] Create `ShareService.java` annotated with `@Service`
-- [ ] Inject via constructor: `ShareRepository`
-- [ ] Implement `SharePostUseCase`:
-  - [ ] Create `PostShare.of(command.postId(), command.sharerId(), command.recipientId(), command.shareType())`
-  - [ ] Call `shareRepository.save(share)` and return it
-  - [ ] Log a message if `shareType == DM` noting that DM delivery is pending Phase 7
+- [x] Create `ShareService.java` annotated with `@Service`
+- [x] Inject via constructor: `ShareRepository`
+- [x] Implement `SharePostUseCase`:
+  - [x] Create `PostShare.of(command.postId(), command.sharerId(), command.recipientId(), command.shareType())`
+  - [x] Call `shareRepository.save(share)` and return it
+  - [x] Log a message if `shareType == DM` noting that DM delivery is pending Phase 7
 
 ---
 
 ### `PostShareJpaEntity.java` (JPA Entity)
 
-- [ ] Create `PostShareJpaEntity.java`:
+- [x] Create `PostShareJpaEntity.java`:
   ```java
   @Entity
   @Table(name = "post_shares")
@@ -79,7 +79,7 @@ Implement the complete vertical slice for the Share feature: in-port use case, d
 
 ### `PostShareJpaRepository.java`
 
-- [ ] Create repository:
+- [x] Create repository:
   ```java
   public interface PostShareJpaRepository extends JpaRepository<PostShareJpaEntity, UUID> {
       List<PostShareJpaEntity> findByPostId(UUID postId);
@@ -90,22 +90,22 @@ Implement the complete vertical slice for the Share feature: in-port use case, d
 
 ### `SharePersistenceAdapter.java`
 
-- [ ] Create `SharePersistenceAdapter.java` annotated with `@Component`
-- [ ] Implement `ShareRepository`
-- [ ] Inject: `PostShareJpaRepository`
-- [ ] Implement `save(PostShare share)`:
+- [x] Create `SharePersistenceAdapter.java` annotated with `@Component`
+- [x] Implement `ShareRepository`
+- [x] Inject: `PostShareJpaRepository`
+- [x] Implement `save(PostShare share)`:
   - Map to `PostShareJpaEntity.fromDomain(share)`, save, map back to `toDomain()`
-- [ ] Implement `findByPostId(UUID postId)`:
+- [x] Implement `findByPostId(UUID postId)`:
   - Delegate to `postShareJpaRepository.findByPostId(postId)`, map to domain list
 
 ---
 
 ### `ShareController.java` (REST Controller)
 
-- [ ] Annotate with `@RestController`, `@RequiredArgsConstructor`, `@Tag(name = "Shares")`
-- [ ] Inject: `SharePostUseCase`
+- [x] Annotate with `@RestController`, `@RequiredArgsConstructor`, `@Tag(name = "Shares")`
+- [x] Inject: `SharePostUseCase`
 
-- [ ] Implement `POST /api/v1/posts/{id}/share`:
+- [x] Implement `POST /api/v1/posts/{id}/share`:
   - `@PreAuthorize("isAuthenticated()")`
   - Request body:
     ```java
@@ -122,7 +122,7 @@ Implement the complete vertical slice for the Share feature: in-port use case, d
     }
     ```
 
-- [ ] Add Swagger `@Operation` annotation
+- [x] Add Swagger `@Operation` annotation
 
 ---
 

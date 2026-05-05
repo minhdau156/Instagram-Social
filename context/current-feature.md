@@ -1,13 +1,18 @@
-# Current Feature
+# Current Feature: TASK-4.25 — In-Port, Service, JPA, Adapter & Controller: Shares
 
 ## Status
 Not Started
 
 ## Goals
-<!-- What does success look like? -->
+- Implement `SharePostUseCase` in-port interface
+- Implement `ShareService` domain service
+- Create `PostShareJpaEntity` and `PostShareJpaRepository`
+- Create `SharePersistenceAdapter` connecting domain and JPA layers
+- Implement `ShareController` providing `POST /api/v1/posts/{id}/share` endpoint
 
 ## Notes
-<!-- Technical constraints, existing patterns, or open questions -->
+- Sharing is intentionally simple for Phase 4 — no complex business rules, just record creation.
+- For `DM` shares, the actual message delivery is out of scope for Phase 4 (deferred to Phase 7). Just persist the record.
 
 ## History
 - TASK-4.22 — Service, JPA, Adapter & Controller: Saves
