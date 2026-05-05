@@ -1,19 +1,13 @@
-# Current Feature: TASK-4.24 — Domain Model & Out-Port: PostShare
+# Current Feature
 
 ## Status
 Not Started
 
 ## Goals
-- Create `ShareType.java` enum (`LINK`, `DM`).
-- Create `PostShare.java` domain model with a hand-written `Builder` and static factory `of(...)` method.
-- Create `ShareRepository.java` out-port interface with `save` and `findByPostId` methods.
-- Implement unit tests in `PostShareTest.java` covering builder validation and factory method logic.
+<!-- What does success look like? -->
 
 ## Notes
-- Domain model lives in `domain/model/` (no framework annotations).
-- Out-port lives in `domain/port/out/` (no Spring or JPA annotations).
-- `PostShare` `build()` validates `id`, `postId`, `sharerId`, `shareType` are non-null.
-- `recipientId` is nullable (only for `ShareType.DM`).
+<!-- Technical constraints, existing patterns, or open questions -->
 
 ## History
 - TASK-4.22 — Service, JPA, Adapter & Controller: Saves
@@ -112,3 +106,4 @@ Not Started
 - TASK-4.17 — REST Controller: Comment
 - TASK-4.20 — Domain Model & Out-Port: SavedPost
 - TASK-4.23 — Unit & Integration Tests: Saves
+- TASK-4.24 — Domain Model & Out-Port: PostShare
