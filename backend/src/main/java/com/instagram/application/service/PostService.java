@@ -20,9 +20,11 @@ import com.instagram.domain.model.PostMedia;
 import com.instagram.domain.model.PostStatus;
 import com.instagram.domain.port.in.*;
 import com.instagram.domain.port.out.HashtagRepository;
+import com.instagram.domain.port.out.LikeRepository;
 import com.instagram.domain.port.out.MediaStoragePort;
 import com.instagram.domain.port.out.PostMediaRepository;
 import com.instagram.domain.port.out.PostRepository;
+import com.instagram.domain.port.out.SavedPostRepository;
 
 @Service
 public class PostService implements
@@ -37,13 +39,18 @@ public class PostService implements
     private final PostMediaRepository postMediaRepository;
     private final HashtagRepository hashtagRepository;
     private final MediaStoragePort mediaStoragePort;
+    private final LikeRepository likeRepository;
+    private final SavedPostRepository savedPostRepository;
 
     public PostService(PostRepository postRepository, PostMediaRepository postMediaRepository,
-            HashtagRepository hashtagRepository, MediaStoragePort mediaStoragePort) {
+            HashtagRepository hashtagRepository, MediaStoragePort mediaStoragePort,
+            LikeRepository likeRepository, SavedPostRepository savedPostRepository) {
         this.postRepository = postRepository;
         this.postMediaRepository = postMediaRepository;
         this.hashtagRepository = hashtagRepository;
         this.mediaStoragePort = mediaStoragePort;
+        this.likeRepository = likeRepository;
+        this.savedPostRepository = savedPostRepository;
     }
 
     @Override
@@ -59,6 +66,8 @@ public class PostService implements
                 .commentCount(0)
                 .saveCount(0)
                 .shareCount(0)
+                .likedByCurrentUser(false)
+                .savedByCurrentUser(false)
                 .createdAt(OffsetDateTime.now())
                 .updatedAt(OffsetDateTime.now())
                 .build();
@@ -89,8 +98,16 @@ public class PostService implements
 
     @Override
     public Post getPost(GetPostUseCase.Query query) {
-        return postRepository.findById(query.id())
+        boolean likedByCurrentUser = likeRepository.hasLikedPost(query.id(), query.currentUserId());
+        boolean savedByCurrentUser = savedPostRepository.existsByPostIdAndUserId(query.id(), query.currentUserId());
+
+        Post post = postRepository.findById(query.id())
                 .orElseThrow(() -> new PostNotFoundException(query.id()));
+
+        return post.builder()
+                .likedByCurrentUser(likedByCurrentUser)
+                .savedByCurrentUser(savedByCurrentUser)
+                .build();
     }
 
     @Override

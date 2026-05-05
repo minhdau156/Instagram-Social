@@ -49,16 +49,17 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
 
     @Override
     @Transactional
-    public List<Comment> getReplies(GetRepliesUseCase.Query query) {
-        List<Comment> comments = commentRepository
-                .findByParentId(query.commentId(), PageRequest.of(query.page(), query.size()))
-                .getContent();
+    public Page<Comment> getReplies(GetRepliesUseCase.Query query) {
+        Page<Comment> comments = commentRepository
+                .findByParentId(query.commentId(), PageRequest.of(query.page(), query.size()));
         User currentUser = userRepository.findById(query.currentUserId())
                 .orElseThrow(() -> new UserNotFoundException(query.currentUserId().toString()));
-        return comments.stream().map(comment -> {
+        return comments.map(comment -> {
             boolean isLikedByCurrentUser = this.likeRepository.hasLikedComment(comment.getId(), currentUser.getId());
-            return comment.withIsLikedByCurrentUser(isLikedByCurrentUser);
-        }).toList();
+            return comment.builder()
+                    .isLikedByCurrentUser(isLikedByCurrentUser)
+                    .build();
+        });
     }
 
     @Override
@@ -118,17 +119,19 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
 
     @Override
     @Transactional
-    public List<Comment> getComments(GetCommentsUseCase.Query query) {
-        List<Comment> comments = commentRepository
-                .findByPostId(query.postId(), PageRequest.of(query.page(), query.size())).getContent();
+    public Page<Comment> getComments(GetCommentsUseCase.Query query) {
+        Page<Comment> comments = commentRepository
+                .findByPostId(query.postId(), PageRequest.of(query.page(), query.size()));
 
         User currentUser = userRepository.findById(query.currentUserId())
                 .orElseThrow(() -> new UserNotFoundException(query.currentUserId().toString()));
 
-        return comments.stream().map(comment -> {
+        return comments.map(comment -> {
             boolean isLikedByCurrentUser = this.likeRepository.hasLikedComment(comment.getId(), currentUser.getId());
-            return comment.withIsLikedByCurrentUser(isLikedByCurrentUser);
-        }).toList();
+            return comment.builder()
+                    .isLikedByCurrentUser(isLikedByCurrentUser)
+                    .build();
+        });
     }
 
     private List<String> extractMentions(String content) {

@@ -24,6 +24,8 @@ public class Post {
     private int commentCount;
     private int saveCount;
     private int shareCount;
+    private boolean likedByCurrentUser;
+    private boolean savedByCurrentUser;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private OffsetDateTime deletedAt;
@@ -72,6 +74,14 @@ public class Post {
 
     public int getShareCount() {
         return shareCount;
+    }
+
+    public boolean isLikedByCurrentUser() {
+        return likedByCurrentUser;
+    }
+
+    public boolean isSavedByCurrentUser() {
+        return savedByCurrentUser;
     }
 
     public OffsetDateTime getCreatedAt() {
@@ -145,6 +155,8 @@ public class Post {
         p.commentCount = this.commentCount;
         p.saveCount = this.saveCount;
         p.shareCount = this.shareCount;
+        p.likedByCurrentUser = this.likedByCurrentUser;
+        p.savedByCurrentUser = this.savedByCurrentUser;
         p.createdAt = this.createdAt;
         p.updatedAt = this.updatedAt;
         p.deletedAt = this.deletedAt;
@@ -210,6 +222,16 @@ public class Post {
             return this;
         }
 
+        public Builder likedByCurrentUser(boolean likedByCurrentUser) {
+            post.likedByCurrentUser = likedByCurrentUser;
+            return this;
+        }
+
+        public Builder savedByCurrentUser(boolean savedByCurrentUser) {
+            post.savedByCurrentUser = savedByCurrentUser;
+            return this;
+        }
+
         public Builder createdAt(OffsetDateTime createdAt) {
             post.createdAt = createdAt;
             return this;
@@ -229,4 +251,5 @@ public class Post {
             return post;
         }
     }
+
 }

@@ -3,6 +3,7 @@ package com.instagram.adapter.in.web;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -101,36 +102,36 @@ public class CommentController {
     }
 
     @GetMapping("/api/v1/posts/{id}/comments")
-    public ResponseEntity<ApiResponse<List<CommentResponse>>> getComments(
+    public ResponseEntity<ApiResponse<Page<CommentResponse>>> getComments(
             @PathVariable UUID id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        List<Comment> comments = getCommentsUseCase
+        Page<Comment> comments = getCommentsUseCase
                 .getComments(new GetCommentsUseCase.Query(id, currentUserId(), page, size));
 
-        List<CommentResponse> commentResponses = comments.stream().map(comment -> {
+        Page<CommentResponse> commentResponses = comments.map(comment -> {
             User user = getUserUseCase.getUser(new GetUserUseCase.Query(comment.getUserId()));
             return CommentResponse.from(comment, user);
-        }).toList();
+        });
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok(commentResponses));
 
     }
 
     @GetMapping("/api/v1/comments/{id}/replies")
-    public ResponseEntity<ApiResponse<List<CommentResponse>>> getReplies(
+    public ResponseEntity<ApiResponse<Page<CommentResponse>>> getReplies(
             @PathVariable UUID id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        List<Comment> comments = getRepliesUseCase
+        Page<Comment> comments = getRepliesUseCase
                 .getReplies(new GetRepliesUseCase.Query(id, currentUserId(), page, size));
 
-        List<CommentResponse> commentResponses = comments.stream().map(comment -> {
+        Page<CommentResponse> commentResponses = comments.map(comment -> {
             User user = getUserUseCase.getUser(new GetUserUseCase.Query(comment.getUserId()));
             return CommentResponse.from(comment, user);
-        }).toList();
+        });
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok(commentResponses));
 

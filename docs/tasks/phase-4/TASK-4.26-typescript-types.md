@@ -24,7 +24,7 @@ frontend/src/types/comment.ts      ← CREATE new file
 
 ### Update `post.ts`
 
-- [ ] Add the following fields to the existing `Post` interface:
+- [x] Add the following fields to the existing `Post` interface:
   ```typescript
   /** Whether the currently authenticated user has liked this post */
   likedByCurrentUser: boolean;
@@ -36,7 +36,7 @@ frontend/src/types/comment.ts      ← CREATE new file
   shareCount: number;
   ```
 
-- [ ] Verify backward compatibility — these new fields should be optional (`?`) if the backend might not always return them for unauthenticated users:
+- [x] Verify backward compatibility — these new fields should be optional (`?`) if the backend might not always return them for unauthenticated users:
   ```typescript
   likedByCurrentUser?: boolean;
   savedByCurrentUser?: boolean;
@@ -47,7 +47,7 @@ frontend/src/types/comment.ts      ← CREATE new file
 
 ### Create `comment.ts`
 
-- [ ] Create `comment.ts` with the following types:
+- [x] Create `comment.ts` with the following types:
 
   ```typescript
   import type { CommentStatus } from './comment';
@@ -100,5 +100,5 @@ frontend/src/types/comment.ts      ← CREATE new file
   }
   ```
 
-- [ ] Verify field names match the backend `CommentResponse` DTO (camelCase matches Spring's default serialization)
-- [ ] Ensure `CommentStatus` enum values exactly match the Java enum string representation
+- [x] Verify field names match the backend `CommentResponse` DTO (camelCase matches Spring's default serialization)
+- [x] Ensure `CommentStatus` enum values exactly match the Java enum string representation

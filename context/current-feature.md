@@ -1,13 +1,16 @@
-# Current Feature
+# Current Feature: TASK-4.26 — TypeScript Types: Post & Comment
 
 ## Status
 Not Started
 
 ## Goals
-<!-- What does success look like? -->
+- Update `frontend/src/types/post.ts` to include `likedByCurrentUser`, `savedByCurrentUser`, and `shareCount`
+- Create `frontend/src/types/comment.ts` with `CommentStatus` enum, `Comment` interface, `AddCommentPayload`, `EditCommentPayload`, and `CommentPage` wrapper
+- Ensure all types exactly match the backend DTOs
 
 ## Notes
-<!-- Technical constraints, existing patterns, or open questions -->
+- `likedByCurrentUser`, `savedByCurrentUser`, and `shareCount` in `Post` should be optional (`?`) for backward compatibility with unauthenticated responses.
+- `CommentStatus` enum values must exactly match the Java enum string representation.
 
 ## History
 - TASK-4.25 — In-Port, Service, JPA, Adapter & Controller: Shares

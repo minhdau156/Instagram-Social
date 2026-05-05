@@ -12,7 +12,9 @@ export interface Post {
   likeCount: number;
   commentCount: number;
   saveCount: number;
-  shareCount: number;
+  shareCount?: number;
+  likedByCurrentUser?: boolean;
+  savedByCurrentUser?: boolean;
   mediaItems: PostMedia[];
   createdAt: string;  // ISO-8601 OffsetDateTime
   updatedAt: string;
