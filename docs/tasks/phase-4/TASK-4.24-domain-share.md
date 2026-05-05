@@ -25,7 +25,7 @@ backend/src/main/java/com/instagram/domain/port/out/ShareRepository.java
 
 ### `ShareType.java`
 
-- [ ] Create `ShareType.java` enum:
+- [x] Create `ShareType.java` enum:
   ```java
   public enum ShareType {
       /** User copied a link to the post. */
@@ -38,7 +38,7 @@ backend/src/main/java/com/instagram/domain/port/out/ShareRepository.java
 
 ### `PostShare.java`
 
-- [ ] Create `PostShare.java` with fields:
+- [x] Create `PostShare.java` with fields:
   ```java
   private UUID id;
   private UUID postId;
@@ -48,9 +48,9 @@ backend/src/main/java/com/instagram/domain/port/out/ShareRepository.java
   private Instant createdAt;
   ```
 
-- [ ] Implement private no-arg constructor and static inner `Builder` with fluent setters
-- [ ] `build()` validates `id`, `postId`, `sharerId`, `shareType` are non-null
-- [ ] Add static factory method `of(UUID postId, UUID sharerId, UUID recipientId, ShareType shareType)`:
+- [x] Implement private no-arg constructor and static inner `Builder` with fluent setters
+- [x] `build()` validates `id`, `postId`, `sharerId`, `shareType` are non-null
+- [x] Add static factory method `of(UUID postId, UUID sharerId, UUID recipientId, ShareType shareType)`:
   ```java
   public static PostShare of(UUID postId, UUID sharerId, UUID recipientId, ShareType shareType) {
       return new Builder()
@@ -63,13 +63,13 @@ backend/src/main/java/com/instagram/domain/port/out/ShareRepository.java
           .build();
   }
   ```
-- [ ] Implement public getters (no setters)
+- [x] Implement public getters (no setters)
 
 ---
 
 ### `ShareRepository.java`
 
-- [ ] Create `ShareRepository.java` interface:
+- [x] Create `ShareRepository.java` interface:
   ```java
   public interface ShareRepository {
 
@@ -89,7 +89,7 @@ backend/src/main/java/com/instagram/domain/port/out/ShareRepository.java
 
 ### Unit Tests — `PostShareTest.java`
 
-- [ ] **`of_createsPostShare_withCorrectFields()`**
-- [ ] **`of_dmShare_hasRecipientId()`**
-- [ ] **`of_linkShare_recipientIdIsNull()`**
-- [ ] **`builder_throwsException_whenShareTypeIsNull()`**
+- [x] **`of_createsPostShare_withCorrectFields()`**
+- [x] **`of_dmShare_hasRecipientId()`**
+- [x] **`of_linkShare_recipientIdIsNull()`**
+- [x] **`builder_throwsException_whenShareTypeIsNull()`**
