@@ -1,21 +1,14 @@
-# Current Feature: TASK-4.27-api-services
+# Current Feature
 
 ## Status
 Not Started
 
 ## Goals
-- Create `likesApi.ts` with like, unlike, and get likers functions.
-- Create `commentsApi.ts` with get, add, get replies, edit, and delete functions.
-- Create `savesApi.ts` with save, unsave, and get saved posts functions.
-- Create `frontend/src/types/save.ts` for SavedPost and SavedPostPage types.
-- Create `sharesApi.ts` with sharePost function and associated types.
 
 ## Notes
-- All services must use the existing shared `axiosInstance`.
-- No business logic, only pure HTTP calls.
-- Return typed promises.
 
 ## History
+- TASK-4.27 — API Services: Likes, Comments, Saves, Shares
 - TASK-4.25 — In-Port, Service, JPA, Adapter & Controller: Shares
 - TASK-4.22 — Service, JPA, Adapter & Controller: Saves
 - TASK-4.21 - Input Ports: Saves
