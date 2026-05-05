@@ -1,20 +1,16 @@
-# Current Feature: TASK-4.29 — Like Components: LikeButton & LikersTooltip
+# Current Feature
 
 ## Status
 Not Started
 
 ## Goals
-- Create `LikeButton.tsx` inside `frontend/src/components/posts/`
-- Implement `LikersTooltip.tsx` and `LikersDialog` inside `frontend/src/components/posts/`
-- Use MUI v5 and `@mui/icons-material` for the UI
-- Implement heart pop animation on like
-- Connect components to `useLikePost` hook
+<!-- bullet points -->
 
 ## Notes
-- Each component is focused and reusable — no page-level logic inside.
-- Animated heart icon for engaging UX.
-- Loading state handled gracefully.
+<!-- additional context -->
+
 ## History
+- TASK-4.29 — Like Components: LikeButton, LikersTooltip & LikersDialog
 - TASK-4.28 — Custom Hooks: Like, Comment, Save
 - TASK-4.27 — API Services: Likes, Comments, Saves, Shares
 - TASK-4.25 — In-Port, Service, JPA, Adapter & Controller: Shares
