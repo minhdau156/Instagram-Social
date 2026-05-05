@@ -30,9 +30,11 @@ import com.instagram.domain.port.in.GetPostUseCase;
 import com.instagram.domain.port.in.GetUserPostsUseCase;
 import com.instagram.domain.port.in.UpdatePostUseCase;
 import com.instagram.domain.port.out.HashtagRepository;
+import com.instagram.domain.port.out.LikeRepository;
 import com.instagram.domain.port.out.MediaStoragePort;
 import com.instagram.domain.port.out.PostMediaRepository;
 import com.instagram.domain.port.out.PostRepository;
+import com.instagram.domain.port.out.SavedPostRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class PostServiceTest {
@@ -44,6 +46,12 @@ public class PostServiceTest {
 
     @Mock
     HashtagRepository hashtagRepository;
+
+    @Mock
+    LikeRepository likeRepository;
+
+    @Mock
+    SavedPostRepository savedPostRepository;
 
     @Mock
     MediaStoragePort mediaStoragePort;
@@ -98,6 +106,8 @@ public class PostServiceTest {
         var query = new GetPostUseCase.Query(postId, UUID.randomUUID());
 
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+        when(likeRepository.hasLikedPost(any(), any())).thenReturn(false);
+        when(savedPostRepository.existsByPostIdAndUserId(any(), any())).thenReturn(false);
 
         Post result = postService.getPost(query);
 
