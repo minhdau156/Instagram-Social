@@ -1,5 +1,5 @@
 import { Page } from '../types/common';
-import type { CreatePostPayload, Post, UpdatePostPayload } from '../types/post';
+import type { CreatePostPayload, Post, PostPage, UpdatePostPayload } from '../types/post';
 import { api } from './client';
 
 const BASE = '/api/v1/posts';
@@ -24,7 +24,7 @@ export const postApi = {
     await api.delete(`${BASE}/${id}`);
   },
 
-  getUserPosts: async (userId: string, page: number, size: number = 12): Promise<Page<Post>> => {
+  getUserPosts: async (userId: string, page: number, size: number = 12): Promise<PostPage> => {
     const { data } = await api.get(`${BASE}/users/${userId}/posts`, {
       params: { page, size }
     });

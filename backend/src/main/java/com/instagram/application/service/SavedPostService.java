@@ -24,10 +24,10 @@ public class SavedPostService implements SavePostUseCase, UnsavePostUseCase, Get
     private final SavedPostRepository savedPostRepository;
 
     @Override
-    public List<SavedPost> getSavedPosts(GetSavedPostsUseCase.Query query) {
+    public Page<SavedPost> getSavedPosts(GetSavedPostsUseCase.Query query) {
         Pageable pageable = PageRequest.of(query.page(), query.size());
         Page<SavedPost> page = savedPostRepository.findByUserId(query.userId(), pageable);
-        return page.getContent();
+        return page;
     }
 
     @Override

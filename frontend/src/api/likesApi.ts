@@ -1,4 +1,4 @@
-import type { UserSummary, UserSummaryPage } from "../types/follow";
+import type { UserSummaryPage } from "../types/follow";
 import { api } from "./client";
 
 const BASE = "/api/v1";

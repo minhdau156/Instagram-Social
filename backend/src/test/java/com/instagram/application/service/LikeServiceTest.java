@@ -23,6 +23,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -187,14 +189,15 @@ class LikeServiceTest {
                 .status(FollowStatus.ACCEPTED)
                 .build();
 
-        when(likeRepository.findPostLikerIds(eq(postId), any(Pageable.class))).thenReturn(likerIds);
+        when(likeRepository.findPostLikerIds(eq(postId), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(likerIds, Pageable.unpaged(), 1));
         when(userRepository.findAllByIds(likerIds)).thenReturn(List.of(user));
         when(followRepository.findByFollowerIdAndFollowingId(requestingUserId, userId)).thenReturn(Optional.of(follow));
 
-        List<UserSummary> summaries = likeService.getPostLikers(query);
+        Page<UserSummary> summaries = likeService.getPostLikers(query);
 
-        assertEquals(1, summaries.size());
-        UserSummary summary = summaries.get(0);
+        assertEquals(1, summaries.getContent().size());
+        UserSummary summary = summaries.getContent().get(0);
         assertEquals(userId, summary.id());
         assertEquals("testuser", summary.username());
         assertEquals(FollowStatus.ACCEPTED, summary.followStatus());

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.TestPropertySource;
 
@@ -69,12 +70,12 @@ public class LikePersistenceAdapterIT {
         UUID userId2 = UUID.randomUUID();
         likePersistenceAdapter.likePost(postId, userId);
         likePersistenceAdapter.likePost(postId, userId2);
-        List<UUID> likerIds = likePersistenceAdapter.findPostLikerIds(postId, Pageable.unpaged());
-        assertTrue(likerIds.contains(userId));
-        assertTrue(likerIds.contains(userId2));
-        assertEquals(2, likerIds.size());
-        assertEquals(userId2, likerIds.get(0));
-        assertEquals(userId, likerIds.get(1));
+        Page<UUID> likerIds = likePersistenceAdapter.findPostLikerIds(postId, Pageable.unpaged());
+        assertTrue(likerIds.getContent().contains(userId));
+        assertTrue(likerIds.getContent().contains(userId2));
+        assertEquals(2, likerIds.getContent().size());
+        assertEquals(userId2, likerIds.getContent().get(0));
+        assertEquals(userId, likerIds.getContent().get(1));
     }
 
     @Test

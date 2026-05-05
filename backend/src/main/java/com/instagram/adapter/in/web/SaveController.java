@@ -3,6 +3,7 @@ package com.instagram.adapter.in.web;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -69,14 +70,11 @@ public class SaveController {
 
     @GetMapping("/api/v1/users/me/saved")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<List<SavedPostResponse>>> getSavedPosts(
+    public ResponseEntity<ApiResponse<Page<SavedPostResponse>>> getSavedPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        List<SavedPost> savedPosts = getSavedPostsUseCase.getSavedPosts(
+        Page<SavedPost> savedPosts = getSavedPostsUseCase.getSavedPosts(
                 new GetSavedPostsUseCase.Query(currentUserId(), page, size));
-        List<SavedPostResponse> response = savedPosts.stream()
-                .map(SavedPostResponse::from)
-                .toList();
-        return ResponseEntity.ok(ApiResponse.ok(response));
+        return ResponseEntity.ok(ApiResponse.ok(savedPosts.map(SavedPostResponse::from)));
     }
 }

@@ -101,12 +101,12 @@ class SavedPostServiceTest {
         Page<SavedPost> page = new PageImpl<>(List.of(savedPost));
         when(savedPostRepository.findByUserId(any(UUID.class), any(Pageable.class))).thenReturn(page);
 
-        List<SavedPost> result = savedPostService.getSavedPosts(
+        Page<SavedPost> result = savedPostService.getSavedPosts(
                 new GetSavedPostsUseCase.Query(userId, 0, 10));
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getPostId()).isEqualTo(postId);
-        assertThat(result.get(0).getUserId()).isEqualTo(userId);
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getPostId()).isEqualTo(postId);
+        assertThat(result.getContent().get(0).getUserId()).isEqualTo(userId);
         verify(savedPostRepository).findByUserId(any(UUID.class), any(Pageable.class));
     }
 }

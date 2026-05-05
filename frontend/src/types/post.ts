@@ -57,3 +57,12 @@ export interface UploadUrlResponse {
   presignedUrl: string;
   mediaKey: string;
 }
+
+export interface PostPage {
+  content: Post[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
+}
