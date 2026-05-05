@@ -28,7 +28,7 @@ frontend/src/api/
 
 ### `likesApi.ts`
 
-- [ ] Create with the following functions:
+- [x] Create with the following functions:
 
   ```typescript
   import axiosInstance from './axiosInstance';
@@ -71,7 +71,7 @@ frontend/src/api/
 
 ### `commentsApi.ts`
 
-- [ ] Create with the following functions:
+- [x] Create with the following functions:
 
   ```typescript
   import axiosInstance from './axiosInstance';
@@ -110,7 +110,7 @@ frontend/src/api/
 
 ### `savesApi.ts`
 
-- [ ] Create with the following functions:
+- [x] Create with the following functions:
 
   ```typescript
   import axiosInstance from './axiosInstance';
@@ -132,7 +132,7 @@ frontend/src/api/
   }
   ```
 
-- [ ] Create minimal `frontend/src/types/save.ts`:
+- [x] Create minimal `frontend/src/types/save.ts`:
   ```typescript
   export interface SavedPost {
     id: string;
@@ -155,7 +155,7 @@ frontend/src/api/
 
 ### `sharesApi.ts`
 
-- [ ] Create with the following functions:
+- [x] Create with the following functions:
 
   ```typescript
   import axiosInstance from './axiosInstance';

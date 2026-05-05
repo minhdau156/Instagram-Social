@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -59,12 +60,11 @@ public class LikePersistenceAdapter implements LikeRepository {
     }
 
     @Override
-    public List<UUID> findPostLikerIds(UUID postId, Pageable pageable) {
+    public Page<UUID> findPostLikerIds(UUID postId, Pageable pageable) {
         return postLikeJpaRepository
                 .findByIdPostIdOrderByCreatedAtDesc(postId, pageable)
-                .stream()
-                .map(e -> e.getId().getUserId())
-                .collect(Collectors.toList());
+                .map(e -> e.getId().getUserId());
+
     }
 
     @Override

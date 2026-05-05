@@ -3,6 +3,7 @@ package com.instagram.adapter.out.persistence.repository;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,5 +16,5 @@ public interface PostLikeJpaRepository extends JpaRepository<PostLikeJpaEntity, 
 
     void deleteByIdPostIdAndIdUserId(UUID postId, UUID userId);
 
-    List<PostLikeJpaEntity> findByIdPostIdOrderByCreatedAtDesc(UUID postId, Pageable pageable);
+    Page<PostLikeJpaEntity> findByIdPostIdOrderByCreatedAtDesc(UUID postId, Pageable pageable);
 }

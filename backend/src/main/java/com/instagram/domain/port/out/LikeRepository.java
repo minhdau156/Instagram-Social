@@ -3,6 +3,7 @@ package com.instagram.domain.port.out;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface LikeRepository {
@@ -14,7 +15,9 @@ public interface LikeRepository {
      *
      * @param postId the ID of the post to like
      * @param userId the ID of the user performing the like
-     * @throws com.instagram.domain.exception.AlreadyLikedException if the user has already liked this post
+     * @throws com.instagram.domain.exception.AlreadyLikedException if the user has
+     *                                                              already liked
+     *                                                              this post
      */
     void likePost(UUID postId, UUID userId);
 
@@ -23,7 +26,8 @@ public interface LikeRepository {
      *
      * @param postId the ID of the post to unlike
      * @param userId the ID of the user removing the like
-     * @throws com.instagram.domain.exception.NotLikedException if the like does not exist
+     * @throws com.instagram.domain.exception.NotLikedException if the like does not
+     *                                                          exist
      */
     void unlikePost(UUID postId, UUID userId);
 
@@ -44,7 +48,7 @@ public interface LikeRepository {
      * @param pageable pagination parameters
      * @return list of user IDs who liked the post
      */
-    List<UUID> findPostLikerIds(UUID postId, Pageable pageable);
+    Page<UUID> findPostLikerIds(UUID postId, Pageable pageable);
 
     // ─── Comment Likes ────────────────────────────────────────────────────────
 
@@ -53,7 +57,9 @@ public interface LikeRepository {
      *
      * @param commentId the ID of the comment to like
      * @param userId    the ID of the user performing the like
-     * @throws com.instagram.domain.exception.AlreadyLikedException if the user has already liked this comment
+     * @throws com.instagram.domain.exception.AlreadyLikedException if the user has
+     *                                                              already liked
+     *                                                              this comment
      */
     void likeComment(UUID commentId, UUID userId);
 
@@ -62,7 +68,8 @@ public interface LikeRepository {
      *
      * @param commentId the ID of the comment to unlike
      * @param userId    the ID of the user removing the like
-     * @throws com.instagram.domain.exception.NotLikedException if the like does not exist
+     * @throws com.instagram.domain.exception.NotLikedException if the like does not
+     *                                                          exist
      */
     void unlikeComment(UUID commentId, UUID userId);
 

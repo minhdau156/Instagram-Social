@@ -1,9 +1,12 @@
 package com.instagram.application.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -94,13 +97,16 @@ public class LikeService implements LikePostUseCase,
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserSummary> getPostLikers(GetPostLikersUseCase.Query query) {
+    public Page<UserSummary> getPostLikers(GetPostLikersUseCase.Query query) {
         Pageable pageable = PageRequest.of(query.page(), query.size());
 
-        List<UUID> postLikerIds = likeRepository.findPostLikerIds(query.postId(), pageable);
-        List<User> users = userRepository.findAllByIds(postLikerIds);
+        Page<UUID> postLikerIds = likeRepository.findPostLikerIds(query.postId(), pageable);
+        Map<UUID, User> idToUser = userRepository.findAllByIds(postLikerIds.getContent())
+                .stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
 
-        return users.stream().map(user -> {
+        Page<UserSummary> likers = postLikerIds.map(id -> {
+            User user = idToUser.get(id);
             FollowStatus followStatus = null;
             if (query.requestingUserId() != null) {
                 Optional<Follow> followOpt = followRepository.findByFollowerIdAndFollowingId(query.requestingUserId(),
@@ -109,15 +115,16 @@ public class LikeService implements LikePostUseCase,
                     followStatus = followOpt.get().getStatus();
                 }
             }
-
             return new UserSummary(
-                    user.getId(),
+                    id,
                     user.getUsername(),
                     user.getFullName(),
                     user.getProfilePictureUrl(),
                     user.isVerified(),
                     user.getPrivacyLevel() == PrivacyLevel.PRIVATE,
                     followStatus);
-        }).toList();
+        });
+
+        return likers;
     }
 }

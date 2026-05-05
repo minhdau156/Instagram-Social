@@ -3,6 +3,7 @@ package com.instagram.adapter.in.web;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -69,15 +70,13 @@ public class LikeController {
     }
 
     @GetMapping("/api/v1/posts/{id}/likers")
-    public ResponseEntity<ApiResponse<List<UserSummaryResponse>>> getPostLikers(
+    public ResponseEntity<ApiResponse<Page<UserSummaryResponse>>> getPostLikers(
             @PathVariable UUID id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        List<UserSummary> likers = getPostLikersUseCase.getPostLikers(new GetPostLikersUseCase.Query(
+        Page<UserSummary> likers = getPostLikersUseCase.getPostLikers(new GetPostLikersUseCase.Query(
                 id, currentUserId(), page, size));
-        return ResponseEntity.ok(ApiResponse.ok(likers.stream()
-                .map(UserSummaryResponse::from)
-                .toList()));
+        return ResponseEntity.ok(ApiResponse.ok(likers.map(UserSummaryResponse::from)));
     }
 
     @PostMapping("/api/v1/comments/{id}/like")
