@@ -104,7 +104,7 @@ public class PostService implements
         Post post = postRepository.findById(query.id())
                 .orElseThrow(() -> new PostNotFoundException(query.id()));
 
-        return post.builder()
+        return post.copy()
                 .likedByCurrentUser(likedByCurrentUser)
                 .savedByCurrentUser(savedByCurrentUser)
                 .build();

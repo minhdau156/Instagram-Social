@@ -111,55 +111,51 @@ public class Post {
      * Returns a new Post with updated fields and refreshed timestamp.
      */
     public Post withUpdateCaptionAndLocation(String caption, String location) {
-        Post updated = this.copy();
-        if (caption != null)
-            updated.caption = caption;
-        if (location != null)
-            updated.location = location;
-        updated.updatedAt = OffsetDateTime.now();
-        return updated;
+        Builder builder = this.copy();
+        if (caption != null) {
+            builder.caption(caption);
+        }
+        if (location != null) {
+            builder.location(location);
+        }
+        return builder.updatedAt(OffsetDateTime.now()).build();
     }
 
     /** Mark the post as soft-deleted. */
     public Post withSoftDelete() {
-        Post deleted = this.copy();
-        deleted.status = PostStatus.DELETED;
-        deleted.deletedAt = OffsetDateTime.now();
-        deleted.updatedAt = OffsetDateTime.now();
-        return deleted;
+        return this.copy()
+                .status(PostStatus.DELETED)
+                .deletedAt(OffsetDateTime.now())
+                .updatedAt(OffsetDateTime.now())
+                .build();
     }
 
     public Post withIncrementLikeCount() {
-        Post updated = this.copy();
-        updated.likeCount++;
-        updated.updatedAt = OffsetDateTime.now();
-        return updated;
+        return this.copy().likeCount(this.likeCount + 1).updatedAt(OffsetDateTime.now()).build();
     }
 
     public Post withDecrementLikeCount() {
-        Post updated = this.copy();
-        updated.likeCount--;
-        updated.updatedAt = OffsetDateTime.now();
-        return updated;
+
+        return this.copy().likeCount(this.likeCount - 1).updatedAt(OffsetDateTime.now()).build();
     }
 
-    private Post copy() {
-        Post p = new Post();
-        p.id = this.id;
-        p.userId = this.userId;
-        p.caption = this.caption;
-        p.location = this.location;
-        p.status = this.status;
-        p.viewCount = this.viewCount;
-        p.likeCount = this.likeCount;
-        p.commentCount = this.commentCount;
-        p.saveCount = this.saveCount;
-        p.shareCount = this.shareCount;
-        p.likedByCurrentUser = this.likedByCurrentUser;
-        p.savedByCurrentUser = this.savedByCurrentUser;
-        p.createdAt = this.createdAt;
-        p.updatedAt = this.updatedAt;
-        p.deletedAt = this.deletedAt;
+    public Builder copy() {
+        Builder p = new Builder();
+        p.id(id)
+                .userId(userId)
+                .caption(caption)
+                .location(location)
+                .status(status)
+                .viewCount(viewCount)
+                .likeCount(likeCount)
+                .commentCount(commentCount)
+                .saveCount(saveCount)
+                .shareCount(shareCount)
+                .likedByCurrentUser(likedByCurrentUser)
+                .savedByCurrentUser(savedByCurrentUser)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
+                .deletedAt(deletedAt);
         return p;
     }
 

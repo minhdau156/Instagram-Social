@@ -26,7 +26,7 @@ frontend/src/components/posts/
 
 ### `LikeButton.tsx`
 
-- [ ] Props interface:
+- [x] Props interface:
   ```typescript
   interface LikeButtonProps {
     postId: string;
@@ -36,13 +36,13 @@ frontend/src/components/posts/
   }
   ```
 
-- [ ] Uses `useLikePost(postId)` hook
+- [x] Uses `useLikePost(postId)` hook
 
-- [ ] Renders MUI `IconButton` with:
+- [x] Renders MUI `IconButton` with:
   - `FavoriteIcon` (filled, color `error`) when liked
   - `FavoriteBorderIcon` (outline, color `inherit`) when not liked
 
-- [ ] Add CSS animation on the heart icon when liked state changes:
+- [x] Add CSS animation on the heart icon when liked state changes:
   ```css
   @keyframes heartPop {
     0%   { transform: scale(1); }
@@ -52,13 +52,13 @@ frontend/src/components/posts/
   ```
   Apply with an MUI `sx` prop or a CSS module when `liked` transitions from `false` → `true`.
 
-- [ ] Show like count as `Typography` next to the icon button
+- [x] Show like count as `Typography` next to the icon button
 
-- [ ] Show `CircularProgress` (size 16) inside the button while mutation is pending
+- [x] Show `CircularProgress` (size 16) inside the button while mutation is pending
 
-- [ ] On click: call `likeMutation.mutate(liked)` (passes current liked state; hook decides like vs unlike)
+- [x] On click: call `likeMutation.mutate(liked)` (passes current liked state; hook decides like vs unlike)
 
-- [ ] Example structure:
+- [x] Example structure:
   ```tsx
   export function LikeButton({ postId, liked, likeCount, disabled }: LikeButtonProps) {
     const likeMutation = useLikePost(postId);
@@ -92,14 +92,14 @@ frontend/src/components/posts/
   }
   ```
 
-- [ ] Use `useEffect` to reset `animating` state after animation completes (300ms)
-- [ ] Add `aria-label` on the icon button for accessibility
+- [x] Use `useEffect` to reset `animating` state after animation completes (300ms)
+- [x] Add `aria-label` on the icon button for accessibility
 
 ---
 
 ### `LikersTooltip.tsx`
 
-- [ ] Props interface:
+- [x] Props interface:
   ```typescript
   interface LikersTooltipProps {
     postId: string;
@@ -108,15 +108,15 @@ frontend/src/components/posts/
   }
   ```
 
-- [ ] Renders an MUI `Tooltip` wrapping a `Typography` link:
+- [x] Renders an MUI `Tooltip` wrapping a `Typography` link:
   - When `likeCount === 0`: render nothing (or a "Be the first to like" text)
   - When `likeCount === 1`: `"Liked by **username1**"`
   - When `likeCount === 2`: `"Liked by **username1** and **username2**"`
   - When `likeCount > 2`: `"Liked by **username1**, **username2** and **N others**"`
 
-- [ ] On click: open `LikersDialog` (a separate dialog that fetches full likers list)
+- [x] On click: open `LikersDialog` (a separate dialog that fetches full likers list)
 
-- [ ] `LikersDialog` sub-component (can live in the same file or `LikersDialog.tsx`):
+- [x] `LikersDialog` sub-component (can live in the same file or `LikersDialog.tsx`):
   - MUI `Dialog` with title `"Likes"`
   - On open: fetch `getPostLikers(postId)` using a `useQuery`
   - `List` of `UserListItem` (imported from follow components)
