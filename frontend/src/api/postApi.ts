@@ -1,4 +1,4 @@
-import { Page } from '../types/common';
+
 import type { CreatePostPayload, Post, PostPage, UpdatePostPayload } from '../types/post';
 import { api } from './client';
 

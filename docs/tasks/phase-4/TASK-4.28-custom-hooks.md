@@ -28,7 +28,7 @@ frontend/src/hooks/
 
 ### `useLikePost.ts`
 
-- [ ] Create `useLikePost(postId: string)` hook:
+- [x] Create `useLikePost(postId: string)` hook:
 
   ```typescript
   export function useLikePost(postId: string) {
@@ -70,14 +70,14 @@ frontend/src/hooks/
   }
   ```
 
-- [ ] Import `likePost`, `unlikePost` from `../api/likesApi`
-- [ ] Import `Post` type from `../types/post`
+- [x] Import `likePost`, `unlikePost` from `../api/likesApi`
+- [x] Import `Post` type from `../types/post`
 
 ---
 
 ### `useComments.ts`
 
-- [ ] Create `useComments(postId: string)` hook using `useInfiniteQuery`:
+- [x] Create `useComments(postId: string)` hook using `useInfiniteQuery`:
 
   ```typescript
   export function useComments(postId: string) {
@@ -91,13 +91,13 @@ frontend/src/hooks/
   }
   ```
 
-- [ ] Import `getComments` from `../api/commentsApi`
+- [x] Import `getComments` from `../api/commentsApi`
 
 ---
 
 ### `useAddComment.ts`
 
-- [ ] Create `useAddComment(postId: string)` hook:
+- [x] Create `useAddComment(postId: string)` hook:
 
   ```typescript
   export function useAddComment(postId: string) {
@@ -116,13 +116,13 @@ frontend/src/hooks/
   }
   ```
 
-- [ ] Import `addComment`, `AddCommentPayload` from `../api/commentsApi`
+- [x] Import `addComment`, `AddCommentPayload` from `../api/commentsApi`
 
 ---
 
 ### `useSavePost.ts`
 
-- [ ] Create `useSavePost(postId: string)` hook with optimistic update:
+- [x] Create `useSavePost(postId: string)` hook with optimistic update:
 
   ```typescript
   export function useSavePost(postId: string) {
@@ -158,4 +158,4 @@ frontend/src/hooks/
   }
   ```
 
-- [ ] Import `savePost`, `unsavePost` from `../api/savesApi`
+- [x] Import `savePost`, `unsavePost` from `../api/savesApi`
