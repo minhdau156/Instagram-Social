@@ -20,12 +20,12 @@ frontend/src/App.tsx    (or frontend/src/router.tsx if extracted)
 
 ## Checklist
 
-- [ ] Import `SavedPostsPage`:
+- [x] Import `SavedPostsPage`:
   ```typescript
   import SavedPostsPage from './pages/profile/SavedPostsPage';
   ```
 
-- [ ] Register protected route `/saved`:
+- [x] Register protected route `/saved`:
   ```tsx
   <Route
     path="/saved"
@@ -38,7 +38,7 @@ frontend/src/App.tsx    (or frontend/src/router.tsx if extracted)
   ```
   - Place this route alongside other protected routes (e.g., after the `/follow-requests` route from Phase 3).
 
-- [ ] Verify `ProtectedRoute` component exists and redirects unauthenticated users to `/login` — it should have been created in Phase 3 (TASK-3.20). If not, create a simple wrapper:
+- [x] Verify `ProtectedRoute` component exists and redirects unauthenticated users to `/login` — it should have been created in Phase 3 (TASK-3.20). If not, create a simple wrapper:
   ```tsx
   function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const { user } = useAuth();
@@ -47,7 +47,7 @@ frontend/src/App.tsx    (or frontend/src/router.tsx if extracted)
   }
   ```
 
-- [ ] Add a navigation link to `/saved` in the sidebar or bottom navigation (if a global `Sidebar.tsx` or `BottomNav.tsx` component exists):
+- [x] Add a navigation link to `/saved` in the sidebar or bottom navigation (if a global `Sidebar.tsx` or `BottomNav.tsx` component exists):
   ```tsx
   <NavLink to="/saved" aria-label="Saved posts">
     <BookmarkBorderIcon />
@@ -55,14 +55,14 @@ frontend/src/App.tsx    (or frontend/src/router.tsx if extracted)
   ```
   - Show filled `BookmarkIcon` when the route is active (`isActive` from React Router `NavLink`)
 
-- [ ] Verify that the `/p/:postId` route (for shareable post links referenced in `ShareMenu`) either already exists or add it:
+- [x] Verify that the `/p/:postId` route (for shareable post links referenced in `ShareMenu`) either already exists or add it:
   ```tsx
   <Route path="/p/:postId" element={<PostDetailPage />} />
   ```
   - `PostDetailPage` can render `PostDetailModal` in full-page mode or redirect to the feed with the modal open.
   - If this page does not exist yet, create a minimal `PostDetailPage.tsx` that fetches the post by ID and renders `PostDetailModal`.
 
-- [ ] After all route changes, verify the router renders correctly by checking:
-  - [ ] `http://localhost:5173/saved` loads `SavedPostsPage` for authenticated users
-  - [ ] `http://localhost:5173/saved` redirects to `/login` for unauthenticated users
-  - [ ] `http://localhost:5173/p/<some-post-id>` loads the post detail
+- [x] After all route changes, verify the router renders correctly by checking:
+  - [x] `http://localhost:5173/saved` loads `SavedPostsPage` for authenticated users
+  - [x] `http://localhost:5173/saved` redirects to `/login` for unauthenticated users
+  - [x] `http://localhost:5173/p/<some-post-id>` loads the post detail
