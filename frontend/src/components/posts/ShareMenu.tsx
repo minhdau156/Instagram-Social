@@ -63,7 +63,7 @@ export const ShareMenu: React.FC<ShareMenuProps> = ({ postId, disabled }) => {
     handleClose();
   };
 
-  const handleCloseSnackbar = (event?: React.SyntheticEvent | Event, reason?: string) => {
+  const handleCloseSnackbar = (_event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
     }

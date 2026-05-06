@@ -1,13 +1,27 @@
 import { useState } from "react";
 import { Post } from "../../types/post";
-import { MoreVert, Favorite, FavoriteBorder, ChatBubbleOutline, BookmarkBorder, ShareOutlined, ChevronLeft, ChevronRight } from "@mui/icons-material";
-import { Card, CardHeader, Avatar, Typography, IconButton, CardMedia, CardContent, Stack, Button, Box } from "@mui/material";
+import { MoreVert, ChevronLeft, ChevronRight } from "@mui/icons-material";
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import { Card, CardHeader, Avatar, Typography, IconButton, CardMedia, CardContent, Button, Box } from "@mui/material";
 import { useAuth } from "../../hooks/useAuth";
+import { LikeButton } from "./LikeButton";
+import { SaveButton } from "./SaveButton";
+import { ShareMenu } from "./ShareMenu";
+import { LikersTooltip } from "./LikersTooltip";
+import { PostDetailModal } from "./PostDetailModal";
 
 export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
-    const [liked, setLiked] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const [mediaIndex, setMediaIndex] = useState(0);
+    const [openDetail, setOpenDetail] = useState(false);
+    const [autoFocusComment, setAutoFocusComment] = useState(false);
+
+    const handleOpenDetail = (focusComment = false) => {
+        setAutoFocusComment(focusComment);
+        setOpenDetail(true);
+    };
+    
+    const handleCloseDetail = () => setOpenDetail(false);
 
     const { profile } = useAuth()
 
@@ -59,17 +73,52 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             </Box>
             <CardContent>
                 {/* Action row */}
-                <Stack direction="row" spacing={1} justifyContent="space-between">
-                    <Stack direction="row" spacing={1}>
-                        <IconButton onClick={() => setLiked(l => !l)}>
-                            {liked ? <Favorite color="error" /> : <FavoriteBorder />}
+                <Box sx={{ display: 'flex', alignItems: 'center', px: 1, py: 0.5 }}>
+                    {/* Left: Like, Comment trigger, Share */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <LikeButton
+                            postId={post.id}
+                            liked={post.likedByCurrentUser ?? false}
+                            likeCount={post.likeCount}
+                            disabled={!profile?.user}
+                        />
+                        <IconButton
+                            size="small"
+                            aria-label="Comment on post"
+                            onClick={() => handleOpenDetail(true)}   // opens PostDetailModal with comment auto-focus
+                        >
+                            <ChatBubbleOutlineIcon />
                         </IconButton>
-                        <IconButton><ChatBubbleOutline /></IconButton>
-                        <IconButton><ShareOutlined /></IconButton>
-                    </Stack>
-                    <IconButton><BookmarkBorder /></IconButton>
-                </Stack>
-                <Typography fontWeight="bold" sx={{ mb: 1 }}>{post.likeCount} likes</Typography>
+                        <ShareMenu postId={post.id} disabled={!profile?.user} />
+                    </Box>
+
+                    {/* Spacer */}
+                    <Box sx={{ flexGrow: 1 }} />
+
+                    {/* Right: Save */}
+                    <SaveButton
+                        postId={post.id}
+                        saved={post.savedByCurrentUser ?? false}
+                        disabled={!profile?.user}
+                    />
+                </Box>
+                {post.likeCount > 0 && (
+                    <LikersTooltip
+                        postId={post.id}
+                        likeCount={post.likeCount}
+                    />
+                )}
+                {post.commentCount > 0 && (
+                    <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ px: 2, cursor: 'pointer' }}
+                        onClick={() => handleOpenDetail(false)}
+                    >
+                        View all {post.commentCount} comments
+                    </Typography>
+                )}
+
 
                 {/* Truncated caption with toggle */}
                 <Box sx={{ mb: 1 }}>
@@ -99,6 +148,14 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                     {new Date(post.createdAt).toLocaleDateString()}
                 </Typography>
             </CardContent>
+            
+            {openDetail && (
+                <PostDetailModal
+                    post={post}
+                    onClose={handleCloseDetail}
+                    autoFocusComment={autoFocusComment}
+                />
+            )}
         </Card>
     );
 };

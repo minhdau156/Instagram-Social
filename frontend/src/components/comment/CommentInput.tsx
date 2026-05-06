@@ -11,10 +11,11 @@ interface CommentInputProps {
     onCancel?: () => void;      // called on cancel (edit mode)
     placeholder?: string;
     onSubmit?: (content: string) => void; // override default submit logic
+    autoFocus?: boolean;
 }
 
 
-export function CommentInput({ postId, parentId, initialValue, onSuccess, onCancel, placeholder, onSubmit }: CommentInputProps) {
+export function CommentInput({ postId, parentId, initialValue, onSuccess, onCancel, placeholder, onSubmit, autoFocus }: CommentInputProps) {
     const [value, setValue] = useState(initialValue ?? '');
     const addMutation = useAddComment(postId);
 
@@ -44,6 +45,7 @@ export function CommentInput({ postId, parentId, initialValue, onSuccess, onCanc
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
                 size="small"
                 variant="standard"
+                autoFocus={autoFocus}
             />
             <IconButton onClick={handleSubmit} disabled={!value.trim() || addMutation.isPending}>
                 {addMutation.isPending ? <CircularProgress size={16} /> : <SendIcon />}

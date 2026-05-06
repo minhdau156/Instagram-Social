@@ -7,9 +7,10 @@ import { CommentInput } from "./CommentInput";
 
 interface CommentSectionProps {
     postId: string;
+    autoFocus?: boolean;
 }
 
-export function CommentSection({ postId }: CommentSectionProps) {
+export function CommentSection({ postId, autoFocus }: CommentSectionProps) {
     const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useComments(postId);
     const observer = useRef<IntersectionObserver | null>(null);
     const lastElementRef = useCallback((node: HTMLDivElement | null) => {
@@ -59,7 +60,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
                     No comments yet. Be the first to comment!
                 </Typography>
             )}
-            <CommentInput postId={postId} parentId={null} />
+            <CommentInput postId={postId} parentId={null} autoFocus={autoFocus} />
         </>
 
     );

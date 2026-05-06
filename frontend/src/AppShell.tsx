@@ -1,13 +1,18 @@
-import { AppBar, Box, Container, Toolbar, Typography, alpha } from '@mui/material';
+import { AppBar, Box, Container, Toolbar, Typography, alpha, IconButton } from '@mui/material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import { Link, Outlet } from 'react-router-dom';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import { Link, NavLink, Outlet } from 'react-router-dom';
+import { useAuth } from './hooks/useAuth';
 
 export default function AppShell() {
+  const { profile } = useAuth();
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* ── Top Navigation Bar ── */}
       <AppBar position="sticky" elevation={0}>
-        <Toolbar>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Box
             component={Link}
             to="/posts"
@@ -45,6 +50,19 @@ export default function AppShell() {
               SocialMedia
             </Typography>
           </Box>
+
+          {/* Right Navigation */}
+          {profile?.user && (
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <NavLink to="/saved" aria-label="Saved posts" style={{ textDecoration: 'none', color: 'inherit' }}>
+                {({ isActive }) => (
+                  <IconButton color="inherit" component="span">
+                    {isActive ? <BookmarkIcon /> : <BookmarkBorderIcon />}
+                  </IconButton>
+                )}
+              </NavLink>
+            </Box>
+          )}
         </Toolbar>
       </AppBar>
 

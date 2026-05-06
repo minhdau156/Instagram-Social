@@ -1,14 +1,22 @@
 import React from 'react';
 import { Dialog, Box, Typography, IconButton, Avatar, Stack, Divider } from '@mui/material';
-import { Close, FavoriteBorder, ChatBubbleOutline, BookmarkBorder } from '@mui/icons-material';
+import { Close, ChatBubbleOutline } from '@mui/icons-material';
 import { Post } from '../../types/post';
+import { useAuth } from '../../hooks/useAuth';
+import { LikeButton } from './LikeButton';
+import { SaveButton } from './SaveButton';
+import { ShareMenu } from './ShareMenu';
+import { LikersTooltip } from './LikersTooltip';
+import { CommentSection } from '../comment/CommentSection';
 
 interface PostDetailModalProps {
     post: Post;
     onClose: () => void;
+    autoFocusComment?: boolean;
 }
 
-export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose }) => {
+export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose, autoFocusComment }) => {
+    const { profile } = useAuth();
     return (
         <Dialog open={true} onClose={onClose} fullScreen>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, height: '100vh' }}>
@@ -64,21 +72,48 @@ export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose 
                                 </Typography>
                             </Box>
                         </Stack>
-                        <Typography color="text.secondary" variant="body2" sx={{ textAlign: 'center', mt: 4 }}>
-                            No comments yet.
-                        </Typography>
+                        <Divider sx={{ my: 2 }} />
+                        <CommentSection postId={post.id} autoFocus={autoFocusComment} />
                     </Box>
                     <Divider />
                     
                     {/* Action Row */}
                     <Box sx={{ p: 2 }}>
-                        <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-                            <IconButton><FavoriteBorder /></IconButton>
-                            <IconButton><ChatBubbleOutline /></IconButton>
-                            <IconButton><BookmarkBorder /></IconButton>
-                        </Stack>
-                        <Typography fontWeight="bold" sx={{ mb: 1 }}>{post.likeCount} likes</Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, ml: -1 }}>
+                            {/* Left: Like, Comment trigger, Share */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <LikeButton
+                                    postId={post.id}
+                                    liked={post.likedByCurrentUser ?? false}
+                                    likeCount={post.likeCount}
+                                    disabled={!profile?.user}
+                                />
+                                <IconButton
+                                    size="small"
+                                    aria-label="Comment on post"
+                                >
+                                    <ChatBubbleOutline />
+                                </IconButton>
+                                <ShareMenu postId={post.id} disabled={!profile?.user} />
+                            </Box>
+
+                            {/* Spacer */}
+                            <Box sx={{ flexGrow: 1 }} />
+
+                            {/* Right: Save */}
+                            <SaveButton
+                                postId={post.id}
+                                saved={post.savedByCurrentUser ?? false}
+                                disabled={!profile?.user}
+                            />
+                        </Box>
+                        {post.likeCount > 0 && (
+                            <LikersTooltip
+                                postId={post.id}
+                                likeCount={post.likeCount}
+                            />
+                        )}
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
                             {new Date(post.createdAt).toLocaleDateString()}
                         </Typography>
                     </Box>

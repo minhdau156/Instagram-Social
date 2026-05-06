@@ -1,15 +1,19 @@
-# Current Feature
+# TASK-4.35 — Register Routes
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Goals will be populated when the next feature is loaded -->
+- Update `App.tsx` to register the new page routes for Phase 4 social interactions (`/saved` and `/p/:postId`).
+- Ensure the `/saved` route is protected and accessible via navigation.
 
 ## Notes
-<!-- Notes will be populated when the next feature is loaded -->
+- Updates `frontend/src/App.tsx`.
+- New routes must be protected where required (authenticated users only).
+- Consistent with TASK-3.20 pattern.
 
 ## History
+- TASK-4.34 — Integrate Action Components into PostCard
 - TASK-4.33 — Saved Posts Page
 - TASK-4.32 — Share Menu Component
 - TASK-4.31 — Save Button Component
