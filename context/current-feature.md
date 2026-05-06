@@ -10,6 +10,7 @@ Not Started
 <!-- additional context -->
 
 ## History
+- TASK-4.30 — Comment Components: CommentSection, CommentItem, CommentInput
 - TASK-4.29 — Like Components: LikeButton, LikersTooltip & LikersDialog
 - TASK-4.28 — Custom Hooks: Like, Comment, Save
 - TASK-4.27 — API Services: Likes, Comments, Saves, Shares
