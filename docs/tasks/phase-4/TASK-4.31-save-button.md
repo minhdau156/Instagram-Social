@@ -21,7 +21,7 @@ frontend/src/components/posts/SaveButton.tsx
 
 ## Checklist
 
-- [ ] Props interface:
+- [x] Props interface:
   ```typescript
   interface SaveButtonProps {
     postId: string;
@@ -30,24 +30,24 @@ frontend/src/components/posts/SaveButton.tsx
   }
   ```
 
-- [ ] Uses `useSavePost(postId)` hook
+- [x] Uses `useSavePost(postId)` hook
 
-- [ ] Renders MUI `IconButton` with:
+- [x] Renders MUI `IconButton` with:
   - `BookmarkIcon` (filled) when `saved === true`
   - `BookmarkBorderIcon` (outline) when `saved === false`
   - Icon color: `primary` when saved, `inherit` when not saved
 
-- [ ] Show `CircularProgress` (size 16) inside the button while mutation is pending
+- [x] Show `CircularProgress` (size 16) inside the button while mutation is pending
 
-- [ ] On click: call `saveMutation.mutate(saved)` (passes current saved state; hook decides save vs unsave)
+- [x] On click: call `saveMutation.mutate(saved)` (passes current saved state; hook decides save vs unsave)
 
-- [ ] Disable button when `disabled === true` (unauthenticated users) or `saveMutation.isPending`
+- [x] Disable button when `disabled === true` (unauthenticated users) or `saveMutation.isPending`
 
-- [ ] Add `aria-label`:
+- [x] Add `aria-label`:
   - `"Save post"` when not saved
   - `"Unsave post"` when saved
 
-- [ ] Example structure:
+- [x] Example structure:
   ```tsx
   export function SaveButton({ postId, saved, disabled }: SaveButtonProps) {
     const saveMutation = useSavePost(postId);
@@ -71,4 +71,4 @@ frontend/src/components/posts/SaveButton.tsx
   }
   ```
 
-- [ ] Add a subtle scale animation on click (similar to `LikeButton`) — optional but improves UX
+- [x] Add a subtle scale animation on click (similar to `LikeButton`) — optional but improves UX

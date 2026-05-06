@@ -1,13 +1,19 @@
-# Current Feature
+# Current Feature: TASK-4.31 — Save Button Component
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- bullet points -->
+- Create the `SaveButton` (bookmark) component in `frontend/src/components/posts/`
+- Use MUI v5 `IconButton` and `@mui/icons-material` (`BookmarkIcon` / `BookmarkBorderIcon`)
+- Integrate optimistic update via `useSavePost(postId)`
+- Ensure accessibility with proper `aria-label`
+- Show `CircularProgress` while mutation is pending
 
 ## Notes
-<!-- additional context -->
+- `SaveButtonProps` includes `postId`, `saved`, and optional `disabled`
+- Lives in `frontend/src/components/posts/SaveButton.tsx`
+- Adds a subtle scale animation on click for better UX
 
 ## History
 - TASK-4.30 — Comment Components: CommentSection, CommentItem, CommentInput
