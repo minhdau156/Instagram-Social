@@ -26,34 +26,34 @@ frontend/src/components/comments/
 
 ### `CommentSection.tsx`
 
-- [ ] Props interface:
+- [x] Props interface:
   ```typescript
   interface CommentSectionProps {
     postId: string;
   }
   ```
 
-- [ ] Uses `useComments(postId)` for infinite scroll pagination
+- [x] Uses `useComments(postId)` for infinite scroll pagination
 
-- [ ] Renders a `List` of `CommentItem` components (top-level only)
+- [x] Renders a `List` of `CommentItem` components (top-level only)
 
-- [ ] Infinite scroll:
+- [x] Infinite scroll:
   - Add a sentinel `<div ref={sentinelRef} />` at the bottom of the list
   - Use `IntersectionObserver` to call `fetchNextPage()` when sentinel is visible and `hasNextPage` is `true`
 
-- [ ] Show `CircularProgress` at the bottom while `isFetchingNextPage`
+- [x] Show `CircularProgress` at the bottom while `isFetchingNextPage`
 
-- [ ] Show empty state `Typography` (`"No comments yet. Be the first to comment!"`) when total count is 0
+- [x] Show empty state `Typography` (`"No comments yet. Be the first to comment!"`) when total count is 0
 
-- [ ] Show error `Alert` with retry button when query fails
+- [x] Show error `Alert` with retry button when query fails
 
-- [ ] Renders `CommentInput` at the bottom of the section (for adding top-level comments)
+- [x] Renders `CommentInput` at the bottom of the section (for adding top-level comments)
 
 ---
 
 ### `CommentItem.tsx`
 
-- [ ] Props interface:
+- [x] Props interface:
   ```typescript
   interface CommentItemProps {
     comment: Comment;
@@ -62,7 +62,7 @@ frontend/src/components/comments/
   }
   ```
 
-- [ ] Renders MUI `ListItem` with:
+- [x] Renders MUI `ListItem` with:
   - `Avatar` (user avatar, fallback to first letter of `username`)
   - **Username** (bold, clickable — navigates to `/:username`)
   - Comment **content** (or `"[deleted]"` with grey italic style if `status === DELETED`)
@@ -71,17 +71,17 @@ frontend/src/components/comments/
   - **Relative timestamp** (`"2 hours ago"` using `date-fns` `formatDistanceToNow`)
   - **Edit / Delete menu** (`MoreVertIcon` → MUI `Menu`) — only visible if `comment.userId === currentUserId`
 
-- [ ] Edit flow:
+- [x] Edit flow:
   - Clicking "Edit" replaces the content with an inline `CommentInput` pre-filled with current content
   - On submit: calls `editCommentMutation.mutate({ content })`, then exits edit mode
   - On cancel (Escape key or cancel button): reverts to view mode
 
-- [ ] Delete flow:
+- [x] Delete flow:
   - Clicking "Delete" shows an MUI `Dialog` for confirmation
   - On confirm: calls `deleteCommentMutation.mutate(comment.id)`
   - Use `useQueryClient().invalidateQueries({ queryKey: ['comments', postId] })` after success
 
-- [ ] **Replies section**:
+- [x] **Replies section**:
   - Show "View N replies" button when `comment.replyCount > 0`
   - Clicking expands an inline `CommentSection`-like `List` with replies (loaded via `useReplies(comment.id)`)
   - Toggling hides/shows replies (not re-fetched on re-open if cached)
@@ -91,7 +91,7 @@ frontend/src/components/comments/
 
 ### `CommentInput.tsx`
 
-- [ ] Props interface:
+- [x] Props interface:
   ```typescript
   interface CommentInputProps {
     postId: string;
@@ -103,9 +103,9 @@ frontend/src/components/comments/
   }
   ```
 
-- [ ] Uses `useAddComment(postId)` or receives an `onSubmit` prop for edit mode
+- [x] Uses `useAddComment(postId)` or receives an `onSubmit` prop for edit mode
 
-- [ ] Renders MUI `TextField` (multiline, `rows={1}`, `maxRows={4}`):
+- [x] Renders MUI `TextField` (multiline, `rows={1}`, `maxRows={4}`):
   - `placeholder` defaults to `"Add a comment…"`
   - Submit on `Enter` key press (without `Shift`)
   - Submit button visible when input is non-empty
@@ -115,11 +115,11 @@ frontend/src/components/comments/
   - On `@` trigger: show MUI `Autocomplete` dropdown with matching usernames (search via existing `userApi.ts` or a simple debounced fetch)
   - On selection: insert `@username` into the text at the cursor position
 
-- [ ] Show `CircularProgress` (size 16) in the submit button while mutation is pending
+- [x] Show `CircularProgress` (size 16) in the submit button while mutation is pending
 
-- [ ] Disable submit button when input is empty or mutation is pending
+- [x] Disable submit button when input is empty or mutation is pending
 
-- [ ] On successful submit: clear input field and call `onSuccess?.()` callback
+- [x] On successful submit: clear input field and call `onSuccess?.()` callback
 
 - [ ] Example structure:
   ```tsx
