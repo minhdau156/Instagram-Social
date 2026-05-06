@@ -10,6 +10,7 @@ Not Started
 <!-- additional context -->
 
 ## History
+- TASK-4.32 — Share Menu Component
 - TASK-4.31 — Save Button Component
 - TASK-4.30 — Comment Components: CommentSection, CommentItem, CommentInput
 - TASK-4.29 — Like Components: LikeButton, LikersTooltip & LikersDialog
