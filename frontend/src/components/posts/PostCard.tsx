@@ -11,8 +11,6 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
 
     const { profile } = useAuth()
 
-    console.log({ media: `http://localhost:9000/${post.mediaItems?.[mediaIndex]?.mediaUrl}` })
-
     const hasMultipleMedia = post.mediaItems && post.mediaItems.length > 1;
 
     const handleNextMedia = () => {

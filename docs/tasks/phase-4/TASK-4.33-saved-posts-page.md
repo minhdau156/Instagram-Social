@@ -22,7 +22,7 @@ frontend/src/pages/profile/SavedPostsPage.tsx
 
 ## Checklist
 
-- [ ] Create `SavedPostsPage.tsx`:
+- [x] Create `SavedPostsPage.tsx`:
 
   ```tsx
   export default function SavedPostsPage() {
@@ -39,23 +39,23 @@ frontend/src/pages/profile/SavedPostsPage.tsx
   }
   ```
 
-- [ ] Import `getSavedPosts` from `../api/savesApi`
+- [x] Import `getSavedPosts` from `../api/savesApi`
 
-- [ ] **Loading state**: Show MUI `Skeleton` grid (3-column, 9 skeleton cells) while initial data is loading
+- [x] **Loading state**: Show MUI `Skeleton` grid (3-column, 9 skeleton cells) while initial data is loading
 
-- [ ] **Error state**: Show MUI `Alert` with severity `"error"` and a retry button
+- [x] **Error state**: Show MUI `Alert` with severity `"error"` and a retry button
 
-- [ ] **Empty state**: Show centred icon (`BookmarkBorderIcon`, large), heading `"No saved posts yet"`, and subtext `"Tap the bookmark icon on any post to save it here."`
+- [x] **Empty state**: Show centred icon (`BookmarkBorderIcon`, large), heading `"No saved posts yet"`, and subtext `"Tap the bookmark icon on any post to save it here."`
 
-- [ ] **Content**: Render posts in a 3-column responsive grid:
+- [x] **Content**: Render posts in a 3-column responsive grid:
   - Extract `postId` values from `data.pages.flatMap(p => p.content)`
   - For each `postId`, render a `PostThumbnail` component (fetch individual post details via existing `getPostById` API or display from cache)
   - Alternatively, the backend `GET /users/me/saved` can be enhanced in a follow-up to return enriched post data instead of just `SavedPost` records
 
-- [ ] **Page header**: `Typography` with `"Saved"` as the page title
+- [x] **Page header**: `Typography` with `"Saved"` as the page title
 
-- [ ] **Infinite scroll sentinel**: Use `IntersectionObserver` at the bottom of the list to call `fetchNextPage()`
+- [x] **Infinite scroll sentinel**: Use `IntersectionObserver` at the bottom of the list to call `fetchNextPage()`
 
-- [ ] **Protected route check**: Use `useAuth()` hook — if `user` is null, render `<Navigate to="/login" replace />`
+- [x] **Protected route check**: Use `useAuth()` hook — if `user` is null, render `<Navigate to="/login" replace />`
 
-- [ ] This route will be registered as `/saved` in TASK-4.35
+- [x] This route will be registered as `/saved` in TASK-4.35

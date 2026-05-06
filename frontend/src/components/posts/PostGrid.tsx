@@ -12,17 +12,17 @@ export const PostGrid: React.FC<{ posts: Post[] }> = ({ posts }) => {
                 {posts.map(post => {
                     const imageUrl = post.mediaItems?.[0]?.mediaUrl || 'https://via.placeholder.com/300?text=No+Media';
                     return (
-                        <ImageListItem 
-                            key={post.id} 
-                            onClick={() => setSelected(post)} 
-                            sx={{ 
+                        <ImageListItem
+                            key={post.id}
+                            onClick={() => setSelected(post)}
+                            sx={{
                                 cursor: 'pointer',
                                 position: 'relative',
                                 '&:hover .overlay': { opacity: 1 }
                             }}
                         >
                             <img src={imageUrl} style={{ aspectRatio: '1/1', objectFit: 'cover' }} alt="Post thumbnail" />
-                            <Box 
+                            <Box
                                 className="overlay"
                                 sx={{
                                     position: 'absolute',
@@ -43,7 +43,7 @@ export const PostGrid: React.FC<{ posts: Post[] }> = ({ posts }) => {
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                     <ChatBubble fontSize="small" />
-                                    <Typography fontWeight="bold">0</Typography>
+                                    <Typography fontWeight="bold">{post.commentCount}</Typography>
                                 </Box>
                             </Box>
                         </ImageListItem>
