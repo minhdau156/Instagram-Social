@@ -4,12 +4,13 @@
 Not Started
 
 ## Goals
-<!-- bullet points -->
+<!-- Goals will be populated when the next feature is loaded -->
 
 ## Notes
-<!-- additional context -->
+<!-- Notes will be populated when the next feature is loaded -->
 
 ## History
+- TASK-4.33 — Saved Posts Page
 - TASK-4.32 — Share Menu Component
 - TASK-4.31 — Save Button Component
 - TASK-4.30 — Comment Components: CommentSection, CommentItem, CommentInput
