@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Post } from "../../types/post";
 import { MoreVert, ChevronLeft, ChevronRight } from "@mui/icons-material";
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
@@ -9,6 +9,9 @@ import { SaveButton } from "./SaveButton";
 import { ShareMenu } from "./ShareMenu";
 import { LikersTooltip } from "./LikersTooltip";
 import { PostDetailModal } from "./PostDetailModal";
+import { usersApi } from "../../api/usersApi";
+import { useMutation } from "@tanstack/react-query";
+import { User } from "../../types/user";
 
 export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     const [expanded, setExpanded] = useState(false);
@@ -16,11 +19,20 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     const [openDetail, setOpenDetail] = useState(false);
     const [autoFocusComment, setAutoFocusComment] = useState(false);
 
+    const { data, mutate } = useMutation({
+        mutationFn: () => usersApi.getUserById(post.userId),
+    });
+
+    useEffect(() => {
+        mutate();
+    }, []);
+    const user = data;
+
     const handleOpenDetail = (focusComment = false) => {
         setAutoFocusComment(focusComment);
         setOpenDetail(true);
     };
-    
+
     const handleCloseDetail = () => setOpenDetail(false);
 
     const { profile } = useAuth()
@@ -42,8 +54,8 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     return (
         <Card sx={{ maxWidth: 600, mb: 2 }}>
             <CardHeader
-                avatar={<Avatar src={profile?.user?.avatarUrl ? profile.user?.avatarUrl : undefined} />}
-                title={<Typography fontWeight="bold">{profile?.user?.username}</Typography>}
+                avatar={<Avatar src={user?.avatarUrl ? user?.avatarUrl : undefined} />}
+                title={<Typography fontWeight="bold">{user?.username}</Typography>}
                 subheader={post.location}
                 action={<IconButton><MoreVert /></IconButton>}
             />
@@ -75,7 +87,7 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                 {/* Action row */}
                 <Box sx={{ display: 'flex', alignItems: 'center', px: 1, py: 0.5 }}>
                     {/* Left: Like, Comment trigger, Share */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                         <LikeButton
                             postId={post.id}
                             liked={post.likedByCurrentUser ?? false}
@@ -123,7 +135,7 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                 {/* Truncated caption with toggle */}
                 <Box sx={{ mb: 1 }}>
                     <Typography component="span" fontWeight="bold" sx={{ mr: 1 }}>
-                        {post.userId}
+                        {user?.username}
                     </Typography>
                     <Typography
                         component="span"
@@ -148,12 +160,13 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                     {new Date(post.createdAt).toLocaleDateString()}
                 </Typography>
             </CardContent>
-            
+
             {openDetail && (
                 <PostDetailModal
                     post={post}
                     onClose={handleCloseDetail}
                     autoFocusComment={autoFocusComment}
+                    postUser={user as User}
                 />
             )}
         </Card>

@@ -97,7 +97,7 @@ public class Comment {
         }
     }
 
-    private Builder copy() {
+    public Builder copy() {
         return builder()
                 .id(id)
                 .postId(postId)

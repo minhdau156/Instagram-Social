@@ -59,13 +59,13 @@ public class LikeController {
 
     @PostMapping("/api/v1/posts/{id}/like")
     public ResponseEntity<ApiResponse<Void>> likePost(@PathVariable UUID id) {
-        likePostUseCase.like(new LikePostUseCase.Command(currentUserId(), id));
+        likePostUseCase.like(new LikePostUseCase.Command(id, currentUserId()));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @DeleteMapping("/api/v1/posts/{id}/like")
     public ResponseEntity<ApiResponse<Void>> unlikePost(@PathVariable UUID id) {
-        unlikePostUseCase.unlike(new UnlikePostUseCase.Command(currentUserId(), id));
+        unlikePostUseCase.unlike(new UnlikePostUseCase.Command(id, currentUserId()));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -81,13 +81,13 @@ public class LikeController {
 
     @PostMapping("/api/v1/comments/{id}/like")
     public ResponseEntity<ApiResponse<Void>> likeComment(@PathVariable UUID id) {
-        likeCommentUseCase.likeComment(new LikeCommentUseCase.Command(currentUserId(), id));
+        likeCommentUseCase.likeComment(new LikeCommentUseCase.Command(id, currentUserId()));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @DeleteMapping("/api/v1/comments/{id}/like")
     public ResponseEntity<ApiResponse<Void>> unlikeComment(@PathVariable UUID id) {
-        unlikeCommentUseCase.unlikeComment(new UnlikeCommentUseCase.Command(currentUserId(), id));
+        unlikeCommentUseCase.unlikeComment(new UnlikeCommentUseCase.Command(id, currentUserId()));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

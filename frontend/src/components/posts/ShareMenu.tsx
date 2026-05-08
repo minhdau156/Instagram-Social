@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IconButton, Menu, MenuItem, Snackbar, Alert } from '@mui/material';
+import { IconButton, Menu, MenuItem, Snackbar, Alert, Box } from '@mui/material';
 import IosShareIcon from '@mui/icons-material/IosShare';
 import LinkIcon from '@mui/icons-material/Link';
 import SendIcon from '@mui/icons-material/Send';
@@ -72,9 +72,16 @@ export const ShareMenu: React.FC<ShareMenuProps> = ({ postId, disabled }) => {
 
   return (
     <>
-      <IconButton aria-label="Share post" onClick={handleOpen}>
-        <IosShareIcon />
-      </IconButton>
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingBottom: 1
+      }}>
+        <IconButton aria-label="Share post" onClick={handleOpen} size="small" >
+          <IosShareIcon />
+        </IconButton>
+      </Box>
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem onClick={handleCopyLink}>

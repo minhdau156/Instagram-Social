@@ -62,7 +62,6 @@ public class LikeService implements LikePostUseCase,
             throw new AlreadyLikedException("post", command.postId());
         }
         likeRepository.likePost(command.postId(), command.userId());
-        postRepository.incrementLikeCount(command.postId());
     }
 
     @Override
@@ -72,7 +71,6 @@ public class LikeService implements LikePostUseCase,
             throw new NotLikedException("post", command.postId());
         }
         likeRepository.unlikePost(command.postId(), command.userId());
-        postRepository.decrementLikeCount(command.postId());
     }
 
     @Override
@@ -82,7 +80,6 @@ public class LikeService implements LikePostUseCase,
             throw new AlreadyLikedException("comment", command.commentId());
         }
         likeRepository.likeComment(command.commentId(), command.userId());
-        commentRepository.incrementLikeCount(command.commentId());
     }
 
     @Override
@@ -92,7 +89,6 @@ public class LikeService implements LikePostUseCase,
             throw new NotLikedException("comment", command.commentId());
         }
         likeRepository.unlikeComment(command.commentId(), command.userId());
-        commentRepository.decrementLikeCount(command.commentId());
     }
 
     @Override

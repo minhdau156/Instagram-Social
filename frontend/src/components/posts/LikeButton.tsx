@@ -40,9 +40,7 @@ export function LikeButton({ postId, liked, likeCount, disabled }: LikeButtonPro
                 size="small"
                 aria-label={liked ? 'Unlike post' : 'Like post'}
             >
-                {likeMutation.isPending ? (
-                    <CircularProgress size={16} />
-                ) : liked ? (
+                {liked ? (
                     <FavoriteIcon color="error" sx={animating ? { animation: `${heartPop} 0.3s ease` } : {}} />
                 ) : (
                     <FavoriteBorderIcon color="inherit" />

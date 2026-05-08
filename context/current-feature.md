@@ -1,13 +1,21 @@
-# Current Feature
+# Current Feature: TASK-5.1 — Out-Port: FeedRepository
 
 ## Status
 Not Started
 
 ## Goals
-<!-- Add goals here -->
+- Create `FeedRepository.java` interface in `domain/port/out/` with three methods: `getHomeFeed`, `getExploreFeed`, `getTrendingHashtags`
+- Interface uses only pure Java domain types (`Post`, `Hashtag`, `UUID`, `List`) — no Spring or JPA imports
+- `getHomeFeed(UUID userId, UUID cursor, int limit)` — returns posts from followed users, keyset-paginated
+- `getExploreFeed(UUID userId, UUID cursor, int limit)` — returns engagement-ranked posts from non-followed users
+- `getTrendingHashtags(int limit)` — returns hashtags ordered by `weekly_count DESC`
 
 ## Notes
-<!-- Add notes here -->
+- File location: `backend/src/main/java/com/instagram/domain/port/out/FeedRepository.java`
+- `Hashtag` domain model already exists from Phase 2 — do not create a new class
+- Cursor is `null` for the first page (no previous post to paginate from)
+- `limit` is capped at 50 by the service layer (TASK-5.3); this interface does not enforce it
+- No unit test needed for a pure interface — tests live in the service (TASK-5.9)
 
 ## History
 - TASK-4.35 — Register Routes

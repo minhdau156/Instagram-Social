@@ -55,14 +55,12 @@ public class SaveController {
     }
 
     @PostMapping("/api/v1/posts/{id}/save")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> savePost(@PathVariable UUID id) {
         savePostUseCase.save(new SavePostUseCase.Command(id, currentUserId()));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @DeleteMapping("/api/v1/posts/{id}/save")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> unsavePost(@PathVariable UUID id) {
         unsavePostUseCase.unsave(new UnsavePostUseCase.Command(id, currentUserId()));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

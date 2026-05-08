@@ -22,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.instagram.domain.model.User;
 import com.instagram.domain.port.in.GetUserProfileUseCase;
 import com.instagram.domain.port.in.UpdateProfileUseCase;
+import com.instagram.domain.port.in.user.GetUserUseCase;
 import com.instagram.domain.port.out.MediaStoragePort;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,6 +47,7 @@ public class UserController {
     private final GetUserProfileUseCase getUserProfileUseCase;
     private final UpdateProfileUseCase updateProfileUseCase;
     private final MediaStoragePort mediaStoragePort;
+    private final GetUserUseCase getUserUseCase;
 
     private UUID currentUserId() {
         org.springframework.security.core.Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -129,11 +131,17 @@ public class UserController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
     })
-    @GetMapping("/{username}")
+    @GetMapping("/{username}/bio")
     public ResponseEntity<ApiResponse<UserProfileResponse>> getProfile(@PathVariable String username) {
         UserProfile profile = getUserProfileUseCase
                 .getUserProfile(new GetUserProfileUseCase.Query(username, currentUserId()));
         return ResponseEntity.ok(ApiResponse.ok(UserProfileResponse.from(profile)));
+    }
+
+    @GetMapping("/get/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable UUID id) {
+        User user = getUserUseCase.getUser(new GetUserUseCase.Query(id));
+        return ResponseEntity.ok(ApiResponse.ok(UserResponse.from(user)));
     }
 
 }

@@ -128,7 +128,7 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
 
         return comments.map(comment -> {
             boolean isLikedByCurrentUser = this.likeRepository.hasLikedComment(comment.getId(), currentUser.getId());
-            return comment.builder()
+            return comment.copy()
                     .isLikedByCurrentUser(isLikedByCurrentUser)
                     .build();
         });

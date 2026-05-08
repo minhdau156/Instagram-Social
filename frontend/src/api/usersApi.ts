@@ -18,4 +18,6 @@ export const usersApi = {
             headers: { 'Content-Type': 'multipart/form-data' },
         }).then(r => r.data.data);
     },
+    getUserById: (id: string) =>
+        api.get<{ data: User }>(`/api/v1/users/get/${id}`).then(r => r.data.data),
 }

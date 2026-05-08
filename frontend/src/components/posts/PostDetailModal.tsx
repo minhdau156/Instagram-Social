@@ -8,61 +8,53 @@ import { SaveButton } from './SaveButton';
 import { ShareMenu } from './ShareMenu';
 import { LikersTooltip } from './LikersTooltip';
 import { CommentSection } from '../comment/CommentSection';
+import { User } from '../../types/user';
 
 interface PostDetailModalProps {
     post: Post;
     onClose: () => void;
     autoFocusComment?: boolean;
+    postUser: User | null;
 }
 
-export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose, autoFocusComment }) => {
+export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose, autoFocusComment, postUser }) => {
     const { profile } = useAuth();
     return (
         <Dialog open={true} onClose={onClose} fullScreen>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, height: '100vh' }}>
                 {/* Left Side - Media */}
-                <Box sx={{ 
-                    flex: { xs: 'none', md: '1 1 60%' }, 
-                    bgcolor: 'black', 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                <Box sx={{
+                    flex: { xs: 'none', md: '1 1 60%' },
+                    bgcolor: 'black',
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'center',
                     borderRight: 1,
                     borderColor: 'divider'
                 }}>
-                    <img 
-                        src={post.mediaItems?.[0]?.mediaUrl || ''} 
-                        alt="Post media" 
-                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
+                    <img
+                        src={`http://localhost:9000/instagram-media/${post.mediaItems?.[0]?.mediaUrl}`}
+                        alt="Post media"
+                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                     />
                 </Box>
-                
+
                 {/* Right Side - Details & Comments */}
-                <Box sx={{ 
-                    flex: { xs: 'none', md: '1 1 40%' }, 
-                    display: 'flex', 
+                <Box sx={{
+                    flex: { xs: 'none', md: '1 1 40%' },
+                    display: 'flex',
                     flexDirection: 'column',
                     bgcolor: 'background.paper'
                 }}>
-                    {/* Header */}
-                    <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Stack direction="row" spacing={2} alignItems="center">
-                            <Avatar>{String(post.userId).charAt(0)}</Avatar>
-                            <Typography fontWeight="bold">{post.userId}</Typography>
-                        </Stack>
-                        <IconButton onClick={onClose}>
-                            <Close />
-                        </IconButton>
-                    </Box>
-                    <Divider />
-                    
+
+
                     {/* Comments Area (Caption + Comments) */}
                     <Box sx={{ p: 2, flexGrow: 1, overflowY: 'auto' }}>
                         <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                            <Avatar>{String(post.userId).charAt(0)}</Avatar>
+                            <Avatar src={postUser?.avatarUrl || undefined}>{String(post.userId).charAt(0)}</Avatar>
                             <Box>
                                 <Typography component="span" fontWeight="bold" sx={{ mr: 1 }}>
-                                    {post.userId}
+                                    {postUser?.username}
                                 </Typography>
                                 <Typography component="span" sx={{ whiteSpace: 'pre-wrap' }}>
                                     {post.caption}
@@ -76,7 +68,7 @@ export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose,
                         <CommentSection postId={post.id} autoFocus={autoFocusComment} />
                     </Box>
                     <Divider />
-                    
+
                     {/* Action Row */}
                     <Box sx={{ p: 2 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, ml: -1 }}>
@@ -111,6 +103,7 @@ export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose,
                             <LikersTooltip
                                 postId={post.id}
                                 likeCount={post.likeCount}
+
                             />
                         )}
                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
