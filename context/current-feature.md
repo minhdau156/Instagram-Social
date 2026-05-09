@@ -8,6 +8,7 @@ Not Started
 ## Notes
 
 ## History
+- TASK-5.9 — Unit & Integration Tests: Feed
 - TASK-5.8 — hashtag_stats Scheduled Rollup
 - TASK-5.7 — user_interests Tracking
 - TASK-5.6 — DTOs: FeedPageResponse & TrendingHashtagResponse
