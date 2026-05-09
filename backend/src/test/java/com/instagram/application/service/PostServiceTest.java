@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -32,6 +33,7 @@ import com.instagram.domain.port.in.UpdatePostUseCase;
 import com.instagram.domain.port.out.HashtagRepository;
 import com.instagram.domain.port.out.LikeRepository;
 import com.instagram.domain.port.out.MediaStoragePort;
+import com.instagram.domain.port.out.PostHashtagRepository;
 import com.instagram.domain.port.out.PostMediaRepository;
 import com.instagram.domain.port.out.PostRepository;
 import com.instagram.domain.port.out.SavedPostRepository;
@@ -55,6 +57,9 @@ public class PostServiceTest {
 
     @Mock
     MediaStoragePort mediaStoragePort;
+
+    @Mock
+    PostHashtagRepository postHashtagRepository;
 
     @InjectMocks
     PostService postService;
@@ -85,6 +90,7 @@ public class PostServiceTest {
                 .thenAnswer(inv -> inv.getArgument(0));
         when(hashtagRepository.findOrCreate(anyString()))
                 .thenReturn(Hashtag.builder().name("world").postCount(0).build());
+        doNothing().when(postHashtagRepository).save(any(), any());
 
         Post result = postService.createPost(postCommand);
 
@@ -144,6 +150,7 @@ public class PostServiceTest {
         when(postRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(hashtagRepository.findOrCreate(anyString()))
                 .thenReturn(Hashtag.builder().name("caption").postCount(0).build());
+        doNothing().when(postHashtagRepository).save(any(), any());
 
         Post result = postService.updatePost(command);
 

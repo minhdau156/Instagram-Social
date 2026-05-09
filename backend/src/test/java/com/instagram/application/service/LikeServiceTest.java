@@ -16,6 +16,7 @@ import com.instagram.domain.port.out.CommentRepository;
 import com.instagram.domain.port.out.FollowRepository;
 import com.instagram.domain.port.out.LikeRepository;
 import com.instagram.domain.port.out.PostRepository;
+import com.instagram.domain.port.out.UserInterestPort;
 import com.instagram.domain.port.out.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,9 @@ class LikeServiceTest {
     @Mock
     private FollowRepository followRepository;
 
+    @Mock
+    private UserInterestPort userInterestPort;
+
     @InjectMocks
     private LikeService likeService;
 
@@ -69,16 +73,13 @@ class LikeServiceTest {
     }
 
     @Test
-    void like_notYetLiked_savesAndIncrementsCount() {
+    void like_notYetLiked_savesLikeRecord() {
         LikePostUseCase.Command command = new LikePostUseCase.Command(postId, userId);
         when(likeRepository.hasLikedPost(postId, userId)).thenReturn(false);
-        doNothing().when(likeRepository).likePost(postId, userId);
-        doNothing().when(postRepository).incrementLikeCount(postId);
 
         likeService.like(command);
 
         verify(likeRepository).likePost(postId, userId);
-        verify(postRepository).incrementLikeCount(postId);
     }
 
     @Test
@@ -89,20 +90,16 @@ class LikeServiceTest {
         assertThrows(AlreadyLikedException.class, () -> likeService.like(command));
 
         verify(likeRepository, never()).likePost(any(), any());
-        verify(postRepository, never()).incrementLikeCount(any());
     }
 
     @Test
-    void unlike_hasLiked_deletesAndDecrementsCount() {
+    void unlike_hasLiked_deletesLikeRecord() {
         UnlikePostUseCase.Command command = new UnlikePostUseCase.Command(postId, userId);
         when(likeRepository.hasLikedPost(postId, userId)).thenReturn(true);
-        doNothing().when(likeRepository).unlikePost(postId, userId);
-        doNothing().when(postRepository).decrementLikeCount(postId);
 
         likeService.unlike(command);
 
         verify(likeRepository).unlikePost(postId, userId);
-        verify(postRepository).decrementLikeCount(postId);
     }
 
     @Test
@@ -113,20 +110,16 @@ class LikeServiceTest {
         assertThrows(NotLikedException.class, () -> likeService.unlike(command));
 
         verify(likeRepository, never()).unlikePost(any(), any());
-        verify(postRepository, never()).decrementLikeCount(any());
     }
 
     @Test
-    void likeComment_notLikedYet_SavesAndIncrementsCount() {
+    void likeComment_notLikedYet_savesCommentLikeRecord() {
         LikeCommentUseCase.Command command = new LikeCommentUseCase.Command(commentId, userId);
         when(likeRepository.hasLikedComment(commentId, userId)).thenReturn(false);
-        doNothing().when(likeRepository).likeComment(commentId, userId);
-        doNothing().when(commentRepository).incrementLikeCount(commentId);
 
         likeService.likeComment(command);
 
         verify(likeRepository).likeComment(commentId, userId);
-        verify(commentRepository).incrementLikeCount(commentId);
     }
 
     @Test
@@ -137,20 +130,16 @@ class LikeServiceTest {
         assertThrows(AlreadyLikedException.class, () -> likeService.likeComment(command));
 
         verify(likeRepository, never()).likeComment(any(), any());
-        verify(commentRepository, never()).incrementLikeCount(any());
     }
 
     @Test
-    void unlikeComment_hasLiked_deletesAndDecrementsCount() {
+    void unlikeComment_hasLiked_deletesCommentLikeRecord() {
         UnlikeCommentUseCase.Command command = new UnlikeCommentUseCase.Command(commentId, userId);
         when(likeRepository.hasLikedComment(commentId, userId)).thenReturn(true);
-        doNothing().when(likeRepository).unlikeComment(commentId, userId);
-        doNothing().when(commentRepository).decrementLikeCount(commentId);
 
         likeService.unlikeComment(command);
 
         verify(likeRepository).unlikeComment(commentId, userId);
-        verify(commentRepository).decrementLikeCount(commentId);
     }
 
     @Test
@@ -161,7 +150,6 @@ class LikeServiceTest {
         assertThrows(NotLikedException.class, () -> likeService.unlikeComment(command));
 
         verify(likeRepository, never()).unlikeComment(any(), any());
-        verify(commentRepository, never()).decrementLikeCount(any());
     }
 
     @Test

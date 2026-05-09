@@ -1,0 +1,118 @@
+package com.instagram.adapter.out.persistence;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
+
+import com.instagram.adapter.out.persistence.entity.FollowId;
+import com.instagram.adapter.out.persistence.entity.FollowJpaEntity;
+import com.instagram.adapter.out.persistence.entity.PostJpaEntity;
+import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
+import com.instagram.adapter.out.persistence.repository.FeedJpaRepository;
+import com.instagram.adapter.out.persistence.repository.PostJpaRepository;
+import com.instagram.domain.model.PostStatus;
+import com.instagram.domain.model.PrivacyLevel;
+import com.instagram.domain.model.UserStatus;
+import com.instagram.infrastructure.config.JpaConfig;
+
+@DataJpaTest
+@Import(JpaConfig.class)
+@TestPropertySource(properties = {
+        "spring.flyway.enabled=false",
+        "spring.jpa.hibernate.ddl-auto=create-drop"
+})
+class FeedJpaQueryAdapterIT {
+
+    @Autowired
+    private TestEntityManager tem;
+
+    @Autowired
+    private FeedJpaRepository feedJpaRepository;
+
+    @Autowired
+    private PostJpaRepository postJpaRepository;
+
+    private FeedJpaQueryAdapter adapter;
+
+    private UserJpaEntity follower;
+    private UserJpaEntity followed;
+    private UserJpaEntity stranger;
+
+    @BeforeEach
+    void setUp() {
+        adapter = new FeedJpaQueryAdapter(feedJpaRepository, postJpaRepository);
+
+        follower = tem.persistAndFlush(buildUser("follower"));
+        followed = tem.persistAndFlush(buildUser("followed"));
+        stranger = tem.persistAndFlush(buildUser("stranger"));
+
+        // follower -> followed (approved)
+        tem.persistAndFlush(FollowJpaEntity.builder()
+                .id(new FollowId(follower.getId(), followed.getId()))
+                .follower(follower)
+                .following(followed)
+                .isApproved(true)
+                .build());
+
+        // Posts: 2 from followed, 1 from stranger
+        tem.persistAndFlush(buildPost(followed));
+        tem.persistAndFlush(buildPost(followed));
+        tem.persistAndFlush(buildPost(stranger));
+
+        tem.flush();
+        tem.clear();
+    }
+
+    @Test
+    void findHomeFeed_returnsOnlyFollowedUsersPosts() {
+        List<PostJpaEntity> feed = feedJpaRepository.findHomeFeed(follower.getId(), null, 20);
+
+        assertThat(feed).hasSize(2);
+        assertThat(feed).allMatch(p -> p.getUser().getId().equals(followed.getId()));
+    }
+
+    @Test
+    void findExploreFeed_excludesFollowedUsers() {
+        List<PostJpaEntity> explore = feedJpaRepository.findExploreFeed(follower.getId(), null, 20);
+
+        assertThat(explore).hasSize(1);
+        assertThat(explore.get(0).getUser().getId()).isEqualTo(stranger.getId());
+    }
+
+    @Test
+    void findHomeFeed_cursorPagination_returnsEmptyWhenCursorIsMinUuid() {
+        // UUID.fromString("00000000-...") is the minimum possible UUID;
+        // no post id can be less than it, so the page must be empty.
+        UUID minUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+
+        List<PostJpaEntity> page = feedJpaRepository.findHomeFeed(follower.getId(), minUuid, 20);
+
+        assertThat(page).isEmpty();
+    }
+
+    private UserJpaEntity buildUser(String username) {
+        return UserJpaEntity.builder()
+                .username(username)
+                .fullName(username)
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build();
+    }
+
+    private PostJpaEntity buildPost(UserJpaEntity user) {
+        return PostJpaEntity.builder()
+                .user(user)
+                .status(PostStatus.PUBLISHED)
+                .build();
+    }
+}
