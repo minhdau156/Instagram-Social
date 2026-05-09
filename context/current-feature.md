@@ -1,22 +1,17 @@
-# Current Feature: TASK-5.5 — REST Controller: FeedController
+# Current Feature
 
 ## Status
 Not Started
 
 ## Goals
-- Expose the feed and explore endpoints via a REST controller
-- Implement `GET /api/v1/feed` for home feed with keyset pagination
-- Implement `GET /api/v1/explore` for explore feed with keyset pagination
-- Implement `GET /api/v1/explore/hashtags` for trending hashtags
-- Delegate entirely to the use-case interfaces
-- Read authenticated user's ID from `SecurityContextHolder`
+<!-- Add goals here -->
 
 ## Notes
-- File location: `backend/src/main/java/com/instagram/adapter/in/web/FeedController.java`
-- Handle malformed cursor UUIDs via `GlobalExceptionHandler` (return 400).
-- Only `nextCursor` is included for pagination metadata.
+<!-- Add notes here -->
 
 ## History
+- TASK-5.6 — DTOs: FeedPageResponse & TrendingHashtagResponse
+- TASK-5.5 — REST Controller: FeedController
 - TASK-5.4 — Persistence Adapter: FeedJpaQueryAdapter
 - TASK-5.3 — Domain Service: FeedService
 - TASK-5.2 — In-Ports: Feed Use Cases
