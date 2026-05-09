@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dialog, Box, Typography, IconButton, Avatar, Stack, Divider } from '@mui/material';
-import { Close, ChatBubbleOutline } from '@mui/icons-material';
+import { ChatBubbleOutline } from '@mui/icons-material';
 import { Post } from '../../types/post';
 import { useAuth } from '../../hooks/useAuth';
 import { LikeButton } from './LikeButton';
@@ -16,6 +16,7 @@ interface PostDetailModalProps {
     autoFocusComment?: boolean;
     postUser: User | null;
 }
+
 
 export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose, autoFocusComment, postUser }) => {
     const { profile } = useAuth();

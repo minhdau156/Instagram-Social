@@ -128,7 +128,7 @@ public class UserServiceTest {
 
         assertEquals("accessToken", result.accessToken());
         assertEquals("refreshToken", result.refreshToken());
-        assertEquals(3600L, result.expiresIn());
+        assertEquals(900L, result.expiresIn());
 
     }
 
