@@ -22,6 +22,7 @@ import com.instagram.domain.port.in.*;
 import com.instagram.domain.port.out.HashtagRepository;
 import com.instagram.domain.port.out.LikeRepository;
 import com.instagram.domain.port.out.MediaStoragePort;
+import com.instagram.domain.port.out.PostHashtagRepository;
 import com.instagram.domain.port.out.PostMediaRepository;
 import com.instagram.domain.port.out.PostRepository;
 import com.instagram.domain.port.out.SavedPostRepository;
@@ -41,16 +42,19 @@ public class PostService implements
     private final MediaStoragePort mediaStoragePort;
     private final LikeRepository likeRepository;
     private final SavedPostRepository savedPostRepository;
+    private final PostHashtagRepository postHashtagRepository;
 
     public PostService(PostRepository postRepository, PostMediaRepository postMediaRepository,
             HashtagRepository hashtagRepository, MediaStoragePort mediaStoragePort,
-            LikeRepository likeRepository, SavedPostRepository savedPostRepository) {
+            LikeRepository likeRepository, SavedPostRepository savedPostRepository,
+            PostHashtagRepository postHashtagRepository) {
         this.postRepository = postRepository;
         this.postMediaRepository = postMediaRepository;
         this.hashtagRepository = hashtagRepository;
         this.mediaStoragePort = mediaStoragePort;
         this.likeRepository = likeRepository;
         this.savedPostRepository = savedPostRepository;
+        this.postHashtagRepository = postHashtagRepository;
     }
 
     @Override
@@ -90,7 +94,7 @@ public class PostService implements
             postMediaRepository.saveAll(mediaList);
         }
 
-        processHashtags(command.caption());
+        processHashtags(command.caption(), saved.getId());
         processMentions(command.caption());
 
         return saved;
@@ -123,7 +127,7 @@ public class PostService implements
         Post updated = existing.withUpdateCaptionAndLocation(command.caption(), command.location());
         Post saved = postRepository.save(updated);
 
-        processHashtags(command.caption());
+        processHashtags(command.caption(), saved.getId());
         processMentions(command.caption());
 
         return saved;
@@ -150,7 +154,7 @@ public class PostService implements
         return new GenerateUploadUrlUseCase.UploadUrl(presignedUrl, mediaKey);
     }
 
-    private void processHashtags(String caption) {
+    private void processHashtags(String caption, UUID postId) {
         if (caption == null || caption.isEmpty())
             return;
         Pattern.compile("#(\\w+)").matcher(caption).results()
@@ -159,6 +163,7 @@ public class PostService implements
                 .forEach(tag -> {
                     Hashtag hashtag = hashtagRepository.findOrCreate(tag);
                     hashtagRepository.save(hashtag.withIncrementedCount());
+                    postHashtagRepository.save(postId, hashtag.getId());
                 });
     }
 

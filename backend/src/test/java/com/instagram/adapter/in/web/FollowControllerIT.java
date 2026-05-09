@@ -101,7 +101,7 @@ public class FollowControllerIT {
                 mockMvc.perform(post("/api/v1/users/{username}/follow", "minh")
                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andDo(print())
-                                .andExpect(status().is3xxRedirection());
+                                .andExpect(status().isUnauthorized());
         }
 
         @Test

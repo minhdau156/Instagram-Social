@@ -100,7 +100,7 @@ public class PostControllerIT {
         mockMvc.perform(post("/api/v1/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isFound());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

@@ -157,9 +157,9 @@ class CommentControllerTest {
                                 .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().is3xxRedirection()); // Or isForbidden depending on SecurityConfig.
-                                                                         // Let's accept isUnauthorized as typically
-                                                                         // we'd map this, or 403 from spring security
+                                .andExpect(status().isUnauthorized()); // Or isForbidden depending on SecurityConfig.
+                                                                       // Let's accept isUnauthorized as typically
+                                                                       // we'd map this, or 403 from spring security
         }
 
         @Test

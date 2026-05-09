@@ -14,4 +14,5 @@ public interface HashtagJpaRepository extends JpaRepository<HashtagJpaEntity, UU
 
     // Top trending hashtags for the Explore page
     Page<HashtagJpaEntity> findTopByOrderByPostCountDesc(Pageable pageable);
+
 }

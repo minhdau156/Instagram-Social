@@ -45,8 +45,8 @@ public class UserService
     /** Role embedded in the access token. Roles are expanded in Phase 2. */
     private static final String DEFAULT_ROLE = "USER";
 
-    /** Access token lifetime in seconds (1 hour). */
-    private static final long ACCESS_TOKEN_EXPIRES_IN = 3600L;
+    /** Access token lifetime in seconds (15 minutes). */
+    private static final long ACCESS_TOKEN_EXPIRES_IN = 900L;
 
     private final UserRepository userRepository;
     private final PasswordHashPort passwordHashPort;

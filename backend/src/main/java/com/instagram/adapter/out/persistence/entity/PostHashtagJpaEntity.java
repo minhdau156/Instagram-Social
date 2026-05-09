@@ -22,21 +22,11 @@ public class PostHashtagJpaEntity {
     @EmbeddedId
     private PostHashtagId id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @MapsId("postId")
-    @JoinColumn(name = "post_id", nullable = false)
-    private PostJpaEntity post;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @MapsId("hashtagId")
-    @JoinColumn(name = "hashtag_id", nullable = false)
-    private HashtagJpaEntity hashtag;
-
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
-    @Embeddable
-    public record PostHashtagId(UUID postId, UUID hashtagId) implements Serializable {
+    public PostHashtagJpaEntity(PostHashtagId id) {
+        this.id = id;
     }
 }

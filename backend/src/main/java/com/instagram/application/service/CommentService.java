@@ -24,6 +24,7 @@ import com.instagram.domain.port.in.comment.GetCommentsUseCase;
 import com.instagram.domain.port.in.comment.GetRepliesUseCase;
 import com.instagram.domain.port.out.CommentRepository;
 import com.instagram.domain.port.out.LikeRepository;
+import com.instagram.domain.port.out.UserInterestPort;
 import com.instagram.domain.port.out.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -39,12 +40,15 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
+    private final UserInterestPort userInterestPort;
 
     public CommentService(CommentRepository commentRepository, UserRepository userRepository,
-            LikeRepository likeRepository) {
+            LikeRepository likeRepository,
+            UserInterestPort userInterestPort) {
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
         this.likeRepository = likeRepository;
+        this.userInterestPort = userInterestPort;
     }
 
     @Override
@@ -108,6 +112,7 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
             this.commentRepository.incrementReplyCount(command.parentId());
         }
         this.commentRepository.incrementPostCommentCount(command.postId());
+        this.userInterestPort.recordComment(command.userId(), command.postId());
 
         List<String> mentions = extractMentions(command.content());
         if (!mentions.isEmpty()) {

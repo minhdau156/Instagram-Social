@@ -82,7 +82,7 @@ class SaveControllerTest {
 
                 mockMvc.perform(post("/api/v1/posts/{id}/save", postId)
                                 .with(csrf()))
-                                .andExpect(status().is3xxRedirection());
+                                .andExpect(status().isUnauthorized());
         }
 
         @Test
@@ -137,6 +137,6 @@ class SaveControllerTest {
         @Test
         void getSavedPosts_unauthenticated_returns401Or403() throws Exception {
                 mockMvc.perform(get("/api/v1/users/me/saved"))
-                                .andExpect(status().is3xxRedirection());
+                                .andExpect(status().isUnauthorized());
         }
 }

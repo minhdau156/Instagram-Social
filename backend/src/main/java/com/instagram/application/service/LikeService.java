@@ -29,6 +29,7 @@ import com.instagram.domain.port.out.FollowRepository;
 import com.instagram.domain.port.out.LikeRepository;
 import com.instagram.domain.port.out.UserRepository;
 import com.instagram.domain.port.out.PostRepository;
+import com.instagram.domain.port.out.UserInterestPort;
 
 @Service
 public class LikeService implements LikePostUseCase,
@@ -43,16 +44,20 @@ public class LikeService implements LikePostUseCase,
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
 
+    private final UserInterestPort userInterestPort;
+
     public LikeService(LikeRepository likeRepository,
             PostRepository postRepository,
             CommentRepository commentRepository,
             UserRepository userRepository,
-            FollowRepository followRepository) {
+            FollowRepository followRepository,
+            UserInterestPort userInterestPort) {
         this.likeRepository = likeRepository;
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
         this.followRepository = followRepository;
+        this.userInterestPort = userInterestPort;
     }
 
     @Override
@@ -62,6 +67,7 @@ public class LikeService implements LikePostUseCase,
             throw new AlreadyLikedException("post", command.postId());
         }
         likeRepository.likePost(command.postId(), command.userId());
+        userInterestPort.recordLike(command.userId(), command.postId());
     }
 
     @Override
