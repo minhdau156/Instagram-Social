@@ -4,12 +4,11 @@
 Not Started
 
 ## Goals
-<!-- Add goals here -->
 
 ## Notes
-<!-- Add notes here -->
 
 ## History
+- TASK-5.7 — user_interests Tracking
 - TASK-5.6 — DTOs: FeedPageResponse & TrendingHashtagResponse
 - TASK-5.5 — REST Controller: FeedController
 - TASK-5.4 — Persistence Adapter: FeedJpaQueryAdapter
@@ -29,7 +28,6 @@ Not Started
 - TASK-4.22 — Service, JPA, Adapter & Controller: Saves
 - TASK-4.21 - Input Ports: Saves
 - TASK-4.14 — Domain Service: CommentService
-
 - TASK-4.9 — Unit & Integration Tests: Likes
 - TASK-4.8 — REST Controller: LikeController
 - TASK-4.7 — Persistence Adapter: LikePersistenceAdapter
