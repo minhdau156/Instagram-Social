@@ -24,6 +24,7 @@ import com.instagram.domain.port.in.comment.DeleteCommentUseCase;
 import com.instagram.domain.port.in.comment.EditCommentUseCase;
 import com.instagram.domain.port.out.CommentRepository;
 import com.instagram.domain.port.out.LikeRepository;
+import com.instagram.domain.port.out.UserInterestPort;
 import com.instagram.domain.port.out.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +35,8 @@ public class CommentServiceTest {
     private UserRepository userRepository;
     @Mock
     private LikeRepository likeRepository;
+    @Mock
+    private UserInterestPort userInterestPort;
     @InjectMocks
     private CommentService commentService;
 
