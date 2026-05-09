@@ -25,7 +25,7 @@ backend/src/main/java/com/instagram/adapter/in/web/dto/
 
 ### `FeedPageResponse.java`
 
-- [ ] Create the record:
+- [x] Create the record:
 
   ```java
   public record FeedPageResponse(
@@ -55,14 +55,14 @@ backend/src/main/java/com/instagram/adapter/in/web/dto/
   }
   ```
 
-- [ ] Import `PostResponse` from the same `dto` package.
-- [ ] Import both `GetHomeFeedUseCase` and `GetExploreFeedUseCase` from `domain/port/in/`.
+- [x] Import `PostResponse` from the same `dto` package.
+- [x] Import both `GetHomeFeedUseCase` and `GetExploreFeedUseCase` from `domain/port/in/`.
 
 ---
 
 ### `TrendingHashtagResponse.java`
 
-- [ ] Create the record:
+- [x] Create the record:
 
   ```java
   public record TrendingHashtagResponse(
@@ -80,7 +80,7 @@ backend/src/main/java/com/instagram/adapter/in/web/dto/
   }
   ```
 
-- [ ] Import `com.instagram.domain.model.Hashtag`.
+- [x] Import `com.instagram.domain.model.Hashtag`.
 
 ## Notes
 

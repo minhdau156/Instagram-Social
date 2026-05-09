@@ -1,23 +1,26 @@
-# Current Feature: TASK-5.1 — Out-Port: FeedRepository
+# Current Feature: TASK-5.5 — REST Controller: FeedController
 
 ## Status
 Not Started
 
 ## Goals
-- Create `FeedRepository.java` interface in `domain/port/out/` with three methods: `getHomeFeed`, `getExploreFeed`, `getTrendingHashtags`
-- Interface uses only pure Java domain types (`Post`, `Hashtag`, `UUID`, `List`) — no Spring or JPA imports
-- `getHomeFeed(UUID userId, UUID cursor, int limit)` — returns posts from followed users, keyset-paginated
-- `getExploreFeed(UUID userId, UUID cursor, int limit)` — returns engagement-ranked posts from non-followed users
-- `getTrendingHashtags(int limit)` — returns hashtags ordered by `weekly_count DESC`
+- Expose the feed and explore endpoints via a REST controller
+- Implement `GET /api/v1/feed` for home feed with keyset pagination
+- Implement `GET /api/v1/explore` for explore feed with keyset pagination
+- Implement `GET /api/v1/explore/hashtags` for trending hashtags
+- Delegate entirely to the use-case interfaces
+- Read authenticated user's ID from `SecurityContextHolder`
 
 ## Notes
-- File location: `backend/src/main/java/com/instagram/domain/port/out/FeedRepository.java`
-- `Hashtag` domain model already exists from Phase 2 — do not create a new class
-- Cursor is `null` for the first page (no previous post to paginate from)
-- `limit` is capped at 50 by the service layer (TASK-5.3); this interface does not enforce it
-- No unit test needed for a pure interface — tests live in the service (TASK-5.9)
+- File location: `backend/src/main/java/com/instagram/adapter/in/web/FeedController.java`
+- Handle malformed cursor UUIDs via `GlobalExceptionHandler` (return 400).
+- Only `nextCursor` is included for pagination metadata.
 
 ## History
+- TASK-5.4 — Persistence Adapter: FeedJpaQueryAdapter
+- TASK-5.3 — Domain Service: FeedService
+- TASK-5.2 — In-Ports: Feed Use Cases
+- TASK-5.1 — Out-Port: FeedRepository
 - TASK-4.35 — Register Routes
 - TASK-4.34 — Integrate Action Components into PostCard
 - TASK-4.33 — Saved Posts Page

@@ -22,7 +22,7 @@ backend/src/main/java/com/instagram/adapter/in/web/FeedController.java
 
 ## Checklist
 
-- [ ] Create `FeedController.java`:
+- [x] Create `FeedController.java`:
 
   ```java
   @RestController
@@ -45,7 +45,7 @@ backend/src/main/java/com/instagram/adapter/in/web/FeedController.java
 
   > **Note:** Trending hashtags is a thin read operation — it is acceptable to call `feedRepository.getTrendingHashtags()` directly from the controller without a dedicated use-case for MVP. If the project later needs ranking logic, extract a use-case then.
 
-- [ ] Implement `GET /api/v1/feed`:
+- [x] Implement `GET /api/v1/feed`:
 
   ```java
   @GetMapping("/feed")
@@ -64,7 +64,7 @@ backend/src/main/java/com/instagram/adapter/in/web/FeedController.java
   }
   ```
 
-- [ ] Implement `GET /api/v1/explore`:
+- [x] Implement `GET /api/v1/explore`:
 
   ```java
   @GetMapping("/explore")
@@ -83,7 +83,7 @@ backend/src/main/java/com/instagram/adapter/in/web/FeedController.java
   }
   ```
 
-- [ ] Implement `GET /api/v1/explore/hashtags`:
+- [x] Implement `GET /api/v1/explore/hashtags`:
 
   ```java
   @GetMapping("/explore/hashtags")
@@ -101,7 +101,7 @@ backend/src/main/java/com/instagram/adapter/in/web/FeedController.java
   }
   ```
 
-- [ ] Add private helper to resolve the current user's UUID from Spring Security:
+- [x] Add private helper to resolve the current user's UUID from Spring Security:
 
   ```java
   private UUID currentUserId() {
@@ -113,7 +113,7 @@ backend/src/main/java/com/instagram/adapter/in/web/FeedController.java
 
   > If the project uses a custom `UserPrincipal` object instead of a raw String, adapt accordingly — check `AuthController` or `PostController` for the existing pattern.
 
-- [ ] Add `@SecurityRequirement(name = "bearerAuth")` to the class (OpenAPI annotation).
+- [x] Add `@SecurityRequirement(name = "bearerAuth")` to the class (OpenAPI annotation).
 
 ## Notes
 
