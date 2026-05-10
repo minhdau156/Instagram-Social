@@ -66,3 +66,13 @@ export interface PostPage {
   totalPages: number;
   last: boolean;
 }
+
+/**
+ * Keyset-paginated feed response.
+ * nextCursor is the UUID of the last post in this page,
+ * or null when there are no more pages.
+ */
+export interface FeedPage {
+  posts: Post[];
+  nextCursor: string | null;
+}
