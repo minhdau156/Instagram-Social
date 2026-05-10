@@ -24,7 +24,7 @@ frontend/src/components/common/InfiniteScroll.tsx
 
 ### Props interface
 
-- [ ] Define the props type:
+- [x] Define the props type:
 
   ```typescript
   interface InfiniteScrollProps {
@@ -43,7 +43,7 @@ frontend/src/components/common/InfiniteScroll.tsx
 
 ### Component implementation
 
-- [ ] Create `InfiniteScroll.tsx`:
+- [x] Create `InfiniteScroll.tsx`:
 
   ```tsx
   import { useEffect, useRef } from 'react';
