@@ -25,7 +25,7 @@ frontend/src/pages/feed/HomePage.tsx
 
 ### Step 1 — Scaffold the component
 
-- [ ] Create `HomePage.tsx`:
+- [x] Create `HomePage.tsx`:
 
   ```tsx
   import { Navigate } from 'react-router-dom';
@@ -116,7 +116,7 @@ frontend/src/pages/feed/HomePage.tsx
 
 ### Step 2 — Create `SuggestedUsers` component
 
-- [ ] Create `frontend/src/components/users/SuggestedUsers.tsx`:
+- [x] Create `frontend/src/components/users/SuggestedUsers.tsx`:
 
   ```tsx
   import { useQuery } from '@tanstack/react-query';
@@ -181,7 +181,7 @@ frontend/src/pages/feed/HomePage.tsx
 
 ### Step 3 — Pull-to-refresh on mobile (optional enhancement)
 
-- [ ] Add swipe-down gesture support using a `touchstart`/`touchend` listener on the feed column:
+- [x] Add swipe-down gesture support using a `touchstart`/`touchend` listener on the feed column:
 
   ```tsx
   // Simplified version — only trigger refetch if user pulls down > 80px
