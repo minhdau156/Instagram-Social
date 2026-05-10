@@ -29,7 +29,7 @@ backend/src/main/java/com/instagram/infrastructure/config/AsyncConfig.java  (new
 
 ### `UserInterestJpaEntity.java`
 
-- [ ] Create the entity with a composite PK via `@EmbeddedId`:
+- [x] Create the entity with a composite PK via `@EmbeddedId`:
 
   ```java
   @Embeddable
@@ -61,7 +61,7 @@ backend/src/main/java/com/instagram/infrastructure/config/AsyncConfig.java  (new
 
 ### `UserInterestJpaRepository.java`
 
-- [ ] Create repository interface:
+- [x] Create repository interface:
 
   ```java
   public interface UserInterestJpaRepository
@@ -86,7 +86,7 @@ backend/src/main/java/com/instagram/infrastructure/config/AsyncConfig.java  (new
 
 ### `AsyncConfig.java`
 
-- [ ] Create Spring async configuration to enable `@Async`:
+- [x] Create Spring async configuration to enable `@Async`:
 
   ```java
   @Configuration
@@ -110,7 +110,7 @@ backend/src/main/java/com/instagram/infrastructure/config/AsyncConfig.java  (new
 
 ### Interest signal service
 
-- [ ] Create `UserInterestService.java` in `domain/service/` (or `adapter/out/persistence/` — use the adapter layer since it's JPA-dependent):
+- [x] Create `UserInterestService.java` in `domain/service/` (or `adapter/out/persistence/` — use the adapter layer since it's JPA-dependent):
 
   Actually, since this directly touches JPA, place it in `adapter/out/persistence/` as a Spring `@Service`:
 
@@ -143,7 +143,7 @@ backend/src/main/java/com/instagram/infrastructure/config/AsyncConfig.java  (new
   }
   ```
 
-- [ ] Add `findHashtagIdsByPostId(UUID postId)` query method to `PostHashtagJpaRepository` (or create a new repository for `post_hashtags` if it doesn't exist):
+- [x] Add `findHashtagIdsByPostId(UUID postId)` query method to `PostHashtagJpaRepository` (or create a new repository for `post_hashtags` if it doesn't exist):
 
   ```java
   @Query("SELECT ph.hashtagId FROM PostHashtagJpaEntity ph WHERE ph.postId = :postId")
@@ -154,7 +154,7 @@ backend/src/main/java/com/instagram/infrastructure/config/AsyncConfig.java  (new
 
 ### Wire signals into `LikeService`
 
-- [ ] Inject `UserInterestService` into `LikeService` (constructor injection):
+- [x] Inject `UserInterestService` into `LikeService` (constructor injection):
 
   ```java
   // After a successful likePost:
@@ -165,7 +165,7 @@ backend/src/main/java/com/instagram/infrastructure/config/AsyncConfig.java  (new
 
 ### Wire signals into `CommentService`
 
-- [ ] Inject `UserInterestService` into `CommentService`:
+- [x] Inject `UserInterestService` into `CommentService`:
 
   ```java
   // After a successful addComment:

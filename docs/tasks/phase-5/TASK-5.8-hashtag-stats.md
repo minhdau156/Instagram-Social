@@ -31,7 +31,7 @@ backend/src/main/java/com/instagram/infrastructure/config/SchedulerConfig.java (
 
 ### `HashtagStatsJpaEntity.java`
 
-- [ ] Create entity (primary key is `hashtag_id` — single-column PK referencing `hashtags`):
+- [x] Create entity (primary key is `hashtag_id` — single-column PK referencing `hashtags`):
 
   ```java
   @Entity
@@ -57,7 +57,7 @@ backend/src/main/java/com/instagram/infrastructure/config/SchedulerConfig.java (
 
 ### `HashtagStatsJpaRepository.java`
 
-- [ ] Create repository interface:
+- [x] Create repository interface:
 
   ```java
   public interface HashtagStatsJpaRepository
@@ -87,7 +87,7 @@ backend/src/main/java/com/instagram/infrastructure/config/SchedulerConfig.java (
 
 ### `SchedulerConfig.java`
 
-- [ ] Enable scheduling:
+- [x] Enable scheduling:
 
   ```java
   @Configuration
@@ -99,7 +99,7 @@ backend/src/main/java/com/instagram/infrastructure/config/SchedulerConfig.java (
 
 ### `HashtagStatsScheduler.java`
 
-- [ ] Create the scheduled job:
+- [x] Create the scheduled job:
 
   ```java
   @Component

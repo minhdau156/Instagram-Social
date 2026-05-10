@@ -25,10 +25,10 @@ backend/src/test/java/com/instagram/
 
 ### `FeedServiceTest.java`
 
-- [ ] Set up: mock `FeedRepository` with Mockito (`@ExtendWith(MockitoExtension.class)`)
-- [ ] Inject `FeedService` via constructor with the mocked repository
+- [x] Set up: mock `FeedRepository` with Mockito (`@ExtendWith(MockitoExtension.class)`)
+- [x] Inject `FeedService` via constructor with the mocked repository
 
-- [ ] Test: `getHomeFeed_returnsPostsFromRepository`:
+- [x] Test: `getHomeFeed_returnsPostsFromRepository`:
   ```java
   // Arrange
   UUID userId = UUID.randomUUID();
@@ -45,7 +45,7 @@ backend/src/test/java/com/instagram/
   assertThat(result.nextCursor()).isNull(); // 2 < limit=20, so no next page
   ```
 
-- [ ] Test: `getHomeFeed_setsNextCursor_whenFullPageReturned`:
+- [x] Test: `getHomeFeed_setsNextCursor_whenFullPageReturned`:
   ```java
   // Returns exactly `limit` posts → nextCursor = id of last post
   List<Post> posts = generatePosts(20); // helper that creates 20 posts
@@ -56,16 +56,16 @@ backend/src/test/java/com/instagram/
   assertThat(result.nextCursor()).isEqualTo(posts.get(19).getId());
   ```
 
-- [ ] Test: `getExploreFeed_delegatesToRepository` — same pattern as above
+- [x] Test: `getExploreFeed_delegatesToRepository` — same pattern as above
 
 ---
 
 ### `FeedJpaQueryAdapterIT.java`
 
-- [ ] Annotate with `@DataJpaTest`
-- [ ] Use `@Sql` or repository `saveAll` to set up test data: 2 users, 1 follow relationship, 3 posts (2 from followed user, 1 from stranger)
+- [x] Annotate with `@DataJpaTest`
+- [x] Use `@Sql` or repository `saveAll` to set up test data: 2 users, 1 follow relationship, 3 posts (2 from followed user, 1 from stranger)
 
-- [ ] Test: `findHomeFeed_returnsOnlyFollowedUsersPosts`:
+- [x] Test: `findHomeFeed_returnsOnlyFollowedUsersPosts`:
   ```java
   List<PostJpaEntity> feed = feedJpaRepository.findHomeFeed(followerId, null, 20);
 
@@ -73,7 +73,7 @@ backend/src/test/java/com/instagram/
   assertThat(feed).allMatch(p -> p.getUserId().equals(followedUserId));
   ```
 
-- [ ] Test: `findExploreFeed_excludesFollowedUsers`:
+- [x] Test: `findExploreFeed_excludesFollowedUsers`:
   ```java
   List<PostJpaEntity> explore = feedJpaRepository.findExploreFeed(followerId, null, 20);
 
@@ -81,7 +81,7 @@ backend/src/test/java/com/instagram/
   assertThat(explore.get(0).getUserId()).isEqualTo(strangerId);
   ```
 
-- [ ] Test: `findHomeFeed_cursorPagination_returnsPostsBeforeCursor`:
+- [x] Test: `findHomeFeed_cursorPagination_returnsPostsBeforeCursor`:
   ```java
   // cursor = id of the first post → should return nothing (no older posts)
   List<PostJpaEntity> page2 = feedJpaRepository
@@ -94,10 +94,10 @@ backend/src/test/java/com/instagram/
 
 ### `FeedControllerTest.java`
 
-- [ ] Annotate with `@WebMvcTest(FeedController.class)`
-- [ ] Mock `GetHomeFeedUseCase`, `GetExploreFeedUseCase`, `FeedRepository`
+- [x] Annotate with `@WebMvcTest(FeedController.class)`
+- [x] Mock `GetHomeFeedUseCase`, `GetExploreFeedUseCase`, `FeedRepository`
 
-- [ ] Test: `GET /api/v1/feed` returns 200 with `posts` array and `nextCursor`:
+- [x] Test: `GET /api/v1/feed` returns 200 with `posts` array and `nextCursor`:
   ```java
   when(getHomeFeedUseCase.getHomeFeed(any()))
       .thenReturn(new GetHomeFeedUseCase.FeedPage(List.of(somePost), someUuid));
@@ -109,7 +109,7 @@ backend/src/test/java/com/instagram/
       .andExpect(jsonPath("$.data.nextCursor").isNotEmpty());
   ```
 
-- [ ] Test: `GET /api/v1/feed?cursor=<uuid>` passes cursor to use case:
+- [x] Test: `GET /api/v1/feed?cursor=<uuid>` passes cursor to use case:
   ```java
   UUID cursor = UUID.randomUUID();
   mockMvc.perform(get("/api/v1/feed").param("cursor", cursor.toString())
@@ -120,9 +120,9 @@ backend/src/test/java/com/instagram/
       argThat(q -> cursor.equals(q.cursor())));
   ```
 
-- [ ] Test: `GET /api/v1/feed?cursor=invalid` returns 400 (bad UUID)
+- [x] Test: `GET /api/v1/feed?cursor=invalid` returns 400 (bad UUID)
 
-- [ ] Test: `GET /api/v1/explore/hashtags` returns 200 with hashtag list
+- [x] Test: `GET /api/v1/explore/hashtags` returns 200 with hashtag list
 
 ## Notes
 

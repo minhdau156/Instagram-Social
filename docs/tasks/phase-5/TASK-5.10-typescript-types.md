@@ -23,7 +23,7 @@ frontend/src/types/hashtag.ts  ← new file
 
 ### Update `frontend/src/types/post.ts`
 
-- [ ] Add `FeedPage` interface at the bottom of the file:
+- [x] Add `FeedPage` interface at the bottom of the file:
 
   ```typescript
   /**
@@ -43,7 +43,7 @@ frontend/src/types/hashtag.ts  ← new file
 
 ### Create `frontend/src/types/hashtag.ts`
 
-- [ ] Create the file:
+- [x] Create the file:
 
   ```typescript
   export interface TrendingHashtag {

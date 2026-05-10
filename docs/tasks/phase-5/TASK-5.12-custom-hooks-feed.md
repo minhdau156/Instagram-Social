@@ -26,7 +26,7 @@ frontend/src/hooks/
 
 ### `useHomeFeed.ts`
 
-- [ ] Create the hook:
+- [x] Create the hook:
 
   ```typescript
   import { useInfiniteQuery } from '@tanstack/react-query';
@@ -51,7 +51,7 @@ frontend/src/hooks/
   }
   ```
 
-- [ ] Verify import path for `getHomeFeed` and `FeedPage`.
+- [x] Verify import path for `getHomeFeed` and `FeedPage`.
 
 **What the hook returns (key fields components use):**
 | Field | Type | Use |
@@ -67,7 +67,7 @@ frontend/src/hooks/
 
 ### `useExploreFeed.ts`
 
-- [ ] Create the hook using the **exact same pattern** as `useHomeFeed`, with these differences:
+- [x] Create the hook using the **exact same pattern** as `useHomeFeed`, with these differences:
   - `queryKey: ['exploreFeed']`
   - `queryFn: ({ pageParam }) => getExploreFeed(pageParam)`
   - `staleTime: 120_000` (explore content changes less frequently — 2 min is fine)

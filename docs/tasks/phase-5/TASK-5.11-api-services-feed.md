@@ -22,7 +22,7 @@ frontend/src/api/feedApi.ts
 
 ## Checklist
 
-- [ ] Create `feedApi.ts` with three exported functions:
+- [x] Create `feedApi.ts` with three exported functions:
 
   ```typescript
   import { api } from './client';
@@ -64,8 +64,8 @@ frontend/src/api/feedApi.ts
   }
   ```
 
-- [ ] Verify `FeedPage` is exported from `../types/post` (added in TASK-5.10).
-- [ ] Verify `TrendingHashtag` is exported from `../types/hashtag` (created in TASK-5.10).
+- [x] Verify `FeedPage` is exported from `../types/post` (added in TASK-5.10).
+- [x] Verify `TrendingHashtag` is exported from `../types/hashtag` (created in TASK-5.10).
 
 ## Notes
 
