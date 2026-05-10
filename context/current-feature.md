@@ -8,6 +8,7 @@ Not Started
 ## Notes
 
 ## History
+- TASK-5.13 — InfiniteScroll Utility Component
 - TASK-5.12 — Custom Hooks: useHomeFeed & useExploreFeed
 - TASK-5.11 — API Service: feedApi.ts
 - TASK-5.10 — TypeScript Types: FeedPage & TrendingHashtag
