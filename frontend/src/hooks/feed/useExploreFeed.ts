@@ -9,8 +9,9 @@ export function useExploreFeed() {
         initialPageParam: undefined,
         getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
         select: (data) => ({
+            pages: data.pages,
             posts: data.pages.flatMap(p => p.posts),
-            nextCursor: data.pages.at(-1)?.nextCursor ?? null,
+            nextCursor: data.pages[data.pages.length - 1]?.nextCursor ?? null,
         }),
         staleTime: 120_000,
         refetchOnWindowFocus: false,
