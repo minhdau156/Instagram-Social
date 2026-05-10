@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Dialog, Box, Typography, IconButton, Avatar, Stack, Divider } from '@mui/material';
 import { ChatBubbleOutline } from '@mui/icons-material';
 import { Post } from '../../types/post';
@@ -8,18 +8,27 @@ import { SaveButton } from './SaveButton';
 import { ShareMenu } from './ShareMenu';
 import { LikersTooltip } from './LikersTooltip';
 import { CommentSection } from '../comment/CommentSection';
-import { User } from '../../types/user';
+import { useMutation } from '@tanstack/react-query';
+import { usersApi } from '../../api/usersApi';
 
 interface PostDetailModalProps {
     post: Post;
     onClose: () => void;
     autoFocusComment?: boolean;
-    postUser: User | null;
 }
 
 
-export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose, autoFocusComment, postUser }) => {
+export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose, autoFocusComment }) => {
     const { profile } = useAuth();
+
+    const { data, mutate } = useMutation({
+        mutationFn: () => usersApi.getUserById(post.userId),
+    });
+
+    useEffect(() => {
+        mutate();
+    }, []);
+    const postUser = data;
     return (
         <Dialog open={true} onClose={onClose} fullScreen>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, height: '100vh' }}>

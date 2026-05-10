@@ -11,7 +11,7 @@ import { LikersTooltip } from "./LikersTooltip";
 import { PostDetailModal } from "./PostDetailModal";
 import { usersApi } from "../../api/usersApi";
 import { useMutation } from "@tanstack/react-query";
-import { User } from "../../types/user";
+
 
 export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     const [expanded, setExpanded] = useState(false);
@@ -166,7 +166,7 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                     post={post}
                     onClose={handleCloseDetail}
                     autoFocusComment={autoFocusComment}
-                    postUser={user as User}
+
                 />
             )}
         </Card>
