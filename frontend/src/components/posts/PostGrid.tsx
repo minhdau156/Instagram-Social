@@ -50,7 +50,7 @@ export const PostGrid: React.FC<{ posts: Post[] }> = ({ posts }) => {
                     );
                 })}
             </ImageList>
-            {selected && <PostDetailModal post={selected} onClose={() => setSelected(null)} postUser={null} />}
+            {selected && <PostDetailModal post={selected} onClose={() => setSelected(null)} />}
         </>
     );
 };
