@@ -8,6 +8,7 @@ Not Started
 ## Notes
 
 ## History
+- TASK-5.15 — Explore Page: ExplorePage.tsx
 - TASK-5.14 — Home Page: HomePage.tsx
 - TASK-5.13 — InfiniteScroll Utility Component
 - TASK-5.12 — Custom Hooks: useHomeFeed & useExploreFeed
