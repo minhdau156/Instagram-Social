@@ -30,8 +30,8 @@ backend/src/main/java/com/instagram/domain/port/in/messaging/LeaveConversationUs
 
 ### `CreateConversationUseCase.java`
 
-- [ ] Method: `Conversation createConversation(Command command)`
-- [ ] Inner record `Command`:
+- [x] Method: `Conversation createConversation(Command command)`
+- [x] Inner record `Command`:
   - `UUID creatorId`
   - `List<UUID> participantIds`
   - `String name` (nullable — only for group chats)
@@ -39,16 +39,16 @@ backend/src/main/java/com/instagram/domain/port/in/messaging/LeaveConversationUs
 
 ### `GetConversationsUseCase.java`
 
-- [ ] Method: `List<Conversation> getConversations(Query query)`
-- [ ] Inner record `Query`:
+- [x] Method: `List<Conversation> getConversations(Query query)`
+- [x] Inner record `Query`:
   - `UUID userId`
   - `int page`
   - `int size`
 
 ### `GetMessagesUseCase.java`
 
-- [ ] Method: `List<Message> getMessages(Query query)`
-- [ ] Inner record `Query`:
+- [x] Method: `List<Message> getMessages(Query query)`
+- [x] Inner record `Query`:
   - `UUID conversationId`
   - `UUID requesterId`
   - `UUID cursor` (nullable — null for first/latest page)
@@ -56,8 +56,8 @@ backend/src/main/java/com/instagram/domain/port/in/messaging/LeaveConversationUs
 
 ### `SendMessageUseCase.java`
 
-- [ ] Method: `Message sendMessage(Command command)`
-- [ ] Inner record `Command`:
+- [x] Method: `Message sendMessage(Command command)`
+- [x] Inner record `Command`:
   - `UUID conversationId`
   - `UUID senderId`
   - `String content` (nullable for IMAGE/VIDEO)
@@ -67,23 +67,23 @@ backend/src/main/java/com/instagram/domain/port/in/messaging/LeaveConversationUs
 
 ### `MarkReadUseCase.java`
 
-- [ ] Method: `void markRead(Command command)`
-- [ ] Inner record `Command`:
+- [x] Method: `void markRead(Command command)`
+- [x] Inner record `Command`:
   - `UUID conversationId`
   - `UUID userId`
 
 ### `AddGroupMemberUseCase.java`
 
-- [ ] Method: `void addGroupMember(Command command)`
-- [ ] Inner record `Command`:
+- [x] Method: `void addGroupMember(Command command)`
+- [x] Inner record `Command`:
   - `UUID conversationId`
   - `UUID requesterId` (must be OWNER to add members)
   - `List<UUID> newMemberIds`
 
 ### `LeaveConversationUseCase.java`
 
-- [ ] Method: `void leaveConversation(Command command)`
-- [ ] Inner record `Command`:
+- [x] Method: `void leaveConversation(Command command)`
+- [x] Inner record `Command`:
   - `UUID conversationId`
   - `UUID userId`
 
