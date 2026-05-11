@@ -8,6 +8,7 @@ Not Started
 ## Notes
 
 ## History
+- TASK-5.17 — Register Routes: `/` and `/explore`
 - TASK-5.16 — Post Skeleton: PostSkeleton.tsx
 - TASK-5.15 — Explore Page: ExplorePage.tsx
 - TASK-5.14 — Home Page: HomePage.tsx
