@@ -2,6 +2,8 @@ import { AppBar, Box, Container, Toolbar, Typography, alpha, IconButton } from '
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
+import ExploreIcon from '@mui/icons-material/Explore';
+import ExploreOutlinedIcon from '@mui/icons-material/ExploreOutlined';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 
@@ -54,6 +56,13 @@ export default function AppShell() {
           {/* Right Navigation */}
           {profile?.user && (
             <Box sx={{ display: 'flex', gap: 1 }}>
+              <NavLink to="/explore" aria-label="Explore" style={{ textDecoration: 'none', color: 'inherit' }}>
+                {({ isActive }) => (
+                  <IconButton color="inherit" component="span">
+                    {isActive ? <ExploreIcon /> : <ExploreOutlinedIcon />}
+                  </IconButton>
+                )}
+              </NavLink>
               <NavLink to="/saved" aria-label="Saved posts" style={{ textDecoration: 'none', color: 'inherit' }}>
                 {({ isActive }) => (
                   <IconButton color="inherit" component="span">

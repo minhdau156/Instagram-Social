@@ -19,6 +19,10 @@ import { CreatePostModalPage } from './pages/posts/CreatePostModalPage';
 import { PublicProfilePage } from './pages/users/PublicProfilePage';
 import FollowRequestsPage from './pages/follow/FollowRequestsPage';
 import SavedPostsPage from './pages/profile/SavedPostsPage';
+import React from 'react';
+
+const HomePage = React.lazy(() => import('./pages/feed/HomePage'));
+const ExplorePage = React.lazy(() => import('./pages/explore/ExplorePage'));
 
 function GlobalNavigation() {
   const navigate = useNavigate();
@@ -53,6 +57,8 @@ export default function App() {
                 <Route path="/saved" element={<ErrorBoundary><SavedPostsPage /></ErrorBoundary>} />
                 <Route path="/follow-requests" element={<ErrorBoundary><FollowRequestsPage /></ErrorBoundary>} />
                 <Route path="/:username" element={<ErrorBoundary><PublicProfilePage /></ErrorBoundary>} />
+                <Route path="/" element={<HomePage />} />
+                <Route path="/explore" element={<ExplorePage />} />
               </Route>
             </Route>
           </Routes>

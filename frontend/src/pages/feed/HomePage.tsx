@@ -7,7 +7,7 @@ import { InfiniteScroll } from "../../components/common/InfiniteScroll";
 import { SuggestedUsers } from "../users/SuggestedUsers";
 import { PostSkeletonList } from "../../components/posts/PostSkeletonList";
 
-export const HomePage = () => {
+export default function HomePage() {
     const { profile } = useAuth();
 
     const { isError, isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useHomeFeed();
