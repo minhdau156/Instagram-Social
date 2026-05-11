@@ -23,51 +23,51 @@ backend/src/main/java/com/instagram/application/service/MessagingService.java
 
 ### Class declaration
 
-- [ ] `@Service` annotation.
-- [ ] Implements all seven use-case interfaces from TASK-6.4.
-- [ ] Constructor injects: `ConversationRepository`, `MessageRepository`, `SimpMessagingTemplate`.
+- [x] `@Service` annotation.
+- [x] Implements all seven use-case interfaces from TASK-6.4.
+- [x] Constructor injects: `ConversationRepository`, `MessageRepository`, `SimpMessagingTemplate`.
 
 ### `createConversation`
 
-- [ ] For 1-to-1 (`isGroup = false`): call `conversationRepository.findExisting1to1(creatorId, participantId)`. If found, return the existing conversation — do not create a duplicate.
-- [ ] For new conversations: build a `Conversation` via its Builder, call `conversationRepository.save(...)`.
-- [ ] Add creator as `OWNER` via `conversationRepository.addMember(...)`.
-- [ ] Add all `participantIds` as `MEMBER` via `conversationRepository.addMember(...)`.
-- [ ] Return the saved `Conversation`.
+- [x] For 1-to-1 (`isGroup = false`): call `conversationRepository.findExisting1to1(creatorId, participantId)`. If found, return the existing conversation — do not create a duplicate.
+- [x] For new conversations: build a `Conversation` via its Builder, call `conversationRepository.save(...)`.
+- [x] Add creator as `OWNER` via `conversationRepository.addMember(...)`.
+- [x] Add all `participantIds` as `MEMBER` via `conversationRepository.addMember(...)`.
+- [x] Return the saved `Conversation`.
 
 ### `getConversations`
 
-- [ ] Call `conversationRepository.findByMemberId(userId, PageRequest.of(page, size))`.
-- [ ] Return the list as-is.
+- [x] Call `conversationRepository.findByMemberId(userId, PageRequest.of(page, size))`.
+- [x] Return the list as-is.
 
 ### `getMessages`
 
-- [ ] Verify `requesterId` is a member: call `conversationRepository.isMember(conversationId, requesterId)`. If not, throw `NotConversationMemberException`.
-- [ ] Fetch: `messageRepository.findByConversationId(conversationId, cursor, limit)`.
-- [ ] Return the list.
+- [x] Verify `requesterId` is a member: call `conversationRepository.isMember(conversationId, requesterId)`. If not, throw `NotConversationMemberException`.
+- [x] Fetch: `messageRepository.findByConversationId(conversationId, cursor, limit)`.
+- [x] Return the list.
 
 ### `sendMessage`
 
-- [ ] Verify `senderId` is a member; throw `NotConversationMemberException` if not.
-- [ ] Build a `Message` via its Builder with `status = SENT` and `createdAt = OffsetDateTime.now()`.
-- [ ] Save via `messageRepository.save(...)`.
-- [ ] Broadcast to `/topic/conversations/{conversationId}` using `simpMessagingTemplate.convertAndSend(...)`.
-- [ ] Return the saved `Message`.
+- [x] Verify `senderId` is a member; throw `NotConversationMemberException` if not.
+- [x] Build a `Message` via its Builder with `status = SENT` and `createdAt = OffsetDateTime.now()`.
+- [x] Save via `messageRepository.save(...)`.
+- [x] Broadcast to `/topic/conversations/{conversationId}` using `simpMessagingTemplate.convertAndSend(...)`.
+- [x] Return the saved `Message`.
 
 ### `markRead`
 
-- [ ] Call `messageRepository.markAsRead(conversationId, userId, OffsetDateTime.now())`.
+- [x] Call `messageRepository.markAsRead(conversationId, userId, OffsetDateTime.now())`.
 
 ### `addGroupMember`
 
-- [ ] Load conversation: `conversationRepository.findById(conversationId)` — throw `ConversationNotFoundException` if absent.
-- [ ] Verify `requesterId` is a member and is `OWNER` — throw `NotConversationMemberException` if not. (To check role, you may need to add a `findMember(UUID conversationId, UUID userId): Optional<ConversationMember>` method to `ConversationRepository` — add it if needed.)
-- [ ] Add each `newMemberId` as `MEMBER`.
+- [x] Load conversation: `conversationRepository.findById(conversationId)` — throw `ConversationNotFoundException` if absent.
+- [x] Verify `requesterId` is a member and is `OWNER` — throw `NotConversationMemberException` if not. (To check role, you may need to add a `findMember(UUID conversationId, UUID userId): Optional<ConversationMember>` method to `ConversationRepository` — add it if needed.)
+- [x] Add each `newMemberId` as `MEMBER`.
 
 ### `leaveConversation`
 
-- [ ] Verify `userId` is a member; throw `NotConversationMemberException` if not.
-- [ ] Call `conversationRepository.removeMember(conversationId, userId)`.
+- [x] Verify `userId` is a member; throw `NotConversationMemberException` if not.
+- [x] Call `conversationRepository.removeMember(conversationId, userId)`.
 
 ## Notes
 

@@ -24,4 +24,6 @@ public interface ConversationRepository {
 
     Optional<Conversation> findExisting1to1(UUID userId1, UUID userId2);
 
+    Optional<ConversationMember> findMember(UUID conversationId, UUID userId);
+
 }
