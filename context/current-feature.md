@@ -8,6 +8,7 @@ Not Started
 ## Notes
 
 ## History
+- TASK-6.3 — Out-Ports: ConversationRepository & MessageRepository
 - TASK-6.2 — Domain Exceptions: ConversationNotFoundException, NotConversationMemberException, MessageNotFoundException
 - TASK-6.1 — Domain Models: Conversation, ConversationMember, Message
 - TASK-5.17 — Register Routes: `/` and `/explore`

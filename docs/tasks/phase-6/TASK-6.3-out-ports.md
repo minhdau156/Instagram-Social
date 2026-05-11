@@ -23,21 +23,21 @@ backend/src/main/java/com/instagram/domain/port/out/MessageRepository.java
 
 ### `ConversationRepository.java`
 
-- [ ] `Conversation save(Conversation conversation)`
-- [ ] `Optional<Conversation> findById(UUID conversationId)`
-- [ ] `List<Conversation> findByMemberId(UUID userId, Pageable pageable)` — ordered by latest message descending
-- [ ] `void addMember(UUID conversationId, UUID userId, ConversationMember.Role role)`
-- [ ] `void removeMember(UUID conversationId, UUID userId)`
-- [ ] `boolean isMember(UUID conversationId, UUID userId)`
-- [ ] `Optional<Conversation> findExisting1to1(UUID userId1, UUID userId2)` — returns existing 1-to-1 conversation if it exists
+- [x] `Conversation save(Conversation conversation)`
+- [x] `Optional<Conversation> findById(UUID conversationId)`
+- [x] `List<Conversation> findByMemberId(UUID userId, Pageable pageable)` — ordered by latest message descending
+- [x] `void addMember(UUID conversationId, UUID userId, ConversationMember.Role role)`
+- [x] `void removeMember(UUID conversationId, UUID userId)`
+- [x] `boolean isMember(UUID conversationId, UUID userId)`
+- [x] `Optional<Conversation> findExisting1to1(UUID userId1, UUID userId2)` — returns existing 1-to-1 conversation if it exists
 
 ### `MessageRepository.java`
 
-- [ ] `Message save(Message message)`
-- [ ] `Optional<Message> findById(UUID messageId)`
-- [ ] `List<Message> findByConversationId(UUID conversationId, UUID cursor, int limit)` — cursor-paginated, newest first; `cursor = null` returns the latest page
-- [ ] `void markAsRead(UUID conversationId, UUID userId, OffsetDateTime readAt)`
-- [ ] `int getUnreadCount(UUID conversationId, UUID userId)`
+- [x] `Message save(Message message)`
+- [x] `Optional<Message> findById(UUID messageId)`
+- [x] `List<Message> findByConversationId(UUID conversationId, UUID cursor, int limit)` — cursor-paginated, newest first; `cursor = null` returns the latest page
+- [x] `void markAsRead(UUID conversationId, UUID userId, OffsetDateTime readAt)`
+- [x] `int getUnreadCount(UUID conversationId, UUID userId)`
 
 ## Notes
 
