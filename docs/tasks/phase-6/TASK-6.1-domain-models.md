@@ -25,32 +25,32 @@ backend/src/main/java/com/instagram/domain/model/Message.java
 
 ### `Conversation.java`
 
-- [ ] Fields:
+- [x] Fields:
   - `UUID id`
   - `String name` (nullable — only used for group chats)
   - `boolean isGroup`
   - `OffsetDateTime createdAt`
   - `OffsetDateTime updatedAt`
-- [ ] Builder with all fields.
-- [ ] Business method `withUpdatedName(String name)` — returns a new `Conversation` with the updated name and `updatedAt = OffsetDateTime.now()`.
-- [ ] No setters.
+- [x] Builder with all fields.
+- [x] Business method `withUpdatedName(String name)` — returns a new `Conversation` with the updated name and `updatedAt = OffsetDateTime.now()`.
+- [x] No setters.
 
 ### `ConversationMember.java`
 
-- [ ] Public static enum `Role { OWNER, MEMBER }`.
-- [ ] Fields:
+- [x] Public static enum `Role { OWNER, MEMBER }`.
+- [x] Fields:
   - `UUID conversationId`
   - `UUID userId`
   - `Role role`
   - `OffsetDateTime joinedAt`
-- [ ] Builder with all fields.
-- [ ] No business behaviour methods needed.
+- [x] Builder with all fields.
+- [x] No business behaviour methods needed.
 
 ### `Message.java`
 
-- [ ] Public static enum `MessageType { TEXT, IMAGE, VIDEO, POST_SHARE }`.
-- [ ] Public static enum `MessageStatus { SENT, DELIVERED, READ }`.
-- [ ] Fields:
+- [x] Public static enum `MessageType { TEXT, IMAGE, VIDEO, POST_SHARE }`.
+- [x] Public static enum `MessageStatus { SENT, DELIVERED, READ }`.
+- [x] Fields:
   - `UUID id`
   - `UUID conversationId`
   - `UUID senderId`
@@ -60,8 +60,8 @@ backend/src/main/java/com/instagram/domain/model/Message.java
   - `UUID sharedPostId` (nullable — only for `POST_SHARE` type)
   - `MessageStatus status`
   - `OffsetDateTime createdAt`
-- [ ] Builder with all fields.
-- [ ] Business method `withRead()` — returns a new `Message` with `status = MessageStatus.READ`.
+- [x] Builder with all fields.
+- [x] Business method `withRead()` — returns a new `Message` with `status = MessageStatus.READ`.
 
 ## Notes
 

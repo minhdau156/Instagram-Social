@@ -1,27 +1,14 @@
-# Current Feature: TASK-6.1 — Domain Models: Conversation, ConversationMember, Message
+# Current Feature
 
 ## Status
 Not Started
 
 ## Goals
-- Create `Conversation.java` domain model with Builder pattern and `withUpdatedName()` copy method
-- Create `ConversationMember.java` domain model with `Role` enum (`OWNER`, `MEMBER`)
-- Create `Message.java` domain model with `MessageType` and `MessageStatus` enums and `withRead()` copy method
-- All models are pure Java — no Spring, JPA, or Lombok annotations
 
 ## Notes
-- Reference `Post.java` for Builder pattern and immutable-copy behaviour
-- `MessageType` enum: `TEXT, IMAGE, VIDEO, POST_SHARE` — defined inside `Message.java`
-- `MessageStatus` enum: `SENT, DELIVERED, READ` — defined inside `Message.java`
-- `ConversationMemberRole` enum: `OWNER, MEMBER` — defined inside `ConversationMember.java`
-- Do NOT embed `List<ConversationMember>` inside `Conversation` — keep models flat
-- `Conversation.updatedAt` bumped by service layer, not directly by domain (only `withUpdatedName` touches it)
-- File locations:
-  - `backend/src/main/java/com/instagram/domain/model/Conversation.java`
-  - `backend/src/main/java/com/instagram/domain/model/ConversationMember.java`
-  - `backend/src/main/java/com/instagram/domain/model/Message.java`
 
 ## History
+- TASK-6.1 — Domain Models: Conversation, ConversationMember, Message
 - TASK-5.17 — Register Routes: `/` and `/explore`
 - TASK-5.16 — Post Skeleton: PostSkeleton.tsx
 - TASK-5.15 — Explore Page: ExplorePage.tsx
