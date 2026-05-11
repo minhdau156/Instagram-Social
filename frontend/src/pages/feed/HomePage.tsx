@@ -1,10 +1,11 @@
 import { Navigate } from "react-router-dom";
 import { useHomeFeed } from "../../hooks/feed/useHomeFeed";
 import { useAuth } from "../../hooks/useAuth";
-import { Alert, Box, Container, Skeleton, Typography } from "@mui/material";
+import { Alert, Box, Container, Typography } from "@mui/material";
 import { PostCard } from "../../components/posts/PostCard";
 import { InfiniteScroll } from "../../components/common/InfiniteScroll";
 import { SuggestedUsers } from "../users/SuggestedUsers";
+import { PostSkeletonList } from "../../components/posts/PostSkeletonList";
 
 export const HomePage = () => {
     const { profile } = useAuth();
@@ -24,7 +25,7 @@ export const HomePage = () => {
                     {isError && <Alert severity="error" onClick={() => refetch()}>
                         Failed to load feed. Click to retry.
                     </Alert>}
-                    {isLoading && <Skeleton variant="rectangular" width={200} height={100} />}
+                    {isLoading && <PostSkeletonList />}
                     {!isLoading && !isError && posts.length === 0 && (
                         <Box textAlign="center" py={8}>
                             <Typography variant="h6" gutterBottom>
