@@ -6,9 +6,12 @@ import com.instagram.domain.exception.AlreadyLikedException;
 import com.instagram.domain.exception.AlreadySavedException;
 import com.instagram.domain.exception.CannotFollowYourselfException;
 import com.instagram.domain.exception.CommentNotFoundException;
+import com.instagram.domain.exception.ConversationNotFoundException;
 import com.instagram.domain.exception.FollowRequestNotFoundException;
 import com.instagram.domain.exception.InvalidCredentialsException;
 import com.instagram.domain.exception.MediaUploadException;
+import com.instagram.domain.exception.MessageNotFoundException;
+import com.instagram.domain.exception.NotConversationMemberException;
 import com.instagram.domain.exception.NotLikedException;
 import com.instagram.domain.exception.NotSavedException;
 import com.instagram.domain.exception.PasswordResetTokenExpiredException;
@@ -180,6 +183,24 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex) {
         log.warn(ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(ConversationNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleConversationNotFound(ConversationNotFoundException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(NotConversationMemberException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotConversationMember(NotConversationMemberException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(MessageNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMessageNotFound(MessageNotFoundException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

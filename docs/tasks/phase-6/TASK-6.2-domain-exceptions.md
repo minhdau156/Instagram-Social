@@ -25,24 +25,24 @@ backend/src/main/java/com/instagram/adapter/in/web/GlobalExceptionHandler.java  
 
 ### `ConversationNotFoundException.java`
 
-- [ ] Extends `RuntimeException`.
-- [ ] Constructor: `public ConversationNotFoundException(UUID conversationId)` — message: `"Conversation not found: " + conversationId`.
+- [x] Extends `RuntimeException`.
+- [x] Constructor: `public ConversationNotFoundException(UUID conversationId)` — message: `"Conversation not found: " + conversationId`.
 
 ### `NotConversationMemberException.java`
 
-- [ ] Extends `RuntimeException`.
-- [ ] Constructor: `public NotConversationMemberException(UUID userId, UUID conversationId)` — message: `"User " + userId + " is not a member of conversation " + conversationId`.
+- [x] Extends `RuntimeException`.
+- [x] Constructor: `public NotConversationMemberException(UUID userId, UUID conversationId)` — message: `"User " + userId + " is not a member of conversation " + conversationId`.
 
 ### `MessageNotFoundException.java`
 
-- [ ] Extends `RuntimeException`.
-- [ ] Constructor: `public MessageNotFoundException(UUID messageId)` — message: `"Message not found: " + messageId`.
+- [x] Extends `RuntimeException`.
+- [x] Constructor: `public MessageNotFoundException(UUID messageId)` — message: `"Message not found: " + messageId`.
 
 ### `GlobalExceptionHandler.java` — add mappings
 
-- [ ] `@ExceptionHandler(ConversationNotFoundException.class)` → `404 NOT_FOUND` with `error` field set to the exception message.
-- [ ] `@ExceptionHandler(NotConversationMemberException.class)` → `403 FORBIDDEN`.
-- [ ] `@ExceptionHandler(MessageNotFoundException.class)` → `404 NOT_FOUND`.
+- [x] `@ExceptionHandler(ConversationNotFoundException.class)` → `404 NOT_FOUND` with `error` field set to the exception message.
+- [x] `@ExceptionHandler(NotConversationMemberException.class)` → `403 FORBIDDEN`.
+- [x] `@ExceptionHandler(MessageNotFoundException.class)` → `404 NOT_FOUND`.
 
 ## Notes
 
