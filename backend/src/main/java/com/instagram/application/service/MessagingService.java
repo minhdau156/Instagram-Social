@@ -2,8 +2,11 @@ package com.instagram.application.service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -11,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import com.instagram.domain.exception.ConversationNotFoundException;
 import com.instagram.domain.exception.NotConversationMemberException;
+import com.instagram.domain.exception.UserNotFoundException;
+import com.instagram.domain.model.User;
 import com.instagram.domain.model.Conversation;
 import com.instagram.domain.model.ConversationMember;
 import com.instagram.domain.model.Message;
@@ -23,6 +28,7 @@ import com.instagram.domain.port.in.messaging.MarkReadUseCase;
 import com.instagram.domain.port.in.messaging.SendMessageUseCase;
 import com.instagram.domain.port.out.ConversationRepository;
 import com.instagram.domain.port.out.MessageRepository;
+import com.instagram.domain.port.out.UserRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -38,13 +44,16 @@ public class MessagingService implements
 
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
+    private final UserRepository userRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     public MessagingService(ConversationRepository conversationRepository,
             MessageRepository messageRepository,
+            UserRepository userRepository,
             SimpMessagingTemplate simpMessagingTemplate) {
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
+        this.userRepository = userRepository;
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
@@ -87,7 +96,7 @@ public class MessagingService implements
 
     @Override
     @Transactional
-    public Message sendMessage(SendMessageUseCase.Command command) {
+    public SendMessageUseCase.MessageView sendMessage(SendMessageUseCase.Command command) {
         if (!conversationRepository.isMember(command.conversationId(), command.senderId())) {
             throw new NotConversationMemberException(command.senderId(), command.conversationId());
         }
@@ -108,25 +117,44 @@ public class MessagingService implements
                 "/topic/conversations/" + command.conversationId(),
                 savedMessage);
 
-        return savedMessage;
-
+        User sender = userRepository.findById(command.senderId())
+                .orElseThrow(() -> new UserNotFoundException(command.senderId()));
+        return new SendMessageUseCase.MessageView(savedMessage, sender.getUsername(), sender.getProfilePictureUrl());
     }
 
     @Override
     @Transactional
-    public List<Message> getMessages(GetMessagesUseCase.Query query) {
+    public List<GetMessagesUseCase.MessageView> getMessages(GetMessagesUseCase.Query query) {
         if (!conversationRepository.isMember(query.conversationId(), query.requesterId())) {
             throw new NotConversationMemberException(query.requesterId(), query.conversationId());
         }
 
-        return messageRepository.findByConversationId(query.conversationId(), query.cursor(), query.limit());
+        List<Message> messages = messageRepository.findByConversationId(
+                query.conversationId(), query.cursor(), query.limit());
+
+        List<UUID> senderIds = messages.stream().map(Message::getSenderId).distinct().toList();
+        Map<UUID, User> senderMap = userRepository.findAllByIds(senderIds).stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+
+        return messages.stream()
+                .map(m -> {
+                    User sender = senderMap.get(m.getSenderId());
+                    return new GetMessagesUseCase.MessageView(m,
+                            sender != null ? sender.getUsername() : null,
+                            sender != null ? sender.getProfilePictureUrl() : null);
+                })
+                .toList();
     }
 
     @Override
     @Transactional
-    public List<Conversation> getConversations(GetConversationsUseCase.Query query) {
-        return conversationRepository.findByMemberId(query.userId(),
+    public List<GetConversationsUseCase.ConversationView> getConversations(GetConversationsUseCase.Query query) {
+        List<Conversation> conversations = conversationRepository.findByMemberId(query.userId(),
                 PageRequest.of(query.page(), query.size()));
+        return conversations.stream()
+                .map(c -> new GetConversationsUseCase.ConversationView(c,
+                        messageRepository.getUnreadCount(c.getId(), query.userId())))
+                .toList();
     }
 
     @Override
@@ -146,6 +174,7 @@ public class MessagingService implements
         Conversation conversation = Conversation.builder()
                 .name(command.name())
                 .isGroup(command.isGroup())
+                .createdById(command.creatorId())
                 .build();
 
         Conversation savedConversation = conversationRepository.save(conversation);

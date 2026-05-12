@@ -6,8 +6,8 @@ import java.util.UUID;
 import com.instagram.domain.model.Conversation;
 
 public interface GetConversationsUseCase {
-    List<Conversation> getConversations(Query query);
+    List<ConversationView> getConversations(Query query);
 
-    record Query(UUID userId, int page, int size) {
-    }
+    record Query(UUID userId, int page, int size) {}
+    record ConversationView(Conversation conversation, int unreadCount) {}
 }

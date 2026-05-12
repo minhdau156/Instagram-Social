@@ -5,9 +5,9 @@ import java.util.UUID;
 import com.instagram.domain.model.Message;
 
 public interface SendMessageUseCase {
-    Message sendMessage(Command command);
+    MessageView sendMessage(Command command);
 
     record Command(UUID conversationId, UUID senderId, String content, Message.MessageType messageType,
-            String mediaUrl, UUID sharedPostId) {
-    }
+            String mediaUrl, UUID sharedPostId) {}
+    record MessageView(Message message, String senderUsername, String senderAvatarUrl) {}
 }
