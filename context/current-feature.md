@@ -8,6 +8,7 @@ Not Started
 ## Notes
 
 ## History
+- TASK-6.11 — REST Controller: MessageController, ConversationResponse, MessageResponse, CreateConversationRequest, AddGroupMemberRequest + enriched use-case return types
 - TASK-6.10 — WebSocket Controller: MessageWebSocketController, TypingPayload, TypingEvent
 - TASK-6.9 — WebSocket Configuration: WebSocketConfig, WebSocketAuthChannelInterceptor
 - TASK-6.8 — Persistence Adapters: ConversationPersistenceAdapter, MessagePersistenceAdapter
