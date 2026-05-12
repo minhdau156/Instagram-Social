@@ -24,43 +24,43 @@ backend/src/main/java/com/instagram/adapter/out/persistence/MessagePersistenceAd
 
 ### `ConversationPersistenceAdapter.java`
 
-- [ ] `@Component` + `implements ConversationRepository`
-- [ ] Constructor injects: `ConversationJpaRepository`, `ConversationMemberJpaRepository`
-- [ ] Implement `save(Conversation)`:
+- [x] `@Component` + `implements ConversationRepository`
+- [x] Constructor injects: `ConversationJpaRepository`, `ConversationMemberJpaRepository`
+- [x] Implement `save(Conversation)`:
   - Call `toEntity(conversation)`, then `jpaRepo.save(entity)`, then `toDomain(saved)`.
-- [ ] Implement `findById(UUID)`:
+- [x] Implement `findById(UUID)`:
   - Call `jpaRepo.findById(id)` and map with `.map(this::toDomain)`.
-- [ ] Implement `findByMemberId(UUID, Pageable)`:
+- [x] Implement `findByMemberId(UUID, Pageable)`:
   - Call `jpaRepo.findByMemberId(userId, pageable)` and map each entity.
-- [ ] Implement `addMember(UUID conversationId, UUID userId, ConversationMember.Role role)`:
+- [x] Implement `addMember(UUID conversationId, UUID userId, ConversationMember.Role role)`:
   - Build `ConversationMemberJpaEntity` with the composite key and save via `memberRepo.save(...)`.
-- [ ] Implement `removeMember(UUID, UUID)`:
+- [x] Implement `removeMember(UUID, UUID)`:
   - Delete by composite key: `memberRepo.deleteById(new ConversationMemberId(conversationId, userId))`.
-- [ ] Implement `isMember(UUID, UUID)`:
+- [x] Implement `isMember(UUID, UUID)`:
   - Delegate to `memberRepo.existsById_ConversationIdAndId_UserId(...)`.
-- [ ] Implement `findExisting1to1(UUID, UUID)`:
+- [x] Implement `findExisting1to1(UUID, UUID)`:
   - Delegate to `jpaRepo.findExisting1to1(...)` and map result.
-- [ ] Private `toEntity(Conversation)` — maps domain → JPA.
-- [ ] Private `toDomain(ConversationJpaEntity)` — maps JPA → domain.
-- [ ] Private `memberToDomain(ConversationMemberJpaEntity)` — maps member JPA → `ConversationMember`.
+- [x] Private `toEntity(Conversation)` — maps domain → JPA.
+- [x] Private `toDomain(ConversationJpaEntity)` — maps JPA → domain.
+- [x] Private `memberToDomain(ConversationMemberJpaEntity)` — maps member JPA → `ConversationMember`.
 
 ### `MessagePersistenceAdapter.java`
 
-- [ ] `@Component` + `implements MessageRepository`
-- [ ] Constructor injects: `MessageJpaRepository`, `MessageReadJpaRepository`
-- [ ] Implement `save(Message)`:
+- [x] `@Component` + `implements MessageRepository`
+- [x] Constructor injects: `MessageJpaRepository`, `MessageReadJpaRepository`
+- [x] Implement `save(Message)`:
   - Map to entity, save, map back.
-- [ ] Implement `findById(UUID)`:
+- [x] Implement `findById(UUID)`:
   - `jpaRepo.findById(id).map(this::toDomain)`.
-- [ ] Implement `findByConversationId(UUID conversationId, UUID cursor, int limit)`:
+- [x] Implement `findByConversationId(UUID conversationId, UUID cursor, int limit)`:
   - If `cursor == null`: call `findByConversationIdOrderByCreatedAtDesc(conversationId, PageRequest.of(0, limit))`.
   - Else: call `findOlderThanCursor(conversationId, cursor, PageRequest.of(0, limit))`.
   - Map results.
-- [ ] Implement `markAsRead(UUID, UUID, OffsetDateTime)`:
+- [x] Implement `markAsRead(UUID, UUID, OffsetDateTime)`:
   - Call the native upsert query on `MessageReadJpaRepository`.
-- [ ] Implement `getUnreadCount(UUID, UUID)`:
+- [x] Implement `getUnreadCount(UUID, UUID)`:
   - Delegate to `messageReadRepo.countUnread(...)`.
-- [ ] Private `toEntity(Message)` and `toDomain(MessageJpaEntity)` mapping methods.
+- [x] Private `toEntity(Message)` and `toDomain(MessageJpaEntity)` mapping methods.
 
 ## Notes
 
