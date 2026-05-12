@@ -8,6 +8,7 @@ Not Started
 ## Notes
 
 ## History
+- TASK-6.6 — JPA Entities: ConversationJpaEntity, ConversationMemberJpaEntity, MessageJpaEntity, MessageReadJpaEntity + composite key classes
 - TASK-6.5 — Domain Service: MessagingService
 - TASK-6.4 — In-Ports: 7 Use-Case Interfaces (messaging sub-package)
 - TASK-6.3 — Out-Ports: ConversationRepository & MessageRepository
