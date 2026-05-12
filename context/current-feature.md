@@ -8,6 +8,7 @@ Not Started
 ## Notes
 
 ## History
+- TASK-6.9 — WebSocket Configuration: WebSocketConfig, WebSocketAuthChannelInterceptor
 - TASK-6.8 — Persistence Adapters: ConversationPersistenceAdapter, MessagePersistenceAdapter
 - TASK-6.7 — JPA Repositories: ConversationJpaRepository, ConversationMemberJpaRepository, MessageJpaRepository, MessageReadJpaRepository
 - TASK-6.6 — JPA Entities: ConversationJpaEntity, ConversationMemberJpaEntity, MessageJpaEntity, MessageReadJpaEntity + composite key classes
