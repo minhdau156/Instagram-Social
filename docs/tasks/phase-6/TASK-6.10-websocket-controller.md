@@ -23,24 +23,24 @@ backend/src/main/java/com/instagram/adapter/in/messaging/MessageWebSocketControl
 
 ### Class setup
 
-- [ ] `@Controller`
-- [ ] Constructor injects: `SendMessageUseCase`, `SimpMessagingTemplate`
+- [x] `@Controller`
+- [x] Constructor injects: `SendMessageUseCase`, `SimpMessagingTemplate`
 
 ### `@MessageMapping("/chat.send")`
 
-- [ ] Accept a `SendMessageRequest` payload (the same DTO from TASK-6.12 or a dedicated WebSocket payload record).
-- [ ] Extract sender ID from `Principal principal` parameter (the authenticated user set by the channel interceptor).
-- [ ] Build a `SendMessageUseCase.Command` and call `sendMessageUseCase.sendMessage(command)`.
-- [ ] The service already broadcasts to `/topic/conversations/{conversationId}` — do **not** duplicate the broadcast here.
-- [ ] Return `void` or the `MessageResponse` (if you want to send an ACK back to the sender via `@SendToUser`).
+- [x] Accept a `SendMessageRequest` payload (the same DTO from TASK-6.12 or a dedicated WebSocket payload record).
+- [x] Extract sender ID from `Principal principal` parameter (the authenticated user set by the channel interceptor).
+- [x] Build a `SendMessageUseCase.Command` and call `sendMessageUseCase.sendMessage(command)`.
+- [x] The service already broadcasts to `/topic/conversations/{conversationId}` — do **not** duplicate the broadcast here.
+- [x] Return `void` or the `MessageResponse` (if you want to send an ACK back to the sender via `@SendToUser`).
 
 ### `@MessageMapping("/chat.typing")`
 
-- [ ] Accept a simple `TypingPayload` record: `{ UUID conversationId, boolean isTyping }`.
-- [ ] Extract sender ID from `Principal`.
-- [ ] Build a `TypingEvent` record: `{ UUID conversationId, UUID userId, boolean isTyping }`.
-- [ ] Broadcast to `/topic/conversations/{conversationId}/typing` using `simpMessagingTemplate.convertAndSend(...)`.
-- [ ] No use-case needed — typing indicators are ephemeral and not persisted.
+- [x] Accept a simple `TypingPayload` record: `{ UUID conversationId, boolean isTyping }`.
+- [x] Extract sender ID from `Principal`.
+- [x] Build a `TypingEvent` record: `{ UUID conversationId, UUID userId, boolean isTyping }`.
+- [x] Broadcast to `/topic/conversations/{conversationId}/typing` using `simpMessagingTemplate.convertAndSend(...)`.
+- [x] No use-case needed — typing indicators are ephemeral and not persisted.
 
 ## Notes
 
