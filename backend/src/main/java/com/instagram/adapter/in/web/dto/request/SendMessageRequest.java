@@ -4,7 +4,11 @@ import java.util.UUID;
 
 import com.instagram.domain.model.Message;
 
-public record SendMessageRequest(UUID conversationId, String content, Message.MessageType messageType, String mediaUrl,
-        UUID sharedPostId) {
+import jakarta.validation.constraints.NotNull;
 
+public record SendMessageRequest(
+        String content,
+        @NotNull Message.MessageType messageType,
+        String mediaUrl,
+        UUID sharedPostId) {
 }
