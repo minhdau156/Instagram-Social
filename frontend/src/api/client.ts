@@ -18,7 +18,7 @@ export const api = axios.create({
 // backend knows who is logged in.
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem('accessToken');
-  
+
   if (token) {
     // If the headers object doesn't exist, create it
     if (!config.headers) {
@@ -27,7 +27,7 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     // Attach the Token
     config.headers.Authorization = `Bearer ${token}`;
   }
-  
+
   return config;
 });
 
@@ -66,8 +66,8 @@ api.interceptors.response.use(
 
     // SCENARIO A: The server said "401 Unauthorized" (Our token is expired/missing)
     // We also make sure we haven't already tried to retry this exact request (`!_retry`).
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      
+    if ((error.response?.status === 401 && !originalRequest._retry)) {
+
       // If the `/refresh` endpoint itself fails, just stop. Don't create an infinite loop.
       if (originalRequest.url?.includes('/api/v1/auth/refresh')) {
         return Promise.reject(error);
@@ -100,8 +100,8 @@ api.interceptors.response.use(
           refreshToken,
         });
 
-        const newAccessToken = data.accessToken;
-        const newRefreshToken = data.refreshToken;
+        const newAccessToken = data.data.accessToken;
+        const newRefreshToken = data.data.refreshToken;
 
         // Save the new tokens to the browser's storage
         localStorage.setItem('accessToken', newAccessToken);
@@ -109,7 +109,7 @@ api.interceptors.response.use(
 
         // Tell everyone waiting in the queue to continue with the new token
         processQueue(null, newAccessToken);
-        
+
         // Retry our own original request with the new token
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest);
@@ -119,7 +119,7 @@ api.interceptors.response.use(
         processQueue(err, null);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        
+
         // Force the user back to the login screen
         if (navigationRef.navigate) {
           navigationRef.navigate('/login');
@@ -138,7 +138,7 @@ api.interceptors.response.use(
       error.response?.data?.message ??
       error.message ??
       'An unexpected error occurred';
-      
+
     return Promise.reject(new Error(message));
   }
 );
