@@ -8,6 +8,7 @@ Not Started
 ## Notes
 
 ## History
+- TASK-6.20 — Unread Badge in Navigation: inbox NavLink + MUI Badge in AppShell, totalUnreadCount in useWebSocket, /messages route registered
 - TASK-6.19 — Pages: InboxPage, ChatPage, NewConversationDialog, GroupChatDialog + backend user search endpoint + useDebounce hook
 - TASK-6.18 — Message Components: MessageBubble, ConversationListItem, TypingIndicator
 - TASK-6.17 — Custom Hooks: useConversations, useMessages, useSendMessage
