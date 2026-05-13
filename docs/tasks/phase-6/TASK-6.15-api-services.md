@@ -22,25 +22,25 @@ frontend/src/api/messagingApi.ts
 
 ### Functions to implement
 
-- [ ] `getConversations(page?: number, size?: number): Promise<Conversation[]>`
+- [x] `getConversations(page?: number, size?: number): Promise<Conversation[]>`
   - `GET /api/v1/conversations?page={page}&size={size}`
-- [ ] `createConversation(payload: CreateConversationPayload): Promise<Conversation>`
+- [x] `createConversation(payload: CreateConversationPayload): Promise<Conversation>`
   - `POST /api/v1/conversations`
-- [ ] `getMessages(conversationId: string, cursor?: string, limit?: number): Promise<Message[]>`
+- [x] `getMessages(conversationId: string, cursor?: string, limit?: number): Promise<Message[]>`
   - `GET /api/v1/conversations/{conversationId}/messages?cursor={cursor}&limit={limit}`
   - Omit `cursor` param when it is `undefined`.
-- [ ] `sendMessage(conversationId: string, payload: SendMessagePayload): Promise<Message>`
+- [x] `sendMessage(conversationId: string, payload: SendMessagePayload): Promise<Message>`
   - `POST /api/v1/conversations/{conversationId}/messages`
-- [ ] `markRead(conversationId: string): Promise<void>`
+- [x] `markRead(conversationId: string): Promise<void>`
   - `PUT /api/v1/conversations/{conversationId}/read`
-- [ ] `addGroupMembers(conversationId: string, memberIds: string[]): Promise<void>`
+- [x] `addGroupMembers(conversationId: string, memberIds: string[]): Promise<void>`
   - `POST /api/v1/conversations/{conversationId}/members` with body `{ memberIds }`
-- [ ] `leaveConversation(conversationId: string): Promise<void>`
+- [x] `leaveConversation(conversationId: string): Promise<void>`
   - `DELETE /api/v1/conversations/{conversationId}/members/me`
 
 ### Export style
 
-- [ ] Export as a named object `messagingApi` with all functions as methods (same style as `postsApi`).
+- [x] Export as a named object `messagingApi` with all functions as methods (same style as `postsApi`).
 
 ## Notes
 
