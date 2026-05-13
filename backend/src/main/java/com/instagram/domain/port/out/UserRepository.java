@@ -21,6 +21,8 @@ public interface UserRepository {
 
     List<User> findAll(int page, int size);
 
+    List<User> searchByUsername(String term, int limit);
+
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);

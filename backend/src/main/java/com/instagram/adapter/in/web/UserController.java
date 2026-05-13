@@ -23,6 +23,7 @@ import com.instagram.domain.model.User;
 import com.instagram.domain.port.in.GetUserProfileUseCase;
 import com.instagram.domain.port.in.UpdateProfileUseCase;
 import com.instagram.domain.port.in.user.GetUserUseCase;
+import com.instagram.domain.port.in.user.SearchUsersUseCase;
 import com.instagram.domain.port.out.MediaStoragePort;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +34,8 @@ import com.instagram.adapter.in.web.dto.request.UpdateProfileRequest;
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
 import com.instagram.adapter.in.web.dto.response.UserProfileResponse;
 import com.instagram.adapter.in.web.dto.response.UserResponse;
+
+import java.util.List;
 import com.instagram.domain.model.UserProfile;
 import com.instagram.domain.model.PrivacyLevel;
 
@@ -48,6 +51,7 @@ public class UserController {
     private final UpdateProfileUseCase updateProfileUseCase;
     private final MediaStoragePort mediaStoragePort;
     private final GetUserUseCase getUserUseCase;
+    private final SearchUsersUseCase searchUsersUseCase;
 
     private UUID currentUserId() {
         org.springframework.security.core.Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -142,6 +146,18 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable UUID id) {
         User user = getUserUseCase.getUser(new GetUserUseCase.Query(id));
         return ResponseEntity.ok(ApiResponse.ok(UserResponse.from(user)));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> searchUsers(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "10") int limit) {
+        List<UserResponse> results = searchUsersUseCase
+                .searchUsers(new SearchUsersUseCase.Command(q, limit))
+                .stream()
+                .map(UserResponse::from)
+                .toList();
+        return ResponseEntity.ok(ApiResponse.ok(results));
     }
 
 }

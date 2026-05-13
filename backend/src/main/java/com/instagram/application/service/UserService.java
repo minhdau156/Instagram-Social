@@ -1,5 +1,6 @@
 package com.instagram.application.service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,6 +29,7 @@ import com.instagram.domain.port.in.RegisterUserUseCase;
 import com.instagram.domain.port.in.RequestPasswordResetUseCase;
 import com.instagram.domain.port.in.UpdateProfileUseCase;
 import com.instagram.domain.port.in.user.GetUserUseCase;
+import com.instagram.domain.port.in.user.SearchUsersUseCase;
 import com.instagram.domain.port.out.EmailPort;
 import com.instagram.domain.port.out.FollowRepository;
 import com.instagram.domain.port.out.PasswordHashPort;
@@ -38,7 +40,8 @@ import com.instagram.domain.port.out.UserStatsRepository;
 @Service
 public class UserService
         implements GetUserUseCase, RegisterUserUseCase, LoginUseCase, RefreshTokenUseCase, LogoutUseCase,
-        RequestPasswordResetUseCase, ConfirmPasswordResetUseCase, GetUserProfileUseCase, UpdateProfileUseCase {
+        RequestPasswordResetUseCase, ConfirmPasswordResetUseCase, GetUserProfileUseCase, UpdateProfileUseCase,
+        SearchUsersUseCase {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
@@ -245,5 +248,12 @@ public class UserService
     public User getUser(GetUserUseCase.Query query) {
         return userRepository.findById(query.userId())
                 .orElseThrow(() -> UserNotFoundException.withId(query.userId()));
+    }
+
+    // ── SearchUsersUseCase ───────────────────────────────────────────────────
+
+    @Override
+    public List<User> searchUsers(SearchUsersUseCase.Command command) {
+        return userRepository.searchByUsername(command.term(), command.limit());
     }
 }

@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
@@ -55,6 +56,15 @@ public class UserPersistenceAdapter implements UserRepository {
     @Override
     public List<User> findAll(int page, int size) {
         return jpaRepository.findAll(PageRequest.of(page, size))
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<User> searchByUsername(String term, int limit) {
+        return jpaRepository
+                .findByUsernameContainingIgnoreCase(term, PageRequest.of(0, limit, Sort.by("username")))
+                .stream()
                 .map(this::toDomain)
                 .toList();
     }
