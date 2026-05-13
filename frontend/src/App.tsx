@@ -1,5 +1,5 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { Suspense, useEffect } from 'react';
 import theme from './theme';
 import AppShell from './AppShell';
@@ -19,11 +19,17 @@ import { CreatePostModalPage } from './pages/posts/CreatePostModalPage';
 import { PublicProfilePage } from './pages/users/PublicProfilePage';
 import FollowRequestsPage from './pages/follow/FollowRequestsPage';
 import SavedPostsPage from './pages/profile/SavedPostsPage';
-import { InboxPage } from './pages/messaging/InboxPage';
 import React from 'react';
 
 const HomePage = React.lazy(() => import('./pages/feed/HomePage'));
 const ExplorePage = React.lazy(() => import('./pages/explore/ExplorePage'));
+const InboxPage = React.lazy(() => import('./pages/messaging/InboxPage'));
+const ChatPage = React.lazy(() => import('./pages/messaging/ChatPage'));
+
+function ChatRoute() {
+  const { conversationId } = useParams<{ conversationId: string }>();
+  return conversationId ? <ChatPage conversationId={conversationId} /> : null;
+}
 
 function GlobalNavigation() {
   const navigate = useNavigate();
@@ -61,6 +67,7 @@ export default function App() {
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/explore" element={<ExplorePage />} />
                 <Route path="/messages" element={<ErrorBoundary><InboxPage /></ErrorBoundary>} />
+                <Route path="/messages/:conversationId" element={<ErrorBoundary><ChatRoute /></ErrorBoundary>} />
               </Route>
             </Route>
           </Routes>
