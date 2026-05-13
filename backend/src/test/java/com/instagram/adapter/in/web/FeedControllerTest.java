@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -69,7 +70,7 @@ class FeedControllerTest {
                                 .updatedAt(OffsetDateTime.now())
                                 .build();
                 when(getHomeFeedUseCase.getHomeFeed(any()))
-                                .thenReturn(new GetHomeFeedUseCase.FeedPage(List.of(post), nextCursor, null));
+                                .thenReturn(new GetHomeFeedUseCase.FeedPage(List.of(post), nextCursor, Map.of()));
 
                 mockMvc.perform(get("/api/v1/feed").param("limit", "1"))
                                 .andExpect(status().isOk())
@@ -83,7 +84,7 @@ class FeedControllerTest {
         void getHomeFeed_cursorParam_passedToUseCase() throws Exception {
                 UUID cursor = UUID.randomUUID();
                 when(getHomeFeedUseCase.getHomeFeed(any()))
-                                .thenReturn(new GetHomeFeedUseCase.FeedPage(List.of(), null, null));
+                                .thenReturn(new GetHomeFeedUseCase.FeedPage(List.of(), null, Map.of()));
 
                 mockMvc.perform(get("/api/v1/feed").param("cursor", cursor.toString()))
                                 .andExpect(status().isOk());

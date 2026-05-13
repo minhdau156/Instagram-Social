@@ -1,6 +1,7 @@
 package com.instagram.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -18,12 +19,16 @@ import com.instagram.domain.model.Post;
 import com.instagram.domain.port.in.feed.GetExploreFeedUseCase;
 import com.instagram.domain.port.in.feed.GetHomeFeedUseCase;
 import com.instagram.domain.port.out.FeedRepository;
+import com.instagram.domain.port.out.PostMediaRepository;
 
 @ExtendWith(MockitoExtension.class)
 class FeedServiceTest {
 
     @Mock
     private FeedRepository feedRepository;
+
+    @Mock
+    private PostMediaRepository postMediaRepository;
 
     @InjectMocks
     private FeedService feedService;
@@ -33,6 +38,7 @@ class FeedServiceTest {
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
+        when(postMediaRepository.findByPostIds(anyCollection())).thenReturn(List.of());
     }
 
     @Test
