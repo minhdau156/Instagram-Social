@@ -4,9 +4,9 @@ import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { useConversations } from "../../hooks/messaging/useConversations";
 import { ConversationListItem } from "../../components/messaging/ConversationListItem";
 import { useState } from "react";
-import { ChatPage } from "./ChatPage";
+import ChatPage from "./ChatPage";
 
-export const InboxPage = () => {
+export default function InboxPage() {
     const { conversations, isLoading, isError } = useConversations();
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
     return (

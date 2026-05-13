@@ -19,7 +19,7 @@ interface ChatPageProps {
     onBack?: () => void;
 }
 
-export function ChatPage({ conversationId, onBack }: ChatPageProps) {
+export default function ChatPage({ conversationId, onBack }: ChatPageProps) {
     const { profile } = useAuth();
     const queryClient = useQueryClient();
     const [inputValue, setInputValue] = useState('');
