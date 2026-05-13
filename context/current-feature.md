@@ -1,28 +1,14 @@
-# Current Feature: TASK-6.14 — TypeScript Types: messaging.ts
+# Current Feature
 
 ## Status
 Not Started
 
 ## Goals
 
-- Define `MessageType` string union: `'TEXT' | 'IMAGE' | 'VIDEO' | 'POST_SHARE'`
-- Define `MessageStatus` string union: `'SENT' | 'DELIVERED' | 'READ'`
-- Define `ConversationMember` interface
-- Define `Message` interface
-- Define `Conversation` interface
-- Define `SendMessagePayload` interface
-- Define `CreateConversationPayload` interface
-
 ## Notes
 
-- File: `frontend/src/types/messaging.ts`
-- No `any` types — strict TypeScript
-- All UUID fields as `string` (Axios deserialises them as strings)
-- `MessageType` and `MessageStatus` as string unions (not TS `enum`) — directly comparable to API values
-- `Conversation.name` is `null` for 1-to-1 chats
-- `Message.status` is `MessageStatus | null` — only present for messages sent by the current user
-
 ## History
+- TASK-6.14 — TypeScript Types: MessageType, MessageStatus, ConversationMember, Message, Conversation, SendMessagePayload, CreateConversationPayload
 - TASK-6.13 — Unit & Integration Tests: MessagingServiceTest, ConversationPersistenceAdapterIT, MessageControllerIT
 - TASK-6.12 — DTOs: SendMessageRequest, CreateConversationRequest, ConversationResponse, MessageResponse
 - TASK-6.11 — REST Controller: MessageController, ConversationResponse, MessageResponse, CreateConversationRequest, AddGroupMemberRequest + enriched use-case return types
