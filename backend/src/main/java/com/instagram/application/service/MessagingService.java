@@ -118,7 +118,7 @@ public class MessagingService implements
                 savedMessage);
 
         User sender = userRepository.findById(command.senderId())
-                .orElseThrow(() -> new UserNotFoundException(command.senderId()));
+                .orElseThrow(() -> UserNotFoundException.withId(command.senderId()));
         return new SendMessageUseCase.MessageView(savedMessage, sender.getUsername(), sender.getProfilePictureUrl());
     }
 

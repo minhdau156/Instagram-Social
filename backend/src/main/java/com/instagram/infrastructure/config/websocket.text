@@ -1,0 +1,82 @@
+Step 1 — HTTP Upgrade (one-time)
+
+  Frontend: GET http://localhost:8080/ws
+           Header: Upgrade: websocket
+
+  This is still a regular HTTP request, so it goes through Spring Security's servlet filter chain including JwtFilter. However at this point most apps permit   
+  the /ws/** path in Security config to allow the handshake through. The HTTP connection is then upgraded to a raw TCP WebSocket.
+
+  ---
+  Step 2 — STOMP CONNECT frame
+
+  Frontend sends: STOMP CONNECT
+                  Authorization: Bearer eyJhbGci...
+
+  The frame is not HTTP — it travels down Spring's message channel pipeline:
+
+  CONNECT frame
+      → configureClientInboundChannel
+      → WebSocketAuthChannelInterceptor.preSend()
+          → StompCommand == CONNECT ✓
+          → extract "Bearer eyJhbGci..."
+          → jwtTokenProvider.validateAccessToken(token) → Optional<UUID>
+          → accessor.setUser(new UsernamePasswordAuthenticationToken(uuid, null, []))
+      → Spring STOMP broker
+          → registers the session with the authenticated Principal (uuid)
+          → sends CONNECTED response back to client
+
+  From this point the connection is alive and the server knows who this socket belongs to.
+
+  ---
+  Step 3 — Client subscribes
+
+  Frontend sends: STOMP SUBSCRIBE
+                  destination: /topic/conversation.{roomId}
+                               OR /user/queue/messages
+
+  SUBSCRIBE frame
+      → WebSocketAuthChannelInterceptor.preSend()
+          → StompCommand != CONNECT → passes through unchanged
+      → Simple broker registers: "this session listens on this destination"
+
+  ---
+  Step 4 — Client sends a message
+
+  Frontend sends: STOMP SEND
+                  destination: /app/chat.send
+                  body: { conversationId, content, ... }
+
+  SEND frame
+      → WebSocketAuthChannelInterceptor.preSend()
+          → passes through (not CONNECT)
+      → Spring sees destination starts with /app
+      → routes to @MessageMapping("/chat.send") on MessagingController
+          → Principal principal injected (the UUID set in Step 2)
+          → MessagingService.sendMessage(Command(principal.getName(), ...))
+              → validates sender is a member (ConversationRepository.isMember)
+              → builds Message domain object
+              → MessageRepository.save(message)
+              → SimpMessagingTemplate.convertAndSend(
+                    "/topic/conversation." + conversationId, messagePayload)
+
+  ---
+  Step 5 — Delivery to all subscribers
+
+  Simple broker receives /topic/conversation.{id}
+      → finds all sessions subscribed to that destination (Step 3)
+      → pushes MESSAGE frame to each of them over their WebSocket connections
+
+  For private delivery (e.g. typing indicator to one user):
+  convertAndSendToUser(targetUserId, "/queue/messages", payload)
+      → broker rewrites to /user/{targetUserId}/queue/messages
+      → delivered only to sessions where principal.getName() == targetUserId
+
+  ---
+  Summary diagram
+
+  Connect:   WS Upgrade → CONNECT → Interceptor (JWT) → session bound to UUID
+  Subscribe: SUBSCRIBE  → Interceptor (pass) → broker registers listener
+  Send:      SEND /app/ → Interceptor (pass) → @MessageMapping → Service → DB → broadcast
+  Receive:   broker → /topic/... → all matching sessions
+
+  The interceptor only does real work on CONNECT — everything after that flows through unmodified.

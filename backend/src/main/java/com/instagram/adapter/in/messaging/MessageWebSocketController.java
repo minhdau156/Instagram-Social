@@ -7,7 +7,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
-import com.instagram.adapter.in.web.dto.request.SendMessageRequest;
 import com.instagram.domain.exception.NotConversationMemberException;
 import com.instagram.domain.port.in.messaging.SendMessageUseCase;
 
@@ -23,11 +22,11 @@ public class MessageWebSocketController {
     }
 
     @MessageMapping("/chat.send")
-    public void handleSend(SendMessageRequest request, Principal principal) {
+    public void handleSend(ChatMessagePayload payload, Principal principal) {
         UUID senderId = UUID.fromString(principal.getName());
         SendMessageUseCase.Command command = new SendMessageUseCase.Command(
-                request.conversationId(), senderId, request.content(),
-                request.messageType(), request.mediaUrl(), request.sharedPostId());
+                payload.conversationId(), senderId, payload.content(),
+                payload.messageType(), payload.mediaUrl(), payload.sharedPostId());
         try {
             sendMessageUseCase.sendMessage(command);
         } catch (NotConversationMemberException e) {

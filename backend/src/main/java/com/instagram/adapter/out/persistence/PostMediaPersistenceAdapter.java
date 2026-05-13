@@ -1,5 +1,6 @@
 package com.instagram.adapter.out.persistence;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,6 +59,14 @@ public class PostMediaPersistenceAdapter implements PostMediaRepository {
                 .fileSizeBytes(media.getFileSizeBytes())
                 .sortOrder(Short.parseShort(media.getSortOrder()))
                 .build();
+    }
+
+    @Override
+    public List<PostMedia> findByPostIds(Collection<UUID> postIds) {
+        return jpaRepository.findByPostIdIn(postIds)
+                .stream()
+                .map(this::toDomain)
+                .toList();
     }
 
 }

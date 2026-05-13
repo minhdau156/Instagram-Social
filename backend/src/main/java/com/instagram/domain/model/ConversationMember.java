@@ -5,13 +5,16 @@ import java.util.UUID;
 
 public class ConversationMember {
 
-    public enum Role { OWNER, MEMBER }
+    public enum Role {
+        OWNER, MEMBER
+    }
 
     private UUID conversationId;
     private UUID userId;
     private Role role;
     private OffsetDateTime joinedAt;
     private OffsetDateTime leftAt;
+    private OffsetDateTime lastReadAt;
 
     private ConversationMember() {
 
@@ -49,6 +52,11 @@ public class ConversationMember {
             return this;
         }
 
+        public Builder lastReadAt(OffsetDateTime lastReadAt) {
+            conversationMember.lastReadAt = lastReadAt;
+            return this;
+        }
+
         public ConversationMember build() {
             return conversationMember;
         }
@@ -72,5 +80,9 @@ public class ConversationMember {
 
     public OffsetDateTime getLeftAt() {
         return leftAt;
+    }
+
+    public OffsetDateTime getLastReadAt() {
+        return lastReadAt;
     }
 }

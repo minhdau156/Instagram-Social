@@ -8,6 +8,7 @@ public class Conversation {
     private String name;
     private boolean isGroup;
     private String pictureUrl;
+    private UUID createdBy;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -25,6 +26,10 @@ public class Conversation {
 
     public String getPictureUrl() {
         return pictureUrl;
+    }
+
+    public UUID getCreatedBy() {
+        return createdBy;
     }
 
     public OffsetDateTime getCreatedAt() {
@@ -76,6 +81,11 @@ public class Conversation {
             return this;
         }
 
+        public Builder createdById(UUID createdBy) {
+            conversation.createdBy = createdBy;
+            return this;
+        }
+
         public Conversation build() {
             return conversation;
         }
@@ -87,6 +97,7 @@ public class Conversation {
                 .name(name)
                 .isGroup(isGroup)
                 .pictureUrl(pictureUrl)
+                .createdById(createdBy)
                 .createdAt(createdAt)
                 .updatedAt(updatedAt);
     }

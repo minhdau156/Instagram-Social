@@ -11,7 +11,7 @@ public record FeedPageResponse(
     public static FeedPageResponse from(GetHomeFeedUseCase.FeedPage page) {
         List<PostResponse> postResponses = page.posts().stream()
                 .map(post -> {
-                    return PostResponse.from(post, null);
+                    return PostResponse.from(post, page.postMediasMap().get(post.getId()));
                 })
                 .toList();
         String cursor = page.nextCursor() != null
@@ -24,7 +24,7 @@ public record FeedPageResponse(
     public static FeedPageResponse from(GetExploreFeedUseCase.FeedPage page) {
         List<PostResponse> postResponses = page.posts().stream()
                 .map(post -> {
-                    return PostResponse.from(post, null);
+                    return PostResponse.from(post, page.postMediasMap().get(post.getId()));
                 })
                 .toList();
         String cursor = page.nextCursor() != null

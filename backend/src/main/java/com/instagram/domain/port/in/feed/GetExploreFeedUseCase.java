@@ -1,10 +1,12 @@
 package com.instagram.domain.port.in.feed;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
 import com.instagram.domain.model.Post;
+import com.instagram.domain.model.PostMedia;
 
 public interface GetExploreFeedUseCase {
 
@@ -17,6 +19,6 @@ public interface GetExploreFeedUseCase {
         }
     }
 
-    record FeedPage(List<Post> posts, UUID nextCursor) {
+    record FeedPage(List<Post> posts, UUID nextCursor, Map<UUID, List<PostMedia>> postMediasMap) {
     }
 }

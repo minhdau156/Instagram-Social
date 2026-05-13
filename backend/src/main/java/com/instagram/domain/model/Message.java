@@ -5,9 +5,14 @@ import java.util.UUID;
 
 public class Message {
 
-    public enum MessageType { TEXT, IMAGE, VIDEO, POST_SHARE }
+    public enum MessageType {
+        TEXT, IMAGE, VIDEO, POST_SHARE
+    }
 
-    public enum MessageStatus { SENT, DELIVERED, READ }
+    public enum MessageStatus {
+        SENT, DELIVERED, READ
+    }
+
     private UUID id;
     private UUID conversationId;
     private UUID senderId;
@@ -16,6 +21,7 @@ public class Message {
     private String mediaUrl;
     private UUID sharedPostId;
     private MessageStatus status;
+    private UUID replyToMessageId;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -80,6 +86,11 @@ public class Message {
             return this;
         }
 
+        public Builder replyToMessageId(UUID replyToMessageId) {
+            message.replyToMessageId = replyToMessageId;
+            return this;
+        }
+
         public Message build() {
             return message;
         }
@@ -125,6 +136,10 @@ public class Message {
         return updatedAt;
     }
 
+    public UUID getReplyToMessageId() {
+        return replyToMessageId;
+    }
+
     private Builder copy() {
         return this.builder()
                 .id(id)
@@ -136,7 +151,8 @@ public class Message {
                 .sharedPostId(sharedPostId)
                 .status(status)
                 .createdAt(createdAt)
-                .updatedAt(updatedAt);
+                .updatedAt(updatedAt)
+                .replyToMessageId(replyToMessageId);
     }
 
     public Message withRead() {

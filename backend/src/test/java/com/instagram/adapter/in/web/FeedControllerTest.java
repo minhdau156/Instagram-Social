@@ -36,83 +36,83 @@ import com.instagram.infrastructure.security.SecurityConfig;
 @Import(SecurityConfig.class)
 class FeedControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockBean
-    private JwtTokenProvider jwtTokenProvider;
+        @MockBean
+        private JwtTokenProvider jwtTokenProvider;
 
-    @MockBean
-    private UserDetailsService userDetailsService;
+        @MockBean
+        private UserDetailsService userDetailsService;
 
-    @MockBean
-    private OAuth2SuccessHandler oAuth2SuccessHandler;
+        @MockBean
+        private OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    @MockBean
-    private GetHomeFeedUseCase getHomeFeedUseCase;
+        @MockBean
+        private GetHomeFeedUseCase getHomeFeedUseCase;
 
-    @MockBean
-    private GetExploreFeedUseCase getExploreFeedUseCase;
+        @MockBean
+        private GetExploreFeedUseCase getExploreFeedUseCase;
 
-    @MockBean
-    private FeedRepository feedRepository;
+        @MockBean
+        private FeedRepository feedRepository;
 
-    @Test
-    @WithMockUser(username = "123e4567-e89b-12d3-a456-426614174000")
-    void getHomeFeed_returns200WithPostsAndNextCursor() throws Exception {
-        UUID nextCursor = UUID.randomUUID();
-        Post post = Post.builder()
-                .id(UUID.randomUUID())
-                .userId(UUID.randomUUID())
-                .status(PostStatus.PUBLISHED)
-                .createdAt(OffsetDateTime.now())
-                .updatedAt(OffsetDateTime.now())
-                .build();
-        when(getHomeFeedUseCase.getHomeFeed(any()))
-                .thenReturn(new GetHomeFeedUseCase.FeedPage(List.of(post), nextCursor));
+        @Test
+        @WithMockUser(username = "123e4567-e89b-12d3-a456-426614174000")
+        void getHomeFeed_returns200WithPostsAndNextCursor() throws Exception {
+                UUID nextCursor = UUID.randomUUID();
+                Post post = Post.builder()
+                                .id(UUID.randomUUID())
+                                .userId(UUID.randomUUID())
+                                .status(PostStatus.PUBLISHED)
+                                .createdAt(OffsetDateTime.now())
+                                .updatedAt(OffsetDateTime.now())
+                                .build();
+                when(getHomeFeedUseCase.getHomeFeed(any()))
+                                .thenReturn(new GetHomeFeedUseCase.FeedPage(List.of(post), nextCursor, null));
 
-        mockMvc.perform(get("/api/v1/feed").param("limit", "1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.posts").isArray())
-                .andExpect(jsonPath("$.data.posts[0]").exists())
-                .andExpect(jsonPath("$.data.nextCursor").value(nextCursor.toString()));
-    }
+                mockMvc.perform(get("/api/v1/feed").param("limit", "1"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data.posts").isArray())
+                                .andExpect(jsonPath("$.data.posts[0]").exists())
+                                .andExpect(jsonPath("$.data.nextCursor").value(nextCursor.toString()));
+        }
 
-    @Test
-    @WithMockUser(username = "123e4567-e89b-12d3-a456-426614174000")
-    void getHomeFeed_cursorParam_passedToUseCase() throws Exception {
-        UUID cursor = UUID.randomUUID();
-        when(getHomeFeedUseCase.getHomeFeed(any()))
-                .thenReturn(new GetHomeFeedUseCase.FeedPage(List.of(), null));
+        @Test
+        @WithMockUser(username = "123e4567-e89b-12d3-a456-426614174000")
+        void getHomeFeed_cursorParam_passedToUseCase() throws Exception {
+                UUID cursor = UUID.randomUUID();
+                when(getHomeFeedUseCase.getHomeFeed(any()))
+                                .thenReturn(new GetHomeFeedUseCase.FeedPage(List.of(), null, null));
 
-        mockMvc.perform(get("/api/v1/feed").param("cursor", cursor.toString()))
-                .andExpect(status().isOk());
+                mockMvc.perform(get("/api/v1/feed").param("cursor", cursor.toString()))
+                                .andExpect(status().isOk());
 
-        verify(getHomeFeedUseCase).getHomeFeed(
-                argThat(q -> cursor.equals(q.cursor())));
-    }
+                verify(getHomeFeedUseCase).getHomeFeed(
+                                argThat(q -> cursor.equals(q.cursor())));
+        }
 
-    @Test
-    @WithMockUser(username = "123e4567-e89b-12d3-a456-426614174000")
-    void getHomeFeed_invalidCursorParam_returns400() throws Exception {
-        mockMvc.perform(get("/api/v1/feed").param("cursor", "not-a-uuid"))
-                .andExpect(status().isBadRequest());
-    }
+        @Test
+        @WithMockUser(username = "123e4567-e89b-12d3-a456-426614174000")
+        void getHomeFeed_invalidCursorParam_returns400() throws Exception {
+                mockMvc.perform(get("/api/v1/feed").param("cursor", "not-a-uuid"))
+                                .andExpect(status().isBadRequest());
+        }
 
-    @Test
-    @WithMockUser(username = "123e4567-e89b-12d3-a456-426614174000")
-    void getTrendingHashtags_returns200WithHashtagList() throws Exception {
-        Hashtag hashtag = Hashtag.builder()
-                .id(UUID.randomUUID())
-                .name("spring")
-                .postCount(42)
-                .build();
-        when(feedRepository.getTrendingHashtags(10)).thenReturn(List.of(hashtag));
+        @Test
+        @WithMockUser(username = "123e4567-e89b-12d3-a456-426614174000")
+        void getTrendingHashtags_returns200WithHashtagList() throws Exception {
+                Hashtag hashtag = Hashtag.builder()
+                                .id(UUID.randomUUID())
+                                .name("spring")
+                                .postCount(42)
+                                .build();
+                when(feedRepository.getTrendingHashtags(10)).thenReturn(List.of(hashtag));
 
-        mockMvc.perform(get("/api/v1/explore/hashtags"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data[0].name").value("spring"))
-                .andExpect(jsonPath("$.data[0].postCount").value(42));
-    }
+                mockMvc.perform(get("/api/v1/explore/hashtags"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data").isArray())
+                                .andExpect(jsonPath("$.data[0].name").value("spring"))
+                                .andExpect(jsonPath("$.data[0].postCount").value(42));
+        }
 }
