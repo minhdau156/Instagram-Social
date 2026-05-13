@@ -97,6 +97,29 @@ class MessagingServiceTest {
         }
 
         @Test
+        void createConversation_isNotGroupConversationAndIsNew_savesNewConversation() {
+                // Given
+                UUID creatorId = UUID.randomUUID();
+                UUID participantId = UUID.randomUUID();
+                CreateConversationUseCase.Command command = new CreateConversationUseCase.Command(
+                                creatorId, List.of(participantId), null, false);
+                Conversation conversation = Conversation.builder()
+                                .id(UUID.randomUUID())
+                                .isGroup(false)
+                                .build();
+                when(conversationRepository.findExisting1to1(any(), any())).thenReturn(Optional.empty());
+                when(conversationRepository.save(any(Conversation.class))).thenReturn(conversation);
+                doNothing().when(conversationRepository).addMember(any(), any(), any());
+
+                // When
+                messagingService.createConversation(command);
+
+                // Then
+                verify(conversationRepository, times(1)).save(any(Conversation.class));
+                verify(conversationRepository, times(2)).addMember(any(), any(), any());
+        }
+
+        @Test
         void createConversation_isNotGroupConversationAndMemberIsMoreThan1_throwException() {
                 // Given
                 UUID creatorId = UUID.randomUUID();

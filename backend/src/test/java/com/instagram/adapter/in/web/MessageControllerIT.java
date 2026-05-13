@@ -1,6 +1,7 @@
 package com.instagram.adapter.in.web;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -190,6 +191,18 @@ class MessageControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = CURRENT_USER_ID)
+    void markRead_returns204() throws Exception {
+        UUID conversationId = UUID.randomUUID();
+
+        mockMvc.perform(put("/api/v1/conversations/{id}/read", conversationId))
+                .andExpect(status().isNoContent());
+
+        verify(markReadUseCase).markRead(
+                new MarkReadUseCase.Command(conversationId, UUID.fromString(CURRENT_USER_ID)));
     }
 
     @Test

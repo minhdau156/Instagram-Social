@@ -1,6 +1,8 @@
 package com.instagram.adapter.out.persistence;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -150,7 +152,7 @@ public class ConversationPersistenceAdapterIT {
         assertEquals(savedConversation.getId(), foundMember.get().getConversationId());
         assertEquals(member.getUserId(), foundMember.get().getUserId());
         assertEquals(member.getRole(), foundMember.get().getRole());
-
+        assertTrue(conversationPersistenceAdapter.isMember(savedConversation.getId(), member.getUserId()));
     }
 
     @Test
@@ -166,6 +168,24 @@ public class ConversationPersistenceAdapterIT {
 
         // then
         assertEquals(Optional.empty(), foundMember);
+        assertFalse(conversationPersistenceAdapter.isMember(savedConversation.getId(), member.getUserId()));
+    }
+
+    @Test
+    void findExisting1to1_isSuccess_shouldFind() {
+        // given
+        UUID user1Id = UUID.randomUUID();
+        UUID user2Id = UUID.randomUUID();
+        Conversation savedConversation = conversationPersistenceAdapter.save(conversation);
+        conversationPersistenceAdapter.addMember(savedConversation.getId(), user1Id, ConversationMember.Role.OWNER);
+        conversationPersistenceAdapter.addMember(savedConversation.getId(), user2Id, ConversationMember.Role.MEMBER);
+
+        // when
+        Optional<Conversation> found = conversationPersistenceAdapter.findExisting1to1(user1Id, user2Id);
+
+        // then
+        assertTrue(found.isPresent());
+        assertEquals(savedConversation.getId(), found.get().getId());
     }
 
     @Test
