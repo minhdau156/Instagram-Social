@@ -3,24 +3,32 @@ import EditIcon from "@mui/icons-material/Edit";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { useConversations } from "../../hooks/messaging/useConversations";
 import { ConversationListItem } from "../../components/messaging/ConversationListItem";
+import { NewConversationDialog } from "../../components/messaging/NewConversationDialog";
+import { GroupChatDialog } from "../../components/messaging/GroupChatDialog";
 import { useState } from "react";
 import ChatPage from "./ChatPage";
 
 export default function InboxPage() {
     const { conversations, isLoading, isError } = useConversations();
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+    const [newConvOpen, setNewConvOpen] = useState(false);
+    const [groupChatOpen, setGroupChatOpen] = useState(false);
+
     return (
         <Box sx={{ display: 'flex', height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
             <Box sx={{ width: { xs: '100%', md: 360 }, borderRight: 1, borderColor: 'divider', overflow: 'auto' }}>
                 <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="h6">Messages</Typography>
-                    <IconButton>
+                    <IconButton onClick={() => setNewConvOpen(true)}>
                         <EditIcon />
                     </IconButton>
-                    <IconButton>
+                    <IconButton onClick={() => setGroupChatOpen(true)}>
                         <GroupAddIcon />
                     </IconButton>
                 </Box>
+
+                <NewConversationDialog open={newConvOpen} onClose={() => setNewConvOpen(false)} />
+                <GroupChatDialog open={groupChatOpen} onClose={() => setGroupChatOpen(false)} />
                 <Divider />
 
                 {isLoading ? (
