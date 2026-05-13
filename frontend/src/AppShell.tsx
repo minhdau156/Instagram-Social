@@ -1,14 +1,25 @@
-import { AppBar, Box, Container, Toolbar, Typography, alpha, IconButton } from '@mui/material';
+import { AppBar, Badge, Box, Container, IconButton, Toolbar, Typography, alpha } from '@mui/material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import ExploreIcon from '@mui/icons-material/Explore';
 import ExploreOutlinedIcon from '@mui/icons-material/ExploreOutlined';
+import MailIcon from '@mui/icons-material/Mail';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
+import { useWebSocket } from './hooks/useWebSocket';
+import { useConversations } from './hooks/messaging/useConversations';
 
 export default function AppShell() {
   const { profile } = useAuth();
+  const { totalUnreadCount, isConnected } = useWebSocket(null);
+  const { conversations } = useConversations();
+
+  const unreadCount =
+    isConnected && totalUnreadCount !== null
+      ? totalUnreadCount
+      : (conversations ?? []).reduce((sum, c) => sum + (c.unreadCount ?? 0), 0);
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -68,6 +79,15 @@ export default function AppShell() {
                   <IconButton color="inherit" component="span">
                     {isActive ? <BookmarkIcon /> : <BookmarkBorderIcon />}
                   </IconButton>
+                )}
+              </NavLink>
+              <NavLink to="/messages" aria-label="Messages" style={{ textDecoration: 'none', color: 'inherit' }}>
+                {({ isActive }) => (
+                  <Badge badgeContent={unreadCount} color="error" max={99}>
+                    <IconButton color="inherit" component="span">
+                      {isActive ? <MailIcon /> : <MailOutlineIcon />}
+                    </IconButton>
+                  </Badge>
                 )}
               </NavLink>
             </Box>

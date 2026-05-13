@@ -19,6 +19,7 @@ import { CreatePostModalPage } from './pages/posts/CreatePostModalPage';
 import { PublicProfilePage } from './pages/users/PublicProfilePage';
 import FollowRequestsPage from './pages/follow/FollowRequestsPage';
 import SavedPostsPage from './pages/profile/SavedPostsPage';
+import { InboxPage } from './pages/messaging/InboxPage';
 import React from 'react';
 
 const HomePage = React.lazy(() => import('./pages/feed/HomePage'));
@@ -59,6 +60,7 @@ export default function App() {
                 <Route path="/:username" element={<ErrorBoundary><PublicProfilePage /></ErrorBoundary>} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/explore" element={<ExplorePage />} />
+                <Route path="/messages" element={<ErrorBoundary><InboxPage /></ErrorBoundary>} />
               </Route>
             </Route>
           </Routes>

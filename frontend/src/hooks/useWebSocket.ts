@@ -11,6 +11,7 @@ export function useWebSocket(conversationId: string | null) {
   const clientRef = useRef<Client | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [typingUserIds, setTypingUserIds] = useState<string[]>([]);
+  const [totalUnreadCount, setTotalUnreadCount] = useState<number | null>(null);
   const typingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   // Create STOMP client once and activate for the lifetime of the session
@@ -104,11 +105,14 @@ export function useWebSocket(conversationId: string | null) {
           conversationId: string;
           unreadCount: number;
         };
-        queryClient.setQueryData<Conversation[]>(['conversations'], (old) =>
+        const updated = queryClient.setQueryData<Conversation[]>(['conversations'], (old) =>
           old?.map((conv) =>
             conv.id === convId ? { ...conv, unreadCount } : conv
           ) ?? []
         );
+        if (updated) {
+          setTotalUnreadCount(updated.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0));
+        }
       }
     );
 
@@ -133,5 +137,5 @@ export function useWebSocket(conversationId: string | null) {
     });
   };
 
-  return { sendMessage, sendTyping, isConnected, typingUserIds };
+  return { sendMessage, sendTyping, isConnected, typingUserIds, totalUnreadCount };
 }
