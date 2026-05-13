@@ -91,7 +91,7 @@ class MessageControllerIT {
     void getConversations_returns200WithList() throws Exception {
         Conversation conversation = buildConversation();
         when(getConversationsUseCase.getConversations(any()))
-                .thenReturn(List.of(new GetConversationsUseCase.ConversationView(conversation, 2)));
+                .thenReturn(List.of(new GetConversationsUseCase.ConversationView(conversation, 2, null)));
 
         mockMvc.perform(get("/api/v1/conversations"))
                 .andExpect(status().isOk())

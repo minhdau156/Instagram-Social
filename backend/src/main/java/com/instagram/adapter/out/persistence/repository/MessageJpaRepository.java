@@ -1,6 +1,7 @@
 package com.instagram.adapter.out.persistence.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -19,4 +20,6 @@ public interface MessageJpaRepository extends JpaRepository<MessageJpaEntity, UU
             Pageable pageable);
 
     List<MessageJpaEntity> findByConversationIdOrderByCreatedAtDesc(UUID conversationId, Pageable pageable);
+
+    Optional<MessageJpaEntity> findTopByConversationIdOrderByCreatedAtDesc(UUID conversationId);
 }

@@ -1,6 +1,7 @@
 package com.instagram.application.service;
 
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -151,9 +152,34 @@ public class MessagingService implements
     public List<GetConversationsUseCase.ConversationView> getConversations(GetConversationsUseCase.Query query) {
         List<Conversation> conversations = conversationRepository.findByMemberId(query.userId(),
                 PageRequest.of(query.page(), query.size()));
+
+        Map<UUID, Message> lastMessages = new HashMap<>();
+        for (Conversation c : conversations) {
+            messageRepository.findLatestByConversationId(c.getId())
+                    .ifPresent(m -> lastMessages.put(c.getId(), m));
+        }
+
+        List<UUID> senderIds = lastMessages.values().stream()
+                .map(Message::getSenderId).distinct().toList();
+        Map<UUID, User> senderMap = userRepository.findAllByIds(senderIds).stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+
         return conversations.stream()
-                .map(c -> new GetConversationsUseCase.ConversationView(c,
-                        messageRepository.getUnreadCount(c.getId(), query.userId())))
+                .map(c -> {
+                    Message lastMsg = lastMessages.get(c.getId());
+                    GetConversationsUseCase.MessageView lastMessageView = null;
+                    if (lastMsg != null) {
+                        User sender = senderMap.get(lastMsg.getSenderId());
+                        lastMessageView = new GetConversationsUseCase.MessageView(
+                                lastMsg,
+                                sender != null ? sender.getUsername() : null,
+                                sender != null ? sender.getProfilePictureUrl() : null);
+                    }
+                    return new GetConversationsUseCase.ConversationView(
+                            c,
+                            messageRepository.getUnreadCount(c.getId(), query.userId()),
+                            lastMessageView);
+                })
                 .toList();
     }
 

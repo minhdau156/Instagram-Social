@@ -80,7 +80,14 @@ public class MessageController {
                 List<GetConversationsUseCase.ConversationView> views = getConversationsUseCase.getConversations(
                                 new GetConversationsUseCase.Query(userId, page, size));
                 List<ConversationResponse> responses = views.stream()
-                                .map(v -> ConversationResponse.from(v.conversation(), null, v.unreadCount()))
+                                .map(v -> {
+                                        MessageResponse lastMessage = v.lastMessage() != null
+                                                        ? MessageResponse.from(v.lastMessage().message(),
+                                                                        v.lastMessage().senderUsername(),
+                                                                        v.lastMessage().senderAvatarUrl())
+                                                        : null;
+                                        return ConversationResponse.from(v.conversation(), lastMessage, v.unreadCount());
+                                })
                                 .toList();
                 return ResponseEntity.ok(ApiResponse.ok(responses));
         }

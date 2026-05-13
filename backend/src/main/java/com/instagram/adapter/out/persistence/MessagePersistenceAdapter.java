@@ -59,6 +59,12 @@ public class MessagePersistenceAdapter implements MessageRepository {
         return this.messageReadJpaRepository.countUnread(conversationId, userId);
     }
 
+    @Override
+    public Optional<Message> findLatestByConversationId(UUID conversationId) {
+        return this.messageJpaRepository.findTopByConversationIdOrderByCreatedAtDesc(conversationId)
+                .map(this::toDomain);
+    }
+
     private MessageJpaEntity toEntity(Message message) {
         return MessageJpaEntity.builder()
                 .id(message.getId())

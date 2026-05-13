@@ -17,4 +17,6 @@ public interface MessageRepository {
     void markAsRead(UUID messageId, UUID userId, OffsetDateTime readAt);
 
     int getUnreadCount(UUID conversationId, UUID userId);
+
+    Optional<Message> findLatestByConversationId(UUID conversationId);
 }
