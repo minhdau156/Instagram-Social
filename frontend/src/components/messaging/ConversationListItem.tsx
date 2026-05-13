@@ -4,7 +4,7 @@ import GroupIcon from "@mui/icons-material/Group"
 
 interface ConversationListItemProps {
     conversation: Conversation,
-    currentUserId: string,
+    currentUserId?: string,
     isSelected: boolean,
     onClick: () => void
 }
