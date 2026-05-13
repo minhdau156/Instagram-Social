@@ -8,6 +8,7 @@ Not Started
 ## Notes
 
 ## History
+- TASK-6.17 — Custom Hooks: useConversations, useMessages, useSendMessage
 - TASK-6.15 — API Service: messagingApi.ts (getConversations, createConversation, getMessages, sendMessage, markRead, addGroupMembers, leaveConversation)
 - TASK-6.14 — TypeScript Types: MessageType, MessageStatus, ConversationMember, Message, Conversation, SendMessagePayload, CreateConversationPayload
 - TASK-6.13 — Unit & Integration Tests: MessagingServiceTest, ConversationPersistenceAdapterIT, MessageControllerIT
