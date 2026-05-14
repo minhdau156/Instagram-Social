@@ -14,6 +14,7 @@ import com.instagram.domain.exception.MessageNotFoundException;
 import com.instagram.domain.exception.NotConversationMemberException;
 import com.instagram.domain.exception.NotLikedException;
 import com.instagram.domain.exception.NotSavedException;
+import com.instagram.domain.exception.NotificationNotFoundException;
 import com.instagram.domain.exception.PasswordResetTokenExpiredException;
 import com.instagram.domain.exception.PostNotFoundException;
 import com.instagram.domain.exception.UnauthorizedCommentAccessException;
@@ -22,13 +23,13 @@ import com.instagram.domain.exception.UserAlreadyExistsException;
 import com.instagram.domain.exception.UserNotFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ConstraintViolation;
+
 import jakarta.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -38,8 +39,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.security.access.AccessDeniedException;
 
-import java.net.URI;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -199,6 +198,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MessageNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleMessageNotFound(MessageNotFoundException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(NotificationNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotificationNotFound(NotificationNotFoundException ex) {
         log.warn(ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
     }

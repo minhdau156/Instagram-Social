@@ -22,13 +22,13 @@ backend/src/main/java/com/instagram/adapter/in/web/GlobalExceptionHandler.java  
 
 ### `NotificationNotFoundException.java`
 
-- [ ] Extends `RuntimeException`.
-- [ ] Constructor takes `UUID notificationId` and passes a descriptive message to `super(...)`, e.g. `"Notification not found: " + notificationId`.
-- [ ] Static factory `withId(UUID id)` — returns `new NotificationNotFoundException(id)`.
+- [x] Extends `RuntimeException`.
+- [x] Constructor takes `UUID notificationId` and passes a descriptive message to `super(...)`, e.g. `"Notification not found: " + notificationId`.
+- [x] Static factory `withId(UUID id)` — returns `new NotificationNotFoundException(id)`.
 
 ### `GlobalExceptionHandler.java`
 
-- [ ] Add a handler method for `NotificationNotFoundException` that returns `404 NOT FOUND` with a standard error body. Mirror the existing handler for `PostNotFoundException`.
+- [x] Add a handler method for `NotificationNotFoundException` that returns `404 NOT FOUND` with a standard error body. Mirror the existing handler for `PostNotFoundException`.
 
 ## Notes
 
