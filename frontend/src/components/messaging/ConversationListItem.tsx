@@ -6,19 +6,21 @@ interface ConversationListItemProps {
     conversation: Conversation,
     currentUserId?: string,
     isSelected: boolean,
+    isClick: boolean,
     onClick: () => void
 }
 
-export function ConversationListItem({ conversation, isSelected, onClick }: ConversationListItemProps) {
+export function ConversationListItem({ conversation, isSelected, onClick, isClick }: ConversationListItemProps) {
     const displayName = conversation.isGroup
         ? (conversation.name ?? 'Group')
-        : (conversation.lastMessage?.senderUsername ?? 'Unknown');
+        : (conversation.eachOtherName ?? 'Unknown');
+
 
     return (
         <ListItemButton selected={isSelected} onClick={onClick}>
             <ListItemAvatar>
                 <Badge
-                    badgeContent={conversation.unreadCount}
+                    badgeContent={isClick ? 0 : conversation.unreadCount}
                     color="primary"
                     overlap="circular"
                     invisible={conversation.unreadCount === 0}

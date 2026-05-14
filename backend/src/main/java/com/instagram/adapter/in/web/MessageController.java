@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.instagram.adapter.in.web.dto.request.AddGroupMemberRequest;
 import com.instagram.adapter.in.web.dto.request.CreateConversationRequest;
+import com.instagram.adapter.in.web.dto.request.MarkReadRequest;
 import com.instagram.adapter.in.web.dto.request.SendMessageRequest;
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
 import com.instagram.adapter.in.web.dto.response.ConversationResponse;
@@ -29,9 +30,11 @@ import com.instagram.domain.port.in.messaging.GetMessagesUseCase;
 import com.instagram.domain.port.in.messaging.LeaveConversationUseCase;
 import com.instagram.domain.port.in.messaging.MarkReadUseCase;
 import com.instagram.domain.port.in.messaging.SendMessageUseCase;
+import com.instagram.domain.port.in.user.GetUserUseCase;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Tag(name = "Messaging", description = "Conversation and message management")
 @RequestMapping("/api/v1/conversations")
@@ -40,11 +43,13 @@ public class MessageController {
 
         private final GetConversationsUseCase getConversationsUseCase;
         private final CreateConversationUseCase createConversationUseCase;
+        private final GetUserUseCase getUserUseCase;
         private final GetMessagesUseCase getMessagesUseCase;
         private final SendMessageUseCase sendMessageUseCase;
         private final MarkReadUseCase markReadUseCase;
         private final AddGroupMemberUseCase addGroupMemberUseCase;
         private final LeaveConversationUseCase leaveConversationUseCase;
+        private final SimpMessagingTemplate messagingTemplate;
 
         public MessageController(
                         GetConversationsUseCase getConversationsUseCase,
@@ -53,7 +58,9 @@ public class MessageController {
                         SendMessageUseCase sendMessageUseCase,
                         MarkReadUseCase markReadUseCase,
                         AddGroupMemberUseCase addGroupMemberUseCase,
-                        LeaveConversationUseCase leaveConversationUseCase) {
+                        LeaveConversationUseCase leaveConversationUseCase,
+                        GetUserUseCase getUserUseCase,
+                        SimpMessagingTemplate messagingTemplate) {
                 this.getConversationsUseCase = getConversationsUseCase;
                 this.createConversationUseCase = createConversationUseCase;
                 this.getMessagesUseCase = getMessagesUseCase;
@@ -61,6 +68,8 @@ public class MessageController {
                 this.markReadUseCase = markReadUseCase;
                 this.addGroupMemberUseCase = addGroupMemberUseCase;
                 this.leaveConversationUseCase = leaveConversationUseCase;
+                this.getUserUseCase = getUserUseCase;
+                this.messagingTemplate = messagingTemplate;
         }
 
         private UUID currentUserId() {
@@ -79,6 +88,7 @@ public class MessageController {
                 UUID userId = currentUserId();
                 List<GetConversationsUseCase.ConversationView> views = getConversationsUseCase.getConversations(
                                 new GetConversationsUseCase.Query(userId, page, size));
+
                 List<ConversationResponse> responses = views.stream()
                                 .map(v -> {
                                         MessageResponse lastMessage = v.lastMessage() != null
@@ -86,7 +96,8 @@ public class MessageController {
                                                                         v.lastMessage().senderUsername(),
                                                                         v.lastMessage().senderAvatarUrl())
                                                         : null;
-                                        return ConversationResponse.from(v.conversation(), lastMessage, v.unreadCount());
+                                        return ConversationResponse.from(v.conversation(), lastMessage,
+                                                        v.unreadCount(), v.eachOtherName());
                                 })
                                 .toList();
                 return ResponseEntity.ok(ApiResponse.ok(responses));
@@ -99,8 +110,14 @@ public class MessageController {
                 var conversation = createConversationUseCase.createConversation(
                                 new CreateConversationUseCase.Command(creatorId, request.participantIds(),
                                                 request.name(), request.isGroup()));
+                String eachOtherName = null;
+                if (!request.isGroup() && !request.participantIds().isEmpty()) {
+                        eachOtherName = getUserUseCase
+                                        .getUser(new GetUserUseCase.Query(request.participantIds().get(0)))
+                                        .getUsername();
+                }
                 return ResponseEntity.status(HttpStatus.CREATED)
-                                .body(ApiResponse.ok(ConversationResponse.from(conversation, null, 0)));
+                                .body(ApiResponse.ok(ConversationResponse.from(conversation, null, 0, eachOtherName)));
         }
 
         @GetMapping("/{id}/messages")
@@ -128,14 +145,17 @@ public class MessageController {
                                 new SendMessageUseCase.Command(id, userId, request.content(), request.messageType(),
                                                 request.mediaUrl(),
                                                 request.sharedPostId()));
-                return ResponseEntity.status(HttpStatus.CREATED)
-                                .body(ApiResponse.ok(MessageResponse.from(view.message(), view.senderUsername(),
-                                                view.senderAvatarUrl())));
+                MessageResponse response = MessageResponse.from(view.message(), view.senderUsername(),
+                                view.senderAvatarUrl());
+                messagingTemplate.convertAndSend("/topic/conversations/" + id, response);
+                return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
         }
 
         @PutMapping("/{id}/read")
-        public ResponseEntity<ApiResponse<Void>> markRead(@PathVariable UUID id) {
-                markReadUseCase.markRead(new MarkReadUseCase.Command(id, currentUserId()));
+        public ResponseEntity<ApiResponse<Void>> markRead(@PathVariable("id") UUID conversationId,
+                        @Valid @RequestBody MarkReadRequest request) {
+                markReadUseCase.markRead(
+                                new MarkReadUseCase.Command(conversationId, currentUserId(), request.messageId()));
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.ok(null));
         }
 
@@ -154,4 +174,5 @@ public class MessageController {
                                 new LeaveConversationUseCase.Command(id, currentUserId()));
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.ok(null));
         }
+
 }

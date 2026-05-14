@@ -1,10 +1,13 @@
 package com.instagram.application.service;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -88,7 +91,8 @@ public class MessagingService implements
     @Override
     @Transactional
     public void markRead(MarkReadUseCase.Command command) {
-        messageRepository.markAsRead(command.conversationId(), command.messageId(), command.userId(), OffsetDateTime.now());
+        messageRepository.markAsRead(command.conversationId(), command.messageId(), command.userId(),
+                OffsetDateTime.now());
     }
 
     @Override
@@ -152,9 +156,22 @@ public class MessagingService implements
                     .ifPresent(m -> lastMessages.put(c.getId(), m));
         }
 
-        List<UUID> senderIds = lastMessages.values().stream()
-                .map(Message::getSenderId).distinct().toList();
-        Map<UUID, User> senderMap = userRepository.findAllByIds(senderIds).stream()
+        // For 1-1 conversations, resolve the other member's ID
+        Map<UUID, UUID> conversationToOtherMember = new HashMap<>();
+        for (Conversation c : conversations) {
+            if (!c.isGroup()) {
+                conversationRepository.findMemberIds(c.getId()).stream()
+                        .filter(id -> !id.equals(query.userId()))
+                        .findFirst()
+                        .ifPresent(otherId -> conversationToOtherMember.put(c.getId(), otherId));
+            }
+        }
+
+        Set<UUID> allUserIds = new HashSet<>(
+                lastMessages.values().stream().map(Message::getSenderId).toList());
+        allUserIds.addAll(conversationToOtherMember.values());
+
+        Map<UUID, User> userMap = userRepository.findAllByIds(new ArrayList<>(allUserIds)).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
         return conversations.stream()
@@ -162,16 +179,23 @@ public class MessagingService implements
                     Message lastMsg = lastMessages.get(c.getId());
                     GetConversationsUseCase.MessageView lastMessageView = null;
                     if (lastMsg != null) {
-                        User sender = senderMap.get(lastMsg.getSenderId());
+                        User sender = userMap.get(lastMsg.getSenderId());
                         lastMessageView = new GetConversationsUseCase.MessageView(
                                 lastMsg,
                                 sender != null ? sender.getUsername() : null,
                                 sender != null ? sender.getProfilePictureUrl() : null);
                     }
+                    String eachOtherName = null;
+                    if (!c.isGroup()) {
+                        UUID otherId = conversationToOtherMember.get(c.getId());
+                        User other = otherId != null ? userMap.get(otherId) : null;
+                        eachOtherName = other != null ? other.getUsername() : null;
+                    }
                     return new GetConversationsUseCase.ConversationView(
                             c,
                             messageRepository.getUnreadCount(c.getId(), query.userId()),
-                            lastMessageView);
+                            lastMessageView,
+                            eachOtherName);
                 })
                 .toList();
     }

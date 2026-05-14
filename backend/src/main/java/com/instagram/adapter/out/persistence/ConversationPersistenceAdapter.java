@@ -78,6 +78,11 @@ public class ConversationPersistenceAdapter implements ConversationRepository {
                 .map(this::memberToDomain);
     }
 
+    @Override
+    public List<UUID> findMemberIds(UUID conversationId) {
+        return conversationMemberJpaRepository.findUserIdsByConversationId(conversationId);
+    }
+
     private ConversationJpaEntity toEntity(Conversation conversation) {
         ConversationJpaEntity entity = ConversationJpaEntity.builder()
                 .id(conversation.getId())

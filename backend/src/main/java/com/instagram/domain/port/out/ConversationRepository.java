@@ -26,4 +26,6 @@ public interface ConversationRepository {
 
     Optional<ConversationMember> findMember(UUID conversationId, UUID userId);
 
+    List<UUID> findMemberIds(UUID conversationId);
+
 }

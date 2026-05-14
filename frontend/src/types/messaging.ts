@@ -29,6 +29,7 @@ export interface Conversation {
     isGroup: boolean;
     lastMessage: Message | null;
     unreadCount: number;
+    eachOtherName: string | null;
     createdAt: string;
 }
 
