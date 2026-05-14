@@ -8,12 +8,20 @@ import MailIcon from '@mui/icons-material/Mail';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
-import { useWebSocket } from './hooks/useWebSocket';
+import { WebSocketProvider, useWebSocketContext } from './context/WebSocketContext';
 import { useConversations } from './hooks/messaging/useConversations';
 
 export default function AppShell() {
+  return (
+    <WebSocketProvider>
+      <AppShellContent />
+    </WebSocketProvider>
+  );
+}
+
+function AppShellContent() {
   const { profile } = useAuth();
-  const { totalUnreadCount, isConnected } = useWebSocket(null);
+  const { totalUnreadCount, isConnected } = useWebSocketContext();
   const { conversations } = useConversations();
 
   const unreadCount =

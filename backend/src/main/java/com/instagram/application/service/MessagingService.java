@@ -10,7 +10,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.instagram.domain.exception.ConversationNotFoundException;
@@ -46,16 +45,13 @@ public class MessagingService implements
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
-    private final SimpMessagingTemplate simpMessagingTemplate;
 
     public MessagingService(ConversationRepository conversationRepository,
             MessageRepository messageRepository,
-            UserRepository userRepository,
-            SimpMessagingTemplate simpMessagingTemplate) {
+            UserRepository userRepository) {
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
-        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     @Override
@@ -92,7 +88,7 @@ public class MessagingService implements
     @Override
     @Transactional
     public void markRead(MarkReadUseCase.Command command) {
-        messageRepository.markAsRead(command.conversationId(), command.userId(), OffsetDateTime.now());
+        messageRepository.markAsRead(command.conversationId(), command.messageId(), command.userId(), OffsetDateTime.now());
     }
 
     @Override
@@ -114,9 +110,6 @@ public class MessagingService implements
                 .build();
 
         Message savedMessage = messageRepository.save(message);
-        simpMessagingTemplate.convertAndSend(
-                "/topic/conversations/" + command.conversationId(),
-                savedMessage);
 
         User sender = userRepository.findById(command.senderId())
                 .orElseThrow(() -> UserNotFoundException.withId(command.senderId()));

@@ -9,7 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { messagingApi } from '../../api/messagingApi';
 import { useMessages } from '../../hooks/messaging/useMessages';
 import { useSendMessage } from '../../hooks/messaging/useSendMessage';
-import { useWebSocket } from '../../hooks/useWebSocket';
+import { useWebSocketContext } from '../../context/WebSocketContext';
 import { useAuth } from '../../hooks/useAuth';
 import { MessageBubble } from '../../components/messaging/MessageBubble';
 import { TypingIndicator } from '../../components/messaging/TypingIndicator';
@@ -28,7 +28,12 @@ export default function ChatPage({ conversationId, onBack }: ChatPageProps) {
 
     const { messages, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useMessages(conversationId);
     const { sendMessage, isPending } = useSendMessage(conversationId);
-    const { sendTyping, typingUserIds } = useWebSocket(conversationId);
+    const { sendTyping, typingUserIds, setActiveConversationId } = useWebSocketContext();
+
+    useEffect(() => {
+        setActiveConversationId(conversationId);
+        return () => setActiveConversationId(null);
+    }, [conversationId, setActiveConversationId]);
 
     // Build senderId → username map from loaded messages for TypingIndicator
     const senderMap = new Map(messages.map(m => [m.senderId, m.senderUsername]));
@@ -38,12 +43,14 @@ export default function ChatPage({ conversationId, onBack }: ChatPageProps) {
 
     const conversationDisplayName = messages.find(m => m.senderId !== profile?.user.id)?.senderUsername ?? 'Conversation';
 
-    // Mark read on mount
+    // Mark read whenever the latest incoming message changes (covers open + new arrivals)
+    const latestMessage = messages[0];
     useEffect(() => {
-        messagingApi.markRead(conversationId).then(() => {
+        if (!latestMessage || latestMessage.senderId === profile?.user.id) return;
+        messagingApi.markRead(conversationId, latestMessage.id).then(() => {
             queryClient.invalidateQueries({ queryKey: ['conversations'] });
         });
-    }, [conversationId, queryClient]);
+    }, [conversationId, latestMessage?.id, profile?.user.id, queryClient]);
 
     // IntersectionObserver: sentinel is at the visual top (DOM bottom in column-reverse)
     useEffect(() => {
@@ -86,11 +93,11 @@ export default function ChatPage({ conversationId, onBack }: ChatPageProps) {
         setInputValue(e.target.value);
         sendTyping(conversationId, true);
         if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
-        typingTimerRef.current = setTimeout(() => sendTyping(conversationId, false), 2000);
+        typingTimerRef.current = setTimeout(() => sendTyping(conversationId, true), 2000);
     };
 
     const handleInputBlur = () => {
-        sendTyping(conversationId, false);
+        sendTyping(conversationId, true);
         if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
     };
 

@@ -11,6 +11,7 @@ import ChatPage from "./ChatPage";
 export default function InboxPage() {
     const { conversations, isLoading, isError } = useConversations();
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+    const [isClick, setIsClick] = useState(false);
     const [newConvOpen, setNewConvOpen] = useState(false);
     const [groupChatOpen, setGroupChatOpen] = useState(false);
 
@@ -50,7 +51,10 @@ export default function InboxPage() {
                                 conversation={conversation}
                                 onClick={() => {
                                     setSelectedConversationId(conversation.id);
+                                    setIsClick(true);
+
                                 }}
+                                isClick={isClick}
                                 isSelected={selectedConversationId === conversation.id}
                             />
                         ))}
@@ -63,7 +67,7 @@ export default function InboxPage() {
                         <Typography>Select a conversation to start chatting</Typography>
                     </Box>
                 ) : (
-                    <ChatPage conversationId={selectedConversationId} />
+                    <ChatPage conversationId={selectedConversationId || ""} />
                 )}
             </Box>
         </Box >
