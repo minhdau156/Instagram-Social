@@ -23,22 +23,22 @@ backend/src/main/java/com/instagram/domain/port/out/PushNotificationPort.java
 
 ### `NotificationRepository.java`
 
-- [ ] `Notification save(Notification notification)`
-- [ ] `List<Notification> findByRecipientId(UUID recipientId, Pageable pageable)` — ordered newest-first
-- [ ] `Optional<Notification> findById(UUID notificationId)`
-- [ ] `void markAsRead(UUID notificationId)`
-- [ ] `void markAllAsRead(UUID recipientId)`
-- [ ] `long getUnreadCount(UUID recipientId)`
+- [x] `Notification save(Notification notification)`
+- [x] `List<Notification> findByRecipientId(UUID recipientId, Pageable pageable)` — ordered newest-first
+- [x] `Optional<Notification> findById(UUID notificationId)`
+- [x] `void markAsRead(UUID notificationId)`
+- [x] `void markAllAsRead(UUID recipientId)`
+- [x] `long getUnreadCount(UUID recipientId)`
 
 ### `NotificationSettingsRepository.java`
 
-- [ ] `Optional<NotificationSettings> findByUserId(UUID userId)`
-- [ ] `NotificationSettings save(NotificationSettings settings)`
+- [x] `Optional<NotificationSettings> findByUserId(UUID userId)`
+- [x] `NotificationSettings save(NotificationSettings settings)`
 
 ### `PushNotificationPort.java`
 
-- [ ] `void sendPush(UUID userId, String title, String body)` — abstraction over FCM/APNs; the adapter logs for now.
-- [ ] No other methods.
+- [x] `void sendPush(UUID userId, String title, String body)` — abstraction over FCM/APNs; the adapter logs for now.
+- [x] No other methods.
 
 ## Notes
 
