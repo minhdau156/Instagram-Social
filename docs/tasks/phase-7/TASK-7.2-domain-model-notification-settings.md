@@ -18,13 +18,13 @@ backend/src/main/java/com/instagram/domain/model/NotificationSettings.java
 
 ## Checklist
 
-- [ ] `userId: UUID` — the owner of these settings.
-- [ ] `likesEnabled: boolean` — receive LIKE notifications.
-- [ ] `commentsEnabled: boolean` — receive COMMENT and MENTION notifications.
-- [ ] `followsEnabled: boolean` — receive FOLLOW and FOLLOW_REQUEST notifications.
-- [ ] `messagesEnabled: boolean` — receive MESSAGE notifications.
-- [ ] `pushEnabled: boolean` — master switch for FCM/APNs push delivery; does not affect WebSocket or in-app display.
-- [ ] Static factory method `defaultsFor(UUID userId)` — returns a `NotificationSettings` instance with all boolean flags set to `true`. Called by the service when a user has no saved settings yet.
+- [x] `userId: UUID` — the owner of these settings.
+- [x] `likesEnabled: boolean` — receive LIKE notifications.
+- [x] `commentsEnabled: boolean` — receive COMMENT and MENTION notifications.
+- [x] `followsEnabled: boolean` — receive FOLLOW and FOLLOW_REQUEST notifications.
+- [x] `messagesEnabled: boolean` — receive MESSAGE notifications.
+- [x] `pushEnabled: boolean` — master switch for FCM/APNs push delivery; does not affect WebSocket or in-app display.
+- [x] Static factory method `defaultsFor(UUID userId)` — returns a `NotificationSettings` instance with all boolean flags set to `true`. Called by the service when a user has no saved settings yet.
 
 ## Notes
 
