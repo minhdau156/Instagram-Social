@@ -1,28 +1,13 @@
-# Current Feature: TASK-6.22 — File Attachments in ChatPage (Image & Video)
+# Current Feature
 
 ## Status
-Complete
 
 ## Goals
-- Wire the `AttachFileIcon` button in `ChatPage.tsx` to a hidden `<input type="file" accept="image/*,video/*">`
-- Show a preview above the input bar after file selection (thumbnail for images, filename chip for videos) with an ✕ dismiss button
-- On Send, upload the file via `mediaApi.getUploadUrl()` + `mediaApi.uploadToMinio()`, then call `sendMessage()` with `messageType: 'IMAGE'|'VIDEO'` and `mediaUrl`
-- Clear the pending file state after a successful send
-- Disable the Send button while upload is in progress
 
 ## Notes
-- **Backend is fully ready** — no backend changes needed:
-  - `POST /api/v1/media/upload-url` exists in `MediaController.java`
-  - `SendMessageRequest` already accepts `mediaUrl` and `messageType`
-  - `MessageBubble.tsx` already renders IMAGE (with Skeleton) and VIDEO (with `controls`)
-- **Frontend helpers already exist**: `mediaApi.getUploadUrl()` + `mediaApi.uploadToMinio()` in `frontend/src/api/mediaApi.ts`
-- `SendMessagePayload.mediaUrl` is already typed in `frontend/src/types/messaging.ts`
-- `AttachFileIcon` button is at `ChatPage.tsx:154-156` — currently has no `onClick`
-- Use `URL.createObjectURL(file)` for the local preview (revoke on cleanup)
-- Derive `messageType` from `file.type.startsWith('video/')` → `'VIDEO'`, else `'IMAGE'`
-- Keep all new state local to `ChatPage` — no new hook needed
 
 ## History
+- TASK-7.1 — Domain Model: Notification with NotificationType (12 values), EntityType, hand-written Builder, immutable withRead()
 - TASK-6.22 — File Attachments in ChatPage: hidden file input wired to AttachFileIcon, preview strip above input bar, upload via mediaApi presigned URL, send IMAGE/VIDEO message with full MinIO URL
 - TASK-6.21 — Register Routes: /messages (InboxPage lazy) + /messages/:conversationId (ChatRoute wrapper → ChatPage lazy), both protected; converted InboxPage + ChatPage to default exports for React.lazy compatibility
 - TASK-6.20 — Unread Badge in Navigation: inbox NavLink + MUI Badge in AppShell, totalUnreadCount in useWebSocket, /messages route registered
