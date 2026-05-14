@@ -7,6 +7,7 @@
 ## Notes
 
 ## History
+- TASK-7.3 — Domain Exceptions: NotificationNotFoundException + 404 handler in GlobalExceptionHandler
 - TASK-7.2 — Domain Model: NotificationSettings as Java record with 6 boolean flags and defaultsFor() factory
 - TASK-7.1 — Domain Model: Notification with NotificationType (12 values), EntityType, hand-written Builder, immutable withRead()
 - TASK-6.22 — File Attachments in ChatPage: hidden file input wired to AttachFileIcon, preview strip above input bar, upload via mediaApi presigned URL, send IMAGE/VIDEO message with full MinIO URL
