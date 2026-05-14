@@ -106,7 +106,7 @@ One-sentence description of what is being built.
 - Frontend: list of files to create/modify
 - DB: Flyway migration file (if needed)
 
-## Acceptance Criteria
+## Acceptance Criteria  ← success criteria for Goal-Driven Execution (CLAUDE.md §4)
 - [ ] Criterion 1
 - [ ] Criterion 2
 
