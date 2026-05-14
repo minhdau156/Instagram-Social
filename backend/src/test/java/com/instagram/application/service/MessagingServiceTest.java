@@ -47,8 +47,6 @@ class MessagingServiceTest {
         private MessageRepository messageRepository;
         @Mock
         private UserRepository userRepository;
-        @Mock
-        private SimpMessagingTemplate simpMessagingTemplate;
         @InjectMocks
         private MessagingService messagingService;
 
@@ -218,9 +216,6 @@ class MessagingServiceTest {
                 assertEquals("haha", res.senderUsername());
                 assertEquals("haha", res.senderAvatarUrl());
 
-                verify(simpMessagingTemplate).convertAndSend(
-                                eq("/topic/conversations/" + conversationId),
-                                any(Message.class));
         }
 
         @Test
@@ -240,12 +235,13 @@ class MessagingServiceTest {
                 // Given
                 UUID conversationId = UUID.randomUUID();
                 UUID userId = UUID.randomUUID();
-                MarkReadUseCase.Command command = new MarkReadUseCase.Command(conversationId, userId);
-                doNothing().when(messageRepository).markAsRead(any(), any(), any());
+                UUID messageId = UUID.randomUUID();
+                MarkReadUseCase.Command command = new MarkReadUseCase.Command(conversationId, userId, messageId);
+                doNothing().when(messageRepository).markAsRead(any(), any(), any(), any());
                 // When
                 messagingService.markRead(command);
                 // Then
-                verify(messageRepository).markAsRead(eq(conversationId), eq(userId), any());
+                verify(messageRepository).markAsRead(eq(conversationId), eq(messageId), eq(userId), any());
         }
 
         @Test

@@ -20,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -42,178 +43,201 @@ import com.instagram.infrastructure.security.SecurityConfig;
 @Import(SecurityConfig.class)
 class MessageControllerIT {
 
-    private static final String CURRENT_USER_ID = "123e4567-e89b-12d3-a456-426614174000";
+        private static final String CURRENT_USER_ID = "123e4567-e89b-12d3-a456-426614174000";
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockBean private JwtTokenProvider jwtTokenProvider;
-    @MockBean private UserDetailsService userDetailsService;
-    @MockBean private OAuth2SuccessHandler oAuth2SuccessHandler;
+        @MockBean
+        private JwtTokenProvider jwtTokenProvider;
+        @MockBean
+        private UserDetailsService userDetailsService;
+        @MockBean
+        private OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    @MockBean private GetConversationsUseCase getConversationsUseCase;
-    @MockBean private CreateConversationUseCase createConversationUseCase;
-    @MockBean private GetMessagesUseCase getMessagesUseCase;
-    @MockBean private SendMessageUseCase sendMessageUseCase;
-    @MockBean private MarkReadUseCase markReadUseCase;
-    @MockBean private AddGroupMemberUseCase addGroupMemberUseCase;
-    @MockBean private LeaveConversationUseCase leaveConversationUseCase;
+        @MockBean
+        private GetConversationsUseCase getConversationsUseCase;
+        @MockBean
+        private CreateConversationUseCase createConversationUseCase;
+        @MockBean
+        private GetMessagesUseCase getMessagesUseCase;
+        @MockBean
+        private SendMessageUseCase sendMessageUseCase;
+        @MockBean
+        private SimpMessagingTemplate simpMessagingTemplate;
+        @MockBean
+        private MarkReadUseCase markReadUseCase;
+        @MockBean
+        private AddGroupMemberUseCase addGroupMemberUseCase;
+        @MockBean
+        private LeaveConversationUseCase leaveConversationUseCase;
 
-    // ── helpers ──────────────────────────────────────────────────────────────
+        // ── helpers ──────────────────────────────────────────────────────────────
 
-    private static Conversation buildConversation() {
-        return Conversation.builder()
-                .id(UUID.randomUUID())
-                .name("Test Chat")
-                .isGroup(false)
-                .createdById(UUID.fromString(CURRENT_USER_ID))
-                .createdAt(OffsetDateTime.now())
-                .updatedAt(OffsetDateTime.now())
-                .build();
-    }
+        private static Conversation buildConversation() {
+                return Conversation.builder()
+                                .id(UUID.randomUUID())
+                                .name("Test Chat")
+                                .isGroup(false)
+                                .createdById(UUID.fromString(CURRENT_USER_ID))
+                                .createdAt(OffsetDateTime.now())
+                                .updatedAt(OffsetDateTime.now())
+                                .build();
+        }
 
-    private static Message buildMessage(UUID conversationId) {
-        return Message.builder()
-                .id(UUID.randomUUID())
-                .conversationId(conversationId)
-                .senderId(UUID.fromString(CURRENT_USER_ID))
-                .content("Hello")
-                .messageType(Message.MessageType.TEXT)
-                .status(Message.MessageStatus.SENT)
-                .createdAt(OffsetDateTime.now())
-                .build();
-    }
+        private static Message buildMessage(UUID conversationId) {
+                return Message.builder()
+                                .id(UUID.randomUUID())
+                                .conversationId(conversationId)
+                                .senderId(UUID.fromString(CURRENT_USER_ID))
+                                .content("Hello")
+                                .messageType(Message.MessageType.TEXT)
+                                .status(Message.MessageStatus.SENT)
+                                .createdAt(OffsetDateTime.now())
+                                .build();
+        }
 
-    // ── tests ─────────────────────────────────────────────────────────────────
+        // ── tests ─────────────────────────────────────────────────────────────────
 
-    @Test
-    @WithMockUser(username = CURRENT_USER_ID)
-    void getConversations_returns200WithList() throws Exception {
-        Conversation conversation = buildConversation();
-        when(getConversationsUseCase.getConversations(any()))
-                .thenReturn(List.of(new GetConversationsUseCase.ConversationView(conversation, 2, null)));
+        @Test
+        @WithMockUser(username = CURRENT_USER_ID)
+        void getConversations_returns200WithList() throws Exception {
+                Conversation conversation = buildConversation();
+                when(getConversationsUseCase.getConversations(any()))
+                                .thenReturn(List.of(
+                                                new GetConversationsUseCase.ConversationView(conversation, 2, null,
+                                                                null)));
 
-        mockMvc.perform(get("/api/v1/conversations"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data[0].id").value(conversation.getId().toString()))
-                .andExpect(jsonPath("$.data[0].unreadCount").value(2));
-    }
+                mockMvc.perform(get("/api/v1/conversations"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data").isArray())
+                                .andExpect(jsonPath("$.data[0].id").value(conversation.getId().toString()))
+                                .andExpect(jsonPath("$.data[0].unreadCount").value(2));
+        }
 
-    @Test
-    @WithMockUser(username = CURRENT_USER_ID)
-    void createConversation_returns201WithConversation() throws Exception {
-        Conversation conversation = buildConversation();
-        when(createConversationUseCase.createConversation(any())).thenReturn(conversation);
+        @Test
+        @WithMockUser(username = CURRENT_USER_ID)
+        void createConversation_returns201WithConversation() throws Exception {
+                Conversation conversation = buildConversation();
+                when(createConversationUseCase.createConversation(any())).thenReturn(conversation);
 
-        String body = """
-                {
-                  "participantIds": ["%s"],
-                  "name": "Test Chat",
-                  "isGroup": false
-                }
-                """.formatted(UUID.randomUUID());
+                String body = """
+                                {
+                                  "participantIds": ["%s"],
+                                  "name": "Test Chat",
+                                  "isGroup": false
+                                }
+                                """.formatted(UUID.randomUUID());
 
-        mockMvc.perform(post("/api/v1/conversations")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.id").value(conversation.getId().toString()))
-                .andExpect(jsonPath("$.data.name").value("Test Chat"));
-    }
+                mockMvc.perform(post("/api/v1/conversations")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.data.id").value(conversation.getId().toString()))
+                                .andExpect(jsonPath("$.data.name").value("Test Chat"));
+        }
 
-    @Test
-    @WithMockUser(username = CURRENT_USER_ID)
-    void createConversation_missingParticipants_returns400() throws Exception {
-        String body = """
-                {
-                  "participantIds": [],
-                  "isGroup": false
-                }
-                """;
+        @Test
+        @WithMockUser(username = CURRENT_USER_ID)
+        void createConversation_missingParticipants_returns400() throws Exception {
+                String body = """
+                                {
+                                  "participantIds": [],
+                                  "isGroup": false
+                                }
+                                """;
 
-        mockMvc.perform(post("/api/v1/conversations")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest());
-    }
+                mockMvc.perform(post("/api/v1/conversations")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isBadRequest());
+        }
 
-    @Test
-    @WithMockUser(username = CURRENT_USER_ID)
-    void getMessages_returns200WithMessageList() throws Exception {
-        UUID conversationId = UUID.randomUUID();
-        Message message = buildMessage(conversationId);
-        when(getMessagesUseCase.getMessages(any()))
-                .thenReturn(List.of(new GetMessagesUseCase.MessageView(message, "alice", null)));
+        @Test
+        @WithMockUser(username = CURRENT_USER_ID)
+        void getMessages_returns200WithMessageList() throws Exception {
+                UUID conversationId = UUID.randomUUID();
+                Message message = buildMessage(conversationId);
+                when(getMessagesUseCase.getMessages(any()))
+                                .thenReturn(List.of(new GetMessagesUseCase.MessageView(message, "alice", null)));
 
-        mockMvc.perform(get("/api/v1/conversations/{id}/messages", conversationId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data[0].content").value("Hello"))
-                .andExpect(jsonPath("$.data[0].senderUsername").value("alice"));
-    }
+                mockMvc.perform(get("/api/v1/conversations/{id}/messages", conversationId))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data").isArray())
+                                .andExpect(jsonPath("$.data[0].content").value("Hello"))
+                                .andExpect(jsonPath("$.data[0].senderUsername").value("alice"));
+        }
 
-    @Test
-    @WithMockUser(username = CURRENT_USER_ID)
-    void sendMessage_returns201WithMessage() throws Exception {
-        UUID conversationId = UUID.randomUUID();
-        Message message = buildMessage(conversationId);
-        when(sendMessageUseCase.sendMessage(any()))
-                .thenReturn(new SendMessageUseCase.MessageView(message, "alice", null));
+        @Test
+        @WithMockUser(username = CURRENT_USER_ID)
+        void sendMessage_returns201WithMessage() throws Exception {
+                UUID conversationId = UUID.randomUUID();
+                Message message = buildMessage(conversationId);
+                when(sendMessageUseCase.sendMessage(any()))
+                                .thenReturn(new SendMessageUseCase.MessageView(message, "alice", null));
 
-        String body = """
-                {
-                  "content": "Hello",
-                  "messageType": "TEXT"
-                }
-                """;
+                String body = """
+                                {
+                                  "content": "Hello",
+                                  "messageType": "TEXT"
+                                }
+                                """;
 
-        mockMvc.perform(post("/api/v1/conversations/{id}/messages", conversationId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.content").value("Hello"))
-                .andExpect(jsonPath("$.data.messageType").value("TEXT"));
-    }
+                mockMvc.perform(post("/api/v1/conversations/{id}/messages", conversationId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.data.content").value("Hello"))
+                                .andExpect(jsonPath("$.data.messageType").value("TEXT"));
+        }
 
-    @Test
-    @WithMockUser(username = CURRENT_USER_ID)
-    void sendMessage_missingMessageType_returns400() throws Exception {
-        UUID conversationId = UUID.randomUUID();
+        @Test
+        @WithMockUser(username = CURRENT_USER_ID)
+        void sendMessage_missingMessageType_returns400() throws Exception {
+                UUID conversationId = UUID.randomUUID();
 
-        String body = """
-                {
-                  "content": "Hello"
-                }
-                """;
+                String body = """
+                                {
+                                  "content": "Hello"
+                                }
+                                """;
 
-        mockMvc.perform(post("/api/v1/conversations/{id}/messages", conversationId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest());
-    }
+                mockMvc.perform(post("/api/v1/conversations/{id}/messages", conversationId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isBadRequest());
+        }
 
-    @Test
-    @WithMockUser(username = CURRENT_USER_ID)
-    void markRead_returns204() throws Exception {
-        UUID conversationId = UUID.randomUUID();
+        @Test
+        @WithMockUser(username = CURRENT_USER_ID)
+        void markRead_returns204() throws Exception {
+                UUID conversationId = UUID.randomUUID();
+                UUID messageId = UUID.randomUUID();
+                String body = """
+                                {
+                                  "messageId": "%s"
+                                }
+                                """.formatted(messageId);
 
-        mockMvc.perform(put("/api/v1/conversations/{id}/read", conversationId))
-                .andExpect(status().isNoContent());
+                mockMvc.perform(put("/api/v1/conversations/{id}/read", conversationId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isNoContent());
 
-        verify(markReadUseCase).markRead(
-                new MarkReadUseCase.Command(conversationId, UUID.fromString(CURRENT_USER_ID)));
-    }
+                verify(markReadUseCase).markRead(
+                                new MarkReadUseCase.Command(conversationId, UUID.fromString(CURRENT_USER_ID),
+                                                messageId));
+        }
 
-    @Test
-    @WithMockUser(username = CURRENT_USER_ID)
-    void getMessages_notConversationMember_returns403() throws Exception {
-        UUID conversationId = UUID.randomUUID();
-        when(getMessagesUseCase.getMessages(any()))
-                .thenThrow(new NotConversationMemberException(
-                        UUID.fromString(CURRENT_USER_ID), conversationId));
+        @Test
+        @WithMockUser(username = CURRENT_USER_ID)
+        void getMessages_notConversationMember_returns403() throws Exception {
+                UUID conversationId = UUID.randomUUID();
+                when(getMessagesUseCase.getMessages(any()))
+                                .thenThrow(new NotConversationMemberException(
+                                                UUID.fromString(CURRENT_USER_ID), conversationId));
 
-        mockMvc.perform(get("/api/v1/conversations/{id}/messages", conversationId))
-                .andExpect(status().isForbidden());
-    }
+                mockMvc.perform(get("/api/v1/conversations/{id}/messages", conversationId))
+                                .andExpect(status().isForbidden());
+        }
 }

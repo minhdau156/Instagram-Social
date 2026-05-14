@@ -2,6 +2,8 @@ package com.instagram.adapter.out.persistence.entity;
 
 import java.time.OffsetDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -27,6 +29,7 @@ public class ConversationMemberJpaEntity {
     private boolean isAdmin;
 
     @Column(name = "joined_at")
+    @CreationTimestamp
     private OffsetDateTime joinedAt;
 
     @Column(name = "left_at")

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Alert, Button, CircularProgress, Container, Stack, TextField, Typography } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { useAuth } from "../../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export const LoginPage = () => {
     const { control, handleSubmit, formState: { errors } } = useForm({
@@ -28,8 +28,7 @@ export const LoginPage = () => {
     };
 
     if (isAuthenticated) {
-        console.log("User is already logged in");
-        navigate("/");
+        return <Navigate to="/" replace />;
     }
 
     return (

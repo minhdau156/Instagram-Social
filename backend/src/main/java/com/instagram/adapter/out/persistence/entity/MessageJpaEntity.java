@@ -17,7 +17,9 @@ import lombok.Setter;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
 import com.instagram.domain.model.Message;
@@ -56,6 +58,7 @@ public class MessageJpaEntity {
     private UUID sharedPostId;
 
     @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
     private OffsetDateTime createdAt;
 
     @Column(name = "reply_to_message_id", columnDefinition = "uuid")
@@ -65,5 +68,6 @@ public class MessageJpaEntity {
     private boolean isDeleted;
 
     @Column(name = "updated_at", nullable = false)
+    @UpdateTimestamp
     private OffsetDateTime updatedAt;
 }

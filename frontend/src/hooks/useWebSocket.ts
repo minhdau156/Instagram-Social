@@ -1,7 +1,7 @@
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useEffect, useRef, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { InfiniteData, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
 import type { Conversation, Message, SendMessagePayload } from '../types/messaging';
 
@@ -17,9 +17,11 @@ export function useWebSocket(conversationId: string | null) {
   // Create STOMP client once and activate for the lifetime of the session
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
+    if (!token) return;
+
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
-      connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
+      webSocketFactory: () => new SockJS('http://localhost:8080/ws', null, { transports: ['websocket'] }),
+      connectHeaders: { Authorization: `Bearer ${token}` },
       reconnectDelay: 5000,
       onConnect: () => setIsConnected(true),
       onDisconnect: () => setIsConnected(false),
@@ -45,10 +47,16 @@ export function useWebSocket(conversationId: string | null) {
       (frame) => {
         const message: Message = JSON.parse(frame.body);
 
-        // Prepend to messages cache (newest-first)
-        queryClient.setQueryData<Message[]>(
+        // Own messages are handled by useSendMessage optimistic update — skip to avoid flicker
+        if (message.senderId === profile?.user.id) return;
+
+        queryClient.setQueryData<InfiniteData<Message[]>>(
           ['messages', conversationId],
-          (old) => (old ? [message, ...old] : [message])
+          (old) => {
+            if (!old) return old;
+            const [firstPage, ...rest] = old.pages;
+            return { ...old, pages: [[message, ...(firstPage ?? [])], ...rest] };
+          }
         );
 
         // Update lastMessage on the matching conversation

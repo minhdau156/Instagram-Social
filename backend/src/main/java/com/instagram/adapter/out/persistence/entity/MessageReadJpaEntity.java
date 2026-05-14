@@ -2,6 +2,8 @@ package com.instagram.adapter.out.persistence.entity;
 
 import java.time.OffsetDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -24,5 +26,6 @@ public class MessageReadJpaEntity {
     private MessageReadId id;
 
     @Column(name = "read_at", nullable = false)
+    @CreationTimestamp
     private OffsetDateTime readAt;
 }

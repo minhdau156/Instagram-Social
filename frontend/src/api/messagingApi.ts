@@ -26,8 +26,8 @@ export const messagingApi = {
     return data.data;
   },
 
-  markRead: async (conversationId: string): Promise<void> => {
-    await api.put(`${BASE}/${conversationId}/read`);
+  markRead: async (conversationId: string, messageId: string): Promise<void> => {
+    await api.put(`${BASE}/${conversationId}/read`, { messageId });
   },
 
   addGroupMembers: async (conversationId: string, memberIds: string[]): Promise<void> => {

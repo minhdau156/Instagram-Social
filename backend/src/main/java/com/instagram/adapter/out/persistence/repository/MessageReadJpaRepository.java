@@ -34,10 +34,20 @@ public interface MessageReadJpaRepository extends JpaRepository<MessageReadJpaEn
         int countUnread(@Param("convId") UUID conversationId, @Param("userId") UUID userId);
 
         @Modifying
-        @Transactional
-        @Query(value = "INSERT INTO message_reads (message_id, user_id, read_at) " +
-                        "VALUES (:messageId, :userId, :readAt) " +
-                        "ON CONFLICT (message_id, user_id) DO UPDATE SET read_at = EXCLUDED.read_at", nativeQuery = true)
-        void upsertReadTimestamp(@Param("messageId") UUID messageId, @Param("userId") UUID userId,
-                        @Param("readAt") OffsetDateTime readAt);
+@Transactional
+@Query(value = "INSERT INTO message_reads (message_id, user_id, read_at) " +
+               "SELECT m.id, :userId, :readAt " +
+               "FROM messages m " +
+               "WHERE m.conversation_id = :convId " +
+               "AND m.sender_id <> :userId " +
+               "AND m.created_at <= (SELECT created_at FROM messages WHERE id = :messageId) " +
+               "ON CONFLICT (message_id, user_id) DO UPDATE SET read_at = EXCLUDED.read_at",
+       nativeQuery = true)
+void markConversationReadUpToMessage(@Param("convId") UUID conversationId,
+                                     @Param("userId") UUID userId,
+                                     @Param("messageId") UUID messageId,
+                                     @Param("readAt") OffsetDateTime readAt);
+                        
+
+                        
 }

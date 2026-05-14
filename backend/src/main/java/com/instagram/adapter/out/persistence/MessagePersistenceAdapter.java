@@ -50,8 +50,9 @@ public class MessagePersistenceAdapter implements MessageRepository {
     }
 
     @Override
-    public void markAsRead(UUID messageId, UUID userId, OffsetDateTime readAt) {
-        this.messageReadJpaRepository.upsertReadTimestamp(messageId, userId, readAt);
+    public void markAsRead(UUID conversationId, UUID messageId, UUID userId, OffsetDateTime readAt) {
+        this.messageReadJpaRepository.markConversationReadUpToMessage(conversationId, userId, messageId,
+                readAt);
     }
 
     @Override

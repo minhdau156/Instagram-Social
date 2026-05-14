@@ -5,6 +5,6 @@ import java.util.UUID;
 public interface MarkReadUseCase {
     void markRead(Command command);
 
-    record Command(UUID conversationId, UUID userId) {
+    record Command(UUID conversationId, UUID userId, UUID messageId) {
     }
 }
