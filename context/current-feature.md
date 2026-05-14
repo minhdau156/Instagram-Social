@@ -7,6 +7,7 @@
 ## Notes
 
 ## History
+- TASK-7.4 — Out-Ports: NotificationRepository (6 methods), NotificationSettingsRepository (2 methods), PushNotificationPort (sendPush)
 - TASK-7.3 — Domain Exceptions: NotificationNotFoundException + 404 handler in GlobalExceptionHandler
 - TASK-7.2 — Domain Model: NotificationSettings as Java record with 6 boolean flags and defaultsFor() factory
 - TASK-7.1 — Domain Model: Notification with NotificationType (12 values), EntityType, hand-written Builder, immutable withRead()
