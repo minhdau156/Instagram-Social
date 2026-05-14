@@ -7,6 +7,7 @@
 ## Notes
 
 ## History
+- TASK-7.2 — Domain Model: NotificationSettings as Java record with 6 boolean flags and defaultsFor() factory
 - TASK-7.1 — Domain Model: Notification with NotificationType (12 values), EntityType, hand-written Builder, immutable withRead()
 - TASK-6.22 — File Attachments in ChatPage: hidden file input wired to AttachFileIcon, preview strip above input bar, upload via mediaApi presigned URL, send IMAGE/VIDEO message with full MinIO URL
 - TASK-6.21 — Register Routes: /messages (InboxPage lazy) + /messages/:conversationId (ChatRoute wrapper → ChatPage lazy), both protected; converted InboxPage + ChatPage to default exports for React.lazy compatibility
