@@ -22,9 +22,9 @@ backend/src/main/java/com/instagram/domain/model/Notification.java
 
 ### `Notification.java`
 
-- [ ] Public static enum `NotificationType { LIKE, COMMENT, MENTION, FOLLOW, FOLLOW_REQUEST, MESSAGE }`.
-- [ ] Public static enum `EntityType { POST, COMMENT, FOLLOW, MESSAGE }`.
-- [ ] Fields:
+- [x] Public static enum `NotificationType` — 12 values matching `schema.sql` (`LIKE_POST`, `LIKE_COMMENT`, `COMMENT_POST`, `REPLY_COMMENT`, `FOLLOW`, `FOLLOW_REQUEST`, `FOLLOW_ACCEPTED`, `MENTION_POST`, `MENTION_COMMENT`, `DIRECT_MESSAGE`, `GROUP_MESSAGE`, `POST_SHARED`). Spec listed 6 simplified names; schema is source of truth.
+- [x] Public static enum `EntityType { POST, COMMENT, FOLLOW, MESSAGE }`.
+- [x] Fields:
   - `UUID id`
   - `UUID recipientId` — the user receiving the notification
   - `UUID actorId` — the user who triggered the action (nullable for system notifications)
@@ -33,9 +33,9 @@ backend/src/main/java/com/instagram/domain/model/Notification.java
   - `NotificationType type`
   - `boolean isRead`
   - `OffsetDateTime createdAt`
-- [ ] Builder with all fields.
-- [ ] Business method `withRead()` — returns a **new** `Notification` with `isRead = true`. Does not mutate the original.
-- [ ] No setters.
+- [x] Builder with all fields.
+- [ ] Business method `withRead()` — returns a **new** `Notification` with `isRead = true`. Does not mutate the original. ⚠️ Currently `withIsRead(boolean)` returning `Builder` — fix: rename to `withRead()`, remove param, return `copy().isRead(true).build()`
+- [x] No setters.
 
 ## Notes
 
