@@ -1,13 +1,16 @@
 # Current Feature
 
 ## Status
-Not Started
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
+<!-- bullet points of what success looks like -->
 
 ## Notes
+<!-- Additional context, constraints, or details -->
 
 ## History
+- TASK-7.10 — Persistence Adapters (Notifications): `NotificationPersistenceAdapter` (6 methods, `toEntity`/`toDomain`) + `NotificationSettingsPersistenceAdapter` (2 methods, `toEntity`/`toDomain`); `@Modifying(clearAutomatically = true)` on both bulk-update queries
 - TASK-7.9 — JPA Entities & Repositories (Notifications): `NotificationJpaEntity` (PG native enum via `@JdbcTypeCode`, `@PrePersist` defaults) + `NotificationJpaRepository` (paged query, 2 `@Modifying` JPQL, unread count) + `NotificationSettingsJpaEntity` (UUID PK, 5 explicit `@Column` mappings) + `NotificationSettingsJpaRepository`
 - TASK-7.8 — Device Token JPA & FCM Push Adapter: `DeviceTokenJpaEntity` + `DeviceTokenJpaRepository` + `FcmPushAdapter` stub (log only, no Firebase SDK)
 - TASK-7.7 — Domain Event Integration: NotificationEvent (domain/event/), NotificationEventHandler (@Async @EventListener in infrastructure/event/); LikeService publishes LIKE_POST + LIKE_COMMENT; CommentService publishes COMMENT_POST + MENTION_COMMENT (ifPresent skip); FollowService publishes FOLLOW/FOLLOW_REQUEST (null entityId)
