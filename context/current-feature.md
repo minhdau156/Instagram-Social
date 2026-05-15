@@ -1,11 +1,19 @@
-# Current Feature
+# Current Feature: TASK-7.8 — Device Token JPA & FCM Push Adapter
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
+- Create `DeviceTokenJpaEntity` (`@Entity @Table(name = "device_tokens")`) with fields: `id`, `userId`, `token`, `platform`, `createdAt`, `updatedAt`; `@PrePersist` sets `createdAt`/`updatedAt` when null; Lombok `@Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor`
+- Create `DeviceTokenJpaRepository` extending `JpaRepository<DeviceTokenJpaEntity, UUID>` with `findByUserId(UUID)` and `deleteByToken(String)`
+- Create `FcmPushAdapter` in `adapter/out/push/` — `@Component`, implements `PushNotificationPort`, injects `DeviceTokenJpaRepository`; `sendPush(userId, title, body)` loads all tokens and logs each at INFO; no HTTP calls
 
 ## Notes
+- Schema columns: `id`, `user_id`, `token`, `platform VARCHAR(20)`, `created_at`, `updated_at` — schema also has `updated_at` (not in task spec — include it)
+- Schema platform values are `'ios' | 'android' | 'web'` (not `FCM`/`APNS` as the task spec suggests) — store as plain `String`, no enum needed
+- `token` is `TEXT NOT NULL UNIQUE` in schema
+- `@PrePersist` should set both `createdAt` and `updatedAt` when null; add `@PreUpdate` for `updatedAt`
+- `FcmPushAdapter` is a stub — log only, no Firebase SDK
 
 ## History
 - TASK-7.7 — Domain Event Integration: NotificationEvent (domain/event/), NotificationEventHandler (@Async @EventListener in infrastructure/event/); LikeService publishes LIKE_POST + LIKE_COMMENT; CommentService publishes COMMENT_POST + MENTION_COMMENT (ifPresent skip); FollowService publishes FOLLOW/FOLLOW_REQUEST (null entityId)
