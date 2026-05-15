@@ -15,6 +15,7 @@ import com.instagram.domain.exception.NotConversationMemberException;
 import com.instagram.domain.exception.NotLikedException;
 import com.instagram.domain.exception.NotSavedException;
 import com.instagram.domain.exception.NotificationNotFoundException;
+import com.instagram.domain.exception.UnauthorizedNotificationAccessException;
 import com.instagram.domain.exception.PasswordResetTokenExpiredException;
 import com.instagram.domain.exception.PostNotFoundException;
 import com.instagram.domain.exception.UnauthorizedCommentAccessException;
@@ -206,6 +207,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleNotificationNotFound(NotificationNotFoundException ex) {
         log.warn(ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(UnauthorizedNotificationAccessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnauthorizedNotificationAccess(
+            UnauthorizedNotificationAccessException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
