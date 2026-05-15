@@ -8,16 +8,19 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.instagram.domain.event.NotificationEvent;
 import com.instagram.domain.exception.AlreadyFollowingException;
 import com.instagram.domain.exception.CannotFollowYourselfException;
 import com.instagram.domain.exception.FollowRequestNotFoundException;
 import com.instagram.domain.exception.UserNotFoundException;
 import com.instagram.domain.model.Follow;
 import com.instagram.domain.model.FollowStatus;
+import com.instagram.domain.model.Notification;
 import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.User;
 import com.instagram.domain.model.UserSummary;
@@ -38,13 +41,16 @@ public class FollowService implements FollowUserUseCase,
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
     private final UserStatsRepository userStatsRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public FollowService(FollowRepository followRepository,
             UserRepository userRepository,
-            UserStatsRepository userStatsRepository) {
+            UserStatsRepository userStatsRepository,
+            ApplicationEventPublisher eventPublisher) {
         this.followRepository = followRepository;
         this.userRepository = userRepository;
         this.userStatsRepository = userStatsRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -70,6 +76,15 @@ public class FollowService implements FollowUserUseCase,
             userStatsRepository.incrementFollowerCount(targetUser.getId());
             userStatsRepository.incrementFollowingCount(command.followerId());
         }
+
+        eventPublisher.publishEvent(new NotificationEvent(
+                this,
+                status == FollowStatus.ACCEPTED ? Notification.NotificationType.FOLLOW
+                        : Notification.NotificationType.FOLLOW_REQUEST,
+                targetUser.getId(),
+                command.followerId(),
+                Notification.EntityType.FOLLOW,
+                null));
 
         return saved;
     }

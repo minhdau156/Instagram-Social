@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.Optional;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.instagram.domain.exception.AlreadyLikedException;
+import com.instagram.domain.exception.CommentNotFoundException;
 import com.instagram.domain.exception.NotLikedException;
+import com.instagram.domain.exception.PostNotFoundException;
+import com.instagram.domain.model.Comment;
 import com.instagram.domain.model.Follow;
 import com.instagram.domain.model.FollowStatus;
 import com.instagram.domain.model.PrivacyLevel;
@@ -31,6 +35,10 @@ import com.instagram.domain.port.out.UserRepository;
 import com.instagram.domain.port.out.PostRepository;
 import com.instagram.domain.port.out.UserInterestPort;
 
+import com.instagram.domain.event.NotificationEvent;
+import com.instagram.domain.model.Notification;
+import com.instagram.domain.model.Post;
+
 @Service
 public class LikeService implements LikePostUseCase,
         UnlikePostUseCase,
@@ -43,6 +51,7 @@ public class LikeService implements LikePostUseCase,
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final UserInterestPort userInterestPort;
 
@@ -51,13 +60,15 @@ public class LikeService implements LikePostUseCase,
             CommentRepository commentRepository,
             UserRepository userRepository,
             FollowRepository followRepository,
-            UserInterestPort userInterestPort) {
+            UserInterestPort userInterestPort,
+            ApplicationEventPublisher eventPublisher) {
         this.likeRepository = likeRepository;
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
         this.followRepository = followRepository;
         this.userInterestPort = userInterestPort;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -68,6 +79,19 @@ public class LikeService implements LikePostUseCase,
         }
         likeRepository.likePost(command.postId(), command.userId());
         userInterestPort.recordLike(command.userId(), command.postId());
+
+        Post post = postRepository.findById(command.postId())
+                .orElseThrow(() -> new PostNotFoundException(command.postId()));
+        if (!post.getUserId().equals(command.userId())) {
+            eventPublisher.publishEvent(new NotificationEvent(
+                    this,
+                    Notification.NotificationType.LIKE_POST,
+                    post.getUserId(),
+                    command.userId(),
+                    Notification.EntityType.POST,
+                    command.postId()));
+        }
+
     }
 
     @Override
@@ -86,6 +110,17 @@ public class LikeService implements LikePostUseCase,
             throw new AlreadyLikedException("comment", command.commentId());
         }
         likeRepository.likeComment(command.commentId(), command.userId());
+        Comment comment = commentRepository.findById(command.commentId())
+                .orElseThrow(() -> new CommentNotFoundException(command.commentId()));
+        if (!comment.getUserId().equals(command.userId())) {
+            eventPublisher.publishEvent(new NotificationEvent(
+                    this,
+                    Notification.NotificationType.LIKE_COMMENT,
+                    comment.getUserId(),
+                    command.userId(),
+                    Notification.EntityType.COMMENT,
+                    command.commentId()));
+        }
     }
 
     @Override

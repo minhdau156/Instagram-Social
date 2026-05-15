@@ -8,14 +8,19 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.instagram.domain.event.NotificationEvent;
 import com.instagram.domain.exception.CommentNotFoundException;
+import com.instagram.domain.exception.PostNotFoundException;
 import com.instagram.domain.exception.UnauthorizedCommentAccessException;
 import com.instagram.domain.exception.UserNotFoundException;
 import com.instagram.domain.model.Comment;
+import com.instagram.domain.model.Notification;
+import com.instagram.domain.model.Post;
 import com.instagram.domain.model.User;
 import com.instagram.domain.port.in.comment.AddCommentUseCase;
 import com.instagram.domain.port.in.comment.DeleteCommentUseCase;
@@ -24,6 +29,7 @@ import com.instagram.domain.port.in.comment.GetCommentsUseCase;
 import com.instagram.domain.port.in.comment.GetRepliesUseCase;
 import com.instagram.domain.port.out.CommentRepository;
 import com.instagram.domain.port.out.LikeRepository;
+import com.instagram.domain.port.out.PostRepository;
 import com.instagram.domain.port.out.UserInterestPort;
 import com.instagram.domain.port.out.UserRepository;
 
@@ -39,16 +45,20 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
 
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
     private final LikeRepository likeRepository;
     private final UserInterestPort userInterestPort;
+    private final ApplicationEventPublisher eventPublisher;
 
     public CommentService(CommentRepository commentRepository, UserRepository userRepository,
-            LikeRepository likeRepository,
-            UserInterestPort userInterestPort) {
+            PostRepository postRepository, LikeRepository likeRepository,
+            UserInterestPort userInterestPort, ApplicationEventPublisher eventPublisher) {
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
+        this.postRepository = postRepository;
         this.likeRepository = likeRepository;
         this.userInterestPort = userInterestPort;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -114,9 +124,33 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
         this.commentRepository.incrementPostCommentCount(command.postId());
         this.userInterestPort.recordComment(command.userId(), command.postId());
 
+        Post post = postRepository.findById(command.postId())
+                .orElseThrow(() -> new PostNotFoundException(command.postId()));
+        if (!post.getUserId().equals(command.userId())) {
+            eventPublisher.publishEvent(new NotificationEvent(
+                    this,
+                    Notification.NotificationType.COMMENT_POST,
+                    post.getUserId(),
+                    command.userId(),
+                    Notification.EntityType.POST,
+                    command.postId()));
+        }
+
         List<String> mentions = extractMentions(command.content());
-        if (!mentions.isEmpty()) {
-            log.info("Extracted mentions in new comment {}: {}", comment.getId(), mentions);
+        for (String username : mentions) {
+            userRepository.findByUsername(username)
+                    .ifPresent(mentionedUser -> {
+                        if (!mentionedUser.getId().equals(command.userId())) {
+                            eventPublisher.publishEvent(new NotificationEvent(
+                                    this,
+                                    Notification.NotificationType.MENTION_COMMENT,
+                                    mentionedUser.getId(),
+                                    command.userId(),
+                                    Notification.EntityType.COMMENT,
+                                    comment.getId()));
+                        }
+                    });
+
         }
 
         return newComment;
