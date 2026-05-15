@@ -12,13 +12,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface NotificationJpaRepository extends JpaRepository<NotificationJpaEntity, UUID> {
-    Page<NotificationJpaEntity> findByRecipientId(UUID recipientId, Pageable pageable);
+    Page<NotificationJpaEntity> findByRecipientIdOrderByCreatedAtDesc(UUID recipientId, Pageable pageable);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE NotificationJpaEntity n SET n.isRead = true WHERE n.id = :id")
     void markAsRead(@Param("id") UUID id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE NotificationJpaEntity n SET n.isRead = true WHERE n.recipientId = :recipientId")
     void markAllAsRead(@Param("recipientId") UUID recipientId);
 
