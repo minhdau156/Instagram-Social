@@ -1,13 +1,13 @@
 # Current Feature
 
 ## Status
-Not Started
 
 ## Goals
 
 ## Notes
 
 ## History
+- TASK-7.6 — Domain Service: NotificationService — all 6 use-cases (createNotification, getNotifications, markRead, markAllRead, getSettings, updateSettings); exhaustive enum switch for suppression; UnauthorizedNotificationAccessException (403); @Transactional on markRead + updateSettings
 - TASK-7.5 — In-Ports: GetNotificationsUseCase, MarkNotificationReadUseCase, MarkAllNotificationsReadUseCase, GetNotificationSettingsUseCase, UpdateNotificationSettingsUseCase, CreateNotificationUseCase (all in domain/port/in/notification/)
 - TASK-7.4 — Out-Ports: NotificationRepository (6 methods), NotificationSettingsRepository (2 methods), PushNotificationPort (sendPush)
 - TASK-7.3 — Domain Exceptions: NotificationNotFoundException + 404 handler in GlobalExceptionHandler
