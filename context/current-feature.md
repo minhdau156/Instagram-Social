@@ -10,6 +10,7 @@
 <!-- Additional context, constraints, or details -->
 
 ## History
+- TASK-7.13 — DTOs: `NotificationResponse` record (8 fields, null-safe `from(Notification, User)` factory) + `NotificationSettingsRequest` (5 primitive booleans) + `RegisterDeviceTokenRequest` (`@NotBlank token` + `@NotBlank platform`)
 - TASK-7.11 — WebSocket Push Configuration: `registry.setUserDestinationPrefix("/user")` in `WebSocketConfig.configureMessageBroker`; already present from TASK-6.9, verified and marked complete
 - TASK-7.10 — Persistence Adapters (Notifications): `NotificationPersistenceAdapter` (6 methods, `toEntity`/`toDomain`) + `NotificationSettingsPersistenceAdapter` (2 methods, `toEntity`/`toDomain`); `@Modifying(clearAutomatically = true)` on both bulk-update queries
 - TASK-7.9 — JPA Entities & Repositories (Notifications): `NotificationJpaEntity` (PG native enum via `@JdbcTypeCode`, `@PrePersist` defaults) + `NotificationJpaRepository` (paged query, 2 `@Modifying` JPQL, unread count) + `NotificationSettingsJpaEntity` (UUID PK, 5 explicit `@Column` mappings) + `NotificationSettingsJpaRepository`
