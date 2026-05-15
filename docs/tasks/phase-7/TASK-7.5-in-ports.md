@@ -26,33 +26,33 @@ backend/src/main/java/com/instagram/domain/port/in/notification/CreateNotificati
 
 ### `GetNotificationsUseCase.java`
 
-- [ ] Method: `List<Notification> getNotifications(Query query)`
-- [ ] Inner record: `Query(UUID userId, int page, int size)`
+- [x] Method: `List<Notification> getNotifications(Query query)`
+- [x] Inner record: `Query(UUID userId, int page, int size)`
 
 ### `MarkNotificationReadUseCase.java`
 
-- [ ] Method: `void markRead(Command command)`
-- [ ] Inner record: `Command(UUID notificationId, UUID userId)` — `userId` is passed to verify the notification belongs to this user before marking it.
+- [x] Method: `void markRead(Command command)`
+- [x] Inner record: `Command(UUID notificationId, UUID userId)` — `userId` is passed to verify the notification belongs to this user before marking it.
 
 ### `MarkAllNotificationsReadUseCase.java`
 
-- [ ] Method: `void markAllRead(Command command)`
-- [ ] Inner record: `Command(UUID userId)`
+- [x] Method: `void markAllRead(Command command)`
+- [x] Inner record: `Command(UUID userId)`
 
 ### `GetNotificationSettingsUseCase.java`
 
-- [ ] Method: `NotificationSettings getSettings(Query query)`
-- [ ] Inner record: `Query(UUID userId)`
+- [x] Method: `NotificationSettings getSettings(Query query)`
+- [x] Inner record: `Query(UUID userId)`
 
 ### `UpdateNotificationSettingsUseCase.java`
 
-- [ ] Method: `NotificationSettings updateSettings(Command command)`
-- [ ] Inner record: `Command(UUID userId, boolean likesEnabled, boolean commentsEnabled, boolean followsEnabled, boolean messagesEnabled, boolean pushEnabled)`
+- [x] Method: `NotificationSettings updateSettings(Command command)`
+- [x] Inner record: `Command(UUID userId, boolean likesEnabled, boolean commentsEnabled, boolean followsEnabled, boolean messagesEnabled, boolean pushEnabled)`
 
 ### `CreateNotificationUseCase.java`
 
-- [ ] Method: `Notification createNotification(Command command)` — internal trigger; not exposed via the REST controller directly.
-- [ ] Inner record: `Command(Notification.NotificationType type, UUID recipientId, UUID actorId, Notification.EntityType entityType, UUID entityId)`
+- [x] Method: `Notification createNotification(Command command)` — internal trigger; not exposed via the REST controller directly.
+- [x] Inner record: `Command(Notification.NotificationType type, UUID recipientId, UUID actorId, Notification.EntityType entityType, UUID entityId)`
 
 ## Notes
 

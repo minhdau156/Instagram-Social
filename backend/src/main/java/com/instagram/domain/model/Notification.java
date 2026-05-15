@@ -94,7 +94,7 @@ public class Notification {
     public static final class Builder {
         private final Notification notification = new Notification();
 
-        private Builder() {
+        public Builder() {
 
         }
 
