@@ -1,15 +1,14 @@
 # Current Feature
 
 ## Status
-<!-- Not Started | In Progress | Complete -->
+Not Started
 
 ## Goals
-<!-- bullet points of what success looks like -->
 
 ## Notes
-<!-- Additional context, constraints, or details -->
 
 ## History
+- TASK-7.14 — Unit & Integration Tests: Notifications: `NotificationServiceTest` (9 unit tests: createNotification allow/suppress, getNotifications, markAllRead, markRead success/notFound/unauthorized, getSettings, updateSettings) + `NotificationEventHandlerTest` (ArgumentCaptor verifying all Command fields) + `NotificationPersistenceAdapterIT` (save, findById, findByRecipientId, markAsRead, markAllAsRead 3-row, getUnreadCount, settings round-trip) + `NotificationControllerIT` (6 authenticated endpoints + 1 unauthenticated 401)
 - TASK-7.12 — REST Controller: `NotificationController` (6 endpoints: GET /notifications with actor batch-fetch via `computeIfAbsent`, PUT /notifications/read-all above {id}/read, GET+PUT /notifications/settings, POST /device-tokens returning 201)
 - TASK-7.13 — DTOs: `NotificationResponse` record (8 fields, null-safe `from(Notification, User)` factory) + `NotificationSettingsRequest` (5 primitive booleans) + `RegisterDeviceTokenRequest` (`@NotBlank token` + `@NotBlank platform`)
 - TASK-7.11 — WebSocket Push Configuration: `registry.setUserDestinationPrefix("/user")` in `WebSocketConfig.configureMessageBroker`; already present from TASK-6.9, verified and marked complete
