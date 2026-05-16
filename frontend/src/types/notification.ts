@@ -2,7 +2,7 @@ export type NotificationType = 'LIKE_POST' | 'LIKE_COMMENT' | 'COMMENT_POST' | '
 
 export type EntityType = 'POST' | 'COMMENT' | 'FOLLOW' | 'MESSAGE';
 
-interface Notification {
+export interface Notification {
     id: string;
     type: NotificationType;
     entityType: EntityType;
@@ -13,7 +13,7 @@ interface Notification {
     createdAt: string;
 }
 
-interface NotificationSettings {
+export interface NotificationSettings {
     likesEnabled: boolean;
     commentsEnabled: boolean;
     followsEnabled: boolean;
@@ -21,7 +21,7 @@ interface NotificationSettings {
     pushEnabled: boolean;
 }
 
-interface RegisterDeviceTokenPayload {
+export interface RegisterDeviceTokenPayload {
     token: string;
     platform: 'FCM' | 'APNS';
 }
