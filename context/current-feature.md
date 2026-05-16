@@ -1,11 +1,22 @@
-# Current Feature
+# Current Feature: Phase 7 — TASK-7.15 TypeScript Types: notification.ts
 
 ## Status
 Not Started
 
 ## Goals
+- `NotificationType` string literal union — use **actual backend enum names**: `'LIKE_POST' | 'LIKE_COMMENT' | 'COMMENT_POST' | 'REPLY_COMMENT' | 'FOLLOW' | 'FOLLOW_REQUEST' | 'FOLLOW_ACCEPTED' | 'MENTION_POST' | 'MENTION_COMMENT' | 'DIRECT_MESSAGE' | 'GROUP_MESSAGE' | 'POST_SHARED'`
+- `EntityType` string literal union: `'POST' | 'COMMENT' | 'FOLLOW' | 'MESSAGE'`
+- `Notification` interface mirroring `NotificationResponse`: `id`, `type`, `entityType`, `entityId: string | null`, `actorUsername: string | null`, `actorAvatarUrl: string | null`, `isRead: boolean`, `createdAt: string`
+- `NotificationSettings` interface: `likesEnabled`, `commentsEnabled`, `followsEnabled`, `messagesEnabled`, `pushEnabled` (all `boolean`)
+- `RegisterDeviceTokenPayload` interface: `token: string`, `platform: 'FCM' | 'APNS'`
 
 ## Notes
+- File: `frontend/src/types/notification.ts`
+- No `any` types — strict TypeScript throughout
+- String literal unions, not TypeScript `enum` — values are directly comparable to API strings
+- All UUID fields (`id`, `entityId`) typed as `string` — Axios deserialises them as strings
+- `actorUsername` and `actorAvatarUrl` are `null` for system notifications
+- **Spec discrepancy:** The task spec lists simplified `NotificationType` values (`'LIKE' | 'COMMENT'` etc.) but the backend serialises the full enum names (`LIKE_POST`, `LIKE_COMMENT`, etc.) — use the full names
 
 ## History
 - TASK-7.14 — Unit & Integration Tests: Notifications: `NotificationServiceTest` (9 unit tests: createNotification allow/suppress, getNotifications, markAllRead, markRead success/notFound/unauthorized, getSettings, updateSettings) + `NotificationEventHandlerTest` (ArgumentCaptor verifying all Command fields) + `NotificationPersistenceAdapterIT` (save, findById, findByRecipientId, markAsRead, markAllAsRead 3-row, getUnreadCount, settings round-trip) + `NotificationControllerIT` (6 authenticated endpoints + 1 unauthenticated 401)

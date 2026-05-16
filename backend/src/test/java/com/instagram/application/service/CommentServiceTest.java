@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,15 +16,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
+import com.instagram.domain.event.NotificationEvent;
 import com.instagram.domain.exception.CommentNotFoundException;
 import com.instagram.domain.exception.UnauthorizedCommentAccessException;
 import com.instagram.domain.model.Comment;
+import com.instagram.domain.model.Post;
+import com.instagram.domain.model.User;
 import com.instagram.domain.port.in.comment.AddCommentUseCase;
 import com.instagram.domain.port.in.comment.DeleteCommentUseCase;
 import com.instagram.domain.port.in.comment.EditCommentUseCase;
 import com.instagram.domain.port.out.CommentRepository;
 import com.instagram.domain.port.out.LikeRepository;
+import com.instagram.domain.port.out.PostRepository;
 import com.instagram.domain.port.out.UserInterestPort;
 import com.instagram.domain.port.out.UserRepository;
 
@@ -36,6 +42,12 @@ public class CommentServiceTest {
     @Mock
     private LikeRepository likeRepository;
     @Mock
+    private ApplicationEventPublisher eventPublisher;
+
+    @Mock
+    private PostRepository postRepository;
+
+    @Mock
     private UserInterestPort userInterestPort;
     @InjectMocks
     private CommentService commentService;
@@ -43,7 +55,7 @@ public class CommentServiceTest {
     UUID postId = UUID.randomUUID();
     UUID userId = UUID.randomUUID();
     UUID commentId = UUID.randomUUID();
-    String content = "This is a comment";
+    String content = "This is a comment @minh";
     UUID parentId = UUID.randomUUID();
 
     @Test
@@ -51,6 +63,17 @@ public class CommentServiceTest {
         Comment comment = Comment.of(postId, userId, content, null);
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
         doNothing().when(commentRepository).incrementPostCommentCount(postId);
+
+        Post post = Post.builder()
+                .id(UUID.randomUUID())
+                .userId(UUID.randomUUID())
+                .build();
+        User mentionedUser = User.builder()
+                .id(UUID.randomUUID())
+                .build();
+        when(postRepository.findById(any(UUID.class))).thenReturn(Optional.of(post));
+        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(mentionedUser));
+
         Comment addedComment = commentService.addComment(new AddCommentUseCase.Command(postId, userId, content, null));
 
         assertEquals(content, addedComment.getContent());
@@ -60,6 +83,7 @@ public class CommentServiceTest {
 
         verify(commentRepository).save(any(Comment.class));
         verify(commentRepository).incrementPostCommentCount(postId);
+        verify(eventPublisher, times(2)).publishEvent(any(NotificationEvent.class));
     }
 
     @Test
@@ -68,6 +92,16 @@ public class CommentServiceTest {
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
         doNothing().when(commentRepository).incrementReplyCount(parentId);
         doNothing().when(commentRepository).incrementPostCommentCount(postId);
+
+        Post post = Post.builder()
+                .id(UUID.randomUUID())
+                .userId(UUID.randomUUID())
+                .build();
+        User mentionedUser = User.builder()
+                .id(UUID.randomUUID())
+                .build();
+        when(postRepository.findById(any(UUID.class))).thenReturn(Optional.of(post));
+        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(mentionedUser));
         Comment addedComment = commentService
                 .addComment(new AddCommentUseCase.Command(postId, userId, content, parentId));
 
@@ -79,6 +113,8 @@ public class CommentServiceTest {
         verify(commentRepository).save(any(Comment.class));
         verify(commentRepository).incrementReplyCount(parentId);
         verify(commentRepository).incrementPostCommentCount(postId);
+        verify(eventPublisher, times(2)).publishEvent(any(NotificationEvent.class));
+
     }
 
     @Test

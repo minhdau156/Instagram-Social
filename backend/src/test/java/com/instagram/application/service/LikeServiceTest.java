@@ -1,9 +1,15 @@
 package com.instagram.application.service;
 
+import com.instagram.domain.event.NotificationEvent;
 import com.instagram.domain.exception.AlreadyLikedException;
+import com.instagram.domain.exception.CommentNotFoundException;
 import com.instagram.domain.exception.NotLikedException;
+import com.instagram.domain.exception.PostNotFoundException;
+import com.instagram.domain.model.Comment;
+import com.instagram.domain.model.CommentStatus;
 import com.instagram.domain.model.Follow;
 import com.instagram.domain.model.FollowStatus;
+import com.instagram.domain.model.Post;
 import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.User;
 import com.instagram.domain.model.UserSummary;
@@ -24,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -58,6 +65,9 @@ class LikeServiceTest {
     @Mock
     private UserInterestPort userInterestPort;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     @InjectMocks
     private LikeService likeService;
 
@@ -75,11 +85,27 @@ class LikeServiceTest {
     @Test
     void like_notYetLiked_savesLikeRecord() {
         LikePostUseCase.Command command = new LikePostUseCase.Command(postId, userId);
+        Post post = Post.builder()
+                .id(postId)
+                .userId(UUID.randomUUID())
+                .build();
+
         when(likeRepository.hasLikedPost(postId, userId)).thenReturn(false);
+        when(postRepository.findById(any(UUID.class))).thenReturn(Optional.of(post));
 
         likeService.like(command);
 
         verify(likeRepository).likePost(postId, userId);
+        verify(eventPublisher).publishEvent(any(NotificationEvent.class));
+    }
+
+    @Test
+    void like_postNotFound_throwsException() {
+        LikePostUseCase.Command command = new LikePostUseCase.Command(postId, userId);
+        when(likeRepository.hasLikedPost(postId, userId)).thenReturn(false);
+        when(postRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        assertThrows(PostNotFoundException.class, () -> likeService.like(command));
     }
 
     @Test
@@ -116,10 +142,29 @@ class LikeServiceTest {
     void likeComment_notLikedYet_savesCommentLikeRecord() {
         LikeCommentUseCase.Command command = new LikeCommentUseCase.Command(commentId, userId);
         when(likeRepository.hasLikedComment(commentId, userId)).thenReturn(false);
+        Comment comment = Comment.builder()
+                .id(commentId)
+                .userId(UUID.randomUUID())
+                .postId(postId)
+                .content("Test content")
+                .status(CommentStatus.ACTIVE)
+                .build();
+        when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.of(comment));
 
         likeService.likeComment(command);
 
         verify(likeRepository).likeComment(commentId, userId);
+        verify(eventPublisher).publishEvent(any(NotificationEvent.class));
+    }
+
+    @Test
+    void likeComment_commentNotFound_throwsException() {
+        LikeCommentUseCase.Command command = new LikeCommentUseCase.Command(commentId, userId);
+        when(likeRepository.hasLikedComment(commentId, userId)).thenReturn(false);
+        when(commentRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        assertThrows(CommentNotFoundException.class, () -> likeService.likeComment(command));
+
     }
 
     @Test

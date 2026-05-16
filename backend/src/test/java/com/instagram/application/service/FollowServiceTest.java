@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import com.instagram.domain.exception.AlreadyFollowingException;
 import com.instagram.domain.exception.CannotFollowYourselfException;
@@ -51,6 +52,8 @@ public class FollowServiceTest {
     UserRepository userRepository;
     @Mock
     UserStatsRepository userStatsRepository;
+    @Mock
+    ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     FollowService followService;
