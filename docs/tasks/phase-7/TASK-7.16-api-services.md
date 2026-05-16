@@ -20,10 +20,10 @@ frontend/src/api/notificationsApi.ts
 
 ## Checklist
 
-- [ ] Import `api` from `'./client'`.
-- [ ] Import `Notification`, `NotificationSettings`, `RegisterDeviceTokenPayload` from `'../types/notification'`.
-- [ ] Define `const BASE = '/api/v1/notifications'`.
-- [ ] Export `notificationsApi` object with these methods:
+- [x] Import `api` from `'./client'`.
+- [x] Import `Notification`, `NotificationSettings`, `RegisterDeviceTokenPayload` from `'../types/notification'`.
+- [x] Define `const BASE_URL = '/api/v1/notifications'`.
+- [x] Export `notificationsApi` object with these methods:
 
   **`getNotifications(page = 0, size = 20): Promise<Notification[]>`**
   - `GET /api/v1/notifications?page={page}&size={size}`
