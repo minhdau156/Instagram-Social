@@ -19,13 +19,13 @@ frontend/src/types/notification.ts
 
 ## Checklist
 
-- [ ] `NotificationType` — string union:
-  `'LIKE' | 'COMMENT' | 'MENTION' | 'FOLLOW' | 'FOLLOW_REQUEST' | 'MESSAGE'`
+- [x] `NotificationType` — string union:
+  `'LIKE_POST' | 'LIKE_COMMENT' | 'COMMENT_POST' | 'REPLY_COMMENT' | 'FOLLOW' | 'FOLLOW_REQUEST' | 'FOLLOW_ACCEPTED' | 'MENTION_POST' | 'MENTION_COMMENT' | 'DIRECT_MESSAGE' | 'GROUP_MESSAGE' | 'POST_SHARED'` (full backend enum names used)
 
-- [ ] `EntityType` — string union:
+- [x] `EntityType` — string union:
   `'POST' | 'COMMENT' | 'FOLLOW' | 'MESSAGE'`
 
-- [ ] `Notification` interface — mirrors `NotificationResponse` from the backend:
+- [x] `Notification` interface — mirrors `NotificationResponse` from the backend:
   - `id: string`
   - `type: NotificationType`
   - `entityType: EntityType`
@@ -35,14 +35,14 @@ frontend/src/types/notification.ts
   - `isRead: boolean`
   - `createdAt: string` (ISO 8601 — leave as `string`; parse with `new Date(...)` when formatting)
 
-- [ ] `NotificationSettings` interface:
+- [x] `NotificationSettings` interface:
   - `likesEnabled: boolean`
   - `commentsEnabled: boolean`
   - `followsEnabled: boolean`
   - `messagesEnabled: boolean`
   - `pushEnabled: boolean`
 
-- [ ] `RegisterDeviceTokenPayload` interface:
+- [x] `RegisterDeviceTokenPayload` interface:
   - `token: string`
   - `platform: 'FCM' | 'APNS'`
 
