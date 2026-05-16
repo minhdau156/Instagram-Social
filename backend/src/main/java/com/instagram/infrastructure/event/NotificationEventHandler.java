@@ -26,6 +26,7 @@ public class NotificationEventHandler {
                 event.getEntityType(),
                 event.getEntityId());
         createNotificationUseCase.createNotification(command);
+
     }
 
 }
