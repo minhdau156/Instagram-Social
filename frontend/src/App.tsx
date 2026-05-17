@@ -25,6 +25,8 @@ const HomePage = React.lazy(() => import('./pages/feed/HomePage'));
 const ExplorePage = React.lazy(() => import('./pages/explore/ExplorePage'));
 const InboxPage = React.lazy(() => import('./pages/messaging/InboxPage'));
 const ChatPage = React.lazy(() => import('./pages/messaging/ChatPage'));
+const NotificationsPage = React.lazy(() => import('./pages/notifications/NotificationsPage'));
+const NotificationSettingsPage = React.lazy(() => import('./pages/notifications/NotificationSettingsPage'));
 
 function ChatRoute() {
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -68,6 +70,8 @@ export default function App() {
                 <Route path="/explore" element={<ExplorePage />} />
                 <Route path="/messages" element={<ErrorBoundary><InboxPage /></ErrorBoundary>} />
                 <Route path="/messages/:conversationId" element={<ErrorBoundary><ChatRoute /></ErrorBoundary>} />
+                <Route path="/notifications" element={<ErrorBoundary><NotificationsPage /></ErrorBoundary>} />
+                <Route path="/settings/notifications" element={<ErrorBoundary><NotificationSettingsPage /></ErrorBoundary>} />
               </Route>
             </Route>
           </Routes>
