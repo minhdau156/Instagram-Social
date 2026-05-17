@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export const useUnreadNotifications = () => {
     const queryClient = useQueryClient();
-    const [unreadCount, setUnreadCount] = useState(0);
+    const [unreadCountNotification, setUnreadCountNotification] = useState(0);
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
         if (!token) return;
@@ -18,7 +18,7 @@ export const useUnreadNotifications = () => {
                 client.subscribe(
                     '/user/topic/notifications',
                     (_frame) => {
-                        setUnreadCount(prevCount => prevCount + 1);
+                        setUnreadCountNotification(prevCount => prevCount + 1);
                         queryClient.invalidateQueries({ queryKey: ['notifications'] });
                     }
                 );
@@ -32,7 +32,7 @@ export const useUnreadNotifications = () => {
         }
     }, [queryClient]);
 
-    const resetCount = () => setUnreadCount(0);
+    const resetCount = () => setUnreadCountNotification(0);
 
-    return { unreadCount, resetCount };
+    return { unreadCountNotification, resetCount };
 }

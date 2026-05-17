@@ -10,6 +10,10 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { WebSocketProvider, useWebSocketContext } from './context/WebSocketContext';
 import { useConversations } from './hooks/messaging/useConversations';
+import { useState } from 'react';
+import { useUnreadNotifications } from './hooks/notification/useUnreadNotifications';
+import { UnreadBadge } from './components/notifications/UnreadBadge';
+import { NotificationDropdown } from './components/notifications/NotificationDropdown';
 
 export default function AppShell() {
   return (
@@ -23,6 +27,10 @@ function AppShellContent() {
   const { profile } = useAuth();
   const { totalUnreadCount, isConnected } = useWebSocketContext();
   const { conversations } = useConversations();
+
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const { unreadCountNotification } = useUnreadNotifications();
+
 
   const unreadCount =
     isConnected && totalUnreadCount !== null
@@ -98,6 +106,11 @@ function AppShellContent() {
                   </Badge>
                 )}
               </NavLink>
+
+              <UnreadBadge
+                unreadCount={unreadCountNotification}
+                onClick={(e) => setAnchorEl(e.currentTarget)}
+              />
             </Box>
           )}
         </Toolbar>
@@ -107,6 +120,11 @@ function AppShellContent() {
       <Container maxWidth="xl" disableGutters>
         <Outlet />
       </Container>
+
+      <NotificationDropdown
+        anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
+      />
     </Box>
   );
 }
