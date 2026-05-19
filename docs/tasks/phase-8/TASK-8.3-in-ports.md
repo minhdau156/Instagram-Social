@@ -27,38 +27,38 @@ backend/src/main/java/com/instagram/domain/port/in/search/ClearSearchHistoryUseC
 
 ### `SearchUsersUseCase.java`
 
-- [ ] Method: `List<User> searchUsers(Query query)`
-- [ ] Inner record: `Query(String q, UUID currentUserId, int page, int size)`
+- [x] Method: `List<User> searchUsers(Query query)`
+- [x] Inner record: `Query(String q, UUID currentUserId, int page, int size)`
   - `currentUserId` is included so the service can later exclude the caller from results or annotate results with "is following" flags.
 
 ### `SearchHashtagsUseCase.java`
 
-- [ ] Method: `List<Hashtag> searchHashtags(Query query)`
-- [ ] Inner record: `Query(String q, int page, int size)`
+- [x] Method: `List<Hashtag> searchHashtags(Query query)`
+- [x] Inner record: `Query(String q, int page, int size)`
   - No `currentUserId` needed — hashtag results are not personalised.
 
 ### `SearchPostsUseCase.java`
 
-- [ ] Method: `List<Post> searchPosts(Query query)`
-- [ ] Inner record: `Query(String q, UUID currentUserId, int page, int size)`
+- [x] Method: `List<Post> searchPosts(Query query)`
+- [x] Inner record: `Query(String q, UUID currentUserId, int page, int size)`
   - `currentUserId` included to allow future filtering (e.g., hide posts from blocked users).
 
 ### `GetPostsByHashtagUseCase.java`
 
-- [ ] Method: `List<Post> getPostsByHashtag(Query query)`
-- [ ] Inner record: `Query(String hashtagName, UUID currentUserId, int page, int size)`
+- [x] Method: `List<Post> getPostsByHashtag(Query query)`
+- [x] Inner record: `Query(String hashtagName, UUID currentUserId, int page, int size)`
   - Uses the hashtag `name` (e.g., `"travel"` — no leading `#`) as the lookup key, matching the `CITEXT` column in the schema.
 
 ### `GetSearchHistoryUseCase.java`
 
-- [ ] Method: `List<SearchHistory> getSearchHistory(Query query)`
-- [ ] Inner record: `Query(UUID userId, int limit)`
+- [x] Method: `List<SearchHistory> getSearchHistory(Query query)`
+- [x] Inner record: `Query(UUID userId, int limit)`
   - `limit` caps the number of returned entries (default 10 in the controller). This avoids fetching hundreds of old entries.
 
 ### `ClearSearchHistoryUseCase.java`
 
-- [ ] Method: `void clearSearchHistory(Command command)`
-- [ ] Inner record: `Command(UUID userId)`
+- [x] Method: `void clearSearchHistory(Command command)`
+- [x] Inner record: `Command(UUID userId)`
 
 ## Notes
 
