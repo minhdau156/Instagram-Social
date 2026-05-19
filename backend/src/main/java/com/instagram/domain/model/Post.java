@@ -106,6 +106,10 @@ public class Post {
         return PostStatus.PUBLISHED == status;
     }
 
+    public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+        this.likedByCurrentUser = likedByCurrentUser;
+    }
+
     /**
      * Apply an edit to caption and/or location.
      * Returns a new Post with updated fields and refreshed timestamp.

@@ -101,31 +101,31 @@ export function useWebSocket(conversationId: string | null) {
   }, [conversationId, isConnected, queryClient]);
 
   // Global unread-count subscription (for nav badge)
-  useEffect(() => {
-    const client = clientRef.current;
-    const userId = profile?.user.id;
-    if (!client || !isConnected || !userId) return;
+  // useEffect(() => {
+  //   const client = clientRef.current;
+  //   const userId = profile?.user.id;
+  //   if (!client || !isConnected || !userId) return;
 
-    const sub = client.subscribe(
-      `/user/${userId}/topic/unread-count`,
-      (frame) => {
-        const { conversationId: convId, unreadCount } = JSON.parse(frame.body) as {
-          conversationId: string;
-          unreadCount: number;
-        };
-        const updated = queryClient.setQueryData<Conversation[]>(['conversations'], (old) =>
-          old?.map((conv) =>
-            conv.id === convId ? { ...conv, unreadCount } : conv
-          ) ?? []
-        );
-        if (updated) {
-          setTotalUnreadCount(updated.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0));
-        }
-      }
-    );
+  //   const sub = client.subscribe(
+  //     `/user/${userId}/topic/unread-count`,
+  //     (frame) => {
+  //       const { conversationId: convId, unreadCount } = JSON.parse(frame.body) as {
+  //         conversationId: string;
+  //         unreadCount: number;
+  //       };
+  //       const updated = queryClient.setQueryData<Conversation[]>(['conversations'], (old) =>
+  //         old?.map((conv) =>
+  //           conv.id === convId ? { ...conv, unreadCount } : conv
+  //         ) ?? []
+  //       );
+  //       if (updated) {
+  //         setTotalUnreadCount(updated.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0));
+  //       }
+  //     }
+  //   );
 
-    return () => sub.unsubscribe();
-  }, [isConnected, profile?.user.id, queryClient]);
+  //   return () => sub.unsubscribe();
+  // }, [isConnected, profile?.user.id, queryClient]);
 
   const sendMessage = (payload: SendMessagePayload) => {
     const client = clientRef.current;

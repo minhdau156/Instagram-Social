@@ -10,14 +10,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface NotificationJpaRepository extends JpaRepository<NotificationJpaEntity, UUID> {
     Page<NotificationJpaEntity> findByRecipientIdOrderByCreatedAtDesc(UUID recipientId, Pageable pageable);
 
+    @Transactional
     @Modifying(clearAutomatically = true)
     @Query("UPDATE NotificationJpaEntity n SET n.isRead = true WHERE n.id = :id")
     void markAsRead(@Param("id") UUID id);
 
+    @Transactional
     @Modifying(clearAutomatically = true)
     @Query("UPDATE NotificationJpaEntity n SET n.isRead = true WHERE n.recipientId = :recipientId")
     void markAllAsRead(@Param("recipientId") UUID recipientId);

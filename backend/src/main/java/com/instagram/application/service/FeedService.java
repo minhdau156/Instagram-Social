@@ -15,6 +15,7 @@ import com.instagram.domain.model.PostMedia;
 import com.instagram.domain.port.in.feed.GetExploreFeedUseCase;
 import com.instagram.domain.port.in.feed.GetHomeFeedUseCase;
 import com.instagram.domain.port.out.FeedRepository;
+import com.instagram.domain.port.out.LikeRepository;
 import com.instagram.domain.port.out.PostMediaRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,8 @@ public class FeedService
         private final FeedRepository feedRepository;
         private final PostMediaRepository postMediaRepository;
 
+        private final LikeRepository likeRepository;
+
         @Override
         public GetHomeFeedUseCase.FeedPage getHomeFeed(GetHomeFeedUseCase.Query query) {
                 // TODO: add Redis cache for cursor=null (page 1) after Phase 10
@@ -39,6 +42,10 @@ public class FeedService
                 for (PostMedia postMedia : postMedias) {
                         postMediasMap.putIfAbsent(postMedia.getPostId(), new ArrayList<>());
                         postMediasMap.get(postMedia.getPostId()).add(postMedia);
+                }
+                for (Post post : posts) {
+                        boolean hasLiked = likeRepository.hasLikedPost(post.getId(), query.userId());
+                        post.setLikedByCurrentUser(hasLiked);
                 }
 
                 UUID nextCursor = posts.size() < query.limit()

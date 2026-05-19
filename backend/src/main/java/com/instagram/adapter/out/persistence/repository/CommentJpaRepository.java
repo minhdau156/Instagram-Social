@@ -20,18 +20,22 @@ public interface CommentJpaRepository extends JpaRepository<CommentJpaEntity, UU
     @Query("SELECT c FROM CommentJpaEntity c WHERE c.parent.id = :parentId AND c.isDeleted = false ORDER BY c.createdAt ASC")
     Page<CommentJpaEntity> findRepliesByParentId(@Param("parentId") UUID parentId, Pageable pageable);
 
+    @Transactional
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE CommentJpaEntity c SET c.replyCount = c.replyCount + 1 WHERE c.id = :id")
     void incrementReplyCount(@Param("id") UUID id);
 
+    @Transactional
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE CommentJpaEntity c SET c.replyCount = GREATEST(c.replyCount - 1, 0) WHERE c.id = :id")
     void decrementReplyCount(@Param("id") UUID id);
 
+    @Transactional
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE CommentJpaEntity c SET c.likeCount = c.likeCount + 1 WHERE c.id = :id")
     void incrementLikeCount(@Param("id") UUID id);
 
+    @Transactional
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE CommentJpaEntity c SET c.likeCount = GREATEST(c.likeCount - 1, 0) WHERE c.id = :id")
     void decrementLikeCount(@Param("id") UUID id);

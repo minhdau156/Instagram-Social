@@ -23,6 +23,22 @@ export const useNotifications = () => {
 
     const markAllRead = useMutation({
         mutationFn: () => notificationsApi.markAllRead(),
+        onMutate: async () => {
+            await queryClient.cancelQueries({ queryKey: ['notifications'] });
+            const previous = queryClient.getQueryData(['notifications']);
+            queryClient.setQueryData(['notifications'], (old: any) => {
+                return {
+                    pages: old.pages.map((page: any) =>
+                        page.map((notification: any) => ({ ...notification, isRead: true }))
+                    ),
+                    pageParams: old.pageParams
+                };
+            });
+            return { previous };
+        },
+        onError: (err, _, context) => {
+            queryClient.setQueryData(['notifications'], context?.previous);
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
         },

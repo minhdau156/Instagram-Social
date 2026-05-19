@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.instagram.adapter.out.persistence.entity.FollowId;
 import com.instagram.adapter.out.persistence.entity.FollowJpaEntity;
@@ -23,6 +24,7 @@ public interface FollowJpaRepository extends JpaRepository<FollowJpaEntity, Foll
 
     List<FollowJpaEntity> findByIdFollowingIdAndIsApprovedOrderByCreatedAtDesc(UUID followingId, boolean isApproved);
 
+    @Transactional
     @Modifying
     @Query("DELETE FROM FollowJpaEntity f WHERE f.id.followerId = :followerId AND f.id.followingId = :followingId")
     void deleteByFollowerIdAndFollowingId(@Param("followerId") UUID followerId, @Param("followingId") UUID followingId);

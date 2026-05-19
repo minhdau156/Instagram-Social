@@ -90,7 +90,7 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                         <LikeButton
                             postId={post.id}
-                            liked={post.likedByCurrentUser ?? false}
+                            liked={post.likedByCurrentUser || undefined}
                             likeCount={post.likeCount}
                             disabled={!profile?.user}
                         />

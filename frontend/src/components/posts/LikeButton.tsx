@@ -13,7 +13,7 @@ const heartPop = keyframes`
 
 interface LikeButtonProps {
     postId: string;
-    liked: boolean;           // current liked state from post data
+    liked: boolean | undefined;           // current liked state from post data
     likeCount: number;        // current count from post data
     disabled?: boolean;       // disable when not authenticated
 }
@@ -24,7 +24,10 @@ export function LikeButton({ postId, liked, likeCount, disabled }: LikeButtonPro
     const handleClick = () => {
         if (disabled) return;
         if (!liked) setAnimating(true);
-        likeMutation.mutate(liked);
+        console.log("liked", liked);
+        console.log("likeCount", likeCount);
+        likeMutation.mutate(liked || false);
+
     };
     useEffect(() => {
         if (!likeMutation.isSuccess) return;

@@ -1,6 +1,29 @@
-import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQueryClient, useMutation, InfiniteData } from "@tanstack/react-query";
 import { unlikePost, likePost } from "../../api/likesApi";
-import { Post } from "../../types/post";
+import { Post, FeedPage } from "../../types/post";
+
+function patchFeedPages(
+    old: InfiniteData<FeedPage> | undefined,
+    postId: string,
+    liked: boolean
+): InfiniteData<FeedPage> | undefined {
+    if (!old) return old;
+    return {
+        ...old,
+        pages: old.pages.map((page) => ({
+            ...page,
+            posts: page.posts.map((post) =>
+                post.id === postId
+                    ? {
+                        ...post,
+                        likedByCurrentUser: !liked,
+                        likeCount: liked ? post.likeCount - 1 : post.likeCount + 1,
+                    }
+                    : post
+            ),
+        })),
+    };
+}
 
 export function useLikePost(postId: string) {
     const queryClient = useQueryClient();
@@ -9,10 +32,12 @@ export function useLikePost(postId: string) {
         mutationFn: (liked: boolean) =>
             liked ? unlikePost(postId) : likePost(postId),
 
-        // Optimistic update
         onMutate: async (liked: boolean) => {
             await queryClient.cancelQueries({ queryKey: ['post', postId] });
-            const previous = queryClient.getQueryData<Post>(['post', postId]);
+            await queryClient.cancelQueries({ queryKey: ['homeFeed'] });
+
+            const previousPost = queryClient.getQueryData<Post>(['post', postId]);
+            const previousFeed = queryClient.getQueryData<InfiniteData<FeedPage>>(['homeFeed']);
 
             queryClient.setQueryData<Post>(['post', postId], (old) =>
                 old
@@ -24,18 +49,25 @@ export function useLikePost(postId: string) {
                     : old
             );
 
-            return { previous };
+            queryClient.setQueryData<InfiniteData<FeedPage>>(['homeFeed'], (old) =>
+                patchFeedPages(old, postId, liked)
+            );
+
+            return { previousPost, previousFeed };
         },
 
-        // Roll back on error
         onError: (_err, _liked, context) => {
-            if (context?.previous) {
-                queryClient.setQueryData(['post', postId], context.previous);
+            if (context?.previousPost) {
+                queryClient.setQueryData(['post', postId], context.previousPost);
+            }
+            if (context?.previousFeed) {
+                queryClient.setQueryData(['homeFeed'], context.previousFeed);
             }
         },
 
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['post', postId] });
+            queryClient.invalidateQueries({ queryKey: ['homeFeed'] });
         },
     });
 }

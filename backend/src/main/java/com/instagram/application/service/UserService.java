@@ -209,7 +209,9 @@ public class UserService
         if (query.targetUsername() == null) {
             User user = userRepository.findById(query.currentUserId())
                     .orElseThrow(() -> UserNotFoundException.withId(query.currentUserId()));
-            return new UserProfile(user, UserStats.zero(user.getId()), false, null);
+            UserStats stats = userStatsRepository.findByUserId(user.getId())
+                    .orElse(UserStats.zero(user.getId()));
+            return new UserProfile(user, stats, false, null);
         }
 
         User user = userRepository.findByUsername(query.targetUsername())

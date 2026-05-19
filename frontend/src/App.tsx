@@ -65,7 +65,7 @@ export default function App() {
                 <Route path="/profile" element={<ErrorBoundary><ProfilePage /></ErrorBoundary>} />
                 <Route path="/saved" element={<ErrorBoundary><SavedPostsPage /></ErrorBoundary>} />
                 <Route path="/follow-requests" element={<ErrorBoundary><FollowRequestsPage /></ErrorBoundary>} />
-                <Route path="/:username" element={<ErrorBoundary><PublicProfilePage /></ErrorBoundary>} />
+                <Route path="/:username/bio" element={<ErrorBoundary><PublicProfilePage /></ErrorBoundary>} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/explore" element={<ExplorePage />} />
                 <Route path="/messages" element={<ErrorBoundary><InboxPage /></ErrorBoundary>} />

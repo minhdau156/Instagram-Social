@@ -1,13 +1,24 @@
-# Current Feature
+# Current Feature: TASK-8.1 — Domain Model: SearchHistory
 
 ## Status
 Not Started
 
 ## Goals
-<!-- List goals here when a new feature is loaded -->
+- Create `SearchHistory.java` in `domain/model/` — pure Java, no Spring/JPA/Lombok
+- Four fields matching `search_history` schema exactly: `UUID id`, `UUID userId`, `String query`, `OffsetDateTime searchedAt`
+- Hand-written inner `Builder` class with all four setter-style fluent methods
+- Static `builder()` factory method returning a new `Builder`
+- `Builder.build()` returns a fully-constructed `SearchHistory` instance
+- Immutable after construction — no setters, no `withXxx()` mutation methods
+- Plain getter methods: `getId()`, `getUserId()`, `getQuery()`, `getSearchedAt()`
 
 ## Notes
-<!-- Add constraints or context here -->
+- Schema: `search_history(id UUID, user_id UUID, query TEXT, searched_at TIMESTAMPTZ)` — confirmed, NO `search_type` column
+- `searchedAt` → `OffsetDateTime` (consistent with other domain models using `TIMESTAMPTZ`)
+- No business-behaviour methods — this is a write-once value record
+- Reference pattern: `Post.java` (private constructor, static `builder()`, `static final class Builder { private final Post post = new Post(); ... }`)
+- Do NOT re-create `Hashtag.java` — it already exists from TASK-2.2
+- File: `backend/src/main/java/com/instagram/domain/model/SearchHistory.java`
 
 ## History
 - TASK-7.21 — Register Routes: `App.tsx` — `NotificationsPage` + `NotificationSettingsPage` lazy-imported via `React.lazy`; `/notifications` and `/settings/notifications` routes added inside `<ProtectedRoute>` block, each wrapped with `<ErrorBoundary>`; mirrors phase-6 InboxPage/ChatPage pattern exactly; both page files confirmed `export default function`

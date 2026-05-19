@@ -6,10 +6,14 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 
 import { usersApi } from "../../api/usersApi";
+import { PostGrid } from "../../components/posts/PostGrid";
+import { usePosts } from "../../hooks/post/usePosts";
 
 export const ProfilePage = () => {
 
     const { profile, isLoading } = useAuth();
+    const { data } = usePosts(profile?.user.id || '');
+    const posts = data?.pages.flatMap(page => page.content) || [];
 
     const [open, setOpen] = useState(false);
     const { control, handleSubmit, formState: { errors } } = useForm({
@@ -19,6 +23,8 @@ export const ProfilePage = () => {
             isPrivate: profile?.user.isPrivate || false,
         }
     });
+
+
 
     const onSubmit = async (data: any) => {
         try {
@@ -48,7 +54,7 @@ export const ProfilePage = () => {
                             <Typography variant="h6" >{profile?.user?.username}</Typography>
                             <Typography variant="body1" >{profile?.user?.fullName}</Typography>
                             <Stack direction="row" spacing={2}>
-                                <Typography variant="body2" >{profile?.postCount || 0} posts</Typography>
+                                <Typography variant="body2" >{posts.length} posts</Typography>
                                 <Typography variant="body2">{profile?.followerCount || 0} followers</Typography>
                                 <Typography variant="body2">{profile?.followingCount || 0} following</Typography>
                             </Stack>
@@ -62,7 +68,7 @@ export const ProfilePage = () => {
                 </Container>
 
                 <Box style={{ marginTop: "5rem", borderTop: "1px solid #e5e5e5" }}>
-                    No post yet.
+                    <PostGrid posts={posts} />
                 </Box>
 
             </Container >

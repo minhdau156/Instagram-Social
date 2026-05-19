@@ -9,7 +9,7 @@ export const usersApi = {
         api.put<{ data: User }>('/api/v1/users/profile/update', payload).then(r => r.data.data),
 
     getUserByUsername: (username: string) =>
-        api.get<{ data: UserProfile }>(`/api/v1/users/${username}`).then(r => r.data.data),
+        api.get<{ data: UserProfile }>(`/api/v1/users/${username}/bio`).then(r => r.data.data),
 
     uploadAvatar: (file: File) => {
         const form = new FormData();
