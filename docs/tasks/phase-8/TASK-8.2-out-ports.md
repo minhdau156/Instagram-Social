@@ -25,30 +25,30 @@ backend/src/main/java/com/instagram/domain/port/out/SearchHistoryRepository.java
 
 ### `SearchRepository.java`
 
-- [ ] `List<User> searchUsers(String query, Pageable pageable)`
+- [x] `List<User> searchUsers(String query, Pageable pageable)`
   - Returns users whose `username` or `full_name` matches the query.
   - **Implementation strategy (TASK-8.5):** `ILIKE '%query%'` on both `username` and `full_name`. Results ordered by `follower_count` descending.
 
-- [ ] `List<Hashtag> searchHashtags(String query, Pageable pageable)`
+- [x] `List<Hashtag> searchHashtags(String query, Pageable pageable)`
   - Returns hashtags whose `name` starts with or is similar to the query (prefix match preferred). Results ordered by `post_count` descending.
   - **Implementation strategy (TASK-8.5):** prefix `ILIKE 'query%'` on `name`.
 
-- [ ] `List<Post> searchPosts(String query, Pageable pageable)`
+- [x] `List<Post> searchPosts(String query, Pageable pageable)`
   - Returns non-deleted posts whose `caption` contains the query.
   - **Implementation strategy (TASK-8.5):** `ILIKE '%query%'` on `caption`, ordered by `created_at` descending.
 
-- [ ] `List<Post> findPostsByHashtag(String hashtagName, Pageable pageable)`
+- [x] `List<Post> findPostsByHashtag(String hashtagName, Pageable pageable)`
   - Returns non-deleted posts linked to the given hashtag via the `post_hashtags` join table. Looks up the hashtag by `name` (case-insensitive via `CITEXT`), then joins to posts. Results ordered by `created_at` descending.
 
 ### `SearchHistoryRepository.java`
 
-- [ ] `SearchHistory save(SearchHistory searchHistory)`
+- [x] `SearchHistory save(SearchHistory searchHistory)`
   - Persists a new search history entry. Returns the saved instance (with a generated `id`).
 
-- [ ] `List<SearchHistory> findByUserIdOrderBySearchedAtDesc(UUID userId, Pageable pageable)`
+- [x] `List<SearchHistory> findByUserIdOrderBySearchedAtDesc(UUID userId, Pageable pageable)`
   - Returns the most recent search entries for a user, newest first.
 
-- [ ] `void deleteByUserId(UUID userId)`
+- [x] `void deleteByUserId(UUID userId)`
   - Deletes all search history entries for a user (used when the user clicks "Clear all").
 
 ## Notes
