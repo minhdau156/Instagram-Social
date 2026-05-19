@@ -1,30 +1,16 @@
-# Current Feature: TASK-8.4 — Application Service: SearchService
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Create `SearchService` in `application/service/` implementing all 6 search use-case in-ports from TASK-8.3
-- Constructor-inject `SearchRepository` and `SearchHistoryRepository` (both `final`)
-- `searchUsers`: blank-guard → `searchRepository.searchUsers(q, PageRequest)` → `saveHistoryAsync(userId, q)` → return list
-- `searchHashtags`: blank-guard → `searchRepository.searchHashtags(q, PageRequest)` → skip history (no `currentUserId`) → return list
-- `searchPosts`: blank-guard → `searchRepository.searchPosts(q, PageRequest)` → `saveHistoryAsync(userId, q)` → return list
-- `getPostsByHashtag`: blank-guard on `hashtagName` → `searchRepository.findPostsByHashtag(name, PageRequest)` → no history → return list
-- `getSearchHistory`: delegate to `searchHistoryRepository.findByUserIdOrderBySearchedAtDesc(userId, PageRequest.ofSize(limit))` → return list
-- `clearSearchHistory`: delegate to `searchHistoryRepository.deleteByUserId(userId)`, annotate `@Transactional`
-- `saveHistoryAsync` (private): annotated `@Async`, builds `SearchHistory` via Builder (`userId`, `query`, `searchedAt = OffsetDateTime.now()`), calls `searchHistoryRepository.save(...)`
+<!-- List goals here when a new feature is loaded -->
 
 ## Notes
-- Lives in `application/service/` — NOT `domain/service/` — because `@Async` is a Spring annotation
-- Class annotations: `@Service`, constructor injection only, all fields `final`
-- Verify `@EnableAsync` is already present (added in TASK-7.7 for `NotificationEventHandler`); if missing, add to an existing `@Configuration` class in `infrastructure/config/`
-- Do NOT add `@Transactional` to read methods (`searchUsers`, `searchPosts`, etc.) — JPA adapter owns transaction boundaries
-- `clearSearchHistory` may be annotated `@Transactional` since `deleteByUserId` issues a bulk DELETE
-- `saveHistoryAsync` returns `void`; verify async config doesn't require `CompletableFuture<Void>`
-- Blank-query early return prevents full-table-scan queries against empty strings
-- File: `backend/src/main/java/com/instagram/application/service/SearchService.java`
+<!-- Add constraints or context here -->
 
 ## History
+- TASK-8.4 — Application Service: `SearchService` in `application/service/` — `@Service`, constructor-injected `SearchRepository` + `SearchHistoryRepository` (both `final`); implements all 6 use-case in-ports (`SearchUsersUseCase`, `SearchHashtagsUseCase`, `SearchPostsUseCase`, `GetPostsByHashtagUseCase`, `GetSearchHistoryUseCase`, `ClearSearchHistoryUseCase`); blank-guard early return on all query/hashtagName params; `searchUsers`/`searchPosts` call `saveHistoryAsync` after DB fetch; `searchHashtags`/`getPostsByHashtag` skip history; `getSearchHistory` delegates to `findByUserIdOrderBySearchedAtDesc` with `PageRequest.ofSize`; `clearSearchHistory` is `@Transactional`; private `@Async saveHistoryAsync` builds `SearchHistory` via Builder with `OffsetDateTime.now()` and calls `searchHistoryRepository.save`
 - TASK-8.3 — In-Ports: 6 use-case interfaces in `domain/port/in/search/` — `SearchUsersUseCase` (`Query(String q, UUID currentUserId, int page, int size)`), `SearchHashtagsUseCase` (`Query(String q, int page, int size)` — no currentUserId), `SearchPostsUseCase` (`Query(String q, UUID currentUserId, int page, int size)`), `GetPostsByHashtagUseCase` (`Query(String hashtagName, UUID currentUserId, int page, int size)`), `GetSearchHistoryUseCase` (`Query(UUID userId, int limit)` — flat list, no pagination), `ClearSearchHistoryUseCase` (`Command(UUID userId)`); pure Java, zero framework imports
 - TASK-8.2 — Out-Ports: `SearchRepository.java` + `SearchHistoryRepository.java` in `domain/port/out/` — pure Java interfaces; `SearchRepository` has 4 methods (`searchUsers`, `searchHashtags`, `searchPosts`, `findPostsByHashtag`) returning domain model types (`User`, `Hashtag`, `Post`) with `Pageable`; `SearchHistoryRepository` has 3 methods (`save`, `findByUserIdOrderBySearchedAtDesc`, `deleteByUserId`); only allowed Spring import is `org.springframework.data.domain.Pageable`; no Spring, JPA, or Lombok annotations anywhere
 - TASK-8.1 — Domain Model: `SearchHistory.java` in `domain/model/` — pure Java, no Spring/JPA/Lombok; 4 fields (`UUID id`, `UUID userId`, `String query`, `OffsetDateTime searchedAt`) matching `search_history` schema exactly; hand-written `static final class Builder` with private constructor, fluent setters for all 4 fields, null guards on `userId`/`query`/`searchedAt` in `build()`; immutable after construction, no setters, no `withXxx()` methods; static `builder()` factory; 4 plain getters
