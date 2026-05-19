@@ -1,13 +1,28 @@
-# Current Feature
+# Current Feature: TASK-8.4 — Application Service: SearchService
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- List goals here when a new feature is loaded -->
+- Create `SearchService` in `application/service/` implementing all 6 search use-case in-ports from TASK-8.3
+- Constructor-inject `SearchRepository` and `SearchHistoryRepository` (both `final`)
+- `searchUsers`: blank-guard → `searchRepository.searchUsers(q, PageRequest)` → `saveHistoryAsync(userId, q)` → return list
+- `searchHashtags`: blank-guard → `searchRepository.searchHashtags(q, PageRequest)` → skip history (no `currentUserId`) → return list
+- `searchPosts`: blank-guard → `searchRepository.searchPosts(q, PageRequest)` → `saveHistoryAsync(userId, q)` → return list
+- `getPostsByHashtag`: blank-guard on `hashtagName` → `searchRepository.findPostsByHashtag(name, PageRequest)` → no history → return list
+- `getSearchHistory`: delegate to `searchHistoryRepository.findByUserIdOrderBySearchedAtDesc(userId, PageRequest.ofSize(limit))` → return list
+- `clearSearchHistory`: delegate to `searchHistoryRepository.deleteByUserId(userId)`, annotate `@Transactional`
+- `saveHistoryAsync` (private): annotated `@Async`, builds `SearchHistory` via Builder (`userId`, `query`, `searchedAt = OffsetDateTime.now()`), calls `searchHistoryRepository.save(...)`
 
 ## Notes
-<!-- Add constraints or context here -->
+- Lives in `application/service/` — NOT `domain/service/` — because `@Async` is a Spring annotation
+- Class annotations: `@Service`, constructor injection only, all fields `final`
+- Verify `@EnableAsync` is already present (added in TASK-7.7 for `NotificationEventHandler`); if missing, add to an existing `@Configuration` class in `infrastructure/config/`
+- Do NOT add `@Transactional` to read methods (`searchUsers`, `searchPosts`, etc.) — JPA adapter owns transaction boundaries
+- `clearSearchHistory` may be annotated `@Transactional` since `deleteByUserId` issues a bulk DELETE
+- `saveHistoryAsync` returns `void`; verify async config doesn't require `CompletableFuture<Void>`
+- Blank-query early return prevents full-table-scan queries against empty strings
+- File: `backend/src/main/java/com/instagram/application/service/SearchService.java`
 
 ## History
 - TASK-8.3 — In-Ports: 6 use-case interfaces in `domain/port/in/search/` — `SearchUsersUseCase` (`Query(String q, UUID currentUserId, int page, int size)`), `SearchHashtagsUseCase` (`Query(String q, int page, int size)` — no currentUserId), `SearchPostsUseCase` (`Query(String q, UUID currentUserId, int page, int size)`), `GetPostsByHashtagUseCase` (`Query(String hashtagName, UUID currentUserId, int page, int size)`), `GetSearchHistoryUseCase` (`Query(UUID userId, int limit)` — flat list, no pagination), `ClearSearchHistoryUseCase` (`Command(UUID userId)`); pure Java, zero framework imports
