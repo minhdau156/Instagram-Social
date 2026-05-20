@@ -1,5 +1,7 @@
 package com.instagram.adapter.out.persistence.repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -74,4 +76,6 @@ public interface UserStatsJpaRepository extends JpaRepository<UserStatsJpaEntity
                         WHERE us.userId = :userId
                         """)
         void decrementPostCount(@Param("userId") UUID userId);
+
+        List<UserStatsJpaEntity> findByUserIdIn(Collection<UUID> userIds);
 }

@@ -11,7 +11,6 @@ export function useWebSocket(conversationId: string | null) {
   const clientRef = useRef<Client | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [typingUserIds, setTypingUserIds] = useState<string[]>([]);
-  const [totalUnreadCount, setTotalUnreadCount] = useState<number | null>(null);
   const typingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   // Create STOMP client once and activate for the lifetime of the session
@@ -145,5 +144,5 @@ export function useWebSocket(conversationId: string | null) {
     });
   };
 
-  return { sendMessage, sendTyping, isConnected, typingUserIds, totalUnreadCount };
+  return { sendMessage, sendTyping, isConnected, typingUserIds };
 }

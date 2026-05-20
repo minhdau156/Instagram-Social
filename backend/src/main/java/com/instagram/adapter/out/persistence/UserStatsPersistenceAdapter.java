@@ -1,5 +1,7 @@
 package com.instagram.adapter.out.persistence;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -76,6 +78,14 @@ public class UserStatsPersistenceAdapter implements UserStatsRepository {
                 userStatsJpaEntity.getPostCount(),
                 userStatsJpaEntity.getFollowerCount(),
                 userStatsJpaEntity.getFollowingCount());
+    }
+
+    @Override
+    public List<UserStats> findAllByIds(Collection<UUID> userIds) {
+        return jpaRepository.findByUserIdIn(userIds)
+                .stream()
+                .map(this::toDomain)
+                .toList();
     }
 
 }

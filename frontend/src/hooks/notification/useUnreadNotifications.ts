@@ -2,13 +2,11 @@ import { Client } from "@stomp/stompjs";
 import { useEffect, useState } from "react"
 import SockJS from "sockjs-client";
 import { useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "../useAuth";
 
 
 export const useUnreadNotifications = () => {
     const queryClient = useQueryClient();
     const [unreadCountNotification, setUnreadCountNotification] = useState(0);
-    const { profile } = useAuth();
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
         if (!token) return;

@@ -3,6 +3,7 @@ package com.instagram.application.service;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -19,6 +20,7 @@ import com.instagram.domain.model.Post;
 import com.instagram.domain.model.PostMedia;
 import com.instagram.domain.model.PostStatus;
 import com.instagram.domain.port.in.*;
+import com.instagram.domain.port.in.post.FindAllPostMediaUseCase;
 import com.instagram.domain.port.out.HashtagRepository;
 import com.instagram.domain.port.out.LikeRepository;
 import com.instagram.domain.port.out.MediaStoragePort;
@@ -34,7 +36,8 @@ public class PostService implements
         UpdatePostUseCase,
         DeletePostUseCase,
         GetUserPostsUseCase,
-        GenerateUploadUrlUseCase {
+        GenerateUploadUrlUseCase,
+        FindAllPostMediaUseCase {
 
     private final PostRepository postRepository;
     private final PostMediaRepository postMediaRepository;
@@ -174,5 +177,10 @@ public class PostService implements
                 .map(r -> r.group(1).toLowerCase())
                 .distinct()
                 .toList(); // For now, we just extract. In future, we would dispatch events or save.
+    }
+
+    @Override
+    public List<PostMedia> findAllByPostIds(Collection<UUID> postIds) {
+        return postMediaRepository.findByPostIds(postIds);
     }
 }

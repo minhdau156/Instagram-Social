@@ -36,7 +36,7 @@ export const useNotifications = () => {
             });
             return { previous };
         },
-        onError: (err, _, context) => {
+        onError: (_, context: any) => {
             queryClient.setQueryData(['notifications'], context?.previous);
         },
         onSuccess: () => {

@@ -19,6 +19,7 @@ import com.instagram.domain.model.Post;
 import com.instagram.domain.port.in.feed.GetExploreFeedUseCase;
 import com.instagram.domain.port.in.feed.GetHomeFeedUseCase;
 import com.instagram.domain.port.out.FeedRepository;
+import com.instagram.domain.port.out.LikeRepository;
 import com.instagram.domain.port.out.PostMediaRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +30,9 @@ class FeedServiceTest {
 
     @Mock
     private PostMediaRepository postMediaRepository;
+
+    @Mock
+    private LikeRepository likeRepository;
 
     @InjectMocks
     private FeedService feedService;

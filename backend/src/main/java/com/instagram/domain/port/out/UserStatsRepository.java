@@ -1,5 +1,7 @@
 package com.instagram.domain.port.out;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,6 +11,8 @@ public interface UserStatsRepository {
     void create(UserStats userStats);
 
     Optional<UserStats> findByUserId(UUID userId);
+
+    List<UserStats> findAllByIds(Collection<UUID> userIds);
 
     void incrementFollowerCount(UUID userId);
 
