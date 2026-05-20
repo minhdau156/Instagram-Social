@@ -1,54 +1,12 @@
-# Current Feature: TASK-8.8 — Unit & Integration Tests (Search)
+# Current Feature
 
 ## Status
-Complete
+Not Started
 
 ## Goals
-- [x] Write `SearchServiceTest.java` (unit, JUnit 5 + Mockito, no Spring context)
-  - [x] Mock `SearchRepository` and `SearchHistoryRepository`
-  - [x] `searchUsers` — non-blank: verify correct `PageRequest` params passed
-  - [x] `searchUsers` — blank/whitespace: verify NO DB call, returns empty list
-  - [x] `searchHashtags` — non-blank: verify `searchRepository.searchHashtags(...)` called
-  - [x] `searchHashtags` — blank: returns empty list, no DB call
-  - [x] `searchPosts` — non-blank: verify DB call + history save triggered
-  - [x] `searchPosts` — blank: returns empty list, no DB call, no history save
-  - [x] `getPostsByHashtag` — valid name: verify `findPostsByHashtag(...)` called
-  - [x] `getSearchHistory` — verify `findByUserIdOrderBySearchedAtDesc(...)` with correct userId + limit
-  - [x] `clearSearchHistory` — verify `deleteByUserId(...)` with correct userId
-  - [x] `saveHistoryAsync` (indirect) — use `ArgumentCaptor` to verify `save(...)` eventually called
-- [x] Write `SearchJpaAdapterIT.java` (`@DataJpaTest`)
-  - [x] `@BeforeEach`: insert `users` row for FK; flush + clear EntityManager
-  - [x] `searchPosts` ILIKE: basic match, no match, soft-deleted exclusion, case-insensitive
-  - [x] `searchUsers` ILIKE: match on full_name, match on username, partial match, ordering by follower_count, soft-deleted exclusion
-  - [x] `searchHashtags` prefix: both "travel" + "travelblog" returned; "food" excluded; ordering by post_count
-  - [x] `findPostsByHashtag` join: only posts linked via `post_hashtags` for the given hashtag returned
-  - [x] `SearchHistoryPersistenceAdapter`: save + round-trip verify; deleteByUserId removes all for that user
-- [x] Write `SearchControllerIT.java` (`@SpringBootTest` + `MockMvc`)
-  - [x] `@MockBean` all 6 use-case interfaces
-  - [x] `GET /api/v1/search?q=john&type=users` — 200 with list
-  - [x] `GET /api/v1/search?q=travel&type=hashtags` — 200 with list
-  - [x] `GET /api/v1/search?q=sunset&type=posts` — 200 with list
-  - [x] `GET /api/v1/search?q=x&type=invalid_type` — 400 BAD REQUEST
-  - [x] `GET /api/v1/search?q=&type=users` — 200 empty list (blank handled by service)
-  - [x] `GET /api/v1/search/history` — authenticated: 200 with list
-  - [x] `DELETE /api/v1/search/history` — authenticated: 204 NO CONTENT
-  - [x] `GET /api/v1/hashtags/travel/posts` — authenticated: 200 with list
-  - [x] Any endpoint unauthenticated — 401 UNAUTHORIZED
-- [x] Achieve ≥ 80% coverage of new search code
-
 ## Notes
-- **Files to create:**
-  - `backend/src/test/java/com/instagram/application/service/SearchServiceTest.java`
-  - `backend/src/test/java/com/instagram/adapter/out/persistence/SearchJpaAdapterIT.java`
-  - `backend/src/test/java/com/instagram/adapter/in/web/SearchControllerIT.java`
-- **Unit tests**: JUnit 5 + Mockito, no Spring context loaded
-- **Integration tests**: `@DataJpaTest` for persistence; `@SpringBootTest` + `MockMvc` for controller
-- **`@Async` handling**: Add `@TestConfiguration` with `SyncTaskExecutor` bean to make async history saves synchronous during tests
-- **FK constraints**: `post_hashtags` needs both `posts` and `hashtags` rows; `posts` needs a `users` row
-- **Controller stubs**: Use `Mockito.when(...).thenReturn(...)` with sensible domain objects (list of 1 User/Hashtag/Post)
-- **Reference patterns**: Follow conventions from TASK-4.9 (Likes), TASK-6.13 (Messaging), TASK-7.14 (Notifications)
-
 ## History
+- TASK-8.8 — Unit & Integration Tests (Search): `SearchServiceTest` (12 unit tests, JUnit 5 + Mockito, blank/null guard, PageRequest delegation, ArgumentCaptor for history save on searchUsers/searchPosts, no history save for hashtags/getPostsByHashtag) + `SearchJpaAdapterIT` (@DataJpaTest, H2 PostgreSQL MODE, @Sql BEFORE_TEST_CLASS for follower_count/deleted_at/post_hashtags DDL, 14 tests covering ILIKE matches, soft-delete exclusion, prefix ordering, join table) + `SearchControllerIT` (@WebMvcTest, 9 tests, all 6 use-case MockBeans, users/hashtags/posts/history/delete/hashtag-posts 200s, invalid type 400, unauthenticated 401)
 - TASK-8.6 — REST Controller: `SearchController` (`@RestController @RequestMapping("/api/v1")`, `@Tag(name="Search")`); 4 endpoints: `GET /search` (Java 21 switch on `users`/`hashtags`/`posts`, 400 for unknown), `GET /search/history` (last 10, mapped to `SearchHistoryResponse`), `DELETE /search/history` (204 NO CONTENT), `GET /hashtags/{name}/posts` (paginated, mapped to `PostSearchResponse`); `currentUserId()` helper from security context; companion DTOs `UserSearchResponse`, `HashtagSearchResponse`, `PostSearchResponse`, `SearchHistoryResponse` + in-port helpers `FindAllUserUseCase`, `FindAllPostMediaUseCase`, `GetUserStatsUseCase` for response enrichment
 - TASK-8.5 — Persistence Layer: `SearchHistoryJpaEntity` (`@Entity`, `@Table(name="search_history")`, Lombok, 4 fields, `@PrePersist` null-guard on `searchedAt`, raw UUID `userId` — no join) + `SearchHistoryJpaRepository` (`findByUserIdOrderBySearchedAtDesc`, `@Modifying @Transactional @Query` bulk `deleteByUserId`) + `SearchJpaAdapter` (`@Component`, `EntityManager` constructor-inject, 4 native-SQL `ILIKE` methods with `@SuppressWarnings("unchecked")` + blank-query early return + prefix-match `query+"%"` for hashtags) + `SearchHistoryPersistenceAdapter` (`@Component`, implements `SearchHistoryRepository`, `save`/`findByUserIdOrderBySearchedAtDesc`/`deleteByUserId` with private `toEntity`/`toDomain` mappers)
 - TASK-8.4 — Application Service: `SearchService` in `application/service/` — `@Service`, constructor-injected `SearchRepository` + `SearchHistoryRepository` (both `final`); implements all 6 use-case in-ports (`SearchUsersUseCase`, `SearchHashtagsUseCase`, `SearchPostsUseCase`, `GetPostsByHashtagUseCase`, `GetSearchHistoryUseCase`, `ClearSearchHistoryUseCase`); blank-guard early return on all query/hashtagName params; `searchUsers`/`searchPosts` call `saveHistoryAsync` after DB fetch; `searchHashtags`/`getPostsByHashtag` skip history; `getSearchHistory` delegates to `findByUserIdOrderBySearchedAtDesc` with `PageRequest.ofSize`; `clearSearchHistory` is `@Transactional`; private `@Async saveHistoryAsync` builds `SearchHistory` via Builder with `OffsetDateTime.now()` and calls `searchHistoryRepository.save`
