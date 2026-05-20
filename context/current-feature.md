@@ -1,10 +1,36 @@
-# Current Feature
+# Current Feature: TASK-8.9 — TypeScript Types: search.ts
 
 ## Status
 Not Started
 
 ## Goals
+- [ ] Create `frontend/src/types/search.ts` with strict TypeScript — no `any`, all named exports
+- [ ] `SearchType` — string literal union: `'users' | 'hashtags' | 'posts'` (matches `type` query param)
+- [ ] `UserSearchResult` interface — 6 fields mirroring `UserSearchResponse` backend DTO:
+  - `id: string`, `username: string`, `fullName: string`, `avatarUrl: string | null`, `isPrivate: boolean`, `followerCount: number`
+- [ ] `HashtagSearchResult` interface — 3 fields mirroring `HashtagSearchResponse`:
+  - `id: string`, `name: string` (no `#` prefix — UI adds it), `postCount: number`
+- [ ] `PostSearchResult` interface — 9 fields mirroring `PostSearchResponse`:
+  - `id: string`, `authorUsername: string`, `authorAvatarUrl: string | null`, `caption: string | null`, `mediaUrl: string`, `mediaType: 'IMAGE' | 'VIDEO'`, `likeCount: number`, `commentCount: number`, `createdAt: string` (ISO 8601)
+- [ ] `SearchHistoryItem` interface — 3 fields mirroring `SearchHistoryResponse`:
+  - `id: string`, `query: string`, `searchedAt: string` (ISO 8601)
+- [ ] `SearchResult` discriminated union (optional helper):
+  ```ts
+  export type SearchResult =
+    | { type: 'users';    items: UserSearchResult[]    }
+    | { type: 'hashtags'; items: HashtagSearchResult[] }
+    | { type: 'posts';    items: PostSearchResult[]    };
+  ```
+
 ## Notes
+- **File:** `frontend/src/types/search.ts`
+- All UUID fields typed as `string` — Axios deserialises as strings
+- `avatarUrl` and `authorAvatarUrl` are `string | null` — UI must render a fallback letter avatar when `null`
+- `caption` is `string | null` — image-only posts have no text
+- `mediaType` is a string literal union (`'IMAGE' | 'VIDEO'`) — keeps the file self-contained without importing from a shared enum
+- No default export; all types exported individually
+- Reference: [TASK-7.15 notification.ts](../phase-7/TASK-7.15-typescript-types.md) for pattern consistency
+
 ## History
 - TASK-8.8 — Unit & Integration Tests (Search): `SearchServiceTest` (12 unit tests, JUnit 5 + Mockito, blank/null guard, PageRequest delegation, ArgumentCaptor for history save on searchUsers/searchPosts, no history save for hashtags/getPostsByHashtag) + `SearchJpaAdapterIT` (@DataJpaTest, H2 PostgreSQL MODE, @Sql BEFORE_TEST_CLASS for follower_count/deleted_at/post_hashtags DDL, 14 tests covering ILIKE matches, soft-delete exclusion, prefix ordering, join table) + `SearchControllerIT` (@WebMvcTest, 9 tests, all 6 use-case MockBeans, users/hashtags/posts/history/delete/hashtag-posts 200s, invalid type 400, unauthenticated 401)
 - TASK-8.6 — REST Controller: `SearchController` (`@RestController @RequestMapping("/api/v1")`, `@Tag(name="Search")`); 4 endpoints: `GET /search` (Java 21 switch on `users`/`hashtags`/`posts`, 400 for unknown), `GET /search/history` (last 10, mapped to `SearchHistoryResponse`), `DELETE /search/history` (204 NO CONTENT), `GET /hashtags/{name}/posts` (paginated, mapped to `PostSearchResponse`); `currentUserId()` helper from security context; companion DTOs `UserSearchResponse`, `HashtagSearchResponse`, `PostSearchResponse`, `SearchHistoryResponse` + in-port helpers `FindAllUserUseCase`, `FindAllPostMediaUseCase`, `GetUserStatsUseCase` for response enrichment

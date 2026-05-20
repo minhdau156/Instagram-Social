@@ -33,7 +33,7 @@ export const NotificationDropdown = ({ anchorEl, onClose }: NotificationDropdown
                 <Typography variant="h6">
                     Notifications
                 </Typography>
-                <Button variant="text" size="small" onClick={() => markAllRead.mutate()}>
+                <Button variant="text" size="small" onClick={() => markAllRead.mutate(undefined)}>
                     Mark all as read
                 </Button>
             </Box>

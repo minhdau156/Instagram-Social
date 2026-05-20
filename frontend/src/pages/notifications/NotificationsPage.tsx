@@ -40,7 +40,7 @@ export default function NotificationsPage() {
         <Box sx={{ maxWidth: "600px", mx: "auto", px: { xs: 1, sm: 2 }, py: 2 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                 <Typography variant="h5" fontWeight={600}>Notifications</Typography>
-                <Button variant="outlined" size="small" onClick={() => markAllRead.mutate()}>Mark all as read</Button>
+                <Button variant="outlined" size="small" onClick={() => markAllRead.mutate(undefined)}>Mark all as read</Button>
             </Box>
             {isLoading && (
                 Array.from({ length: 5 }).map((_, index) => (
