@@ -4,12 +4,13 @@
 Not Started
 
 ## Goals
-<!-- List goals here when a new feature is loaded -->
+<!-- Add goals for the next feature here -->
 
 ## Notes
-<!-- Add constraints or context here -->
+<!-- Add notes for the next feature here -->
 
 ## History
+- TASK-8.6 — REST Controller: `SearchController` (`@RestController @RequestMapping("/api/v1")`, `@Tag(name="Search")`); 4 endpoints: `GET /search` (Java 21 switch on `users`/`hashtags`/`posts`, 400 for unknown), `GET /search/history` (last 10, mapped to `SearchHistoryResponse`), `DELETE /search/history` (204 NO CONTENT), `GET /hashtags/{name}/posts` (paginated, mapped to `PostSearchResponse`); `currentUserId()` helper from security context; companion DTOs `UserSearchResponse`, `HashtagSearchResponse`, `PostSearchResponse`, `SearchHistoryResponse` + in-port helpers `FindAllUserUseCase`, `FindAllPostMediaUseCase`, `GetUserStatsUseCase` for response enrichment
 - TASK-8.5 — Persistence Layer: `SearchHistoryJpaEntity` (`@Entity`, `@Table(name="search_history")`, Lombok, 4 fields, `@PrePersist` null-guard on `searchedAt`, raw UUID `userId` — no join) + `SearchHistoryJpaRepository` (`findByUserIdOrderBySearchedAtDesc`, `@Modifying @Transactional @Query` bulk `deleteByUserId`) + `SearchJpaAdapter` (`@Component`, `EntityManager` constructor-inject, 4 native-SQL `ILIKE` methods with `@SuppressWarnings("unchecked")` + blank-query early return + prefix-match `query+"%"` for hashtags) + `SearchHistoryPersistenceAdapter` (`@Component`, implements `SearchHistoryRepository`, `save`/`findByUserIdOrderBySearchedAtDesc`/`deleteByUserId` with private `toEntity`/`toDomain` mappers)
 - TASK-8.4 — Application Service: `SearchService` in `application/service/` — `@Service`, constructor-injected `SearchRepository` + `SearchHistoryRepository` (both `final`); implements all 6 use-case in-ports (`SearchUsersUseCase`, `SearchHashtagsUseCase`, `SearchPostsUseCase`, `GetPostsByHashtagUseCase`, `GetSearchHistoryUseCase`, `ClearSearchHistoryUseCase`); blank-guard early return on all query/hashtagName params; `searchUsers`/`searchPosts` call `saveHistoryAsync` after DB fetch; `searchHashtags`/`getPostsByHashtag` skip history; `getSearchHistory` delegates to `findByUserIdOrderBySearchedAtDesc` with `PageRequest.ofSize`; `clearSearchHistory` is `@Transactional`; private `@Async saveHistoryAsync` builds `SearchHistory` via Builder with `OffsetDateTime.now()` and calls `searchHistoryRepository.save`
 - TASK-8.3 — In-Ports: 6 use-case interfaces in `domain/port/in/search/` — `SearchUsersUseCase` (`Query(String q, UUID currentUserId, int page, int size)`), `SearchHashtagsUseCase` (`Query(String q, int page, int size)` — no currentUserId), `SearchPostsUseCase` (`Query(String q, UUID currentUserId, int page, int size)`), `GetPostsByHashtagUseCase` (`Query(String hashtagName, UUID currentUserId, int page, int size)`), `GetSearchHistoryUseCase` (`Query(UUID userId, int limit)` — flat list, no pagination), `ClearSearchHistoryUseCase` (`Command(UUID userId)`); pure Java, zero framework imports
