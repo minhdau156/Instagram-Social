@@ -1,13 +1,52 @@
-# Current Feature
+# Current Feature: TASK-8.8 — Unit & Integration Tests (Search)
 
 ## Status
-Not Started
+Complete
 
 ## Goals
-<!-- Add goals for the next feature here -->
+- [x] Write `SearchServiceTest.java` (unit, JUnit 5 + Mockito, no Spring context)
+  - [x] Mock `SearchRepository` and `SearchHistoryRepository`
+  - [x] `searchUsers` — non-blank: verify correct `PageRequest` params passed
+  - [x] `searchUsers` — blank/whitespace: verify NO DB call, returns empty list
+  - [x] `searchHashtags` — non-blank: verify `searchRepository.searchHashtags(...)` called
+  - [x] `searchHashtags` — blank: returns empty list, no DB call
+  - [x] `searchPosts` — non-blank: verify DB call + history save triggered
+  - [x] `searchPosts` — blank: returns empty list, no DB call, no history save
+  - [x] `getPostsByHashtag` — valid name: verify `findPostsByHashtag(...)` called
+  - [x] `getSearchHistory` — verify `findByUserIdOrderBySearchedAtDesc(...)` with correct userId + limit
+  - [x] `clearSearchHistory` — verify `deleteByUserId(...)` with correct userId
+  - [x] `saveHistoryAsync` (indirect) — use `ArgumentCaptor` to verify `save(...)` eventually called
+- [x] Write `SearchJpaAdapterIT.java` (`@DataJpaTest`)
+  - [x] `@BeforeEach`: insert `users` row for FK; flush + clear EntityManager
+  - [x] `searchPosts` ILIKE: basic match, no match, soft-deleted exclusion, case-insensitive
+  - [x] `searchUsers` ILIKE: match on full_name, match on username, partial match, ordering by follower_count, soft-deleted exclusion
+  - [x] `searchHashtags` prefix: both "travel" + "travelblog" returned; "food" excluded; ordering by post_count
+  - [x] `findPostsByHashtag` join: only posts linked via `post_hashtags` for the given hashtag returned
+  - [x] `SearchHistoryPersistenceAdapter`: save + round-trip verify; deleteByUserId removes all for that user
+- [x] Write `SearchControllerIT.java` (`@SpringBootTest` + `MockMvc`)
+  - [x] `@MockBean` all 6 use-case interfaces
+  - [x] `GET /api/v1/search?q=john&type=users` — 200 with list
+  - [x] `GET /api/v1/search?q=travel&type=hashtags` — 200 with list
+  - [x] `GET /api/v1/search?q=sunset&type=posts` — 200 with list
+  - [x] `GET /api/v1/search?q=x&type=invalid_type` — 400 BAD REQUEST
+  - [x] `GET /api/v1/search?q=&type=users` — 200 empty list (blank handled by service)
+  - [x] `GET /api/v1/search/history` — authenticated: 200 with list
+  - [x] `DELETE /api/v1/search/history` — authenticated: 204 NO CONTENT
+  - [x] `GET /api/v1/hashtags/travel/posts` — authenticated: 200 with list
+  - [x] Any endpoint unauthenticated — 401 UNAUTHORIZED
+- [x] Achieve ≥ 80% coverage of new search code
 
 ## Notes
-<!-- Add notes for the next feature here -->
+- **Files to create:**
+  - `backend/src/test/java/com/instagram/application/service/SearchServiceTest.java`
+  - `backend/src/test/java/com/instagram/adapter/out/persistence/SearchJpaAdapterIT.java`
+  - `backend/src/test/java/com/instagram/adapter/in/web/SearchControllerIT.java`
+- **Unit tests**: JUnit 5 + Mockito, no Spring context loaded
+- **Integration tests**: `@DataJpaTest` for persistence; `@SpringBootTest` + `MockMvc` for controller
+- **`@Async` handling**: Add `@TestConfiguration` with `SyncTaskExecutor` bean to make async history saves synchronous during tests
+- **FK constraints**: `post_hashtags` needs both `posts` and `hashtags` rows; `posts` needs a `users` row
+- **Controller stubs**: Use `Mockito.when(...).thenReturn(...)` with sensible domain objects (list of 1 User/Hashtag/Post)
+- **Reference patterns**: Follow conventions from TASK-4.9 (Likes), TASK-6.13 (Messaging), TASK-7.14 (Notifications)
 
 ## History
 - TASK-8.6 — REST Controller: `SearchController` (`@RestController @RequestMapping("/api/v1")`, `@Tag(name="Search")`); 4 endpoints: `GET /search` (Java 21 switch on `users`/`hashtags`/`posts`, 400 for unknown), `GET /search/history` (last 10, mapped to `SearchHistoryResponse`), `DELETE /search/history` (204 NO CONTENT), `GET /hashtags/{name}/posts` (paginated, mapped to `PostSearchResponse`); `currentUserId()` helper from security context; companion DTOs `UserSearchResponse`, `HashtagSearchResponse`, `PostSearchResponse`, `SearchHistoryResponse` + in-port helpers `FindAllUserUseCase`, `FindAllPostMediaUseCase`, `GetUserStatsUseCase` for response enrichment
