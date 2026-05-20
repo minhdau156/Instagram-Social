@@ -1,24 +1,14 @@
-# Current Feature: TASK-8.11 — Custom Hooks: useSearch, useSearchHistory, useHashtagPosts
+# Current Feature
 
 ## Status
-Complete
+Not Started
 
 ## Goals
-- [x] `useSearch(q, type, page?, size?)` — `useQuery` with 300ms debounce on `q`; `queryKey: ['search', debouncedQ, type, page]`; dispatch to `searchUsers`/`searchHashtags`/`searchPosts` by type; `enabled` when `debouncedQ.trim().length >= 1`; `staleTime: 30_000`; returns `results`, `isLoading`, `isFetching`, `isError`
-- [x] `useSearchHistory()` — `useQuery` with `queryKey: ['search-history']`, `staleTime: 60_000`; `useMutation` for `clearSearchHistory` with `invalidateQueries` on success; returns `history`, `isLoading`, `clearHistory()`, `isClearing`
-- [x] `useHashtagPosts(hashtagName)` — `useInfiniteQuery`; `queryKey: ['hashtag-posts', hashtagName]`; `initialPageParam: 0`; `getNextPageParam` returns next page index if last page had 20 items, else `undefined`; `enabled: hashtagName.length > 0`; flattens `data?.pages.flat() ?? []`; returns `posts`, `isLoading`, `isFetchingNextPage`, `fetchNextPage`, `hasNextPage`, `isError`
-- [x] All files in `frontend/src/hooks/search/`
-- [x] `queryClient` via `useQueryClient()` — never imported as singleton
-- [x] No `any`, strict TypeScript throughout
 
 ## Notes
-- **Files:** `hooks/search/useSearch.ts`, `hooks/search/useSearchHistory.ts`, `hooks/search/useHashtagPosts.ts`
-- Debounce in `useSearch`: `useState(q)` + `useEffect([q])` with `setTimeout(300ms)` + `clearTimeout` cleanup — prevents memory leaks and stale state
-- `useSearch` returns union `UserSearchResult[] | HashtagSearchResult[] | PostSearchResult[]`; component narrows via its own `type` prop
-- `useSearch` uses `useQuery` (not `useInfiniteQuery`) — search dropdown shows fixed top results, not infinite scroll
-- Pattern: mirrors `hooks/notification/` sub-folder structure from Phase 7
 
 ## History
+- TASK-8.11 — Custom Hooks: `useSearch` (`useQuery`, 300ms debounce via `useState`+`useEffect`+`clearTimeout`, typed as `UserSearchResult[] | HashtagSearchResult[] | PostSearchResult[]`, dispatches by `SearchType`, `staleTime: 30_000`), `useSearchHistory` (`useQuery` + `useMutation` for `clearSearchHistory` with `invalidateQueries`, returns `isClearing` via `isPending`), `useHashtagPosts` (`useInfiniteQuery`, `getNextPageParam` uses `allPages.length`, flattens pages, `staleTime: 60_000`); all in `hooks/search/`; strict TypeScript, no `any`, `queryClient` via `useQueryClient()`
 - TASK-8.10 — API Service: `searchApi.ts` — 6-method `searchApi` object; `searchUsers`/`searchHashtags`/`searchPosts` hit `GET /api/v1/search` with Axios `params` (URL-safe encoding); `getSearchHistory` hits `GET /api/v1/search/history`; `clearSearchHistory` hits `DELETE /api/v1/search/history` (void); `getPostsByHashtag` hits `GET /api/v1/hashtags/{name}/posts`; all typed from `search.ts`, all body responses unwrap `data.data`
 - TASK-8.9 — TypeScript Types: `search.ts` — `SearchType` (string literal union `'users' | 'hashtags' | 'posts'`), `UserSearchResult` (6 fields), `HashtagSearchResult` (3 fields), `PostSearchResult` (9 fields, `mediaType: 'IMAGE' | 'VIDEO'`), `SearchHistoryItem` (3 fields), `SearchResult` discriminated union; strict TypeScript, no `any`, all named exports
 - TASK-8.8 — Unit & Integration Tests (Search): `SearchServiceTest` (12 unit tests, JUnit 5 + Mockito, blank/null guard, PageRequest delegation, ArgumentCaptor for history save on searchUsers/searchPosts, no history save for hashtags/getPostsByHashtag) + `SearchJpaAdapterIT` (@DataJpaTest, H2 PostgreSQL MODE, @Sql BEFORE_TEST_CLASS for follower_count/deleted_at/post_hashtags DDL, 14 tests covering ILIKE matches, soft-delete exclusion, prefix ordering, join table) + `SearchControllerIT` (@WebMvcTest, 9 tests, all 6 use-case MockBeans, users/hashtags/posts/history/delete/hashtag-posts 200s, invalid type 400, unauthenticated 401)
