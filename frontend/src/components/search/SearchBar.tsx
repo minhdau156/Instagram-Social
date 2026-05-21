@@ -6,6 +6,7 @@ import { useTheme } from "@mui/material/styles";
 import { useSearch } from "../../hooks/search/useSearch";
 import { useNavigate } from "react-router-dom";
 import type { UserSearchResult } from "../../types/search";
+import { RecentSearches } from "./RecentSearches";
 
 interface SearchBarProps {
     onNavigate?: () => void;
@@ -70,7 +71,27 @@ export const SearchBar = ({ onNavigate }: SearchBarProps) => {
                 }}
             />
 
-            {focused && (
+            {focused && query.trim().length === 0 && (
+                <Paper
+                    sx={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        right: 0,
+                        zIndex: theme.zIndex.modal,
+                        mt: 0.5,
+                        maxHeight: 400,
+                        overflow: 'auto',
+                    }}
+                >
+                    <RecentSearches onSelected={(q) => {
+                        setQuery(q);
+                        setActiveIndex(-1);
+                    }} />
+                </Paper>
+            )}
+
+            {focused && query.trim().length > 0 && (
                 <Paper
                     sx={{
                         position: 'absolute',
