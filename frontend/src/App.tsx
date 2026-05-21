@@ -20,6 +20,7 @@ import { PublicProfilePage } from './pages/users/PublicProfilePage';
 import FollowRequestsPage from './pages/follow/FollowRequestsPage';
 import SavedPostsPage from './pages/profile/SavedPostsPage';
 import React from 'react';
+import { SearchPage } from './pages/search/SearchPage';
 
 const HomePage = React.lazy(() => import('./pages/feed/HomePage'));
 const ExplorePage = React.lazy(() => import('./pages/explore/ExplorePage'));
@@ -72,6 +73,7 @@ export default function App() {
                 <Route path="/messages/:conversationId" element={<ErrorBoundary><ChatRoute /></ErrorBoundary>} />
                 <Route path="/notifications" element={<ErrorBoundary><NotificationsPage /></ErrorBoundary>} />
                 <Route path="/settings/notifications" element={<ErrorBoundary><NotificationSettingsPage /></ErrorBoundary>} />
+                <Route path="/search" element={<ErrorBoundary><SearchPage /></ErrorBoundary>} />
               </Route>
             </Route>
           </Routes>
