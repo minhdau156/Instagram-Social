@@ -1,33 +1,14 @@
-# Current Feature: TASK-8.14 — Pages: SearchPage, HashtagPage
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Create `SearchPage` at `frontend/src/pages/search/SearchPage.tsx` — full-page search results with tabs for People, Hashtags, and Posts; URL-driven state via `useSearchParams()`
-- Create `HashtagPage` at `frontend/src/pages/search/HashtagPage.tsx` — infinite-scroll post grid for a given hashtag; path param via `useParams()`
-- Both pages use `export default function` for `React.lazy` compatibility (TASK-8.15)
-- MUI + `sx` only for all styling; no inline `style={{}}`
-- `SearchPage` tabs sync with `?type=` URL param; tab change updates URL via `setSearchParams`
-- `SearchPage` empty query state shows `RecentSearches` component; clicking history item updates URL params
-- `SearchPage` paginated via "Load more" button (increments local `page` state); resets on `q`/`activeTab` change
-- `HashtagPage` infinite scroll via `IntersectionObserver` sentinel + `useHashtagPosts` hook
-- Both pages handle loading skeletons and empty states
-
 ## Notes
 
-- `SearchPage` reads `q` and `type` from URL; `activeTab` defaults to `'users'`
-- Tab values: `"users"` → "People", `"hashtags"` → "Hashtags", `"posts"` → "Posts"
-- People results: `ListItemButton` → `/profile/{username}`, `Avatar`, `ListItemText`, secondary action button
-- Hashtags results: `ListItemButton` → `/hashtag/{hashtag.name}`, `TagIcon` avatar, post count
-- Posts results: 3-column CSS grid, square tiles via `paddingBottom: '100%'` trick, `PlayArrowIcon` overlay for VIDEO
-- `HashtagPage` header: large `TagIcon` avatar (80×80), `#name` heading, post count display
-- `HashtagPage` grid: 2 columns on xs, 3 columns on sm+; hover overlay with like/comment counts (`&:hover: { opacity: 1 }`)
-- `HashtagPage` uses `loading="lazy"` on `<img>` for native lazy loading
-- `useParams` returns `string | undefined` — always pass `name ?? ''` to hook
-
 ## History
+- TASK-8.14 — Pages: SearchPage + HashtagPage: `SearchPage` in `pages/search/SearchPage.tsx` — `default export`, URL-driven via `useSearchParams()` (`q` + `type`); `Tabs` sync with `?type=` param via `setSearchParams`; `useSearch(q, activeTab, page, 20)` + `useEffect` resets `page` on `q`/tab change; skeletons per tab type (circular+text for users, rectangular for hashtags, 9-square grid for posts); empty state guards `q !== ''`; empty query shows `RecentSearches` with `onSelected → setSearchParams`; users/hashtags rendered as `ListItemButton` with navigation; posts as 3-col CSS grid with `paddingBottom: '100%'` square tiles + `PlayArrowIcon` for VIDEO; "Load more" button shown when `results.length === PAGE_SIZE`. `HashtagPage` in `pages/search/HashtagPage.tsx` — `default export`, `useParams<{ name }>()` → `useHashtagPosts(name ?? '')`; header with 80×80 `TagIcon` avatar + `#name` title; 2-col (xs) / 3-col (sm+) responsive grid; square tiles with `loading="lazy"`, hover overlay (`opacity: 0 → 1`) showing like/comment counts, `PlayArrowIcon` for VIDEO; `IntersectionObserver` sentinel for infinite scroll; `CircularProgress` while `isFetchingNextPage`. Also removed stale named import of `SearchPage` from `App.tsx` (was `{ SearchPage }`, now `default export` — route re-registration is TASK-8.15).
 - TASK-8.13 — Recent Searches Component: `RecentSearches` in `components/search/RecentSearches.tsx`; named export, fully typed, MUI `sx`; prop `onSelected(query)` — no navigation, delegates to parent; `useSearchHistory()` internal (`history`, `clearHistory`, `isClearing`); header row "Recent" + "Clear all" (`disabled={isClearing}`); empty state "No recent searches"; `List disablePadding`, `HistoryIcon` avatar (`36×36`, `action.hover`), `primaryTypographyProps={{ variant: 'body2', noWrap: true }}`, `formatDistanceToNow` in `try/catch`; per-item remove via `hiddenIds: Set<string>` local state; X button `e.stopPropagation()` + `removeItem`; `<Fragment key>` + `<Divider component="li">`; wired into `SearchBar` inside `Paper` (absolute, `zIndex.modal`) when `focused && query.trim().length === 0`
 - TASK-8.12 — Search Bar Component: `SearchBar` in `components/search/SearchBar.tsx`; named export, fully typed, MUI `sx`; state `query`/`focused`/`activeIndex`; `useSearch(query, 'users')` + `isFetching` (3 loading skeletons); keyboard nav ArrowUp/Down (update `activeIndex`), Enter (navigate to `/${username}/bio` or `/search?q=…&type=users`), Escape (close); `onBlur` + 150ms `setTimeout`; `onNavigate?.()` called on every navigation; "No results" guard on `query.trim().length > 0 && !isFetching`; `useTheme()` for `zIndex.modal`; `/search` route registered in `App.tsx` inside `<ProtectedRoute>` with `<ErrorBoundary>`
 - TASK-8.11 — Custom Hooks: `useSearch` (`useQuery`, 300ms debounce via `useState`+`useEffect`+`clearTimeout`, typed as `UserSearchResult[] | HashtagSearchResult[] | PostSearchResult[]`, dispatches by `SearchType`, `staleTime: 30_000`), `useSearchHistory` (`useQuery` + `useMutation` for `clearSearchHistory` with `invalidateQueries`, returns `isClearing` via `isPending`), `useHashtagPosts` (`useInfiniteQuery`, `getNextPageParam` uses `allPages.length`, flattens pages, `staleTime: 60_000`); all in `hooks/search/`; strict TypeScript, no `any`, `queryClient` via `useQueryClient()`
