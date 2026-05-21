@@ -1,11 +1,31 @@
-# Current Feature
+# Current Feature: TASK-8.14 — Pages: SearchPage, HashtagPage
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
+- Create `SearchPage` at `frontend/src/pages/search/SearchPage.tsx` — full-page search results with tabs for People, Hashtags, and Posts; URL-driven state via `useSearchParams()`
+- Create `HashtagPage` at `frontend/src/pages/search/HashtagPage.tsx` — infinite-scroll post grid for a given hashtag; path param via `useParams()`
+- Both pages use `export default function` for `React.lazy` compatibility (TASK-8.15)
+- MUI + `sx` only for all styling; no inline `style={{}}`
+- `SearchPage` tabs sync with `?type=` URL param; tab change updates URL via `setSearchParams`
+- `SearchPage` empty query state shows `RecentSearches` component; clicking history item updates URL params
+- `SearchPage` paginated via "Load more" button (increments local `page` state); resets on `q`/`activeTab` change
+- `HashtagPage` infinite scroll via `IntersectionObserver` sentinel + `useHashtagPosts` hook
+- Both pages handle loading skeletons and empty states
+
 ## Notes
+
+- `SearchPage` reads `q` and `type` from URL; `activeTab` defaults to `'users'`
+- Tab values: `"users"` → "People", `"hashtags"` → "Hashtags", `"posts"` → "Posts"
+- People results: `ListItemButton` → `/profile/{username}`, `Avatar`, `ListItemText`, secondary action button
+- Hashtags results: `ListItemButton` → `/hashtag/{hashtag.name}`, `TagIcon` avatar, post count
+- Posts results: 3-column CSS grid, square tiles via `paddingBottom: '100%'` trick, `PlayArrowIcon` overlay for VIDEO
+- `HashtagPage` header: large `TagIcon` avatar (80×80), `#name` heading, post count display
+- `HashtagPage` grid: 2 columns on xs, 3 columns on sm+; hover overlay with like/comment counts (`&:hover: { opacity: 1 }`)
+- `HashtagPage` uses `loading="lazy"` on `<img>` for native lazy loading
+- `useParams` returns `string | undefined` — always pass `name ?? ''` to hook
 
 ## History
 - TASK-8.13 — Recent Searches Component: `RecentSearches` in `components/search/RecentSearches.tsx`; named export, fully typed, MUI `sx`; prop `onSelected(query)` — no navigation, delegates to parent; `useSearchHistory()` internal (`history`, `clearHistory`, `isClearing`); header row "Recent" + "Clear all" (`disabled={isClearing}`); empty state "No recent searches"; `List disablePadding`, `HistoryIcon` avatar (`36×36`, `action.hover`), `primaryTypographyProps={{ variant: 'body2', noWrap: true }}`, `formatDistanceToNow` in `try/catch`; per-item remove via `hiddenIds: Set<string>` local state; X button `e.stopPropagation()` + `removeItem`; `<Fragment key>` + `<Divider component="li">`; wired into `SearchBar` inside `Paper` (absolute, `zIndex.modal`) when `focused && query.trim().length === 0`
