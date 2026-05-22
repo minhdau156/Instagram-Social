@@ -8,6 +8,7 @@ VALUES (
     'demo_user',
     'demo@example.com',
     'Demo User',
-    'active',
-    'public'
+    'ACTIVE',
+    'PUBLIC'
 ) ON CONFLICT (id) DO NOTHING;
+

@@ -35,6 +35,10 @@ backend/src/test/java/com/instagram/adapter/out/persistence/SearchJpaAdapterIT.j
 
 - [ ] Add a `STORED` generated `tsvector` column to `posts`:
   ```sql
+  -- Drop the index if it exists (Postgres 16+ supports NOT EXISTS, but old versions may error)
+  DROP INDEX IF EXISTS idx_posts_caption_trgm;
+
+  -- Add the generated column for FTS
   ALTER TABLE posts
     ADD COLUMN caption_tsv tsvector
       GENERATED ALWAYS AS (

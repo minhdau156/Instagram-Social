@@ -49,8 +49,8 @@ CREATE TABLE users (
     bio                 VARCHAR(150),
     profile_picture_url TEXT,
     website_url         TEXT,
-    account_status      account_status  NOT NULL DEFAULT 'pending_verification',
-    privacy_level       privacy_level   NOT NULL DEFAULT 'public',
+    account_status      account_status  NOT NULL DEFAULT 'PENDING_VERIFICATION',
+    privacy_level       privacy_level   NOT NULL DEFAULT 'PUBLIC',
     is_verified         BOOLEAN         NOT NULL DEFAULT FALSE, -- blue-tick badge
     created_at          TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
@@ -141,7 +141,7 @@ CREATE TABLE posts (
     user_id         UUID        NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     caption         TEXT,
     location        VARCHAR(255),
-    status          post_status NOT NULL DEFAULT 'published',
+    status          post_status NOT NULL DEFAULT 'PUBLISHED',
     view_count      BIGINT      NOT NULL DEFAULT 0,
     like_count      INT         NOT NULL DEFAULT 0,     -- denormalized
     comment_count   INT         NOT NULL DEFAULT 0,     -- denormalized
@@ -344,7 +344,7 @@ CREATE TABLE messages (
     id                  UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
     conversation_id     UUID        NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
     sender_id           UUID        NOT NULL REFERENCES users         (id) ON DELETE CASCADE,
-    message_type        message_type NOT NULL DEFAULT 'text',
+    message_type        message_type NOT NULL DEFAULT 'TEXT',
     body                TEXT,                       -- text content
     media_url           TEXT,                       -- image/video URL
     shared_post_id      UUID        REFERENCES posts (id) ON DELETE SET NULL,  -- post_share type
@@ -443,7 +443,7 @@ CREATE TABLE reports (
     entity_id       UUID                NOT NULL,
     reason          VARCHAR(255)        NOT NULL,
     details         TEXT,
-    status          report_status       NOT NULL DEFAULT 'pending',
+    status          report_status       NOT NULL DEFAULT 'PENDING',
     reviewed_by_id  UUID                REFERENCES users (id) ON DELETE SET NULL,
     reviewed_at     TIMESTAMPTZ,
     created_at      TIMESTAMPTZ         NOT NULL DEFAULT NOW()

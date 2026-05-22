@@ -49,12 +49,13 @@ CREATE TABLE users (
     bio                 VARCHAR(150),
     profile_picture_url TEXT,
     website_url         TEXT,
-    account_status      account_status  NOT NULL DEFAULT 'pending_verification',
-    privacy_level       privacy_level   NOT NULL DEFAULT 'public',
+    account_status      account_status  NOT NULL DEFAULT 'PENDING_VERIFICATION',
+    privacy_level       privacy_level   NOT NULL DEFAULT 'PUBLIC',
     is_verified         BOOLEAN         NOT NULL DEFAULT FALSE, -- blue-tick badge
     created_at          TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
     last_login_at       TIMESTAMPTZ,
+    search_tsv   tsvector  GENERATED ALWAYS AS (to_tsvector('simple', coalesce(username::text, '') || ' ' || coalesce(full_name, ''))) STORED,
 
     CONSTRAINT chk_contact CHECK (email IS NOT NULL OR phone_number IS NOT NULL)
 );
@@ -62,6 +63,7 @@ CREATE TABLE users (
 CREATE INDEX idx_users_username  ON users USING GIN (username gin_trgm_ops);
 CREATE INDEX idx_users_email     ON users (email);
 CREATE INDEX idx_users_status    ON users (account_status);
+CREATE INDEX idx_users_search_fts ON users USING GIN (search_tsv);
 
 -- Third-party OAuth provider links (FR-001)
 CREATE TABLE user_auth_providers (
@@ -141,7 +143,7 @@ CREATE TABLE posts (
     user_id         UUID        NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     caption         TEXT,
     location        VARCHAR(255),
-    status          post_status NOT NULL DEFAULT 'published',
+    status          post_status NOT NULL DEFAULT 'PUBLISHED',
     view_count      BIGINT      NOT NULL DEFAULT 0,
     like_count      INT         NOT NULL DEFAULT 0,     -- denormalized
     comment_count   INT         NOT NULL DEFAULT 0,     -- denormalized
@@ -149,12 +151,15 @@ CREATE TABLE posts (
     share_count     INT         NOT NULL DEFAULT 0,     -- denormalized
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    deleted_at      TIMESTAMPTZ                         -- soft delete
+    deleted_at      TIMESTAMPTZ,                         -- soft delete
+    caption_tsv  tsvector  GENERATED ALWAYS AS (to_tsvector('english', coalesce(caption, ''))) STORED
 );
 
 CREATE INDEX idx_posts_user       ON posts (user_id, created_at DESC);
 CREATE INDEX idx_posts_status     ON posts (status) WHERE deleted_at IS NULL;
 CREATE INDEX idx_posts_created    ON posts (created_at DESC) WHERE deleted_at IS NULL;
+CREATE INDEX idx_posts_caption_fts  ON posts USING GIN (caption_tsv);
+CREATE INDEX idx_posts_caption_trgm ON posts USING GIN (caption gin_trgm_ops);
 
 -- Each post can have multiple media items (carousel / album)
 CREATE TABLE post_media (
@@ -344,7 +349,7 @@ CREATE TABLE messages (
     id                  UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
     conversation_id     UUID        NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
     sender_id           UUID        NOT NULL REFERENCES users         (id) ON DELETE CASCADE,
-    message_type        message_type NOT NULL DEFAULT 'text',
+    message_type        message_type NOT NULL DEFAULT 'TEXT',
     body                TEXT,                       -- text content
     media_url           TEXT,                       -- image/video URL
     shared_post_id      UUID        REFERENCES posts (id) ON DELETE SET NULL,  -- post_share type
@@ -443,7 +448,7 @@ CREATE TABLE reports (
     entity_id       UUID                NOT NULL,
     reason          VARCHAR(255)        NOT NULL,
     details         TEXT,
-    status          report_status       NOT NULL DEFAULT 'pending',
+    status          report_status       NOT NULL DEFAULT 'PENDING',
     reviewed_by_id  UUID                REFERENCES users (id) ON DELETE SET NULL,
     reviewed_at     TIMESTAMPTZ,
     created_at      TIMESTAMPTZ         NOT NULL DEFAULT NOW()

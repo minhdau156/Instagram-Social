@@ -15,7 +15,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.jdbc.Sql;
 
 import com.instagram.adapter.out.persistence.entity.HashtagJpaEntity;
 import com.instagram.adapter.out.persistence.entity.PostJpaEntity;
@@ -34,18 +33,13 @@ import com.instagram.infrastructure.config.JpaConfig;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(JpaConfig.class)
 @TestPropertySource(properties = {
-        "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.datasource.url=jdbc:h2:mem:searchtest;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
-        "spring.datasource.driver-class-name=org.h2.Driver",
-        "spring.datasource.username=sa",
-        "spring.datasource.password="
+        "spring.flyway.enabled=true",
+        "spring.jpa.hibernate.ddl-auto=none",
+        "spring.datasource.url=jdbc:postgresql://localhost:5432/instagram_test",
+        "spring.datasource.username=instagram",
+        "spring.datasource.password=changeme",
+        "spring.datasource.driver-class-name=org.postgresql.Driver"
 })
-@Sql(statements = {
-        "ALTER TABLE users ADD COLUMN IF NOT EXISTS follower_count INT NOT NULL DEFAULT 0",
-        "ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP",
-        "CREATE TABLE IF NOT EXISTS post_hashtags (post_id UUID NOT NULL, hashtag_id UUID NOT NULL, PRIMARY KEY (post_id, hashtag_id))"
-}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 class SearchJpaAdapterIT {
 
     @Autowired
@@ -59,6 +53,13 @@ class SearchJpaAdapterIT {
 
     @BeforeEach
     void setUp() {
+        // Clear all tables to ensure test isolation on ephemeral Testcontainers PostgreSQL
+        tem.getEntityManager()
+                .createNativeQuery("TRUNCATE TABLE search_history, post_hashtags, posts, hashtags, users CASCADE")
+                .executeUpdate();
+        tem.flush();
+        tem.clear();
+
         adapter = new SearchJpaAdapter(tem.getEntityManager());
         historyAdapter = new SearchHistoryPersistenceAdapter(searchHistoryJpaRepository);
     }
@@ -254,7 +255,8 @@ class SearchJpaAdapterIT {
 
     @Test
     void searchHistory_save_roundTrip() {
-        UUID userId = UUID.randomUUID();
+        UserJpaEntity user = tem.persistAndFlush(buildUser("history_user1", "History User One"));
+        UUID userId = user.getId();
         SearchHistory history = SearchHistory.builder()
                 .id(UUID.randomUUID())
                 .userId(userId)
@@ -273,8 +275,10 @@ class SearchJpaAdapterIT {
 
     @Test
     void searchHistory_deleteByUserId_removesAllForUserAndLeavesOthers() {
-        UUID userId = UUID.randomUUID();
-        UUID otherUserId = UUID.randomUUID();
+        UserJpaEntity user = tem.persistAndFlush(buildUser("history_user2", "History User Two"));
+        UserJpaEntity otherUser = tem.persistAndFlush(buildUser("history_user3", "History User Three"));
+        UUID userId = user.getId();
+        UUID otherUserId = otherUser.getId();
 
         historyAdapter.save(SearchHistory.builder()
                 .id(UUID.randomUUID()).userId(userId).query("q1").searchedAt(OffsetDateTime.now()).build());
@@ -287,6 +291,122 @@ class SearchJpaAdapterIT {
 
         assertThat(historyAdapter.findByUserIdOrderBySearchedAtDesc(userId, Pageable.ofSize(10))).isEmpty();
         assertThat(historyAdapter.findByUserIdOrderBySearchedAtDesc(otherUserId, Pageable.ofSize(10))).hasSize(1);
+    }
+
+    // ── FTS Specific Cases ────────────────────────────────────────────────── //
+
+    @Test
+    void searchPosts_ftsStemming() {
+        UserJpaEntity user = tem.persistAndFlush(buildUser("stem_poster", "Stemming User"));
+        tem.persistAndFlush(PostJpaEntity.builder()
+                .user(user).caption("Running along the beautiful beach").status(PostStatus.PUBLISHED).build());
+        tem.clear();
+
+        // "running" stems to "run" in English FTS. Searching "run" should match.
+        List<Post> results = adapter.searchPosts("run", Pageable.ofSize(20));
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getCaption()).isEqualTo("Running along the beautiful beach");
+    }
+
+    @Test
+    void searchPosts_ftsMultiWord() {
+        UserJpaEntity user = tem.persistAndFlush(buildUser("bridge_poster", "Bridge User"));
+        tem.persistAndFlush(PostJpaEntity.builder()
+                .user(user).caption("Beautiful walk on the Golden Gate Bridge").status(PostStatus.PUBLISHED).build());
+        tem.clear();
+
+        List<Post> results = adapter.searchPosts("golden gate", Pageable.ofSize(20));
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getCaption()).isEqualTo("Beautiful walk on the Golden Gate Bridge");
+    }
+
+    @Test
+    void searchPosts_ftsRelevanceOrdering() {
+        UserJpaEntity user = tem.persistAndFlush(buildUser("rank_poster", "Ranking User"));
+        PostJpaEntity postLowDensity = tem.persistAndFlush(PostJpaEntity.builder()
+                .user(user).caption("A beautiful sunset is happening in Bali right now").status(PostStatus.PUBLISHED).build());
+        PostJpaEntity postHighDensity = tem.persistAndFlush(PostJpaEntity.builder()
+                .user(user).caption("sunset sunset sunset is sunset beach").status(PostStatus.PUBLISHED).build());
+        tem.clear();
+
+        List<Post> results = adapter.searchPosts("sunset", Pageable.ofSize(20));
+
+        assertThat(results).hasSize(2);
+        // The post with higher density of the keyword "sunset" should rank first due to ts_rank
+        assertThat(results.get(0).getId()).isEqualTo(postHighDensity.getId());
+        assertThat(results.get(1).getId()).isEqualTo(postLowDensity.getId());
+    }
+
+    @Test
+    void searchPosts_shortQueryFallback() {
+        UserJpaEntity user = tem.persistAndFlush(buildUser("fallback_poster", "Fallback User"));
+        tem.persistAndFlush(PostJpaEntity.builder()
+                .user(user).caption("Beautiful sunset in Bali").status(PostStatus.PUBLISHED).build());
+        tem.clear();
+
+        // Query "ba" is length 2 (< 3 min length). Under FTS it won't match "Bali",
+        // but the short-query fallback should use ILIKE '%ba%' and find it.
+        List<Post> results = adapter.searchPosts("ba", Pageable.ofSize(20));
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getCaption()).isEqualTo("Beautiful sunset in Bali");
+    }
+
+    @Test
+    void searchUsers_shortQueryFallback() {
+        tem.persistAndFlush(buildUser("john_doe", "John Doe"));
+        tem.clear();
+
+        // Query "jo" is length 2 (< 3 min length). FTS won't match it,
+        // but short-query ILIKE fallback should match on username "john_doe".
+        List<User> results = adapter.searchUsers("jo", Pageable.ofSize(20));
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getUsername()).isEqualTo("john_doe");
+    }
+
+    @Test
+    void searchUsers_ftsNoCrossTokenPartialMatch() {
+        tem.persistAndFlush(buildUser("alex_j", "Alexander Johnson"));
+        tem.clear();
+
+        // Query "alexand" is length 7 (>= 3 -> FTS). Simple dictionary splits into full tokens:
+        // "alexander" and "johnson". Since "alexand" is not a complete token, FTS will NOT match it.
+        // This is expected FTS behavior.
+        List<User> results = adapter.searchUsers("alexand", Pageable.ofSize(20));
+
+        assertThat(results).isEmpty();
+    }
+
+    @Test
+    void searchUsers_ftsFollowerCountOrdering() {
+        UserJpaEntity userA = tem.persistAndFlush(buildUser("travel_a", "Traveler Alice"));
+        UserJpaEntity userB = tem.persistAndFlush(buildUser("travel_b", "Traveler Bob"));
+
+        // Manually update follower_count in DB since UserJpaEntity doesn't expose it
+        tem.getEntityManager()
+                .createNativeQuery("UPDATE users SET follower_count = :count WHERE id = :id")
+                .setParameter("count", 10)
+                .setParameter("id", userA.getId())
+                .executeUpdate();
+
+        tem.getEntityManager()
+                .createNativeQuery("UPDATE users SET follower_count = :count WHERE id = :id")
+                .setParameter("count", 100)
+                .setParameter("id", userB.getId())
+                .executeUpdate();
+
+        tem.flush();
+        tem.clear();
+
+        List<User> results = adapter.searchUsers("Traveler", Pageable.ofSize(20));
+
+        assertThat(results).hasSize(2);
+        // bob (100 followers) should be first, alice (10 followers) should be second
+        assertThat(results.get(0).getUsername()).isEqualTo("travel_b");
+        assertThat(results.get(1).getUsername()).isEqualTo("travel_a");
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────── //
