@@ -14,6 +14,7 @@ import { useState } from 'react';
 import { useUnreadNotifications } from './hooks/notification/useUnreadNotifications';
 import { UnreadBadge } from './components/notifications/UnreadBadge';
 import { NotificationDropdown } from './components/notifications/NotificationDropdown';
+import { SearchBar } from './components/search/SearchBar';
 
 export default function AppShell() {
   return (
@@ -41,7 +42,7 @@ function AppShellContent() {
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* ── Top Navigation Bar ── */}
       <AppBar position="sticky" elevation={0}>
-        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
           <Box
             component={Link}
             to="/posts"
@@ -79,6 +80,13 @@ function AppShellContent() {
               SocialMedia
             </Typography>
           </Box>
+
+          {/* Centre — Search */}
+          {profile?.user && (
+            <Box sx={{ flex: 1, maxWidth: 300 }}>
+              <SearchBar />
+            </Box>
+          )}
 
           {/* Right Navigation */}
           {profile?.user && (

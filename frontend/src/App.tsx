@@ -28,6 +28,8 @@ const InboxPage = React.lazy(() => import('./pages/messaging/InboxPage'));
 const ChatPage = React.lazy(() => import('./pages/messaging/ChatPage'));
 const NotificationsPage = React.lazy(() => import('./pages/notifications/NotificationsPage'));
 const NotificationSettingsPage = React.lazy(() => import('./pages/notifications/NotificationSettingsPage'));
+const SearchPage = React.lazy(() => import('./pages/search/SearchPage'));
+const HashtagPage = React.lazy(() => import('./pages/search/HashtagPage'));
 
 function ChatRoute() {
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -73,6 +75,8 @@ export default function App() {
                 <Route path="/messages/:conversationId" element={<ErrorBoundary><ChatRoute /></ErrorBoundary>} />
                 <Route path="/notifications" element={<ErrorBoundary><NotificationsPage /></ErrorBoundary>} />
                 <Route path="/settings/notifications" element={<ErrorBoundary><NotificationSettingsPage /></ErrorBoundary>} />
+                <Route path="/search" element={<ErrorBoundary><SearchPage /></ErrorBoundary>} />
+                <Route path="/hashtag/:name" element={<ErrorBoundary><HashtagPage /></ErrorBoundary>} />
               </Route>
             </Route>
           </Routes>
