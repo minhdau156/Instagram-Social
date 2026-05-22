@@ -33,6 +33,12 @@
 | [TASK-8.14](TASK-8.14-pages.md) | Pages: SearchPage, HashtagPage | ⬜ |
 | [TASK-8.15](TASK-8.15-register-routes.md) | Register routes & integrate SearchBar into navigation | ⬜ |
 
+### Performance
+
+| Task | Title | Status |
+|------|-------|--------|
+| [TASK-8.16](TASK-8.16-full-text-search.md) | Full-text search integration (FTS indexes + SearchJpaAdapter) | ⬜ |
+
 ---
 
 ## Recommended Implementation Order
@@ -52,4 +58,7 @@ Frontend:
 8.12 → 8.13          (shared UI components)
 8.14                  (pages)
 8.15                  (integration into app shell + router)
+
+Performance (can run independently after 8.5):
+8.16                  (FTS migration + SearchJpaAdapter update + FTS integration tests)
 ```
