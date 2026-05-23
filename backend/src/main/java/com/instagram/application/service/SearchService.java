@@ -41,7 +41,8 @@ public class SearchService
         if (query.q() == null || query.q().isBlank()) {
             return Collections.emptyList();
         }
-        List<User> results = searchRepository.searchUsers(query.q(), PageRequest.of(query.page(), query.size()));
+        List<User> results = searchRepository.searchUsers(query.currentUserId(), query.q(),
+                PageRequest.of(query.page(), query.size()));
         saveHistoryAsync(query.currentUserId(), query.q());
         return results;
     }
@@ -59,7 +60,8 @@ public class SearchService
         if (query.q() == null || query.q().isBlank()) {
             return Collections.emptyList();
         }
-        List<Post> results = searchRepository.searchPosts(query.q(), PageRequest.of(query.page(), query.size()));
+        List<Post> results = searchRepository.searchPosts(query.currentUserId(), query.q(),
+                PageRequest.of(query.page(), query.size()));
         saveHistoryAsync(query.currentUserId(), query.q());
         return results;
     }
@@ -69,7 +71,7 @@ public class SearchService
         if (query.hashtagName() == null || query.hashtagName().isBlank()) {
             return Collections.emptyList();
         }
-        return searchRepository.findPostsByHashtag(query.hashtagName(), PageRequest.of(query.page(), query.size()));
+        return searchRepository.findPostsByHashtag(query.currentUserId(), query.hashtagName(), PageRequest.of(query.page(), query.size()));
     }
 
     @Override

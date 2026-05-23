@@ -46,6 +46,8 @@ public class PostPersistenceAdapterIT {
                 .passwordHash("hash")
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .role("USER")
                 .build());
     }
 

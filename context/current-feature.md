@@ -1,10 +1,39 @@
-# Current Feature
+# Current Feature: TASK-9.8 — Block Filtering: Feed & Search Integration
 
 ## Status
+In Progress
 
 ## Goals
+- Blocked users' content is invisible to both parties in feed and search results
+- `BlockFilter` utility loads the complete set of excluded user IDs once per request (two indexed queries, no per-row DB calls)
+- Fast path: if excluded ID set is empty, skip the `NOT IN` clause entirely
+- Home feed and explore feed both filter out posts from blocked/blocking users
+- User search results exclude blocked/blocking users
+- Post search results exclude posts authored by blocked/blocking users
+- Hashtag post pages exclude posts from blocked/blocking users
+- `searchHashtags` requires no filter (no user dimension)
 
 ## Notes
+### Files to Create / Modify
+- **Create:** `backend/src/main/java/com/instagram/infrastructure/util/BlockFilter.java`
+- **Modify:** `backend/src/main/java/com/instagram/adapter/out/persistence/FeedJpaQueryAdapter.java`
+- **Modify:** `backend/src/main/java/com/instagram/adapter/out/persistence/SearchJpaAdapter.java`
+
+### Key Constraints
+- `BlockFilter` is `@Component`, constructor-injects `ModerationRepository` (domain port — NOT `UserBlockJpaRepository` directly)
+- `getExcludedUserIds(UUID currentUserId)` merges results of `findBlockedUserIdsByBlockerId` + `findBlockerIdsByBlockedId` into a `HashSet<UUID>`; returns `Collections.emptySet()` when both are empty
+- No caching between requests — Phase 10 concern
+- `NOT IN (:excludedIds)` binding requires `List<UUID>` (convert from `Set` before binding)
+- Always guard with `if (!excludedIds.isEmpty())` — empty `NOT IN ()` is a PostgreSQL syntax error
+- Must verify `currentUserId` is propagated through `FeedRepository` out-port → `FeedJpaQueryAdapter` (may require interface + service changes)
+- `idx_blocks_blocked ON user_blocks (blocked_id)` index must exist — verify in Flyway migrations; create `V5__add_missing_block_index.sql` only if missing (note: `V4__add_role.sql` was already created in TASK-9.5)
+
+### Acceptance Criteria
+- [ ] `BlockFilter.java` created in `infrastructure/util/`, `@Component`, two-query merge, empty-set fast path
+- [ ] `FeedJpaQueryAdapter` injects `BlockFilter`; home feed + explore feed both apply `AND posts.user_id NOT IN (:excludedIds)` when set is non-empty
+- [ ] `SearchJpaAdapter` injects `BlockFilter`; `searchUsers` filters by user ID, `searchPosts` + `findPostsByHashtag` filter by post author ID; `searchHashtags` unchanged
+- [ ] `currentUserId` successfully propagated to feed adapter (interface/service layers updated if needed)
+- [ ] No empty `NOT IN ()` clause ever reaches PostgreSQL
 
 ## History
 - TASK-9.7 — Persistence Adapters: `ModerationPersistenceAdapter` (`@Component`, constructor-injected `ReportJpaRepository` + `UserBlockJpaRepository`) implements all 13 `ModerationRepository` methods — 6 report methods (`saveReport`, `findReportById`, `findAllReports` with null-status branch, `findPendingReports`, `countByStatus`, `existsByReporterIdAndEntityId`) and 7 block methods (`saveBlock`, `deleteBlock` with `@Transactional`, `isBlocked`, `isEitherBlocked`, `findBlocksByBlockerId`, `findBlockedUserIdsByBlockerId`, `findBlockerIdsByBlockedId`); private `toReportEntity`/`toReportDomain`/`toBlockEntity`/`toBlockDomain` mappers keep JPA entities inside the package. `AuditLogPersistenceAdapter` (`@Component`, constructor-injected `AuditLogJpaRepository`, `private static final Logger log`) implements `AuditLogRepository.log()` wrapped in try-catch — on any exception logs at `WARN` and returns silently, never throws.

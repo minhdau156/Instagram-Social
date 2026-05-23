@@ -31,44 +31,44 @@ backend/src/main/java/com/instagram/adapter/out/persistence/SearchJpaAdapter.jav
 
 ### `BlockFilter.java` (new)
 
-- [ ] Place in `infrastructure/util/` — this is a cross-cutting infrastructure concern, not domain logic.
-- [ ] Annotate with `@Component`.
-- [ ] Inject `ModerationRepository` via constructor.
-- [ ] Declare a single public method: `Set<UUID> getExcludedUserIds(UUID currentUserId)`.
+- [x] Place in `infrastructure/util/` — this is a cross-cutting infrastructure concern, not domain logic.
+- [x] Annotate with `@Component`.
+- [x] Inject `ModerationRepository` via constructor.
+- [x] Declare a single public method: `Set<UUID> getExcludedUserIds(UUID currentUserId)`.
   - Call `moderationRepository.findBlockedUserIdsByBlockerId(currentUserId)` to get the users that `currentUserId` has blocked.
   - Call `moderationRepository.findBlockerIdsByBlockedId(currentUserId)` to get the users who have blocked `currentUserId`.
   - Merge both lists into a single `Set<UUID>` (use `HashSet`, add all elements from both lists).
   - Return the set. If both lists are empty, return `Collections.emptySet()`.
-- [ ] The method does NOT cache results between requests. Caching is a Phase 10 concern. Document this in a comment.
-- [ ] The method should be fast — it makes exactly two indexed queries (`idx_blocks_blocked` and the PK index on `user_blocks`).
+- [x] The method does NOT cache results between requests. Caching is a Phase 10 concern. Document this in a comment.
+- [x] The method should be fast — it makes exactly two indexed queries (`idx_blocks_blocked` and the PK index on `user_blocks`).
 
 ---
 
 ### `FeedJpaQueryAdapter.java` — Modifications
 
-- [ ] Open the file and read all existing feed query methods before making any changes. Identify all native SQL queries that select posts.
-- [ ] Add `BlockFilter` as a new constructor parameter. Inject it and store as a `final` field.
-- [ ] For the home feed method (which fetches posts from followed users):
+- [x] Open the file and read all existing feed query methods before making any changes. Identify all native SQL queries that select posts.
+- [x] Add `BlockFilter` as a new constructor parameter. Inject it and store as a `final` field.
+- [x] For the home feed method (which fetches posts from followed users):
   - Before executing the query, call `blockFilter.getExcludedUserIds(currentUserId)` to get the set of excluded IDs.
   - If the set is empty, execute the original query unchanged.
   - If the set is not empty, append `AND posts.user_id NOT IN (:excludedIds)` to the native SQL WHERE clause, and bind the excluded ID set as a parameter. Be aware that binding a `Set<UUID>` as a native query parameter requires passing a list or collection — check how other native queries in the project handle collection parameters.
-- [ ] For the explore feed method (which fetches trending or popular posts):
+- [x] For the explore feed method (which fetches trending or popular posts):
   - Apply the same excluded-ID filter.
-- [ ] Do not change the ordering, limit, offset, or any other aspect of the queries.
+- [x] Do not change the ordering, limit, offset, or any other aspect of the queries.
 
 ---
 
 ### `SearchJpaAdapter.java` — Modifications
 
-- [ ] Open the file and read all existing search methods before making any changes.
-- [ ] Add `BlockFilter` as a new constructor parameter.
-- [ ] For the `searchUsers` method:
+- [x] Open the file and read all existing search methods before making any changes.
+- [x] Add `BlockFilter` as a new constructor parameter.
+- [x] For the `searchUsers` method:
   - Before building the native SQL, call `blockFilter.getExcludedUserIds(currentUserId)`. The `SearchUsersUseCase.Query` carries `currentUserId` — trace how it is passed from the use case to this adapter and ensure `currentUserId` is available at the point where you call `blockFilter`.
   - If the excluded set is not empty, append `AND users.id NOT IN (:excludedIds)` to the WHERE clause of the user-search native query.
   - If empty, execute the original query unchanged.
-- [ ] For the `searchPosts` method:
+- [x] For the `searchPosts` method:
   - Apply the same `AND posts.user_id NOT IN (:excludedIds)` filter to exclude posts authored by blocked users.
-- [ ] For `searchHashtags` and `findPostsByHashtag`:
+- [x] For `searchHashtags` and `findPostsByHashtag`:
   - `searchHashtags` does not involve users — no filter needed.
   - `findPostsByHashtag`: apply the same post-user-id filter so posts from blocked users do not appear on a hashtag's page.
 
@@ -76,15 +76,15 @@ backend/src/main/java/com/instagram/adapter/out/persistence/SearchJpaAdapter.jav
 
 ### Cross-Cutting Concern: Passing `currentUserId` to Adapters
 
-- [ ] Verify that `currentUserId` is already propagated from the use case through to the persistence adapter for the feed queries. If `FeedRepository` methods do not currently accept `currentUserId` as a parameter, you will need to add it. This is an interface change that cascades from `FeedRepository` (out-port) → `FeedJpaQueryAdapter` (adapter) → `FeedService` (service) → `GetHomeFeedUseCase.Query` (in-port). Document the scope of this change and trace through each layer before modifying.
-- [ ] The same concern applies to `searchPosts` and `searchUsers` — check that `currentUserId` is already being received by the adapter. Based on Phase 8, `SearchJpaAdapter` does receive the query object from the service, but the native SQL methods may not currently accept `currentUserId`. Add it as a method parameter if needed, and update `ModerationRepository` and `SearchRepository` accordingly.
+- [x] Verify that `currentUserId` is already propagated from the use case through to the persistence adapter for the feed queries. If `FeedRepository` methods do not currently accept `currentUserId` as a parameter, you will need to add it. This is an interface change that cascades from `FeedRepository` (out-port) → `FeedJpaQueryAdapter` (adapter) → `FeedService` (service) → `GetHomeFeedUseCase.Query` (in-port). Document the scope of this change and trace through each layer before modifying.
+- [x] The same concern applies to `searchPosts` and `searchUsers` — check that `currentUserId` is already being received by the adapter. Based on Phase 8, `SearchJpaAdapter` does receive the query object from the service, but the native SQL methods may not currently accept `currentUserId`. Add it as a method parameter if needed, and update `ModerationRepository` and `SearchRepository` accordingly.
 
 ---
 
 ### Flyway Migration (if needed)
 
-- [ ] The `user_blocks` table and its indexes (`idx_blocks_blocked`) already exist in the initial Flyway migration. No new migration is needed for this task unless you are adding a database-level function or view for block filtering.
-- [ ] Confirm that `idx_blocks_blocked ON user_blocks (blocked_id)` exists — this index is critical for the performance of `findBlockerIdsByBlockedId`. If it does not exist in the current migration file, create a new migration `V4__add_missing_block_index.sql` that adds it.
+- [x] The `user_blocks` table and its indexes (`idx_blocks_blocked`) already exist in the initial Flyway migration. No new migration is needed for this task unless you are adding a database-level function or view for block filtering.
+- [x] Confirm that `idx_blocks_blocked ON user_blocks (blocked_id)` exists — this index is critical for the performance of `findBlockerIdsByBlockedId`. If it does not exist in the current migration file, create a new migration `V4__add_missing_block_index.sql` that adds it.
 
 ---
 

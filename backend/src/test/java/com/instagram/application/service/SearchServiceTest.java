@@ -51,7 +51,7 @@ class SearchServiceTest {
                 new SearchUsersUseCase.Query("  ", UUID.randomUUID(), 0, 20));
 
         assertThat(result).isEmpty();
-        verify(searchRepository, never()).searchUsers(any(), any());
+        verify(searchRepository, never()).searchUsers(any(), any(), any());
         verify(searchHistoryRepository, never()).save(any());
     }
 
@@ -61,25 +61,25 @@ class SearchServiceTest {
                 new SearchUsersUseCase.Query(null, UUID.randomUUID(), 0, 20));
 
         assertThat(result).isEmpty();
-        verify(searchRepository, never()).searchUsers(any(), any());
+        verify(searchRepository, never()).searchUsers(any(), any(), any());
     }
 
     @Test
     void searchUsers_nonBlankQuery_delegatesWithCorrectPageRequest() {
         UUID userId = UUID.randomUUID();
         User user = User.builder().id(UUID.randomUUID()).username("john").build();
-        when(searchRepository.searchUsers(eq("john"), eq(PageRequest.of(0, 20)))).thenReturn(List.of(user));
+        when(searchRepository.searchUsers(eq(userId), eq("john"), eq(PageRequest.of(0, 20)))).thenReturn(List.of(user));
 
         List<User> result = searchService.searchUsers(new SearchUsersUseCase.Query("john", userId, 0, 20));
 
         assertThat(result).hasSize(1);
-        verify(searchRepository).searchUsers("john", PageRequest.of(0, 20));
+        verify(searchRepository).searchUsers(userId, "john", PageRequest.of(0, 20));
     }
 
     @Test
     void searchUsers_nonBlankQuery_savesHistoryWithCorrectUserIdAndQuery() {
         UUID userId = UUID.randomUUID();
-        when(searchRepository.searchUsers(any(), any())).thenReturn(List.of());
+        when(searchRepository.searchUsers(any(), any(), any())).thenReturn(List.of());
         ArgumentCaptor<SearchHistory> captor = ArgumentCaptor.forClass(SearchHistory.class);
 
         searchService.searchUsers(new SearchUsersUseCase.Query("travel", userId, 0, 20));
@@ -124,7 +124,7 @@ class SearchServiceTest {
                 new SearchPostsUseCase.Query(" ", UUID.randomUUID(), 0, 20));
 
         assertThat(result).isEmpty();
-        verify(searchRepository, never()).searchPosts(any(), any());
+        verify(searchRepository, never()).searchPosts(any(), any(), any());
         verify(searchHistoryRepository, never()).save(any());
     }
 
@@ -132,7 +132,7 @@ class SearchServiceTest {
     void searchPosts_nonBlankQuery_delegatesAndSavesHistory() {
         UUID userId = UUID.randomUUID();
         Post post = Post.builder().id(UUID.randomUUID()).caption("Sunset view").build();
-        when(searchRepository.searchPosts(eq("sunset"), any())).thenReturn(List.of(post));
+        when(searchRepository.searchPosts(eq(userId), eq("sunset"), any())).thenReturn(List.of(post));
         ArgumentCaptor<SearchHistory> captor = ArgumentCaptor.forClass(SearchHistory.class);
 
         List<Post> result = searchService.searchPosts(
@@ -152,20 +152,20 @@ class SearchServiceTest {
                 new GetPostsByHashtagUseCase.Query(" ", UUID.randomUUID(), 0, 20));
 
         assertThat(result).isEmpty();
-        verify(searchRepository, never()).findPostsByHashtag(any(), any());
+        verify(searchRepository, never()).findPostsByHashtag(any(), any(), any());
     }
 
     @Test
     void getPostsByHashtag_validName_delegatesWithCorrectArgsAndNoHistorySave() {
         Post post = Post.builder().id(UUID.randomUUID()).build();
-        when(searchRepository.findPostsByHashtag(eq("travel"), eq(PageRequest.of(0, 20))))
+        when(searchRepository.findPostsByHashtag(any(UUID.class), eq("travel"), eq(PageRequest.of(0, 20))))
                 .thenReturn(List.of(post));
 
         List<Post> result = searchService.getPostsByHashtag(
                 new GetPostsByHashtagUseCase.Query("travel", UUID.randomUUID(), 0, 20));
 
         assertThat(result).hasSize(1);
-        verify(searchRepository).findPostsByHashtag("travel", PageRequest.of(0, 20));
+        verify(searchRepository).findPostsByHashtag(any(UUID.class), eq("travel"), eq(PageRequest.of(0, 20)));
         verify(searchHistoryRepository, never()).save(any());
     }
 

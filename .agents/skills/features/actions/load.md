@@ -14,3 +14,4 @@
    - Write unit test for this feature
 
 3. Confirm spec loaded and show the feature summary
+4. Just adding no deleting the list in History Section

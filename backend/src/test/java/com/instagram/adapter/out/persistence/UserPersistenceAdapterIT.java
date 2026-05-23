@@ -17,6 +17,7 @@ import com.instagram.infrastructure.config.JpaConfig;
 import com.instagram.adapter.out.persistence.repository.UserJpaRepository;
 import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.User;
+import com.instagram.domain.model.UserRole;
 import com.instagram.domain.model.UserStatus;
 
 @DataJpaTest
@@ -50,6 +51,7 @@ public class UserPersistenceAdapterIT {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role(UserRole.USER)
                 .build();
 
         // ACT
@@ -75,6 +77,7 @@ public class UserPersistenceAdapterIT {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role(UserRole.USER)
                 .build();
 
         // ACT
@@ -101,6 +104,7 @@ public class UserPersistenceAdapterIT {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role(UserRole.USER)
                 .build();
 
         // ACT
@@ -127,6 +131,7 @@ public class UserPersistenceAdapterIT {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role(UserRole.USER)
                 .build();
 
         // ACT
@@ -153,6 +158,7 @@ public class UserPersistenceAdapterIT {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role(UserRole.USER)
                 .build();
 
         // ACT
@@ -174,6 +180,7 @@ public class UserPersistenceAdapterIT {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role(UserRole.USER)
                 .build();
 
         // ACT
@@ -195,6 +202,7 @@ public class UserPersistenceAdapterIT {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role(UserRole.USER)
                 .build();
 
         // ACT
@@ -211,6 +219,7 @@ public class UserPersistenceAdapterIT {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role(UserRole.USER)
                 .build();
         User updatingUser = userPersistenceAdapter.save(updatedUser);
 

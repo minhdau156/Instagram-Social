@@ -2,6 +2,8 @@ package com.instagram.adapter.out.persistence;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Pageable;
@@ -14,6 +16,7 @@ import com.instagram.domain.model.Hashtag;
 import com.instagram.domain.model.Post;
 import com.instagram.domain.model.User;
 import com.instagram.domain.port.out.SearchRepository;
+import com.instagram.infrastructure.util.BlockFilter;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -22,27 +25,32 @@ import jakarta.persistence.Query;
 public class SearchJpaAdapter implements SearchRepository {
 
         private final EntityManager em;
+        private final BlockFilter blockFilter;
         private static final int FTS_MIN_LENGTH = 3;
 
-        public SearchJpaAdapter(EntityManager em) {
+        public SearchJpaAdapter(EntityManager em, BlockFilter blockFilter) {
                 this.em = em;
+                this.blockFilter = blockFilter;
         }
 
         @Override
         @SuppressWarnings("unchecked")
-        public List<User> searchUsers(String query, Pageable pageable) {
+        public List<User> searchUsers(UUID currentUserId, String query, Pageable pageable) {
                 if (query == null || query.isBlank())
                         return Collections.emptyList();
+                Set<UUID> excludedIds = blockFilter.getExcludedUserIds(currentUserId);
+                String blockClause = excludedIds.isEmpty() ? "" : " AND id NOT IN (:excludedIds)";
                 String sql = query.length() < FTS_MIN_LENGTH
-                                ? "SELECT * FROM users WHERE (username ILIKE :pattern OR full_name ILIKE :pattern) AND deleted_at IS NULL ORDER BY follower_count DESC LIMIT :limit OFFSET :offset"
-                                : "SELECT * FROM users WHERE search_tsv @@ plainto_tsquery('simple', :query) AND deleted_at IS NULL ORDER BY follower_count DESC LIMIT :limit OFFSET :offset";
-                Query nativeQuery = em.createNativeQuery(
-                                sql,
-                                UserJpaEntity.class);
+                                ? "SELECT * FROM users WHERE (username ILIKE :pattern OR full_name ILIKE :pattern) AND deleted_at IS NULL" + blockClause + " ORDER BY follower_count DESC LIMIT :limit OFFSET :offset"
+                                : "SELECT * FROM users WHERE search_tsv @@ plainto_tsquery('simple', :query) AND deleted_at IS NULL" + blockClause + " ORDER BY follower_count DESC LIMIT :limit OFFSET :offset";
+                Query nativeQuery = em.createNativeQuery(sql, UserJpaEntity.class);
                 if (query.length() < FTS_MIN_LENGTH) {
                         nativeQuery.setParameter("pattern", "%" + query + "%");
                 } else {
                         nativeQuery.setParameter("query", query);
+                }
+                if (!excludedIds.isEmpty()) {
+                        nativeQuery.setParameter("excludedIds", List.copyOf(excludedIds));
                 }
                 nativeQuery.setParameter("limit", pageable.getPageSize());
                 nativeQuery.setParameter("offset", pageable.getOffset());
@@ -71,19 +79,22 @@ public class SearchJpaAdapter implements SearchRepository {
 
         @SuppressWarnings("unchecked")
         @Override
-        public List<Post> searchPosts(String query, Pageable pageable) {
+        public List<Post> searchPosts(UUID currentUserId, String query, Pageable pageable) {
                 if (query == null || query.isBlank())
                         return Collections.emptyList();
+                Set<UUID> excludedIds = blockFilter.getExcludedUserIds(currentUserId);
+                String blockClause = excludedIds.isEmpty() ? "" : " AND p.user_id NOT IN (:excludedIds)";
                 String sql = query.length() < FTS_MIN_LENGTH
-                                ? "SELECT p.* FROM posts p WHERE p.caption ILIKE :pattern AND p.deleted_at IS NULL ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset"
-                                : "SELECT p.* FROM posts p WHERE p.caption_tsv @@ plainto_tsquery('english', :query) AND p.deleted_at IS NULL ORDER BY ts_rank(p.caption_tsv, plainto_tsquery('english', :query)) DESC, p.created_at DESC LIMIT :limit OFFSET :offset";
-                Query nativeQuery = em.createNativeQuery(
-                                sql,
-                                PostJpaEntity.class);
+                                ? "SELECT p.* FROM posts p WHERE p.caption ILIKE :pattern AND p.deleted_at IS NULL" + blockClause + " ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset"
+                                : "SELECT p.* FROM posts p WHERE p.caption_tsv @@ plainto_tsquery('english', :query) AND p.deleted_at IS NULL" + blockClause + " ORDER BY ts_rank(p.caption_tsv, plainto_tsquery('english', :query)) DESC, p.created_at DESC LIMIT :limit OFFSET :offset";
+                Query nativeQuery = em.createNativeQuery(sql, PostJpaEntity.class);
                 if (query.length() < FTS_MIN_LENGTH) {
                         nativeQuery.setParameter("pattern", "%" + query + "%");
                 } else {
                         nativeQuery.setParameter("query", query);
+                }
+                if (!excludedIds.isEmpty()) {
+                        nativeQuery.setParameter("excludedIds", List.copyOf(excludedIds));
                 }
                 nativeQuery.setParameter("limit", pageable.getPageSize());
                 nativeQuery.setParameter("offset", pageable.getOffset());
@@ -95,13 +106,17 @@ public class SearchJpaAdapter implements SearchRepository {
 
         @Override
         @SuppressWarnings("unchecked")
-        public List<Post> findPostsByHashtag(String hashtagName, Pageable pageable) {
+        public List<Post> findPostsByHashtag(UUID currentUserId, String hashtagName, Pageable pageable) {
                 if (hashtagName == null || hashtagName.isBlank())
                         return Collections.emptyList();
-                Query nativeQuery = em.createNativeQuery(
-                                "SELECT p.* FROM posts p JOIN post_hashtags ph ON ph.post_id = p.id JOIN hashtags h ON h.id = ph.hashtag_id WHERE LOWER(h.name) = LOWER(:name) AND p.deleted_at IS NULL ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset",
-                                PostJpaEntity.class);
+                Set<UUID> excludedIds = blockFilter.getExcludedUserIds(currentUserId);
+                String blockClause = excludedIds.isEmpty() ? "" : " AND p.user_id NOT IN (:excludedIds)";
+                String sql = "SELECT p.* FROM posts p JOIN post_hashtags ph ON ph.post_id = p.id JOIN hashtags h ON h.id = ph.hashtag_id WHERE LOWER(h.name) = LOWER(:name) AND p.deleted_at IS NULL" + blockClause + " ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset";
+                Query nativeQuery = em.createNativeQuery(sql, PostJpaEntity.class);
                 nativeQuery.setParameter("name", hashtagName);
+                if (!excludedIds.isEmpty()) {
+                        nativeQuery.setParameter("excludedIds", List.copyOf(excludedIds));
+                }
                 nativeQuery.setParameter("limit", pageable.getPageSize());
                 nativeQuery.setParameter("offset", pageable.getOffset());
                 List<PostJpaEntity> entities = nativeQuery.getResultList();
