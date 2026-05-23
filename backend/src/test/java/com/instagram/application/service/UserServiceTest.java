@@ -21,6 +21,7 @@ import com.instagram.domain.exception.UserNotFoundException;
 import com.instagram.domain.model.AuthResult;
 import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.User;
+import com.instagram.domain.model.UserRole;
 import com.instagram.domain.model.UserStatus;
 import com.instagram.domain.port.in.LoginUseCase;
 import com.instagram.domain.port.in.RegisterUserUseCase;
@@ -115,6 +116,7 @@ public class UserServiceTest {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role(UserRole.USER)
                 .build();
 
         // ACT
@@ -157,6 +159,7 @@ public class UserServiceTest {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role(UserRole.USER)
                 .build();
 
         // ACT
@@ -180,6 +183,7 @@ public class UserServiceTest {
                 .status(UserStatus.DEACTIVATED)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role(UserRole.USER)
                 .build();
 
         // ACT
@@ -205,6 +209,7 @@ public class UserServiceTest {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role(UserRole.USER)
                 .build();
 
         when(userRepository.findById(UUID.fromString(command.userId()))).thenReturn(Optional.of((User) user));
@@ -237,6 +242,7 @@ public class UserServiceTest {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role(UserRole.USER)
                 .build();
 
         when(userRepository.findById(UUID.fromString(command.userId()))).thenReturn(Optional.empty());
