@@ -108,8 +108,8 @@ public class AdminService implements ReviewReportUseCase,
         Report savedReport = moderationRepository.saveReport(updatedReport);
 
         String auditAction = switch (command.action()) {
-            case DISMISS       -> AuditLogRepository.REPORT_DISMISS;
-            case RESOLVE       -> AuditLogRepository.REPORT_RESOLVE;
+            case DISMISS -> AuditLogRepository.REPORT_DISMISS;
+            case RESOLVE -> AuditLogRepository.REPORT_RESOLVE;
             case MARK_REVIEWED -> AuditLogRepository.REPORT_REVIEW;
         };
         auditLogRepository.log(command.adminId(), auditAction, "report", command.reportId(), null, null);
