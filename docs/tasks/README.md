@@ -31,7 +31,7 @@ Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5
 | Phase 7 — Notifications | [phase-7-notifications.md](./phase-7-notifications.md) | ⬜ Not Started | 21 tasks |
 | Phase 8 — Search | [phase-8-search.md](./phase-8-search.md) | ⬜ Not Started | 15 tasks |
 | Phase 9 — Content Moderation & Admin | [phase-9-moderation-admin.md](./phase-9-moderation-admin.md) | ⬜ Not Started | 18 tasks |
-| Phase 10 — Performance, Security & Polish | [phase-10-performance-security-polish.md](./phase-10-performance-security-polish.md) | ⬜ Not Started | 35 tasks (19 core + 10 learning + 6 advanced backend) |
+| Phase 10 — Performance, Security & Polish | [phase-10-performance-security-polish.md](./phase-10-performance-security-polish.md) | ⬜ Not Started | 52 tasks (33 core + 13 learning + 6 advanced backend) |
 
 ---
 
