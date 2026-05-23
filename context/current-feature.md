@@ -1,41 +1,13 @@
-# Current Feature: TASK-9.8 — Block Filtering: Feed & Search Integration
+# Current Feature
 
 ## Status
-In Progress
 
 ## Goals
-- Blocked users' content is invisible to both parties in feed and search results
-- `BlockFilter` utility loads the complete set of excluded user IDs once per request (two indexed queries, no per-row DB calls)
-- Fast path: if excluded ID set is empty, skip the `NOT IN` clause entirely
-- Home feed and explore feed both filter out posts from blocked/blocking users
-- User search results exclude blocked/blocking users
-- Post search results exclude posts authored by blocked/blocking users
-- Hashtag post pages exclude posts from blocked/blocking users
-- `searchHashtags` requires no filter (no user dimension)
 
 ## Notes
-### Files to Create / Modify
-- **Create:** `backend/src/main/java/com/instagram/infrastructure/util/BlockFilter.java`
-- **Modify:** `backend/src/main/java/com/instagram/adapter/out/persistence/FeedJpaQueryAdapter.java`
-- **Modify:** `backend/src/main/java/com/instagram/adapter/out/persistence/SearchJpaAdapter.java`
-
-### Key Constraints
-- `BlockFilter` is `@Component`, constructor-injects `ModerationRepository` (domain port — NOT `UserBlockJpaRepository` directly)
-- `getExcludedUserIds(UUID currentUserId)` merges results of `findBlockedUserIdsByBlockerId` + `findBlockerIdsByBlockedId` into a `HashSet<UUID>`; returns `Collections.emptySet()` when both are empty
-- No caching between requests — Phase 10 concern
-- `NOT IN (:excludedIds)` binding requires `List<UUID>` (convert from `Set` before binding)
-- Always guard with `if (!excludedIds.isEmpty())` — empty `NOT IN ()` is a PostgreSQL syntax error
-- Must verify `currentUserId` is propagated through `FeedRepository` out-port → `FeedJpaQueryAdapter` (may require interface + service changes)
-- `idx_blocks_blocked ON user_blocks (blocked_id)` index must exist — verify in Flyway migrations; create `V5__add_missing_block_index.sql` only if missing (note: `V4__add_role.sql` was already created in TASK-9.5)
-
-### Acceptance Criteria
-- [ ] `BlockFilter.java` created in `infrastructure/util/`, `@Component`, two-query merge, empty-set fast path
-- [ ] `FeedJpaQueryAdapter` injects `BlockFilter`; home feed + explore feed both apply `AND posts.user_id NOT IN (:excludedIds)` when set is non-empty
-- [ ] `SearchJpaAdapter` injects `BlockFilter`; `searchUsers` filters by user ID, `searchPosts` + `findPostsByHashtag` filter by post author ID; `searchHashtags` unchanged
-- [ ] `currentUserId` successfully propagated to feed adapter (interface/service layers updated if needed)
-- [ ] No empty `NOT IN ()` clause ever reaches PostgreSQL
 
 ## History
+- TASK-9.8 — Block Filtering: `BlockFilter` (`@Component`, `infrastructure/util/`) merges `findBlockedUserIdsByBlockerId` + `findBlockerIdsByBlockedId` into `HashSet<UUID>`, returns `Collections.emptySet()` fast path when both empty, no-cache comment. `FeedJpaQueryAdapter`: `BlockFilter` injected; home feed + explore feed apply `AND p.user_id NOT IN (:excludedIds)` via `List.copyOf(excludedIds)` when non-empty, fast path delegates to `FeedJpaRepository`; fixed malformed explore-feed SQL (missing spaces in all concatenated segments); removed stale ANTLR import. `SearchJpaAdapter`: `searchUsers` applies `AND id NOT IN (:excludedIds)` blockClause; `searchPosts` applies `AND p.user_id NOT IN (:excludedIds)`; `findPostsByHashtag` gains `UUID currentUserId` param + same filter; `searchHashtags` unchanged. `SearchRepository.findPostsByHashtag` signature updated with `currentUserId`. `SearchService` passes `query.currentUserId()`. Tests: `SearchServiceTest` mocks updated to 3-arg form; `SearchJpaAdapterIT` constructor updated with `mock(BlockFilter.class)` returning empty set + `findPostsByHashtag` calls updated. CI: `Create test database` step added to create `instagram_test` before `mvn verify`.
 - TASK-9.7 — Persistence Adapters: `ModerationPersistenceAdapter` (`@Component`, constructor-injected `ReportJpaRepository` + `UserBlockJpaRepository`) implements all 13 `ModerationRepository` methods — 6 report methods (`saveReport`, `findReportById`, `findAllReports` with null-status branch, `findPendingReports`, `countByStatus`, `existsByReporterIdAndEntityId`) and 7 block methods (`saveBlock`, `deleteBlock` with `@Transactional`, `isBlocked`, `isEitherBlocked`, `findBlocksByBlockerId`, `findBlockedUserIdsByBlockerId`, `findBlockerIdsByBlockedId`); private `toReportEntity`/`toReportDomain`/`toBlockEntity`/`toBlockDomain` mappers keep JPA entities inside the package. `AuditLogPersistenceAdapter` (`@Component`, constructor-injected `AuditLogJpaRepository`, `private static final Logger log`) implements `AuditLogRepository.log()` wrapped in try-catch — on any exception logs at `WARN` and returns silently, never throws.
 - TASK-9.6 — JPA Entities & Repositories: `ReportJpaEntity` (`@Entity @Table("reports")`, 10 fields, `@Enumerated(EnumType.STRING)` + `@JdbcTypeCode(SqlTypes.NAMED_ENUM)` on `entityType`/`status`, `@PrePersist` defaults `createdAt` → `OffsetDateTime.now()` and `status` → `PENDING`). `ReportJpaRepository` — 5 methods: `findByStatusOrderByCreatedAtAsc`, `findAllByOrderByCreatedAtDesc`, `findByStatusOrderByCreatedAtDesc`, `countByStatus`, `existsByReporterIdAndEntityId`. `UserBlockId` — `@Embeddable`, `Serializable`, Lombok `@EqualsAndHashCode`, `blockerId`/`blockedId` fields. `UserBlockJpaEntity` — `@EmbeddedId UserBlockId id`, `createdAt` with `@PrePersist`. `UserBlockJpaRepository` — 6 methods: `existsById`, `existsByBlockerIdAndBlockedId` (JPQL), `deleteByBlockerIdAndBlockedId` (`@Modifying @Transactional` JPQL), `findByIdBlockerIdOrderByCreatedAtDesc`, `findBlockedIdsByBlockerId`, `findBlockerIdsByBlockedId`. `AuditLogJpaEntity` — `Long id` with `GenerationType.IDENTITY`, `userId` (nullable), `entityType` (nullable), `ip_address` as `String`, `@Builder`. `AuditLogJpaRepository` — `findByUserIdOrderByCreatedAtDesc`, `findByActionOrderByCreatedAtDesc`. Also: `UserService` fixed to use `user.getRole().name()` for JWT instead of hardcoded `DEFAULT_ROLE`.
 - TASK-9.5 — Domain Services: ModerationService, AdminService: `ModerationService` in `application/service/` implements `ReportContentUseCase` (blank-reason guard, `AlreadyReportedException` on duplicate → 409), `BlockUserUseCase` (`@Transactional`, resolve username, `SelfBlockException`/`AlreadyBlockedException` guards), `UnblockUserUseCase` (`@Transactional`, `NotBlockedException` guard), `GetBlockedUsersUseCase` (read-only, no audit). `AdminService` in `application/service/` implements `ReviewReportUseCase` (`@PreAuthorize(ADMIN)`, `@Transactional`, switch expression on `ReviewAction`), `SuspendUserUseCase` (suspension-reason in audit metadata), `UnsuspendUserUseCase` (guards `!= SUSPENDED`), `AdminGetReportsUseCase` (read-only). Both audit every mutation via `AuditLogRepository`. `@EnableMethodSecurity` added to `SecurityConfig`. `AlreadyReportedException` + handler added. `UserRole` enum, `V4__add_role.sql` migration, and role field wired through `User`, `UserJpaEntity`, `UserPersistenceAdapter`, and JWT.
