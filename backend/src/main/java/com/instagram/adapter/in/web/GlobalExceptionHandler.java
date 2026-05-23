@@ -1,6 +1,7 @@
 package com.instagram.adapter.in.web;
 
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
+import com.instagram.domain.exception.AlreadyBlockedException;
 import com.instagram.domain.exception.AlreadyFollowingException;
 import com.instagram.domain.exception.AlreadyLikedException;
 import com.instagram.domain.exception.AlreadySavedException;
@@ -11,6 +12,7 @@ import com.instagram.domain.exception.FollowRequestNotFoundException;
 import com.instagram.domain.exception.InvalidCredentialsException;
 import com.instagram.domain.exception.MediaUploadException;
 import com.instagram.domain.exception.MessageNotFoundException;
+import com.instagram.domain.exception.NotBlockedException;
 import com.instagram.domain.exception.NotConversationMemberException;
 import com.instagram.domain.exception.NotLikedException;
 import com.instagram.domain.exception.NotSavedException;
@@ -18,7 +20,10 @@ import com.instagram.domain.exception.NotificationNotFoundException;
 import com.instagram.domain.exception.UnauthorizedNotificationAccessException;
 import com.instagram.domain.exception.PasswordResetTokenExpiredException;
 import com.instagram.domain.exception.PostNotFoundException;
+import com.instagram.domain.exception.ReportNotFoundException;
+import com.instagram.domain.exception.SelfBlockException;
 import com.instagram.domain.exception.UnauthorizedCommentAccessException;
+import com.instagram.domain.exception.UnauthorizedModerationAccessException;
 import com.instagram.domain.exception.UnauthorizedPostAccessException;
 import com.instagram.domain.exception.UserAlreadyExistsException;
 import com.instagram.domain.exception.UserNotFoundException;
@@ -36,7 +41,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -214,6 +218,37 @@ public class GlobalExceptionHandler {
             UnauthorizedNotificationAccessException ex) {
         log.warn(ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(AlreadyBlockedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAlreadyBlocked(AlreadyBlockedException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(NotBlockedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotBlocked(NotBlockedException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(SelfBlockException.class)
+    public ResponseEntity<ApiResponse<Void>> handleSelfBlock(SelfBlockException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(UnauthorizedModerationAccessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnauthorizedModerationAccess(
+            UnauthorizedModerationAccessException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(ReportNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleReportNotFound(ReportNotFoundException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
