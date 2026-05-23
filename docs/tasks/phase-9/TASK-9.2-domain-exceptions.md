@@ -34,58 +34,58 @@ backend/src/main/java/com/instagram/adapter/in/web/GlobalExceptionHandler.java  
 
 ### `ReportNotFoundException.java`
 
-- [ ] Extends `RuntimeException`.
-- [ ] Constructor accepts a `UUID reportId` parameter. The message should clearly state which report ID was not found, e.g. `"Report not found: " + reportId`.
-- [ ] **When thrown:** In `ModerationService` and `AdminService` when `findReportById` returns an empty result.
-- [ ] **HTTP mapping:** `404 NOT FOUND`.
+- [x] Extends `RuntimeException`.
+- [x] Constructor accepts a `UUID reportId` parameter. The message should clearly state which report ID was not found, e.g. `"Report not found: " + reportId`.
+- [x] **When thrown:** In `ModerationService` and `AdminService` when `findReportById` returns an empty result.
+- [x] **HTTP mapping:** `404 NOT FOUND`.
 
 ---
 
 ### `AlreadyBlockedException.java`
 
-- [ ] Extends `RuntimeException`.
-- [ ] Constructor accepts `UUID blockerId` and `UUID blockedId`. Message should indicate that the block relationship already exists, e.g. `"User " + blockerId + " has already blocked user " + blockedId`.
-- [ ] **When thrown:** In `ModerationService.blockUser()` before attempting to insert a duplicate block. Check `ModerationRepository.isBlocked()` first; if it returns true, throw this exception rather than letting a database unique-constraint violation bubble up.
-- [ ] **HTTP mapping:** `409 CONFLICT`.
+- [x] Extends `RuntimeException`.
+- [x] Constructor accepts `UUID blockerId` and `UUID blockedId`. Message should indicate that the block relationship already exists, e.g. `"User " + blockerId + " has already blocked user " + blockedId`.
+- [x] **When thrown:** In `ModerationService.blockUser()` before attempting to insert a duplicate block. Check `ModerationRepository.isBlocked()` first; if it returns true, throw this exception rather than letting a database unique-constraint violation bubble up.
+- [x] **HTTP mapping:** `409 CONFLICT`.
 
 ---
 
 ### `NotBlockedException.java`
 
-- [ ] Extends `RuntimeException`.
-- [ ] Constructor accepts `UUID blockerId` and `UUID blockedId`. Message should indicate that no block relationship exists to remove, e.g. `"User " + blockerId + " has not blocked user " + blockedId`.
-- [ ] **When thrown:** In `ModerationService.unblockUser()` when the caller tries to unblock a user they have not blocked.
-- [ ] **HTTP mapping:** `404 NOT FOUND`.
+- [x] Extends `RuntimeException`.
+- [x] Constructor accepts `UUID blockerId` and `UUID blockedId`. Message should indicate that no block relationship exists to remove, e.g. `"User " + blockerId + " has not blocked user " + blockedId`.
+- [x] **When thrown:** In `ModerationService.unblockUser()` when the caller tries to unblock a user they have not blocked.
+- [x] **HTTP mapping:** `404 NOT FOUND`.
 
 ---
 
 ### `SelfBlockException.java`
 
-- [ ] Extends `RuntimeException`.
-- [ ] Constructor accepts a `UUID userId` parameter. Message should be `"User " + userId + " cannot block themselves"`.
-- [ ] **When thrown:** In `ModerationService.blockUser()` before the repository call, when `blockerId == blockedId`. This is a secondary guard — the domain model's `UserBlock.Builder.build()` also enforces this rule, but the service should throw this named exception (not let an `IllegalArgumentException` propagate from the builder) so the `GlobalExceptionHandler` can map it cleanly.
-- [ ] **HTTP mapping:** `400 BAD REQUEST`.
+- [x] Extends `RuntimeException`.
+- [x] Constructor accepts a `UUID userId` parameter. Message should be `"User " + userId + " cannot block themselves"`.
+- [x] **When thrown:** In `ModerationService.blockUser()` before the repository call, when `blockerId == blockedId`. This is a secondary guard — the domain model's `UserBlock.Builder.build()` also enforces this rule, but the service should throw this named exception (not let an `IllegalArgumentException` propagate from the builder) so the `GlobalExceptionHandler` can map it cleanly.
+- [x] **HTTP mapping:** `400 BAD REQUEST`.
 
 ---
 
 ### `UnauthorizedModerationAccessException.java`
 
-- [ ] Extends `RuntimeException`.
-- [ ] Constructor accepts a `UUID userId` and a `String action`. Message should indicate the user lacks permission to perform the action, e.g. `"User " + userId + " is not authorized to perform: " + action`.
-- [ ] **When thrown:** In `AdminService` when the caller's JWT does not carry the `ROLE_ADMIN` authority, as a secondary guard for any admin-only use case that is also callable from a path without `@PreAuthorize`.
-- [ ] **HTTP mapping:** `403 FORBIDDEN`.
+- [x] Extends `RuntimeException`.
+- [x] Constructor accepts a `UUID userId` and a `String action`. Message should indicate the user lacks permission to perform the action, e.g. `"User " + userId + " is not authorized to perform: " + action`.
+- [x] **When thrown:** In `AdminService` when the caller's JWT does not carry the `ROLE_ADMIN` authority, as a secondary guard for any admin-only use case that is also callable from a path without `@PreAuthorize`.
+- [x] **HTTP mapping:** `403 FORBIDDEN`.
 
 ---
 
 ### `GlobalExceptionHandler.java` — Additions
 
-- [ ] Open `GlobalExceptionHandler.java`. Do not remove any existing handler methods.
-- [ ] Add a handler method for `ReportNotFoundException` returning `ResponseEntity` with status `404 NOT FOUND` and the exception message as the error body.
-- [ ] Add a handler method for `AlreadyBlockedException` returning `ResponseEntity` with status `409 CONFLICT`.
-- [ ] Add a handler method for `NotBlockedException` returning `ResponseEntity` with status `404 NOT FOUND`.
-- [ ] Add a handler method for `SelfBlockException` returning `ResponseEntity` with status `400 BAD REQUEST`.
-- [ ] Add a handler method for `UnauthorizedModerationAccessException` returning `ResponseEntity` with status `403 FORBIDDEN`.
-- [ ] All new handler methods must follow the existing response format used throughout the project — wrap the error in the same `ApiResponse` envelope already used by the existing handlers. Check the existing methods in `GlobalExceptionHandler.java` before writing to ensure consistency.
+- [x] Open `GlobalExceptionHandler.java`. Do not remove any existing handler methods.
+- [x] Add a handler method for `ReportNotFoundException` returning `ResponseEntity` with status `404 NOT FOUND` and the exception message as the error body.
+- [x] Add a handler method for `AlreadyBlockedException` returning `ResponseEntity` with status `409 CONFLICT`.
+- [x] Add a handler method for `NotBlockedException` returning `ResponseEntity` with status `404 NOT FOUND`.
+- [x] Add a handler method for `SelfBlockException` returning `ResponseEntity` with status `400 BAD REQUEST`.
+- [x] Add a handler method for `UnauthorizedModerationAccessException` returning `ResponseEntity` with status `403 FORBIDDEN`.
+- [x] All new handler methods must follow the existing response format used throughout the project — wrap the error in the same `ApiResponse` envelope already used by the existing handlers. Check the existing methods in `GlobalExceptionHandler.java` before writing to ensure consistency.
 
 ---
 
