@@ -22,12 +22,12 @@ frontend/src/types/search.ts
 
 ### `SearchType`
 
-- [ ] String literal union: `'users' | 'hashtags' | 'posts'`
+- [x] String literal union: `'users' | 'hashtags' | 'posts'`
   - These match the `type` query parameter values accepted by `GET /api/v1/search`.
 
 ### `UserSearchResult`
 
-- [ ] Interface fields (mirrors `UserSearchResponse` from the backend):
+- [x] Interface fields (mirrors `UserSearchResponse` from the backend):
   - `id: string`
   - `username: string`
   - `fullName: string`
@@ -37,14 +37,14 @@ frontend/src/types/search.ts
 
 ### `HashtagSearchResult`
 
-- [ ] Interface fields (mirrors `HashtagSearchResponse`):
+- [x] Interface fields (mirrors `HashtagSearchResponse`):
   - `id: string`
   - `name: string` — without `#` prefix; the UI adds `#` when rendering
   - `postCount: number`
 
 ### `PostSearchResult`
 
-- [ ] Interface fields (mirrors `PostSearchResponse`):
+- [x] Interface fields (mirrors `PostSearchResponse`):
   - `id: string`
   - `authorUsername: string`
   - `authorAvatarUrl: string | null`
@@ -57,14 +57,14 @@ frontend/src/types/search.ts
 
 ### `SearchHistoryItem`
 
-- [ ] Interface fields (mirrors `SearchHistoryResponse`):
+- [x] Interface fields (mirrors `SearchHistoryResponse`):
   - `id: string`
   - `query: string`
   - `searchedAt: string` — ISO 8601
 
 ### `SearchResult` (discriminated union — optional helper type)
 
-- [ ] A union type to represent what the search hook may hold depending on `SearchType`:
+- [x] A union type to represent what the search hook may hold depending on `SearchType`:
   ```ts
   export type SearchResult =
     | { type: 'users';    items: UserSearchResult[]    }

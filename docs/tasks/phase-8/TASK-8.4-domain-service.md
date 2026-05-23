@@ -22,52 +22,52 @@ backend/src/main/java/com/instagram/application/service/SearchService.java
 
 ### Dependencies to inject (constructor)
 
-- [ ] `SearchRepository` — for executing user, hashtag, post, and hashtag-post queries.
-- [ ] `SearchHistoryRepository` — for saving and retrieving per-user search history.
+- [x] `SearchRepository` — for executing user, hashtag, post, and hashtag-post queries.
+- [x] `SearchHistoryRepository` — for saving and retrieving per-user search history.
 
 ### `searchUsers`
 
-- [ ] Validate that `query.q()` is not blank. If it is blank or null, return an empty list immediately without hitting the database.
-- [ ] Call `searchRepository.searchUsers(query.q(), PageRequest.of(query.page(), query.size()))`.
-- [ ] After the DB call returns, asynchronously save the search term by calling `saveHistoryAsync(query.currentUserId(), query.q())` (see below).
-- [ ] Return the `List<User>`.
+- [x] Validate that `query.q()` is not blank. If it is blank or null, return an empty list immediately without hitting the database.
+- [x] Call `searchRepository.searchUsers(query.q(), PageRequest.of(query.page(), query.size()))`.
+- [x] After the DB call returns, asynchronously save the search term by calling `saveHistoryAsync(query.currentUserId(), query.q())` (see below).
+- [x] Return the `List<User>`.
 
 ### `searchHashtags`
 
-- [ ] Validate `query.q()` is not blank; return empty list if so.
-- [ ] Call `searchRepository.searchHashtags(query.q(), PageRequest.of(query.page(), query.size()))`.
-- [ ] Asynchronously save history — but only for hashtag searches initiated by an authenticated user. Since `SearchHashtagsUseCase.Query` does not carry `currentUserId`, skip the history save for now (hashtag searches are treated as anonymous for history purposes).
-- [ ] Return the `List<Hashtag>`.
+- [x] Validate `query.q()` is not blank; return empty list if so.
+- [x] Call `searchRepository.searchHashtags(query.q(), PageRequest.of(query.page(), query.size()))`.
+- [x] Asynchronously save history — but only for hashtag searches initiated by an authenticated user. Since `SearchHashtagsUseCase.Query` does not carry `currentUserId`, skip the history save for now (hashtag searches are treated as anonymous for history purposes).
+- [x] Return the `List<Hashtag>`.
 
 ### `searchPosts`
 
-- [ ] Validate `query.q()` is not blank; return empty list if so.
-- [ ] Call `searchRepository.searchPosts(query.q(), PageRequest.of(query.page(), query.size()))`.
-- [ ] Asynchronously save history via `saveHistoryAsync(query.currentUserId(), query.q())`.
-- [ ] Return the `List<Post>`.
+- [x] Validate `query.q()` is not blank; return empty list if so.
+- [x] Call `searchRepository.searchPosts(query.q(), PageRequest.of(query.page(), query.size()))`.
+- [x] Asynchronously save history via `saveHistoryAsync(query.currentUserId(), query.q())`.
+- [x] Return the `List<Post>`.
 
 ### `getPostsByHashtag`
 
-- [ ] Validate `query.hashtagName()` is not blank; return empty list if so.
-- [ ] Call `searchRepository.findPostsByHashtag(query.hashtagName(), PageRequest.of(query.page(), query.size()))`.
-- [ ] No history save — browsing a hashtag page is not a search action.
-- [ ] Return the `List<Post>`.
+- [x] Validate `query.hashtagName()` is not blank; return empty list if so.
+- [x] Call `searchRepository.findPostsByHashtag(query.hashtagName(), PageRequest.of(query.page(), query.size()))`.
+- [x] No history save — browsing a hashtag page is not a search action.
+- [x] Return the `List<Post>`.
 
 ### `getSearchHistory`
 
-- [ ] Call `searchHistoryRepository.findByUserIdOrderBySearchedAtDesc(query.userId(), PageRequest.ofSize(query.limit()))`.
-- [ ] Return the list as-is.
+- [x] Call `searchHistoryRepository.findByUserIdOrderBySearchedAtDesc(query.userId(), PageRequest.ofSize(query.limit()))`.
+- [x] Return the list as-is.
 
 ### `clearSearchHistory`
 
-- [ ] Call `searchHistoryRepository.deleteByUserId(command.userId())`.
+- [x] Call `searchHistoryRepository.deleteByUserId(command.userId())`.
 
 ### `saveHistoryAsync` (private helper)
 
-- [ ] Annotate with `@Async` — Spring will run this method in a separate thread pool so the HTTP response is not delayed by the INSERT.
-- [ ] Build a `SearchHistory` using the Builder: set `userId`, `query`, `searchedAt = OffsetDateTime.now()`. Leave `id` null — the persistence adapter generates it.
-- [ ] Call `searchHistoryRepository.save(searchHistory)`.
-- [ ] This method returns `void` (or `CompletableFuture<Void>` if the `@Async` configuration requires a return type — check `AsyncConfig` or `@EnableAsync` setup in the project).
+- [x] Annotate with `@Async` — Spring will run this method in a separate thread pool so the HTTP response is not delayed by the INSERT.
+- [x] Build a `SearchHistory` using the Builder: set `userId`, `query`, `searchedAt = OffsetDateTime.now()`. Leave `id` null — the persistence adapter generates it.
+- [x] Call `searchHistoryRepository.save(searchHistory)`.
+- [x] This method returns `void` (or `CompletableFuture<Void>` if the `@Async` configuration requires a return type — check `AsyncConfig` or `@EnableAsync` setup in the project).
 
 ## Notes
 

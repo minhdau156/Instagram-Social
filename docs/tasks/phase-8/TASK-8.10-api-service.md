@@ -20,10 +20,10 @@ frontend/src/api/searchApi.ts
 
 ## Checklist
 
-- [ ] Import `api` from `'./client'`.
-- [ ] Import `UserSearchResult`, `HashtagSearchResult`, `PostSearchResult`, `SearchHistoryItem`, `SearchType` from `'../types/search'`.
+- [x] Import `api` from `'./client'`.
+- [x] Import `UserSearchResult`, `HashtagSearchResult`, `PostSearchResult`, `SearchHistoryItem`, `SearchType` from `'../types/search'`.
 
-- [ ] Export `searchApi` object with the following methods:
+- [x] Export `searchApi` object with the following methods:
 
 ### `searchUsers(q: string, page = 0, size = 20): Promise<UserSearchResult[]>`
 

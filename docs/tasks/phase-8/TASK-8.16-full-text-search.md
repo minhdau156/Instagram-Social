@@ -33,7 +33,7 @@ backend/src/test/java/com/instagram/adapter/out/persistence/SearchJpaAdapterIT.j
 
 ### 1. Flyway Migration `V3__add_fts_indexes.sql`
 
-- [ ] Add a `STORED` generated `tsvector` column to `posts`:
+- [x] Add a `STORED` generated `tsvector` column to `posts`:
   ```sql
   -- Drop the index if it exists (Postgres 16+ supports NOT EXISTS, but old versions may error)
   DROP INDEX IF EXISTS idx_posts_caption_trgm;
@@ -48,7 +48,7 @@ backend/src/test/java/com/instagram/adapter/out/persistence/SearchJpaAdapterIT.j
   CREATE INDEX idx_posts_caption_fts ON posts USING GIN (caption_tsv);
   ```
 
-- [ ] Add a `STORED` generated `tsvector` column to `users` combining `username` and `full_name`:
+- [x] Add a `STORED` generated `tsvector` column to `users` combining `username` and `full_name`:
   ```sql
   ALTER TABLE users
     ADD COLUMN search_tsv tsvector
@@ -62,7 +62,7 @@ backend/src/test/java/com/instagram/adapter/out/persistence/SearchJpaAdapterIT.j
   - Use `'simple'` dictionary (no stemming) so usernames are indexed as-is.
   - Cast `username` from `CITEXT` to `TEXT` — `to_tsvector` cannot resolve overloads on `CITEXT` directly.
 
-- [ ] (Recommended) Add a trigram GIN index on `posts.caption` as a short-query fallback:
+- [x] (Recommended) Add a trigram GIN index on `posts.caption` as a short-query fallback:
   ```sql
   CREATE INDEX idx_posts_caption_trgm ON posts USING GIN (caption gin_trgm_ops);
   ```
@@ -93,9 +93,9 @@ ORDER  BY ts_rank(p.caption_tsv, plainto_tsquery('english', :query)) DESC,
 LIMIT  :limit OFFSET :offset
 ```
 
-- [ ] Replace the native SQL string in `searchPosts` with the FTS query above.
-- [ ] Change parameter binding: bind `:query` directly (no `%` wrapping needed for FTS).
-- [ ] Add a short-query fallback: if `query.length() < 3`, keep the original `ILIKE '%' + query + '%'` path so single-letter searches still return results.
+- [x] Replace the native SQL string in `searchPosts` with the FTS query above.
+- [x] Change parameter binding: bind `:query` directly (no `%` wrapping needed for FTS).
+- [x] Add a short-query fallback: if `query.length() < 3`, keep the original `ILIKE '%' + query + '%'` path so single-letter searches still return results.
   ```java
   private static final int FTS_MIN_LENGTH = 3;
 
@@ -113,7 +113,7 @@ LIMIT  :limit OFFSET :offset
   nativeQuery.setParameter("limit", pageable.getPageSize());
   nativeQuery.setParameter("offset", pageable.getOffset());
   ```
-- [ ] Keep `@SuppressWarnings("unchecked")` and the blank-query guard.
+- [x] Keep `@SuppressWarnings("unchecked")` and the blank-query guard.
 
 #### `searchUsers` — replace ILIKE with FTS
 
@@ -135,26 +135,26 @@ ORDER  BY follower_count DESC
 LIMIT  :limit OFFSET :offset
 ```
 
-- [ ] Replace the native SQL string in `searchUsers` with the FTS query above.
-- [ ] Bind `:query` directly (no `%` wrapping).
-- [ ] Apply the same short-query fallback (< 3 chars → fall back to original ILIKE):
+- [x] Replace the native SQL string in `searchUsers` with the FTS query above.
+- [x] Bind `:query` directly (no `%` wrapping).
+- [x] Apply the same short-query fallback (< 3 chars → fall back to original ILIKE):
   ```sql
   -- fallback
   SELECT * FROM users
   WHERE  (username ILIKE :pattern OR full_name ILIKE :pattern) AND deleted_at IS NULL
   ORDER  BY follower_count DESC LIMIT :limit OFFSET :offset
   ```
-- [ ] Keep `@SuppressWarnings("unchecked")` and the blank-query guard.
+- [x] Keep `@SuppressWarnings("unchecked")` and the blank-query guard.
 
 #### `searchHashtags` and `findPostsByHashtag`
 
-- [ ] Leave both methods **unchanged**. Trigram prefix match is optimal for hashtag autocomplete, and the hashtag-page browse uses an exact CITEXT equality match.
+- [x] Leave both methods **unchanged**. Trigram prefix match is optimal for hashtag autocomplete, and the hashtag-page browse uses an exact CITEXT equality match.
 
 ---
 
 ### 3. Update `docs/database/schema.sql`
 
-- [ ] In the `posts` table block, add the generated column and its index:
+- [x] In the `posts` table block, add the generated column and its index:
   ```sql
   caption_tsv  tsvector  GENERATED ALWAYS AS (to_tsvector('english', coalesce(caption, ''))) STORED
   ```
@@ -162,7 +162,7 @@ LIMIT  :limit OFFSET :offset
   CREATE INDEX idx_posts_caption_fts  ON posts USING GIN (caption_tsv);
   CREATE INDEX idx_posts_caption_trgm ON posts USING GIN (caption gin_trgm_ops);
   ```
-- [ ] In the `users` table block, add the generated column and its index:
+- [x] In the `users` table block, add the generated column and its index:
   ```sql
   search_tsv   tsvector  GENERATED ALWAYS AS (to_tsvector('simple', coalesce(username::text, '') || ' ' || coalesce(full_name, ''))) STORED
   ```
@@ -178,8 +178,8 @@ The existing tests run on H2 in PostgreSQL compatibility mode, but H2 does not s
 
 **Option A — Testcontainers (recommended if already used elsewhere in the project)**
 
-- [ ] Check whether `pom.xml` already declares `org.testcontainers:postgresql` in test scope. If not, add it.
-- [ ] Annotate `SearchJpaAdapterIT` with `@Testcontainers` and add:
+- [x] Check whether `pom.xml` already declares `org.testcontainers:postgresql` in test scope. If not, add it.
+- [x] Annotate `SearchJpaAdapterIT` with `@Testcontainers` and add:
   ```java
   @Container
   static PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:15-alpine");
@@ -191,30 +191,30 @@ The existing tests run on H2 in PostgreSQL compatibility mode, but H2 does not s
       r.add("spring.datasource.password", pg::getPassword);
   }
   ```
-- [ ] Remove the `@AutoConfigureTestDatabase` override that pointed to H2.
-- [ ] The existing `@Sql` fixup for `follower_count`/`deleted_at` DDL should now be removed or simplified — the real schema migration handles it.
+- [x] Remove the `@AutoConfigureTestDatabase` override that pointed to H2.
+- [x] The existing `@Sql` fixup for `follower_count`/`deleted_at` DDL should now be removed or simplified — the real schema migration handles it.
 
 **Option B — Separate FTS test class (fallback if Testcontainers is not in use)**
 
-- [ ] Leave the existing H2-based `SearchJpaAdapterIT` as-is for the ILIKE fallback path tests.
-- [ ] Create `SearchFtsAdapterIT` that extends from the shared Testcontainers base class (if one exists) or configures its own container. Run only the FTS-specific assertions here.
+- [x] Leave the existing H2-based `SearchJpaAdapterIT` as-is for the ILIKE fallback path tests.
+- [x] Create `SearchFtsAdapterIT` that extends from the shared Testcontainers base class (if one exists) or configures its own container. Run only the FTS-specific assertions here.
 
 #### FTS Test Cases (add to whichever class runs against real PostgreSQL)
 
 **`searchPosts` FTS**
-- [ ] **Basic token match:** Insert post with caption `"Beautiful sunset in Bali"`. Search `"sunset"`. Verify post is returned.
-- [ ] **Stemming:** Insert post with caption `"Running along the beach"`. Search `"run"`. Verify post is returned (English FTS stems `running` → `run`).
-- [ ] **Multi-word:** Insert post with caption `"Golden Gate Bridge"`. Search `"golden gate"`. Verify post is returned.
-- [ ] **Soft-delete excluded:** Insert post captioned `"sunset beach"` with `deleted_at` set. Search `"sunset"`. Verify it does NOT appear.
-- [ ] **No match:** Search `"pineapple"` against captions that don't contain that word. Verify empty list.
-- [ ] **Relevance ordering:** Insert two posts — one mentioning `"sunset"` once and one mentioning `"sunset sunset"` twice. Verify the higher-density post ranks first.
-- [ ] **Short-query fallback (< 3 chars):** Search `"ba"`. Verify the ILIKE path returns the `"Bali"` post (contains `"ba"`).
+- [x] **Basic token match:** Insert post with caption `"Beautiful sunset in Bali"`. Search `"sunset"`. Verify post is returned.
+- [x] **Stemming:** Insert post with caption `"Running along the beach"`. Search `"run"`. Verify post is returned (English FTS stems `running` → `run`).
+- [x] **Multi-word:** Insert post with caption `"Golden Gate Bridge"`. Search `"golden gate"`. Verify post is returned.
+- [x] **Soft-delete excluded:** Insert post captioned `"sunset beach"` with `deleted_at` set. Search `"sunset"`. Verify it does NOT appear.
+- [x] **No match:** Search `"pineapple"` against captions that don't contain that word. Verify empty list.
+- [x] **Relevance ordering:** Insert two posts — one mentioning `"sunset"` once and one mentioning `"sunset sunset"` twice. Verify the higher-density post ranks first.
+- [x] **Short-query fallback (< 3 chars):** Search `"ba"`. Verify the ILIKE path returns the `"Bali"` post (contains `"ba"`).
 
 **`searchUsers` FTS**
-- [ ] **Token match on full_name:** Insert user with `full_name = "Alexander Johnson"`. Search `"alexander"`. Verify user is returned.
-- [ ] **Token match on username:** Insert user with `username = "travellover"`. Search `"travellover"`. Verify user is returned.
-- [ ] **No cross-token partial match:** Search `"alexand"` (not a full token). Verify no result — document this as expected FTS behaviour. The short-query fallback covers short inputs; partial suffixes are a known FTS limitation.
-- [ ] **follower_count ordering preserved:** Insert two matching users with different follower counts. Verify higher count appears first.
+- [x] **Token match on full_name:** Insert user with `full_name = "Alexander Johnson"`. Search `"alexander"`. Verify user is returned.
+- [x] **Token match on username:** Insert user with `username = "travellover"`. Search `"travellover"`. Verify user is returned.
+- [x] **No cross-token partial match:** Search `"alexand"` (not a full token). Verify no result — document this as expected FTS behaviour. The short-query fallback covers short inputs; partial suffixes are a known FTS limitation.
+- [x] **follower_count ordering preserved:** Insert two matching users with different follower counts. Verify higher count appears first.
 
 ---
 
@@ -229,10 +229,10 @@ The existing tests run on H2 in PostgreSQL compatibility mode, but H2 does not s
 
 ## Acceptance Criteria
 
-- [ ] `V3__add_fts_indexes.sql` applies cleanly against PostgreSQL 15 with no errors.
-- [ ] `searchPosts("sunset")` returns posts whose caption contains "sunset" or stems of it, ordered by `ts_rank` DESC.
-- [ ] `searchPosts("ba")` (short fallback) returns posts whose caption contains `"ba"` via ILIKE.
-- [ ] `searchUsers("alexander")` returns users whose `full_name` contains the token `"alexander"`.
-- [ ] `searchHashtags` and `findPostsByHashtag` behaviour and query plans are unchanged.
-- [ ] All existing `SearchControllerIT` tests pass — no changes to any port, DTO, or controller interfaces.
-- [ ] At least the FTS-specific integration tests run against a real PostgreSQL instance.
+- [x] `V3__add_fts_indexes.sql` applies cleanly against PostgreSQL 15 with no errors.
+- [x] `searchPosts("sunset")` returns posts whose caption contains "sunset" or stems of it, ordered by `ts_rank` DESC.
+- [x] `searchPosts("ba")` (short fallback) returns posts whose caption contains `"ba"` via ILIKE.
+- [x] `searchUsers("alexander")` returns users whose `full_name` contains the token `"alexander"`.
+- [x] `searchHashtags` and `findPostsByHashtag` behaviour and query plans are unchanged.
+- [x] All existing `SearchControllerIT` tests pass — no changes to any port, DTO, or controller interfaces.
+- [x] At least the FTS-specific integration tests run against a real PostgreSQL instance.
