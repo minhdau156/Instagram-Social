@@ -1,8 +1,12 @@
 package com.instagram.adapter.out.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +32,7 @@ import com.instagram.domain.model.SearchHistory;
 import com.instagram.domain.model.User;
 import com.instagram.domain.model.UserStatus;
 import com.instagram.infrastructure.config.JpaConfig;
+import com.instagram.infrastructure.util.BlockFilter;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -53,14 +58,17 @@ class SearchJpaAdapterIT {
 
     @BeforeEach
     void setUp() {
-        // Clear all tables to ensure test isolation on ephemeral Testcontainers PostgreSQL
+        // Clear all tables to ensure test isolation on ephemeral Testcontainers
+        // PostgreSQL
         tem.getEntityManager()
                 .createNativeQuery("TRUNCATE TABLE search_history, post_hashtags, posts, hashtags, users CASCADE")
                 .executeUpdate();
         tem.flush();
         tem.clear();
 
-        adapter = new SearchJpaAdapter(tem.getEntityManager());
+        BlockFilter noBlockFilter = mock(BlockFilter.class);
+        when(noBlockFilter.getExcludedUserIds(any())).thenReturn(Collections.emptySet());
+        adapter = new SearchJpaAdapter(tem.getEntityManager(), noBlockFilter);
         historyAdapter = new SearchHistoryPersistenceAdapter(searchHistoryJpaRepository);
     }
 
@@ -72,7 +80,7 @@ class SearchJpaAdapterIT {
         tem.persistAndFlush(buildUser("alice99", "Alice Roberts"));
         tem.clear();
 
-        List<User> results = adapter.searchUsers("john", Pageable.ofSize(20));
+        List<User> results = adapter.searchUsers(UUID.randomUUID(), "john", Pageable.ofSize(20));
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getUsername()).isEqualTo("john_doe");
@@ -84,7 +92,8 @@ class SearchJpaAdapterIT {
         tem.persistAndFlush(buildUser("bjones", "Bob Jones"));
         tem.clear();
 
-        List<User> results = adapter.searchUsers("smith", Pageable.ofSize(20));
+        List<User> results = adapter.searchUsers(UUID.randomUUID(),
+                "smith", Pageable.ofSize(20));
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getUsername()).isEqualTo("jsmith");
@@ -95,7 +104,7 @@ class SearchJpaAdapterIT {
         tem.persistAndFlush(buildUser("testuser_ci", "Test User CI"));
         tem.clear();
 
-        List<User> results = adapter.searchUsers("TESTUSER_CI", Pageable.ofSize(20));
+        List<User> results = adapter.searchUsers(UUID.randomUUID(), "TESTUSER_CI", Pageable.ofSize(20));
 
         assertThat(results).hasSize(1);
     }
@@ -109,7 +118,7 @@ class SearchJpaAdapterIT {
                 .executeUpdate();
         tem.clear();
 
-        List<User> results = adapter.searchUsers("deleted_john", Pageable.ofSize(20));
+        List<User> results = adapter.searchUsers(UUID.randomUUID(), "deleted_john", Pageable.ofSize(20));
 
         assertThat(results).isEmpty();
     }
@@ -119,7 +128,7 @@ class SearchJpaAdapterIT {
         tem.persistAndFlush(buildUser("alice_nomatch", "Alice Nobody"));
         tem.clear();
 
-        List<User> results = adapter.searchUsers("zzz_no_match_xyz", Pageable.ofSize(20));
+        List<User> results = adapter.searchUsers(UUID.randomUUID(), "zzz_no_match_xyz", Pageable.ofSize(20));
 
         assertThat(results).isEmpty();
     }
@@ -174,7 +183,7 @@ class SearchJpaAdapterIT {
                 .user(user).caption("Mountain hike").status(PostStatus.PUBLISHED).build());
         tem.clear();
 
-        List<Post> results = adapter.searchPosts("SUNSET", Pageable.ofSize(20));
+        List<Post> results = adapter.searchPosts(UUID.randomUUID(), "SUNSET", Pageable.ofSize(20));
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getCaption()).isEqualTo("Beautiful Sunset view");
@@ -188,7 +197,7 @@ class SearchJpaAdapterIT {
                 .deletedAt(OffsetDateTime.now()).build());
         tem.clear();
 
-        List<Post> results = adapter.searchPosts("sunset", Pageable.ofSize(20));
+        List<Post> results = adapter.searchPosts(UUID.randomUUID(), "sunset", Pageable.ofSize(20));
 
         assertThat(results).isEmpty();
     }
@@ -200,7 +209,7 @@ class SearchJpaAdapterIT {
                 .user(user).caption("Completely unrelated content").status(PostStatus.PUBLISHED).build());
         tem.clear();
 
-        List<Post> results = adapter.searchPosts("zzz_no_match", Pageable.ofSize(20));
+        List<Post> results = adapter.searchPosts(UUID.randomUUID(), "zzz_no_match", Pageable.ofSize(20));
 
         assertThat(results).isEmpty();
     }
@@ -224,7 +233,7 @@ class SearchJpaAdapterIT {
         tem.flush();
         tem.clear();
 
-        List<Post> results = adapter.findPostsByHashtag("travel_d", Pageable.ofSize(20));
+        List<Post> results = adapter.findPostsByHashtag(UUID.randomUUID(), "travel_d", Pageable.ofSize(20));
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getId()).isEqualTo(linkedPost.getId());
@@ -246,7 +255,7 @@ class SearchJpaAdapterIT {
         tem.flush();
         tem.clear();
 
-        List<Post> results = adapter.findPostsByHashtag("travel_e", Pageable.ofSize(20));
+        List<Post> results = adapter.findPostsByHashtag(UUID.randomUUID(), "travel_e", Pageable.ofSize(20));
 
         assertThat(results).isEmpty();
     }
@@ -303,7 +312,7 @@ class SearchJpaAdapterIT {
         tem.clear();
 
         // "running" stems to "run" in English FTS. Searching "run" should match.
-        List<Post> results = adapter.searchPosts("run", Pageable.ofSize(20));
+        List<Post> results = adapter.searchPosts(UUID.randomUUID(), "run", Pageable.ofSize(20));
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getCaption()).isEqualTo("Running along the beautiful beach");
@@ -316,7 +325,7 @@ class SearchJpaAdapterIT {
                 .user(user).caption("Beautiful walk on the Golden Gate Bridge").status(PostStatus.PUBLISHED).build());
         tem.clear();
 
-        List<Post> results = adapter.searchPosts("golden gate", Pageable.ofSize(20));
+        List<Post> results = adapter.searchPosts(UUID.randomUUID(), "golden gate", Pageable.ofSize(20));
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getCaption()).isEqualTo("Beautiful walk on the Golden Gate Bridge");
@@ -326,15 +335,17 @@ class SearchJpaAdapterIT {
     void searchPosts_ftsRelevanceOrdering() {
         UserJpaEntity user = tem.persistAndFlush(buildUser("rank_poster", "Ranking User"));
         PostJpaEntity postLowDensity = tem.persistAndFlush(PostJpaEntity.builder()
-                .user(user).caption("A beautiful sunset is happening in Bali right now").status(PostStatus.PUBLISHED).build());
+                .user(user).caption("A beautiful sunset is happening in Bali right now").status(PostStatus.PUBLISHED)
+                .build());
         PostJpaEntity postHighDensity = tem.persistAndFlush(PostJpaEntity.builder()
                 .user(user).caption("sunset sunset sunset is sunset beach").status(PostStatus.PUBLISHED).build());
         tem.clear();
 
-        List<Post> results = adapter.searchPosts("sunset", Pageable.ofSize(20));
+        List<Post> results = adapter.searchPosts(UUID.randomUUID(), "sunset", Pageable.ofSize(20));
 
         assertThat(results).hasSize(2);
-        // The post with higher density of the keyword "sunset" should rank first due to ts_rank
+        // The post with higher density of the keyword "sunset" should rank first due to
+        // ts_rank
         assertThat(results.get(0).getId()).isEqualTo(postHighDensity.getId());
         assertThat(results.get(1).getId()).isEqualTo(postLowDensity.getId());
     }
@@ -348,7 +359,7 @@ class SearchJpaAdapterIT {
 
         // Query "ba" is length 2 (< 3 min length). Under FTS it won't match "Bali",
         // but the short-query fallback should use ILIKE '%ba%' and find it.
-        List<Post> results = adapter.searchPosts("ba", Pageable.ofSize(20));
+        List<Post> results = adapter.searchPosts(UUID.randomUUID(), "ba", Pageable.ofSize(20));
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getCaption()).isEqualTo("Beautiful sunset in Bali");
@@ -361,7 +372,7 @@ class SearchJpaAdapterIT {
 
         // Query "jo" is length 2 (< 3 min length). FTS won't match it,
         // but short-query ILIKE fallback should match on username "john_doe".
-        List<User> results = adapter.searchUsers("jo", Pageable.ofSize(20));
+        List<User> results = adapter.searchUsers(UUID.randomUUID(), "jo", Pageable.ofSize(20));
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getUsername()).isEqualTo("john_doe");
@@ -372,10 +383,12 @@ class SearchJpaAdapterIT {
         tem.persistAndFlush(buildUser("alex_j", "Alexander Johnson"));
         tem.clear();
 
-        // Query "alexand" is length 7 (>= 3 -> FTS). Simple dictionary splits into full tokens:
-        // "alexander" and "johnson". Since "alexand" is not a complete token, FTS will NOT match it.
+        // Query "alexand" is length 7 (>= 3 -> FTS). Simple dictionary splits into full
+        // tokens:
+        // "alexander" and "johnson". Since "alexand" is not a complete token, FTS will
+        // NOT match it.
         // This is expected FTS behavior.
-        List<User> results = adapter.searchUsers("alexand", Pageable.ofSize(20));
+        List<User> results = adapter.searchUsers(UUID.randomUUID(), "alexand", Pageable.ofSize(20));
 
         assertThat(results).isEmpty();
     }
@@ -401,7 +414,7 @@ class SearchJpaAdapterIT {
         tem.flush();
         tem.clear();
 
-        List<User> results = adapter.searchUsers("Traveler", Pageable.ofSize(20));
+        List<User> results = adapter.searchUsers(UUID.randomUUID(), "Traveler", Pageable.ofSize(20));
 
         assertThat(results).hasSize(2);
         // bob (100 followers) should be first, alice (10 followers) should be second
@@ -419,6 +432,7 @@ class SearchJpaAdapterIT {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role("USER")
                 .build();
     }
 

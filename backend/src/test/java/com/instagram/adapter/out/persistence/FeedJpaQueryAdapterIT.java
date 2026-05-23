@@ -1,7 +1,11 @@
 package com.instagram.adapter.out.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +27,7 @@ import com.instagram.domain.model.PostStatus;
 import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.UserStatus;
 import com.instagram.infrastructure.config.JpaConfig;
+import com.instagram.infrastructure.util.BlockFilter;
 
 @DataJpaTest
 @Import(JpaConfig.class)
@@ -49,7 +54,11 @@ class FeedJpaQueryAdapterIT {
 
     @BeforeEach
     void setUp() {
-        adapter = new FeedJpaQueryAdapter(feedJpaRepository, postJpaRepository);
+
+        BlockFilter noBlockFilter = mock(BlockFilter.class);
+
+        when(noBlockFilter.getExcludedUserIds(any())).thenReturn(Collections.emptySet());
+        adapter = new FeedJpaQueryAdapter(feedJpaRepository, postJpaRepository, noBlockFilter, tem.getEntityManager());
 
         follower = tem.persistAndFlush(buildUser("follower"));
         followed = tem.persistAndFlush(buildUser("followed"));
@@ -106,6 +115,7 @@ class FeedJpaQueryAdapterIT {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
+                .role("USER")
                 .build();
     }
 

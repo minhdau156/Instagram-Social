@@ -41,6 +41,11 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
+      - name: Create test database
+        run: psql -h localhost -U instagram -c "CREATE DATABASE instagram_test;"
+        env:
+          PGPASSWORD: changeme
+
       - name: Build and verify backend
         working-directory: ./backend
         run: mvn verify
