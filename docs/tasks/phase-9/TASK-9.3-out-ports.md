@@ -30,28 +30,28 @@ backend/src/main/java/com/instagram/domain/port/out/AuditLogRepository.java
 
 #### Report Methods
 
-- [ ] `Report saveReport(Report report)` — persists a new report (or updates an existing one after a status change). Returns the saved instance with a populated `id` field.
-- [ ] `Optional<Report> findReportById(UUID reportId)` — looks up a report by its primary key. Returns `Optional.empty()` if not found. The service layer converts an empty result to `ReportNotFoundException`.
-- [ ] `List<Report> findAllReports(ReportStatus status, Pageable pageable)` — returns all reports filtered by the given status, ordered by `created_at DESC`. When `status` is `null`, return all reports regardless of status (used by the admin dashboard to show everything). The implementation in TASK-9.7 will handle the conditional WHERE clause.
-- [ ] `List<Report> findPendingReports(Pageable pageable)` — convenience method returning only reports with `status = PENDING`, ordered by `created_at ASC` (oldest first, so admins handle the queue in order). This is a narrower form of `findAllReports(PENDING, pageable)` but exposed as a named method because the admin queue is a primary use case.
-- [ ] `long countByStatus(ReportStatus status)` — returns the count of reports with the given status. Used by the admin dashboard stats cards.
-- [ ] `boolean existsByReporterIdAndEntityId(UUID reporterId, UUID entityId)` — checks whether the reporter has already submitted a report for this specific entity. Used in `ModerationService` to prevent duplicate reports from the same user against the same content.
+- [x] `Report saveReport(Report report)` — persists a new report (or updates an existing one after a status change). Returns the saved instance with a populated `id` field.
+- [x] `Optional<Report> findReportById(UUID reportId)` — looks up a report by its primary key. Returns `Optional.empty()` if not found. The service layer converts an empty result to `ReportNotFoundException`.
+- [x] `List<Report> findAllReports(ReportStatus status, Pageable pageable)` — returns all reports filtered by the given status, ordered by `created_at DESC`. When `status` is `null`, return all reports regardless of status (used by the admin dashboard to show everything). The implementation in TASK-9.7 will handle the conditional WHERE clause.
+- [x] `List<Report> findPendingReports(Pageable pageable)` — convenience method returning only reports with `status = PENDING`, ordered by `created_at ASC` (oldest first, so admins handle the queue in order). This is a narrower form of `findAllReports(PENDING, pageable)` but exposed as a named method because the admin queue is a primary use case.
+- [x] `long countByStatus(ReportStatus status)` — returns the count of reports with the given status. Used by the admin dashboard stats cards.
+- [x] `boolean existsByReporterIdAndEntityId(UUID reporterId, UUID entityId)` — checks whether the reporter has already submitted a report for this specific entity. Used in `ModerationService` to prevent duplicate reports from the same user against the same content.
 
 #### Block Methods
 
-- [ ] `UserBlock saveBlock(UserBlock block)` — persists a new block. Returns the saved instance.
-- [ ] `void deleteBlock(UUID blockerId, UUID blockedId)` — removes the block. Does not throw if the relationship does not exist; the service layer performs the existence check before calling this method.
-- [ ] `boolean isBlocked(UUID blockerId, UUID blockedId)` — returns `true` if a block relationship exists where `blockerId` is the blocker and `blockedId` is the target. This is a directional check — `isBlocked(A, B)` can be true while `isBlocked(B, A)` is false.
-- [ ] `boolean isEitherBlocked(UUID userA, UUID userB)` — returns `true` if EITHER `userA` has blocked `userB` OR `userB` has blocked `userA`. This bidirectional check is used by the feed and search adapters (TASK-9.8) to exclude content on both sides of a block.
-- [ ] `List<UserBlock> findBlocksByBlockerId(UUID blockerId, Pageable pageable)` — returns all block records where the given user is the blocker. Ordered by `created_at DESC`. Used to render the "Blocked Accounts" settings page.
-- [ ] `List<UUID> findBlockedUserIdsByBlockerId(UUID blockerId)` — returns the full list of `blocked_id` values for a given blocker as a plain `List<UUID>`. Intended for the block-filter utility (TASK-9.8) which needs a set of excluded IDs to inject into feed/search queries. Does NOT accept `Pageable` — it fetches all blocked IDs for the current user.
-- [ ] `List<UUID> findBlockerIdsByBlockedId(UUID blockedId)` — returns all users who have blocked the given user. Also used by the block-filter to ensure neither party can see the other's content.
+- [x] `UserBlock saveBlock(UserBlock block)` — persists a new block. Returns the saved instance.
+- [x] `void deleteBlock(UUID blockerId, UUID blockedId)` — removes the block. Does not throw if the relationship does not exist; the service layer performs the existence check before calling this method.
+- [x] `boolean isBlocked(UUID blockerId, UUID blockedId)` — returns `true` if a block relationship exists where `blockerId` is the blocker and `blockedId` is the target. This is a directional check — `isBlocked(A, B)` can be true while `isBlocked(B, A)` is false.
+- [x] `boolean isEitherBlocked(UUID userA, UUID userB)` — returns `true` if EITHER `userA` has blocked `userB` OR `userB` has blocked `userA`. This bidirectional check is used by the feed and search adapters (TASK-9.8) to exclude content on both sides of a block.
+- [x] `List<UserBlock> findBlocksByBlockerId(UUID blockerId, Pageable pageable)` — returns all block records where the given user is the blocker. Ordered by `created_at DESC`. Used to render the "Blocked Accounts" settings page.
+- [x] `List<UUID> findBlockedUserIdsByBlockerId(UUID blockerId)` — returns the full list of `blocked_id` values for a given blocker as a plain `List<UUID>`. Intended for the block-filter utility (TASK-9.8) which needs a set of excluded IDs to inject into feed/search queries. Does NOT accept `Pageable` — it fetches all blocked IDs for the current user.
+- [x] `List<UUID> findBlockerIdsByBlockedId(UUID blockedId)` — returns all users who have blocked the given user. Also used by the block-filter to ensure neither party can see the other's content.
 
 ---
 
 ### `AuditLogRepository.java`
 
-- [ ] `void log(UUID actorId, String action, String entityType, UUID entityId, String metadata, String ipAddress)` — appends a single audit log entry. All parameters map directly to columns in the `audit_logs` table. Parameters `entityType`, `entityId`, `metadata`, and `ipAddress` are nullable (pass `null` when the action does not involve a specific entity or does not carry metadata). This method is always fire-and-forget — it must not block the main business flow and should never throw a checked exception. If logging fails, it should catch the exception, log it to the application logger (SLF4J), and return silently.
+- [x] `void log(UUID actorId, String action, String entityType, UUID entityId, String metadata, String ipAddress)` — appends a single audit log entry. All parameters map directly to columns in the `audit_logs` table. Parameters `entityType`, `entityId`, `metadata`, and `ipAddress` are nullable (pass `null` when the action does not involve a specific entity or does not carry metadata). This method is always fire-and-forget — it must not block the main business flow and should never throw a checked exception. If logging fails, it should catch the exception, log it to the application logger (SLF4J), and return silently.
   - `actorId` → `user_id` column
   - `action` → `action VARCHAR(100)` — use descriptive constants such as `"report_submit"`, `"user_block"`, `"user_unblock"`, `"report_resolve"`, `"report_dismiss"`, `"user_suspend"`, `"user_unsuspend"`. Define these as `public static final String` constants in the `AuditLogRepository` interface itself or in a companion `AuditActions` constants class in `domain/model/`.
   - `entityType` → `entity_type VARCHAR(50)`
