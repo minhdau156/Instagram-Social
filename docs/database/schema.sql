@@ -56,6 +56,7 @@ CREATE TABLE users (
     updated_at          TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
     last_login_at       TIMESTAMPTZ,
     search_tsv   tsvector  GENERATED ALWAYS AS (to_tsvector('simple', coalesce(username::text, '') || ' ' || coalesce(full_name, ''))) STORED,
+    role                VARCHAR(50)     NOT NULL DEFAULT 'USER',
 
     CONSTRAINT chk_contact CHECK (email IS NOT NULL OR phone_number IS NOT NULL)
 );

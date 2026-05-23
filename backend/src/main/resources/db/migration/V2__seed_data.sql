@@ -12,3 +12,5 @@ VALUES (
     'PUBLIC'
 ) ON CONFLICT (id) DO NOTHING;
 
+
+

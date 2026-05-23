@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
 import com.instagram.adapter.out.persistence.repository.UserJpaRepository;
 import com.instagram.domain.model.User;
+import com.instagram.domain.model.UserRole;
 import com.instagram.domain.port.out.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -96,6 +97,7 @@ public class UserPersistenceAdapter implements UserRepository {
                 .isVerified(user.isVerified())
                 .status(user.getStatus())
                 .lastLoginAt(user.getLastLoginAt())
+                .role("USER")
                 .build();
     }
 
@@ -114,6 +116,7 @@ public class UserPersistenceAdapter implements UserRepository {
                 .isVerified(entity.isVerified())
                 .status(entity.getStatus())
                 .lastLoginAt(entity.getLastLoginAt())
+                .role(entity.getRole() == "USER" ? UserRole.USER : UserRole.ADMIN)
                 .build();
     }
 }

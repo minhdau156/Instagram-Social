@@ -7,9 +7,13 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.security.core.userdetails.User;
@@ -37,9 +41,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
         Optional<UUID> userId = tokenProvider.validateAccessToken(token);
         if (userId.isPresent()) {
+
+            String role = tokenProvider.getRoleFromToken(token);
+
+            List<GrantedAuthority> authorities = List.of(
+                    new SimpleGrantedAuthority("ROLE_" + role) // For @PreAuthorize("hasRole('XXX')")
+            // OR new SimpleGrantedAuthority(role) // For
+            // @PreAuthorize("hasAuthority('XXX')")
+            );
+
             UserDetails userDetails = User.withUsername(userId.get().toString())
                     .password("")
-                    .authorities(Collections.emptyList())
+                    .authorities(authorities)
                     .build();
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());

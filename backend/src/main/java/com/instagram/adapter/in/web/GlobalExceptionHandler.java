@@ -2,6 +2,7 @@ package com.instagram.adapter.in.web;
 
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
 import com.instagram.domain.exception.AlreadyBlockedException;
+import com.instagram.domain.exception.AlreadyReportedException;
 import com.instagram.domain.exception.AlreadyFollowingException;
 import com.instagram.domain.exception.AlreadyLikedException;
 import com.instagram.domain.exception.AlreadySavedException;
@@ -249,6 +250,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleReportNotFound(ReportNotFoundException ex) {
         log.warn(ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(AlreadyReportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAlreadyReported(AlreadyReportedException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

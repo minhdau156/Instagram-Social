@@ -19,6 +19,7 @@ public class User {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private OffsetDateTime lastLoginAt;
+    private UserRole role;
 
     public User() {
 
@@ -84,6 +85,10 @@ public class User {
         return lastLoginAt;
     }
 
+    public UserRole getRole() {
+        return role;
+    }
+
     private Builder copy() {
         return User.builder()
                 .id(this.id)
@@ -100,6 +105,7 @@ public class User {
                 .isVerified(this.isVerified)
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)
+                .role(this.role)
                 .lastLoginAt(this.lastLoginAt);
     }
 
@@ -185,6 +191,11 @@ public class User {
             return this;
         }
 
+        public Builder role(UserRole role) {
+            user.role = role;
+            return this;
+        }
+
         public User build() {
             return user;
         }
@@ -215,6 +226,14 @@ public class User {
 
     public User withUpdatedPasswordHash(String newPasswordHash) {
         return this.copy().passwordHash(newPasswordHash).updatedAt(OffsetDateTime.now()).build();
+    }
+
+    public User withSuspend() {
+        return this.copy().status(UserStatus.SUSPENDED).updatedAt(OffsetDateTime.now()).build();
+    }
+
+    public User withUnsuspend() {
+        return this.copy().status(UserStatus.ACTIVE).updatedAt(OffsetDateTime.now()).build();
     }
 
     public User withDeactivated() {

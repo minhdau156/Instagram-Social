@@ -2,6 +2,7 @@ package com.instagram.infrastructure.security;
 
 import com.instagram.domain.port.out.TokenPort;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 
@@ -90,6 +91,16 @@ public class JwtTokenProvider implements TokenPort {
             log.warn("Invalid token: {}", e.getMessage());
             return Optional.empty();
         }
+    }
+
+    public String getRoleFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(signingKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return claims.get("role", String.class);
     }
 
 }
