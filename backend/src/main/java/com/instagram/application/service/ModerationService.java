@@ -66,7 +66,7 @@ public class ModerationService implements ReportContentUseCase,
 
         moderationRepository.deleteBlock(command.blockerId(), targetId);
         auditLogRepository.log(command.blockerId(), AuditLogRepository.USER_UNBLOCK,
-                "user",
+                "USER",
                 targetId,
                 null,
                 null);
@@ -95,7 +95,7 @@ public class ModerationService implements ReportContentUseCase,
         UserBlock saved = moderationRepository.saveBlock(block);
 
         auditLogRepository.log(command.blockerId(), AuditLogRepository.USER_BLOCK,
-                "user",
+                "USER",
                 blockedUserId,
                 null,
                 null);

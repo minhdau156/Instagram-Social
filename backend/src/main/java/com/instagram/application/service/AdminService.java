@@ -59,7 +59,7 @@ public class AdminService implements ReviewReportUseCase,
         User updatedUser = userRepository.save(unsuspend);
         auditLogRepository.log(command.adminId(),
                 AuditLogRepository.USER_UNSUSPEND,
-                "user",
+                "USER",
                 targetUser.getId(),
                 null,
                 null);
@@ -83,7 +83,7 @@ public class AdminService implements ReviewReportUseCase,
         User updatedUser = userRepository.save(suspend);
         auditLogRepository.log(command.adminId(),
                 AuditLogRepository.USER_SUSPEND,
-                "user",
+                "USER",
                 targetUser.getId(),
                 "{\"reason\": \"" + command.reason() + "\"}",
                 null);
@@ -112,7 +112,7 @@ public class AdminService implements ReviewReportUseCase,
             case RESOLVE -> AuditLogRepository.REPORT_RESOLVE;
             case MARK_REVIEWED -> AuditLogRepository.REPORT_REVIEW;
         };
-        auditLogRepository.log(command.adminId(), auditAction, "report", command.reportId(), null, null);
+        auditLogRepository.log(command.adminId(), auditAction, "REPORT", command.reportId(), null, null);
 
         return savedReport;
 

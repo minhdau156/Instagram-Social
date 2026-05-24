@@ -354,6 +354,93 @@ void softDelete(@Param("id") UUID id);
 ---
 
 
+## Test Naming & Structure
+
+### Naming Convention: `methodName_stateUnderTest_expectedResult`
+
+Every test method must follow the three-part pattern. Each segment is mandatory.
+
+| Segment | Answers | Example |
+|---|---|---|
+| `methodName` | What is being tested? | `reportContent`, `blockUser`, `findById` |
+| `stateUnderTest` | Under what condition? | `whenReasonIsBlank`, `whenUserNotFound`, `whenSuccess` |
+| `expectedResult` | What should happen? | `throwException`, `returnUser`, `saveAndLog` |
+
+```java
+// ✅ Correct
+void reportContent_whenReasonIsBlank_throwIllegalArgumentException()
+void blockUser_whenAlreadyBlocked_throwAlreadyBlockedException()
+void findById_whenUserExists_returnUser()
+void suspendUser_whenUserAlreadySuspended_throwIllegalStateException()
+void getReports_whenStatusFilter_passesFilterToUseCase()
+void getBlockedUsers_whenValid_returnsListAndNoAuditLog()
+
+// ❌ Wrong - vague, no three-part structure
+void testReportContent()
+void blockUser_test1()
+void shouldThrowWhenBlocked()
+void reportContent_Success()        // missing stateUnderTest
+void blockUser_whenBlocked()        // missing expectedResult
+```
+
+### State Segment Conventions
+
+Prefer descriptive state prefixes:
+
+| Prefix | Use for |
+|---|---|
+| `whenValid` / `whenSuccess` | Happy path, all inputs correct |
+| `whenNotFound` | Entity lookup returns empty |
+| `whenAlreadyX` | Duplicate / guard violation (AlreadyBlocked, AlreadyLiked) |
+| `whenUnauthorized` | Missing or wrong credentials |
+| `whenMissingRequiredFields` | Bean validation failure |
+| `whenNull` / `whenBlank` | Null or blank input |
+| `whenReversedDirection` | Bidirectional symmetry check |
+| `whenXFilter` | Optional query parameter provided |
+
+### Result Segment Conventions
+
+| Suffix | Use for |
+|---|---|
+| `returnX` | Returns a value / list |
+| `throwXException` | Named exception thrown |
+| `saveAndLog` | Side effects: persist + audit |
+| `returnNoContent` / `return204` | Void / empty response |
+| `returnBadRequest` / `return400` | Validation failure HTTP response |
+| `returnForbidden` / `return403` | Role-based access denied |
+| `returnUnauthorized` / `return401` | Missing JWT |
+| `passFilterToUseCase` | Verifies argument propagation |
+
+### Flags
+
+- Method name that doesn't reflect the actual method under test (e.g. `testSomething`)
+- Missing `stateUnderTest` segment — reader can't tell the condition
+- Missing `expectedResult` segment — reader can't tell the outcome
+- Using indices instead of states (`blockUser_test1`, `test2`)
+- CamelCase within segments instead of readable words (`whenAlreadyBlockedException` vs `whenAlreadyBlocked`)
+- Happy-path-only tests with no guard / error-path tests
+
+### Unit Test vs Integration Test Checklist
+
+**Unit tests (`*Test.java`):**
+- Each test has exactly one `// Act` call
+- Verify `saveX`/`deleteX` are called with `verify(...)`
+- Verify side effects are NOT called with `verify(..., never())` / `verifyNoInteractions(...)`
+- `@BeforeEach` constructs the service under test manually (no Spring context)
+
+**Persistence integration tests (`*IT.java` with `@DataJpaTest`):**
+- `@BeforeEach` inserts required FK rows (users, etc.)
+- Covers both happy-path and directional / boundary cases (e.g., reversed-direction block)
+- Domain model guards (self-block, double-resolve) tested at the domain layer, not the DB layer
+
+**Controller integration tests (`*IT.java` with `@WebMvcTest`):**
+- One test per HTTP status code variation (200, 201, 204, 400, 401, 403, 404)
+- Use `@WithMockUser` to set role; never hardcode a JWT string unless testing JWT parsing
+- Stub use-case beans to return valid domain objects to avoid NPE in response mapping
+- Validation tests send a minimal invalid JSON body (e.g., `"{}"` or missing required fields)
+
+---
+
 ## Review Output Format
 
 ```markdown
@@ -377,7 +464,8 @@ void softDelete(@Param("id") UUID id);
 - ✅ Constructor injection used throughout
 - ✅ DTOs properly separate from entities
 - ✅ Comprehensive validation on all endpoints
-- ✅ Good test coverage (87%)
+- ✅ Test methods follow `methodName_stateUnderTest_expectedResult` convention
+- ✅ Guard tests verify side effects are NOT called (`verify(never())`)
 ```
 
 ---
@@ -396,6 +484,8 @@ void softDelete(@Param("id") UUID id);
 | **@Query** | Native used for simple filter, JPQL uses column not field name, `@Param` mismatch |
 | **@Modifying** | Missing on UPDATE/DELETE, no `clearAutomatically` when re-reading updated entity |
 | **@Transactional** | Missing on @Modifying call chain, on private method, readOnly=true with writes |
+| **Test Naming** | Missing three-part `method_state_result` convention, vague names, missing guard/error-path tests |
+| **Test Verification** | No `verify(never())` on guard tests, no `verifyNoInteractions` on read-only paths |
 
 ---
 

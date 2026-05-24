@@ -33,9 +33,9 @@ backend/src/main/java/com/instagram/infrastructure/security/SecurityConfig.java 
 
 ### SecurityConfig.java — Prerequisites
 
-- [ ] Before creating `AdminController`, add a `requestMatchers("/api/v1/admin/**").hasRole("ADMIN")` rule to the `authorizeHttpRequests` chain in `SecurityConfig.java`. This ensures any request to an admin endpoint without a valid `ROLE_ADMIN` JWT claim is rejected at the filter chain level with `403 FORBIDDEN`, before the request ever reaches the controller.
-- [ ] Add `@EnableMethodSecurity` to `SecurityConfig` (or a nearby `@Configuration` class) if it is not already present. This activates `@PreAuthorize` annotations on service methods as a second layer of defence.
-- [ ] Verify that the JWT token generation (in `JwtTokenProvider` or the equivalent class) includes the user's role as a claim in the token payload (e.g., `"role": "ADMIN"` or `"roles": ["ROLE_ADMIN"]`). If it does not, update the JWT generation and the `JwtAuthenticationFilter` parsing logic to load the role and convert it into a Spring `GrantedAuthority`. This is a prerequisite for both `hasRole("ADMIN")` in `SecurityConfig` and `@PreAuthorize` in `AdminService` to function correctly.
+- [x] Before creating `AdminController`, add a `requestMatchers("/api/v1/admin/**").hasRole("ADMIN")` rule to the `authorizeHttpRequests` chain in `SecurityConfig.java`. This ensures any request to an admin endpoint without a valid `ROLE_ADMIN` JWT claim is rejected at the filter chain level with `403 FORBIDDEN`, before the request ever reaches the controller.
+- [x] Add `@EnableMethodSecurity` to `SecurityConfig` (or a nearby `@Configuration` class) if it is not already present. This activates `@PreAuthorize` annotations on service methods as a second layer of defence.
+- [x] Verify that the JWT token generation (in `JwtTokenProvider` or the equivalent class) includes the user's role as a claim in the token payload (e.g., `"role": "ADMIN"` or `"roles": ["ROLE_ADMIN"]`). If it does not, update the JWT generation and the `JwtAuthenticationFilter` parsing logic to load the role and convert it into a Spring `GrantedAuthority`. This is a prerequisite for both `hasRole("ADMIN")` in `SecurityConfig` and `@PreAuthorize` in `AdminService` to function correctly.
 
 ---
 
@@ -43,10 +43,10 @@ backend/src/main/java/com/instagram/infrastructure/security/SecurityConfig.java 
 
 #### Class-level setup
 
-- [ ] Annotate with `@RestController`.
-- [ ] Annotate with `@RequestMapping` — no base path at class level because the endpoints span two resource paths (`/api/v1/reports` and `/api/v1/users`).
-- [ ] Annotate with `@Tag(name = "Moderation")` for Swagger.
-- [ ] Inject via constructor (all `final`):
+- [x] Annotate with `@RestController`.
+- [x] Annotate with `@RequestMapping` — no base path at class level because the endpoints span two resource paths (`/api/v1/reports` and `/api/v1/users`).
+- [x] Annotate with `@Tag(name = "Moderation")` for Swagger.
+- [x] Inject via constructor (all `final`):
   - `ReportContentUseCase`
   - `BlockUserUseCase`
   - `UnblockUserUseCase`
@@ -54,38 +54,38 @@ backend/src/main/java/com/instagram/infrastructure/security/SecurityConfig.java 
 
 #### `POST /api/v1/reports`
 
-- [ ] Accepts a `@Valid @RequestBody ReportRequest request`.
-- [ ] Resolves `currentUserId()` from the security context.
-- [ ] Builds `ReportContentUseCase.Command` using `currentUserId`, `request.entityType()`, `request.entityId()`, `request.reason()`, `request.details()`.
-- [ ] Calls `reportContentUseCase.reportContent(command)`.
-- [ ] Maps the returned `Report` domain object to `ReportResponse.from(report)`.
-- [ ] Returns `ResponseEntity` with status `201 CREATED` and the response body wrapped in `ApiResponse`.
+- [x] Accepts a `@Valid @RequestBody ReportRequest request`.
+- [x] Resolves `currentUserId()` from the security context.
+- [x] Builds `ReportContentUseCase.Command` using `currentUserId`, `request.entityType()`, `request.entityId()`, `request.reason()`, `request.details()`.
+- [x] Calls `reportContentUseCase.reportContent(command)`.
+- [x] Maps the returned `Report` domain object to `ReportResponse.from(report)`.
+- [x] Returns `ResponseEntity` with status `201 CREATED` and the response body wrapped in `ApiResponse`.
 
 #### `POST /api/v1/users/{username}/block`
 
-- [ ] Path variable: `@PathVariable String username`.
-- [ ] No request body.
-- [ ] Resolves `currentUserId()`.
-- [ ] Builds `BlockUserUseCase.Command` using `currentUserId` and `username`.
-- [ ] Calls `blockUserUseCase.blockUser(command)`.
-- [ ] Returns `ResponseEntity` with status `200 OK` and a body containing a success message (or `204 NO CONTENT` — choose one and be consistent with the unblock endpoint).
+- [x] Path variable: `@PathVariable String username`.
+- [x] No request body.
+- [x] Resolves `currentUserId()`.
+- [x] Builds `BlockUserUseCase.Command` using `currentUserId` and `username`.
+- [x] Calls `blockUserUseCase.blockUser(command)`.
+- [x] Returns `ResponseEntity` with status `200 OK` and a body containing a success message (or `204 NO CONTENT` — choose one and be consistent with the unblock endpoint).
 
 #### `DELETE /api/v1/users/{username}/block`
 
-- [ ] Path variable: `@PathVariable String username`.
-- [ ] Resolves `currentUserId()`.
-- [ ] Builds `UnblockUserUseCase.Command` using `currentUserId` and `username`.
-- [ ] Calls `unblockUserUseCase.unblockUser(command)`.
-- [ ] Returns `ResponseEntity` with status `204 NO CONTENT`.
+- [x] Path variable: `@PathVariable String username`.
+- [x] Resolves `currentUserId()`.
+- [x] Builds `UnblockUserUseCase.Command` using `currentUserId` and `username`.
+- [x] Calls `unblockUserUseCase.unblockUser(command)`.
+- [x] Returns `ResponseEntity` with status `204 NO CONTENT`.
 
 #### `GET /api/v1/users/me/blocked`
 
-- [ ] Query params: `@RequestParam(defaultValue = "0") int page`, `@RequestParam(defaultValue = "20") int size`.
-- [ ] Resolves `currentUserId()`.
-- [ ] Builds `GetBlockedUsersUseCase.Query` using `currentUserId`, `page`, `size`.
-- [ ] Calls `getBlockedUsersUseCase.getBlockedUsers(query)`.
-- [ ] Maps each `UserBlock` to `BlockedUserResponse` — the response must include the blocked user's username and avatar. Since `UserBlock` only carries UUIDs, the controller must batch-fetch the blocked user profiles using an injected `GetUserUseCase` (or `UserRepository` — check how `NotificationController` resolves actor usernames and follow the same batch-fetch pattern).
-- [ ] Returns `200 OK` with the list.
+- [x] Query params: `@RequestParam(defaultValue = "0") int page`, `@RequestParam(defaultValue = "20") int size`.
+- [x] Resolves `currentUserId()`.
+- [x] Builds `GetBlockedUsersUseCase.Query` using `currentUserId`, `page`, `size`.
+- [x] Calls `getBlockedUsersUseCase.getBlockedUsers(query)`.
+- [x] Maps each `UserBlock` to `BlockedUserResponse` — the response must include the blocked user's username and avatar. Since `UserBlock` only carries UUIDs, the controller must batch-fetch the blocked user profiles using an injected `GetUserUseCase` (or `UserRepository` — check how `NotificationController` resolves actor usernames and follow the same batch-fetch pattern).
+- [x] Returns `200 OK` with the list.
 
 ---
 
@@ -93,10 +93,10 @@ backend/src/main/java/com/instagram/infrastructure/security/SecurityConfig.java 
 
 #### Class-level setup
 
-- [ ] Annotate with `@RestController`.
-- [ ] Annotate with `@RequestMapping("/api/v1/admin")`.
-- [ ] Annotate with `@Tag(name = "Admin")` for Swagger.
-- [ ] Inject via constructor:
+- [x] Annotate with `@RestController`.
+- [x] Annotate with `@RequestMapping("/api/v1/admin")`.
+- [x] Annotate with `@Tag(name = "Admin")` for Swagger.
+- [x] Inject via constructor:
   - `ReviewReportUseCase`
   - `SuspendUserUseCase`
   - `UnsuspendUserUseCase`
@@ -104,50 +104,50 @@ backend/src/main/java/com/instagram/infrastructure/security/SecurityConfig.java 
 
 #### `GET /api/v1/admin/reports`
 
-- [ ] Query params: `@RequestParam(required = false) ReportStatus status`, `@RequestParam(defaultValue = "0") int page`, `@RequestParam(defaultValue = "20") int size`.
-- [ ] When `status` query param is omitted, it is `null`, and the service returns all reports.
-- [ ] Builds `AdminGetReportsUseCase.Query` using `status`, `page`, `size`.
-- [ ] Calls `adminGetReportsUseCase.getReports(query)`.
-- [ ] Maps each `Report` to `ReportResponse`. The `ReportResponse` must include the reporter's username — batch-fetch the reporter profiles using the same batch-fetch pattern as `NotificationController`.
-- [ ] Returns `200 OK` with the list wrapped in `ApiResponse`.
+- [x] Query params: `@RequestParam(required = false) ReportStatus status`, `@RequestParam(defaultValue = "0") int page`, `@RequestParam(defaultValue = "20") int size`.
+- [x] When `status` query param is omitted, it is `null`, and the service returns all reports.
+- [x] Builds `AdminGetReportsUseCase.Query` using `status`, `page`, `size`.
+- [x] Calls `adminGetReportsUseCase.getReports(query)`.
+- [x] Maps each `Report` to `ReportResponse`. The `ReportResponse` must include the reporter's username — batch-fetch the reporter profiles using the same batch-fetch pattern as `NotificationController`.
+- [x] Returns `200 OK` with the list wrapped in `ApiResponse`.
 
 #### `PUT /api/v1/admin/reports/{id}`
 
-- [ ] Path variable: `@PathVariable UUID id`.
-- [ ] Request body: `@Valid @RequestBody ReviewReportRequest request`.
-- [ ] Resolves `currentUserId()` (the admin's UUID).
-- [ ] Builds `ReviewReportUseCase.Command` using `currentUserId`, `id`, `request.action()`.
-- [ ] Calls `reviewReportUseCase.reviewReport(command)`.
-- [ ] Maps the updated `Report` to `ReportResponse`.
-- [ ] Returns `200 OK`.
+- [x] Path variable: `@PathVariable UUID id`.
+- [x] Request body: `@Valid @RequestBody ReviewReportRequest request`.
+- [x] Resolves `currentUserId()` (the admin's UUID).
+- [x] Builds `ReviewReportUseCase.Command` using `currentUserId`, `id`, `request.action()`.
+- [x] Calls `reviewReportUseCase.reviewReport(command)`.
+- [x] Maps the updated `Report` to `ReportResponse`.
+- [x] Returns `200 OK`.
 
 #### `PUT /api/v1/admin/users/{id}/suspend`
 
-- [ ] Path variable: `@PathVariable UUID id`.
-- [ ] Request body: `@Valid @RequestBody SuspendUserRequest request`.
-- [ ] Resolves `currentUserId()` (the admin's UUID).
-- [ ] Builds `SuspendUserUseCase.Command` using `currentUserId`, `id`, `request.reason()`.
-- [ ] Calls `suspendUserUseCase.suspendUser(command)`.
-- [ ] Returns `200 OK` with the updated user summary in `ApiResponse`.
+- [x] Path variable: `@PathVariable UUID id`.
+- [x] Request body: `@Valid @RequestBody SuspendUserRequest request`.
+- [x] Resolves `currentUserId()` (the admin's UUID).
+- [x] Builds `SuspendUserUseCase.Command` using `currentUserId`, `id`, `request.reason()`.
+- [x] Calls `suspendUserUseCase.suspendUser(command)`.
+- [x] Returns `200 OK` with the updated user summary in `ApiResponse`.
 
 #### `PUT /api/v1/admin/users/{id}/unsuspend`
 
-- [ ] Path variable: `@PathVariable UUID id`.
-- [ ] No request body.
-- [ ] Resolves `currentUserId()`.
-- [ ] Builds `UnsuspendUserUseCase.Command` using `currentUserId`, `id`.
-- [ ] Calls `unsuspendUserUseCase.unsuspendUser(command)`.
-- [ ] Returns `200 OK`.
+- [x] Path variable: `@PathVariable UUID id`.
+- [x] No request body.
+- [x] Resolves `currentUserId()`.
+- [x] Builds `UnsuspendUserUseCase.Command` using `currentUserId`, `id`.
+- [x] Calls `unsuspendUserUseCase.unsuspendUser(command)`.
+- [x] Returns `200 OK`.
 
 #### `GET /api/v1/admin/users`
 
-- [ ] Query params: `@RequestParam(required = false) String username` (partial match filter), `@RequestParam(required = false) String status` (account status filter), `@RequestParam(defaultValue = "0") int page`, `@RequestParam(defaultValue = "20") int size`.
-- [ ] This endpoint requires a new use case — `AdminListUsersUseCase` — or it can delegate to the existing `SearchUsersUseCase` with an admin-specific query. Decide which approach is cleaner. If reusing `SearchUsersUseCase`, note that it does not support filtering by account status. If creating a new use case, add it to TASK-9.4 and implement it in `AdminService`.
-- [ ] Returns `200 OK` with a paginated list of `AdminUserResponse` records, each containing: `id`, `username`, `email`, `fullName`, `accountStatus`, `isVerified`, `createdAt`.
+- [x] Query params: `@RequestParam(required = false) String username` (partial match filter), `@RequestParam(required = false) String status` (account status filter), `@RequestParam(defaultValue = "0") int page`, `@RequestParam(defaultValue = "20") int size`.
+- [x] This endpoint requires a new use case — `AdminListUsersUseCase` — or it can delegate to the existing `SearchUsersUseCase` with an admin-specific query. Decide which approach is cleaner. If reusing `SearchUsersUseCase`, note that it does not support filtering by account status. If creating a new use case, add it to TASK-9.4 and implement it in `AdminService`.
+- [x] Returns `200 OK` with a paginated list of `AdminUserResponse` records, each containing: `id`, `username`, `email`, `fullName`, `accountStatus`, `isVerified`, `createdAt`.
 
 #### URL Ordering
 
-- [ ] Confirm that `GET /api/v1/admin/reports` is declared before `PUT /api/v1/admin/reports/{id}` in the class. Spring MVC matches literal paths before parameterised paths, so this is not strictly required, but it improves readability.
+- [x] Confirm that `GET /api/v1/admin/reports` is declared before `PUT /api/v1/admin/reports/{id}` in the class. Spring MVC matches literal paths before parameterised paths, so this is not strictly required, but it improves readability.
 
 ---
 
