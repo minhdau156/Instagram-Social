@@ -29,66 +29,66 @@ frontend/src/api/adminApi.ts
 
 ### `moderationApi.ts`
 
-- [ ] Import `api` from `'./client'`.
-- [ ] Import `Report`, `UserBlock`, `SubmitReportPayload` from `'../types/moderation'`.
+- [x] Import `api` from `'./client'`.
+- [x] Import `Report`, `UserBlock`, `SubmitReportPayload` from `'../types/moderation'`.
 
 #### `submitReport(payload: SubmitReportPayload): Promise<Report>`
 
-- [ ] Sends `POST /api/v1/reports` with `payload` as the request body.
-- [ ] Unwraps the response with `.then(r => r.data.data)`.
-- [ ] Returns `Promise<Report>`.
-- [ ] Note: `payload.entityId` is a `string` (UUID). Do not add any conversion.
+- [x] Sends `POST /api/v1/reports` with `payload` as the request body.
+- [x] Unwraps the response with `.then(r => r.data.data)`.
+- [x] Returns `Promise<Report>`.
+- [x] Note: `payload.entityId` is a `string` (UUID). Do not add any conversion.
 
 #### `blockUser(username: string): Promise<void>`
 
-- [ ] Sends `POST /api/v1/users/{username}/block` with no request body.
-- [ ] Returns a `Promise<void>`. Use `.then(() => undefined)` to discard the response body.
+- [x] Sends `POST /api/v1/users/{username}/block` with no request body.
+- [x] Returns a `Promise<void>`. Use `.then(() => undefined)` to discard the response body.
 
 #### `unblockUser(username: string): Promise<void>`
 
-- [ ] Sends `DELETE /api/v1/users/{username}/block`.
-- [ ] Returns `Promise<void>`.
+- [x] Sends `DELETE /api/v1/users/{username}/block`.
+- [x] Returns `Promise<void>`.
 
 #### `getBlockedUsers(page?: number, size?: number): Promise<UserBlock[]>`
 
-- [ ] Sends `GET /api/v1/users/me/blocked` with `page` (default `0`) and `size` (default `20`) as query params via Axios `params`.
-- [ ] Unwraps with `.then(r => r.data.data)`.
-- [ ] Returns `Promise<UserBlock[]>`.
+- [x] Sends `GET /api/v1/users/me/blocked` with `page` (default `0`) and `size` (default `20`) as query params via Axios `params`.
+- [x] Unwraps with `.then(r => r.data.data)`.
+- [x] Returns `Promise<UserBlock[]>`.
 
 ---
 
 ### `adminApi.ts`
 
-- [ ] Import `api` from `'./client'`.
-- [ ] Import `Report`, `AdminUser`, `ReviewReportPayload`, `SuspendUserPayload`, `ReportStatus` from `'../types/moderation'`.
+- [x] Import `api` from `'./client'`.
+- [x] Import `Report`, `AdminUser`, `ReviewReportPayload`, `SuspendUserPayload`, `ReportStatus` from `'../types/moderation'`.
 
 #### `getReports(status?: ReportStatus, page?: number, size?: number): Promise<Report[]>`
 
-- [ ] Sends `GET /api/v1/admin/reports` with query params `status` (omitted when `undefined`), `page` (default `0`), `size` (default `20`).
-- [ ] For the `status` param: when `undefined`, do not include it in the `params` object so it is not sent as `?status=undefined` — Axios omits keys whose values are `undefined`, but confirm this behaviour.
-- [ ] Unwraps with `.then(r => r.data.data)`.
+- [x] Sends `GET /api/v1/admin/reports` with query params `status` (omitted when `undefined`), `page` (default `0`), `size` (default `20`).
+- [x] For the `status` param: when `undefined`, do not include it in the `params` object so it is not sent as `?status=undefined` — Axios omits keys whose values are `undefined`, but confirm this behaviour.
+- [x] Unwraps with `.then(r => r.data.data)`.
 
 #### `reviewReport(id: string, payload: ReviewReportPayload): Promise<Report>`
 
-- [ ] Sends `PUT /api/v1/admin/reports/{id}` with `payload` as the request body.
-- [ ] Unwraps with `.then(r => r.data.data)`.
-- [ ] Returns `Promise<Report>` (the updated report).
+- [x] Sends `PUT /api/v1/admin/reports/{id}` with `payload` as the request body.
+- [x] Unwraps with `.then(r => r.data.data)`.
+- [x] Returns `Promise<Report>` (the updated report).
 
 #### `suspendUser(id: string, payload: SuspendUserPayload): Promise<AdminUser>`
 
-- [ ] Sends `PUT /api/v1/admin/users/{id}/suspend` with `payload` as the request body.
-- [ ] Unwraps with `.then(r => r.data.data)`.
+- [x] Sends `PUT /api/v1/admin/users/{id}/suspend` with `payload` as the request body.
+- [x] Unwraps with `.then(r => r.data.data)`.
 
 #### `unsuspendUser(id: string): Promise<AdminUser>`
 
-- [ ] Sends `PUT /api/v1/admin/users/{id}/unsuspend` with no request body.
-- [ ] Unwraps with `.then(r => r.data.data)`.
+- [x] Sends `PUT /api/v1/admin/users/{id}/unsuspend` with no request body.
+- [x] Unwraps with `.then(r => r.data.data)`.
 
 #### `getAdminUsers(filters?: { username?: string; status?: string }, page?: number, size?: number): Promise<AdminUser[]>`
 
-- [ ] Sends `GET /api/v1/admin/users` with query params `username` (optional partial match), `status` (optional account status filter), `page` (default `0`), `size` (default `20`).
-- [ ] Constructs the `params` object by spreading `filters` (omit `undefined` values) and adding `page` and `size`.
-- [ ] Unwraps with `.then(r => r.data.data)`.
+- [x] Sends `GET /api/v1/admin/users` with query params `username` (optional partial match), `status` (optional account status filter), `page` (default `0`), `size` (default `20`).
+- [x] Constructs the `params` object by spreading `filters` (omit `undefined` values) and adding `page` and `size`.
+- [x] Unwraps with `.then(r => r.data.data)`.
 
 ---
 
