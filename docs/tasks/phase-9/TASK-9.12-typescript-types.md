@@ -27,31 +27,31 @@ frontend/src/types/moderation.ts
 
 ### `ReportEntityType`
 
-- [ ] String literal union type matching the backend `ReportEntityType` enum values sent in API responses: `'USER' | 'POST' | 'COMMENT' | 'MESSAGE'`.
-- [ ] Note: the backend Java enum uses uppercase (`POST`, `USER`, etc.) and serialises to uppercase strings. The TypeScript type must match exactly.
+- [x] String literal union type matching the backend `ReportEntityType` enum values sent in API responses: `'USER' | 'POST' | 'COMMENT' | 'MESSAGE'`.
+- [x] Note: the backend Java enum uses uppercase (`POST`, `USER`, etc.) and serialises to uppercase strings. The TypeScript type must match exactly.
 
 ### `ReportStatus`
 
-- [ ] String literal union: `'PENDING' | 'REVIEWED' | 'RESOLVED' | 'DISMISSED'`.
+- [x] String literal union: `'PENDING' | 'REVIEWED' | 'RESOLVED' | 'DISMISSED'`.
 
 ### `ReportReason`
 
-- [ ] String literal union of all valid report reason codes: `'SPAM' | 'HATE_SPEECH' | 'NUDITY' | 'VIOLENCE' | 'HARASSMENT' | 'FALSE_INFORMATION' | 'SELF_HARM' | 'OTHER'`.
-- [ ] These values must match exactly what the backend `ReportRequest.reason` field accepts. If the backend uses a `ReportReason` enum, align these values with its members. If the backend accepts a free-form string, note that here but still use this union type on the frontend to constrain UI choices.
+- [x] String literal union of all valid report reason codes: `'SPAM' | 'HATE_SPEECH' | 'NUDITY' | 'VIOLENCE' | 'HARASSMENT' | 'FALSE_INFORMATION' | 'SELF_HARM' | 'OTHER'`.
+- [x] These values must match exactly what the backend `ReportRequest.reason` field accepts. If the backend uses a `ReportReason` enum, align these values with its members. If the backend accepts a free-form string, note that here but still use this union type on the frontend to constrain UI choices.
 
 ### `ReviewAction`
 
-- [ ] String literal union: `'RESOLVE' | 'DISMISS' | 'MARK_REVIEWED'`.
-- [ ] Used in the `ReviewReportRequest` payload sent from the admin panel.
+- [x] String literal union: `'RESOLVE' | 'DISMISS' | 'MARK_REVIEWED'`.
+- [x] Used in the `ReviewReportRequest` payload sent from the admin panel.
 
 ### `AccountStatus`
 
-- [ ] String literal union matching the PostgreSQL `account_status` ENUM values as returned in API responses: `'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED' | 'PENDING_VERIFICATION'`.
-- [ ] Reuse this type wherever `accountStatus` appears in user-related responses across the admin panel.
+- [x] String literal union matching the PostgreSQL `account_status` ENUM values as returned in API responses: `'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED' | 'PENDING_VERIFICATION'`.
+- [x] Reuse this type wherever `accountStatus` appears in user-related responses across the admin panel.
 
 ### `Report`
 
-- [ ] Interface fields (mirrors `ReportResponse` from the backend):
+- [x] Interface fields (mirrors `ReportResponse` from the backend):
   - `id: string`
   - `reporterId: string`
   - `reporterUsername: string`
@@ -66,7 +66,7 @@ frontend/src/types/moderation.ts
 
 ### `UserBlock`
 
-- [ ] Interface fields (mirrors `BlockedUserResponse` from the backend):
+- [x] Interface fields (mirrors `BlockedUserResponse` from the backend):
   - `blockedUserId: string`
   - `username: string`
   - `fullName: string | null`
@@ -75,7 +75,7 @@ frontend/src/types/moderation.ts
 
 ### `AdminUser`
 
-- [ ] Interface fields (mirrors `AdminUserResponse` from the backend):
+- [x] Interface fields (mirrors `AdminUserResponse` from the backend):
   - `id: string`
   - `username: string`
   - `email: string`
@@ -87,7 +87,7 @@ frontend/src/types/moderation.ts
 
 ### `SubmitReportPayload`
 
-- [ ] Represents the request body sent to `POST /api/v1/reports`. Interface fields:
+- [x] Represents the request body sent to `POST /api/v1/reports`. Interface fields:
   - `entityType: ReportEntityType`
   - `entityId: string`
   - `reason: ReportReason`
@@ -95,17 +95,17 @@ frontend/src/types/moderation.ts
 
 ### `ReviewReportPayload`
 
-- [ ] Represents the request body sent to `PUT /api/v1/admin/reports/{id}`. Interface fields:
+- [x] Represents the request body sent to `PUT /api/v1/admin/reports/{id}`. Interface fields:
   - `action: ReviewAction`
 
 ### `SuspendUserPayload`
 
-- [ ] Represents the request body sent to `PUT /api/v1/admin/users/{id}/suspend`. Interface fields:
+- [x] Represents the request body sent to `PUT /api/v1/admin/users/{id}/suspend`. Interface fields:
   - `reason: string`
 
 ### `AuditLog` (optional, for future admin audit log viewer)
 
-- [ ] Interface fields (mirrors `audit_logs` schema):
+- [x] Interface fields (mirrors `audit_logs` schema):
   - `id: number` — BIGSERIAL maps to `number` in TypeScript.
   - `userId: string | null`
   - `action: string`
@@ -114,7 +114,7 @@ frontend/src/types/moderation.ts
   - `metadata: string | null`
   - `ipAddress: string | null`
   - `createdAt: string`
-- [ ] This type is not strictly required for Phase 9 but is included for completeness and to avoid re-typing it if an audit viewer is added in Phase 10.
+- [x] This type is not strictly required for Phase 9 but is included for completeness and to avoid re-typing it if an audit viewer is added in Phase 10.
 
 ---
 
