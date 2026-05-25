@@ -374,3 +374,18 @@ Each occurrence is an offset-based hook that needs to be converted to cursor-bas
 **Cross-task references:**
 - TASK-10.7 creates the `idx_posts_cursor ON posts (created_at DESC, id DESC)` index that backs the keyset `WHERE` clause. This task will perform poorly without that index on large datasets.
 - TASK-10.3 (Redis caching) caches page 1 entirely, so keyset pagination matters most for pages 2+ (cache misses for deep pages).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Why OFFSET pagination gets slow** — the cost of skipping rows at deep pages — https://use-the-index-luke.com/no-offset
+- **Keyset (cursor) pagination** — page by a "seek" predicate instead of OFFSET — https://use-the-index-luke.com/sql/partial-results/fetch-next-page
+- **Stable sort keys** — why the cursor column set must be unique & ordered — https://use-the-index-luke.com/sql/partial-results
+
+### Official docs (code reference)
+- **Spring Data JPA repositories** — https://docs.spring.io/spring-data/jpa/reference/
+- **PostgreSQL LIMIT / ordering** — https://www.postgresql.org/docs/current/queries-limit.html

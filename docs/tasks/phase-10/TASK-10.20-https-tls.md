@@ -318,3 +318,18 @@ If you add `preload=true` and submit your domain to the browser preload list, br
 - [Spring Boot — Handling Behind a Proxy](https://docs.spring.io/spring-boot/docs/current/reference/html/howto.html#howto.webserver.use-behind-a-proxy-server)
 - [Mozilla SSL Configuration Generator](https://ssl-config.mozilla.org/)
 - [HSTS Preload List](https://hstspreload.org/)
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **How TLS works** — handshake, certificates, and what HTTPS actually protects — https://developer.mozilla.org/en-US/docs/Web/Security/Transport_Layer_Security
+- **HSTS** — forcing HTTPS after the first visit — https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+- **Free certificates with Let's Encrypt** — automated cert issuance & renewal — https://letsencrypt.org/docs/
+
+### Official docs (code reference)
+- **Mozilla SSL Config Generator** — secure cipher/protocol configs — https://ssl-config.mozilla.org/
+- **OWASP Transport Layer Security Cheat Sheet** — https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html

@@ -319,3 +319,19 @@ Caffeine is in-process. If you run two backend instances, each has its own bucke
 - [Bucket4j Spring Boot Starter — GitHub](https://github.com/MarcGiffing/bucket4j-spring-boot-starter)
 - [OWASP — Blocking Brute Force Attacks](https://owasp.org/www-community/controls/Blocking_Brute_Force_Attacks)
 - [RFC 6585 — 429 Too Many Requests](https://www.rfc-editor.org/rfc/rfc6585)
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Token bucket algorithm** — how request budgets refill over time — https://en.wikipedia.org/wiki/Token_bucket
+- **HTTP 429 Too Many Requests** — the correct status for throttling — https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429
+- **Retry-After header** — tell clients when to try again — https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
+- **Bucket4j in Spring** — token-bucket rate limiting in Java — https://www.baeldung.com/spring-bucket4j
+
+### Official docs (code reference)
+- **Bucket4j** — https://bucket4j.com/
+- **Spring Security filter chain** — https://docs.spring.io/spring-security/reference/servlet/architecture.html

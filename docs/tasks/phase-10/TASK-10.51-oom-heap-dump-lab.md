@@ -411,3 +411,18 @@ In a leak investigation, **retained heap** is the useful number — it tells you
 - [TASK-10.11](TASK-10.11-streaming-large-exports.md) — covers preventing OOM on large data exports using streaming
 - [TASK-10.27](TASK-10.27-actuator-micrometer.md) — exposes the `/actuator/metrics/jvm.memory.used` endpoint watched in Step 4
 - [TASK-10.49](TASK-10.49-troubleshooting-runbook.md) — the troubleshooting runbook updated in Step 10
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **What causes OutOfMemoryError** — heap exhaustion, leaks, unbounded collections — https://docs.oracle.com/en/java/javase/21/troubleshoot/troubleshoot-memory-leaks.html
+- **Capturing a heap dump** — `-XX:+HeapDumpOnOutOfMemoryError`, `jcmd`, `jmap` — https://docs.oracle.com/en/java/javase/21/troubleshoot/
+- **Analyzing a dump (dominator tree, leak suspects)** — find what's retaining memory — https://eclipse.dev/mat/
+
+### Official docs (code reference)
+- **Eclipse Memory Analyzer (MAT)** — https://eclipse.dev/mat/
+- **JDK 21 Troubleshooting Guide** — https://docs.oracle.com/en/java/javase/21/troubleshoot/

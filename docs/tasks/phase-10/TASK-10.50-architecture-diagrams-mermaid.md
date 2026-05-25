@@ -365,3 +365,19 @@ Exported PNGs cannot be diffed or reviewed. Mermaid source text in the Markdown 
 - [TASK-10.49](TASK-10.49-troubleshooting-runbook.md) — both docs files are linked from README together
 - [TASK-10.46](TASK-10.46-docker-compose.md) — the optional deployment flowchart shows the services defined there
 - [TASK-10.38](TASK-10.38-archunit-fitness-tests.md) — ArchUnit enforces the dependency rules shown in the hexagonal flowchart as automated tests
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Mermaid intro** — diagrams as text, versioned alongside code — https://mermaid.js.org/intro/
+- **Flowcharts** — boxes, arrows, subgraphs — https://mermaid.js.org/syntax/flowchart.html
+- **Sequence diagrams** — request/response flows between components — https://mermaid.js.org/syntax/sequenceDiagram.html
+- **C4 model** — a vocabulary for software architecture diagrams — https://c4model.com/
+
+### Official docs (code reference)
+- **Mermaid documentation** — https://mermaid.js.org/
+- **Mermaid live editor** — https://mermaid.live/

@@ -291,3 +291,18 @@ Existing `media_url` values in the database point at the old origin. A migration
 **Cross-task references:**
 - TASK-10.9 (response compression) pairs with this task — together they reduce both image payload size (CDN) and API JSON payload size (compression).
 - TASK-10.12 (chunked upload) extends `MinioStorageAdapter` with multipart upload support and will need to follow the same CDN URL pattern.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **What is a CDN** — edge caching of static assets, and why it cuts latency — https://developer.mozilla.org/en-US/docs/Glossary/CDN
+- **Caching static assets** — long `max-age` + content hashing — https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+- **CloudFront + S3 overview** — fronting object storage with a CDN — https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html
+
+### Official docs (code reference)
+- **CloudFront signed URLs (private content)** — https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/PrivateContent.html
+- **MinIO documentation** — https://min.io/docs/minio/linux/index.html

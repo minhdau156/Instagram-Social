@@ -378,3 +378,18 @@ They come from Micrometer's auto-configured binders. When `micrometer-registry-p
 **Cross-task references:**
 - [TASK-10.29](TASK-10.29-grafana-prometheus-alerting.md) — Prometheus scrapes this endpoint; Grafana panels use these counters
 - [TASK-10.31](TASK-10.31-sli-slo-error-budget.md) — SLI ratios are computed from `http_server_requests` (auto-instrumented by Actuator)
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Spring Boot Actuator** — built-in health, info, and metrics endpoints — https://spring.io/guides/gs/actuator-service/
+- **Micrometer meters** — counters, gauges, timers, distribution summaries — https://docs.micrometer.io/micrometer/reference/
+- **The /actuator/prometheus endpoint** — exposing metrics for scraping — https://prometheus.io/docs/introduction/overview/
+
+### Official docs (code reference)
+- **Micrometer reference** — https://docs.micrometer.io/micrometer/reference/
+- **Spring Boot (project page → Actuator)** — https://spring.io/projects/spring-boot

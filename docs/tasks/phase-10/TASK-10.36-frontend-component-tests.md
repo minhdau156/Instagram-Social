@@ -538,3 +538,19 @@ The output includes a per-file coverage summary. There is no hard threshold on t
 - **`|| true` in CI** — The existing CI step has `|| true` which silently ignores test failures. Remove it after adding tests so CI actually enforces them.
 
 - Official docs: [Vitest](https://vitest.dev/guide/), [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/), [MSW](https://mswjs.io/docs/), [Testing Library — `user-event`](https://testing-library.com/docs/user-event/intro/).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Testing Library philosophy** — test behaviour the user sees, not implementation — https://testing-library.com/docs/guiding-principles/
+- **React Testing Library** — render, query, and interact with components — https://testing-library.com/docs/react-testing-library/intro/
+- **Vitest basics** — the Vite-native test runner — https://vitest.dev/guide/
+- **Mocking the network (MSW)** — intercept API calls in tests — https://mswjs.io/docs/
+
+### Official docs (code reference)
+- **Vitest** — https://vitest.dev/
+- **React Testing Library** — https://testing-library.com/docs/react-testing-library/intro/

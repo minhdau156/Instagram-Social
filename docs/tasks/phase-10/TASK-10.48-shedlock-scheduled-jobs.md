@@ -419,3 +419,18 @@ MediaCleanupJob   | 2026-05-23 04:05:00+00      | instagram-backend-instance-1
 - Related tasks: [TASK-10.46](TASK-10.46-docker-compose.md), [TASK-10.12](TASK-10.12-chunked-resumable-upload.md), [TASK-10.24](TASK-10.24-idempotency-keys.md).
 
 - Official reference: [ShedLock GitHub](https://github.com/lukas-krecan/ShedLock), [ShedLock JDBC provider](https://github.com/lukas-krecan/ShedLock#jdbctemplate).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Why @Scheduled breaks when scaled out** — every instance fires the same job — https://github.com/lukas-krecan/ShedLock
+- **Distributed locking** — only one node runs the task at a time — https://github.com/lukas-krecan/ShedLock
+- **Spring @Scheduled** — cron and fixed-rate tasks — https://spring.io/guides/gs/scheduling-tasks/
+
+### Official docs (code reference)
+- **ShedLock** — https://github.com/lukas-krecan/ShedLock
+- **Spring scheduling reference** — https://docs.spring.io/spring-framework/reference/integration/scheduling.html

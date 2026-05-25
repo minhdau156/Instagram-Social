@@ -393,3 +393,19 @@ The public key is now the verification authority. If you ever rotate the key pai
 - [OWASP JWT Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html)
 - [jjwt library documentation](https://github.com/jwtk/jjwt)
 - [Spring Security: JSON Web Tokens](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html)
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **What a JWT is** — header, claims, signature — https://jwt.io/introduction
+- **JWT security best practices** — algorithm pinning, expiry, validation pitfalls — https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html
+- **Access vs refresh tokens & rotation** — short-lived access, rotating refresh — https://auth0.com/docs/secure/tokens/refresh-tokens
+- **RFC 7519** — the JWT specification itself — https://datatracker.ietf.org/doc/html/rfc7519
+
+### Official docs (code reference)
+- **Spring Security OAuth2 Resource Server (JWT)** — https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html
+- **jjwt library** — https://github.com/jwtk/jjwt

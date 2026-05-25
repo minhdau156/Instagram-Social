@@ -267,3 +267,18 @@ As of Spring Boot 3.3.4 (the version in this project), the embedded Tomcat does 
 **Cross-task references:**
 - TASK-10.5 (CDN URLs) is complementary — CDNs also compress responses at the edge and serve them from edge nodes.
 - TASK-10.8 (keyset pagination) reduces the number of fields returned per page by giving you control over what the page contains, further reducing payload size.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **HTTP compression (gzip/brotli)** — how the server shrinks the response body — https://developer.mozilla.org/en-US/docs/Web/HTTP/Compression
+- **Accept-Encoding / Content-Encoding** — how client and server negotiate compression — https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Encoding
+- **When NOT to compress** — already-compressed media (JPEG/MP4) and the `Vary` header — https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Vary
+
+### Official docs (code reference)
+- **Spring Boot (project page → `server.compression.*`)** — https://spring.io/projects/spring-boot
+- **MDN HTTP headers index** — https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers

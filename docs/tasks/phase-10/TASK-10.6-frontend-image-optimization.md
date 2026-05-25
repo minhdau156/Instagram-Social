@@ -324,3 +324,19 @@ https://developer.mozilla.org/en-US/docs/Web/Performance/Lazy_loading
 **Cross-task references:**
 - TASK-10.5 (CDN URLs) means images are already served from an edge node — lazy loading ensures you only request those edge-cached images when they are actually needed.
 - TASK-10.9 (response compression) focuses on the JSON API payload; this task focuses on the image and JavaScript payload.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Image optimization fundamentals** — sizing, compression, formats — https://web.dev/learn/images/
+- **Responsive images (srcset & sizes)** — serve the right resolution per device — https://developer.mozilla.org/en-US/docs/Web/HTML/Responsive_images
+- **Modern formats (WebP/AVIF)** — smaller files at equal quality — https://web.dev/articles/serve-images-webp
+- **Native lazy loading** — defer off-screen images with `loading="lazy"` — https://developer.mozilla.org/en-US/docs/Web/Performance/Lazy_loading
+
+### Official docs (code reference)
+- **<img> element (loading, srcset)** — https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img
+- **Vite static asset handling** — https://vitejs.dev/guide/assets.html

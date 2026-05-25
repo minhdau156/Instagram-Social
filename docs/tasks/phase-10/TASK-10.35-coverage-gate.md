@@ -296,3 +296,18 @@ To deliberately verify the gate rejects a drop in coverage, temporarily add `@Ex
 - Related tasks: [TASK-10.34](TASK-10.34-cover-untested-branch.md) walks through finding and fixing a single gap; [TASK-10.33](TASK-10.33-testcontainers-one-test.md) ensures persistence integration tests use real Postgres.
 
 - Official docs: [JaCoCo Maven Plugin](https://www.jacoco.org/jacoco/trunk/doc/maven.html), [JaCoCo — `check` goal](https://www.jacoco.org/jacoco/trunk/doc/check-mojo.html).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Coverage gates** — failing the build below a threshold — https://www.jacoco.org/jacoco/trunk/doc/check-mojo.html
+- **Why 100% coverage is a trap** — coverage measures execution, not correctness — https://martinfowler.com/bliki/TestCoverage.html
+- **JaCoCo counters** — line, branch, complexity, method — https://www.jacoco.org/jacoco/trunk/doc/counters.html
+
+### Official docs (code reference)
+- **JaCoCo Maven plugin** — https://www.jacoco.org/jacoco/trunk/doc/maven.html
+- **jacoco:check goal** — https://www.jacoco.org/jacoco/trunk/doc/check-mojo.html

@@ -292,3 +292,18 @@ The first run will be slower (Docker image pull). Confirm that the FTS-specific 
 - **Slow first run** — The `postgres:15-alpine` image is ~80 MB. The first `docker pull` adds 30–60 seconds. Use `alpine` variants to keep images small.
 
 - Related tasks: [TASK-10.39](TASK-10.39-testcontainers-integration-suite.md) applies this pattern to every `*IT` class in the project.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **What Testcontainers is** — spin up real services (Postgres) in Docker for tests — https://testcontainers.com/getting-started/
+- **Real DB vs H2/mocks** — why tests against the real engine catch more bugs — https://www.baeldung.com/spring-boot-testcontainers-integration-test
+- **PostgreSQL module** — the container that backs your integration test — https://java.testcontainers.org/modules/databases/postgres/
+
+### Official docs (code reference)
+- **Testcontainers for Java** — https://java.testcontainers.org/
+- **Testcontainers getting started** — https://testcontainers.com/getting-started/

@@ -304,3 +304,18 @@ For example, `${MINIO_ENDPOINT:http://localhost:9000}` is safe because the endpo
 - [OWASP Cheat Sheet: Secrets Management](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html)
 - [Spring Boot Externalized Configuration](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config)
 - [GitHub: Removing sensitive data from a repository](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository)
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Secrets management** — why credentials must never live in source — https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
+- **12-Factor config** — keep secrets in the environment, not the repo — https://12factor.net/config
+- **Scanning git history for leaks** — secrets stay in history even after deletion — https://github.com/gitleaks/gitleaks
+
+### Official docs (code reference)
+- **gitleaks (secret scanner)** — https://github.com/gitleaks/gitleaks
+- **GitHub secret scanning** — https://docs.github.com/en/code-security/secret-scanning/about-secret-scanning

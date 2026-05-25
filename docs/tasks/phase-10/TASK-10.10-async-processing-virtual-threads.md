@@ -318,3 +318,19 @@ https://docs.spring.io/spring-framework/reference/integration/scheduling.html#sc
 **Cross-task references:**
 - TASK-10.11 (streaming exports) also runs in a background context and benefits from the same virtual-thread setup.
 - TASK-10.13 (Spring Batch) uses its own job-execution thread model; virtual threads do not apply there directly but the `202 Accepted` pattern for triggering batch jobs follows the same approach as this task.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Virtual threads (Project Loom)** — cheap threads for blocking I/O — https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html
+- **JEP 444: Virtual Threads** — the design rationale — https://openjdk.org/jeps/444
+- **Platform vs virtual threads** — when each one wins — https://www.baeldung.com/java-virtual-thread-vs-thread
+- **Spring @Async + executors** — offloading work to a thread pool — https://spring.io/guides/gs/async-method/
+
+### Official docs (code reference)
+- **Spring scheduling & async reference** — https://docs.spring.io/spring-framework/reference/integration/scheduling.html
+- **ThreadPoolTaskExecutor (javadoc)** — https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/concurrent/ThreadPoolTaskExecutor.html

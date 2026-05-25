@@ -276,3 +276,19 @@ Use the Docker exec form shown in step 1. Alternatively, install psql via `winge
 **Cross-task references:**
 - TASK-10.7 adds the missing indexes that will change `Seq Scan` → `Index Scan` for the follow-graph and search queries.
 - TASK-10.3 adds Redis caching so the second identical request never hits Postgres at all — the comparison to note there is application-level latency, not just query execution time.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Reading a query plan** — interpret EXPLAIN output node by node — https://www.postgresql.org/docs/current/using-explain.html
+- **EXPLAIN vs EXPLAIN ANALYZE** — estimate-only plan vs actually-run timings — https://www.postgresql.org/docs/current/sql-explain.html
+- **Index scan vs sequential scan** — why the planner picks each, and when an index actually helps — https://use-the-index-luke.com/
+- **Buffers / shared hits** — what the `BUFFERS` flag reveals about disk vs memory reads — https://www.postgresql.org/docs/current/using-explain.html
+
+### Official docs (code reference)
+- **psql interactive shell** — https://www.postgresql.org/docs/current/app-psql.html
+- **PostgreSQL indexes** — https://www.postgresql.org/docs/current/indexes.html

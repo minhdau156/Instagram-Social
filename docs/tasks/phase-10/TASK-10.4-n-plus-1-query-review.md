@@ -252,3 +252,19 @@ https://docs.jboss.org/hibernate/orm/6.4/userguide/html_single/Hibernate_User_Gu
 **Cross-task references:**
 - TASK-10.7 adds indexes that speed up the queries that remain after the N+1 is fixed.
 - TASK-10.3 caches the feed result so the N+1 only fires on cache misses.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **The N+1 query problem** — what it is and how to spot it in logs — https://vladmihalcea.com/n-plus-1-query-problem/
+- **LAZY vs EAGER fetching** — how Hibernate decides when to load associations — https://www.baeldung.com/hibernate-lazy-eager-loading
+- **@EntityGraph** — fetch related entities in a single query — https://www.baeldung.com/jpa-entity-graph
+- **Counting SQL in tests** — assert query counts so N+1 can't regress — https://vladmihalcea.com/n-plus-1-query-problem/
+
+### Official docs (code reference)
+- **Spring Data JPA reference** — https://docs.spring.io/spring-data/jpa/reference/
+- **Hibernate ORM documentation** — https://hibernate.org/orm/documentation/

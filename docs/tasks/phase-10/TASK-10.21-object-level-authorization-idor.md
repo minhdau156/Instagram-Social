@@ -302,3 +302,18 @@ UUIDs are version 4 (random) in this project, making guessing practically imposs
 **Reference docs:**
 - [OWASP API Security Top 10 — API1:2023 Broken Object Level Authorization](https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/)
 - [OWASP Cheat Sheet: Authorization](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **IDOR explained** — accessing another user's object by guessing its id — https://cheatsheetseries.owasp.org/cheatsheets/Insecure_Direct_Object_Reference_Prevention_Cheat_Sheet.html
+- **Broken Access Control (OWASP Top 10 #1)** — the most common web risk — https://owasp.org/Top10/A01_2021-Broken_Access_Control/
+- **Authorization vs authentication** — who you are vs what you may do — https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html
+
+### Official docs (code reference)
+- **Spring Security method security (`@PreAuthorize`)** — https://docs.spring.io/spring-security/reference/servlet/authorization/method-security.html
+- **Spring Security authorization** — https://docs.spring.io/spring-security/reference/servlet/authorization/index.html

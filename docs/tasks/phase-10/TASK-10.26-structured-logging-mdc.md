@@ -370,3 +370,18 @@ You likely forgot to add the `logstash-logback-encoder` dependency to `pom.xml` 
 **Cross-task references:**
 - [TASK-10.25](TASK-10.25-trace-request-end-to-end.md) — manual request tracing that motivates this task
 - [TASK-10.30](TASK-10.30-loki-log-aggregation.md) — ships these JSON logs to Loki and lets you query by `requestId`
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Why structured (JSON) logs** — machine-parseable fields beat free text — https://12factor.net/logs
+- **MDC (Mapped Diagnostic Context)** — per-thread key/values attached to logs — https://logback.qos.ch/manual/mdc.html
+- **JSON encoder for Logback** — emit one JSON object per log event — https://github.com/logfellow/logstash-logback-encoder
+
+### Official docs (code reference)
+- **Logback manual** — https://logback.qos.ch/manual/
+- **SLF4J manual** — https://www.slf4j.org/manual.html

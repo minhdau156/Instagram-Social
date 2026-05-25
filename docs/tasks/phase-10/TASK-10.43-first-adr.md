@@ -199,3 +199,18 @@ See [`docs/adr/`](docs/adr/) for a log of significant architectural decisions.
 - **Number sequentially.** `0001`, `0002`, `0003` — zero-padded to four digits so alphabetical file order matches chronological order.
 
 - Reference: [adr.github.io](https://adr.github.io/) — a community site with templates and tooling; [Michael Nygard's original post](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions) introduces the format.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **What an ADR is** — record the *why* behind a decision, not just the *what* — https://github.com/joelparkerhenderson/architecture-decision-record
+- **ADR templates** — a simple, repeatable structure — https://adr.github.io/
+- **MADR (Markdown ADR)** — a popular lightweight format — https://adr.github.io/madr/
+
+### Official docs (code reference)
+- **adr-tools (CLI)** — https://github.com/npryce/adr-tools
+- **ADR organization site** — https://adr.github.io/

@@ -365,3 +365,18 @@ Confirm that the FTS-specific tests in `SearchJpaAdapterIT` pass — `searchPost
 - **Flyway `baseline-on-migrate`** — If the container's database already has schema objects (from a previous test run that was not cleaned up), Flyway's validation may fail. The `POSTGRES.start()` in the `static {}` block creates a fresh database each time the JVM starts, so this is not an issue in normal usage. With `withReuse(true)`, the database persists between runs — if a migration is modified and the container is reused, you may need to stop and restart the container manually.
 
 - Official docs: [Testcontainers — JUnit 5 integration](https://java.testcontainers.org/test_framework_integration/junit_5/), [Testcontainers — Singleton containers](https://java.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers), [Testcontainers — PostgreSQL module](https://java.testcontainers.org/modules/databases/postgres/).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Container lifecycle in JUnit 5** — start once per suite vs per test — https://java.testcontainers.org/test_framework_integration/junit_5/
+- **Sharing one container (singleton pattern)** — speed up the whole suite — https://java.testcontainers.org/
+- **Spring Boot integration testing** — `@SpringBootTest` against a real DB — https://www.baeldung.com/spring-boot-testcontainers-integration-test
+
+### Official docs (code reference)
+- **Testcontainers for Java** — https://java.testcontainers.org/
+- **PostgreSQL module** — https://java.testcontainers.org/modules/databases/postgres/

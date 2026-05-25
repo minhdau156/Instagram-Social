@@ -234,3 +234,18 @@ On a single-user local machine with no concurrent traffic, you will rarely see i
 Hibernate SQL logs are printed by the `org.hibernate.SQL` logger, not by the persistence adapter class directly. The adapter calls the JPA repository, which triggers Hibernate. If you want to see an explicit adapter-level log line, you can temporarily add `log.debug("saving post")` to `PostPersistenceAdapter.save()` — but remove it before committing; TASK-10.26 will add proper structured logging there.
 
 **Next step:** Once you have traced the request manually and felt the pain of correlating lines by thread name, proceed to [TASK-10.26](TASK-10.26-structured-logging-mdc.md) which adds a `requestId` field to every log line automatically.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **The three pillars of observability** — logs, metrics, traces — https://opentelemetry.io/docs/concepts/observability-primer/
+- **Correlation IDs via MDC** — tag every log line of one request with the same id — https://logback.qos.ch/manual/mdc.html
+- **Reading the request lifecycle** — filter → controller → service → repository — https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-servlet.html
+
+### Official docs (code reference)
+- **SLF4J manual** — https://www.slf4j.org/manual.html
+- **Spring Boot Actuator (guide)** — https://spring.io/guides/gs/actuator-service/

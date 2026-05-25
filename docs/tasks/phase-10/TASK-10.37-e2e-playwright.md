@@ -512,3 +512,18 @@ npx playwright show-report
 - **`wait-on` in CI** — The backend can take 30–45 seconds to start in CI while Flyway runs migrations. The `wait-on` command polls both URLs with a 60-second timeout and fails the job cleanly if services never become ready.
 
 - Official docs: [Playwright — Getting Started](https://playwright.dev/docs/intro), [Playwright — `expect` assertions](https://playwright.dev/docs/test-assertions), [Playwright — CI/GitHub Actions](https://playwright.dev/docs/ci-intro).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **What end-to-end testing is** — drive the real browser against the running app — https://playwright.dev/docs/intro
+- **Locators & auto-waiting** — resilient selectors that wait for elements — https://playwright.dev/docs/locators
+- **Writing your first test** — actions, assertions, fixtures — https://playwright.dev/docs/writing-tests
+
+### Official docs (code reference)
+- **Playwright documentation** — https://playwright.dev/
+- **Playwright in CI** — https://playwright.dev/docs/ci

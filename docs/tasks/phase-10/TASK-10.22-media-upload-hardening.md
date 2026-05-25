@@ -403,3 +403,18 @@ MinIO's presigned PUT URL does not support content-length conditions by default.
 - [OWASP File Upload Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html)
 - [Apache Tika — Detecting Media Types](https://tika.apache.org/1.28.5/detection.html)
 - [metadata-extractor — Java EXIF reader](https://github.com/drewnoakes/metadata-extractor)
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Secure file upload** — size limits, type checks, storing outside the web root — https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html
+- **MIME types & content-type validation** — don't trust the client-sent type — https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types
+- **Magic-number detection** — verify the real file type from its bytes — https://tika.apache.org/
+
+### Official docs (code reference)
+- **Apache Tika (content detection)** — https://tika.apache.org/
+- **OWASP File Upload Cheat Sheet** — https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html

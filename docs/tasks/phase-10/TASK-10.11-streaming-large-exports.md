@@ -350,3 +350,18 @@ Replace `PrintWriter` with `ZipOutputStream`, open a `ZipEntry` named `posts.csv
 - TASK-10.8 (keyset pagination) — the cursor-based batch fallback when `Stream<>` scoping is problematic.
 - TASK-10.13 (Spring Batch) covers importing data in chunks — the inverse of this task.
 - TASK-10.27 (Actuator + Micrometer) provides the `jvm.memory.used` metric used in the heap verification step.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Streaming vs buffering** — write the response as you go instead of building it in memory (avoids OOM) — https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Transfer-Encoding
+- **StreamingResponseBody** — Spring MVC's streaming write API — https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/mvc/method/annotation/StreamingResponseBody.html
+- **Streaming query results** — read rows with a cursor, not all-at-once — https://docs.spring.io/spring-data/jpa/reference/
+
+### Official docs (code reference)
+- **OpenCSV (CSV writing)** — https://opencsv.sourceforge.net/
+- **java.util.zip.ZipOutputStream** — https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/zip/ZipOutputStream.html

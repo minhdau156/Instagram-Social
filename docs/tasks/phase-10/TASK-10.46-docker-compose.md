@@ -366,3 +366,18 @@ Docker enforces this via healthchecks:
 - Related tasks: [TASK-10.44](TASK-10.44-dockerfile-backend.md), [TASK-10.45](TASK-10.45-dockerfile-frontend.md), [TASK-10.42](TASK-10.42-smoke-test-script.md), [TASK-10.47](TASK-10.47-cicd-docker-build-push.md).
 
 - Official reference: [Docker Compose file reference](https://docs.docker.com/compose/compose-file/), [Compose `depends_on`](https://docs.docker.com/compose/compose-file/05-services/#depends_on).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Compose basics** — define multi-container apps in one YAML file — https://docs.docker.com/compose/
+- **Services, networks, volumes** — how containers talk and persist data — https://docs.docker.com/reference/compose-file/
+- **depends_on & healthchecks** — start order and readiness gating — https://docs.docker.com/reference/compose-file/services/
+
+### Official docs (code reference)
+- **Docker Compose documentation** — https://docs.docker.com/compose/
+- **Compose file reference** — https://docs.docker.com/reference/compose-file/

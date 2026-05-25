@@ -272,3 +272,18 @@ The report may flag a CVE in a library you've never heard of. That library is a 
 - [OWASP Dependency-Check — Maven plugin](https://jeremylong.github.io/DependencyCheck/dependency-check-maven/index.html)
 - [NVD API key request](https://nvd.nist.gov/developers/request-an-api-key)
 - [OWASP — Using Dependency-Check](https://owasp.org/www-project-dependency-check/)
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Software Composition Analysis (SCA)** — scanning your dependencies for known flaws — https://owasp.org/www-project-dependency-check/
+- **CVEs & CVSS scoring** — how vulnerabilities are identified and rated — https://nvd.nist.gov/vuln-metrics/cvss
+- **Suppressing false positives** — when a flagged CVE doesn't apply to you — https://jeremylong.github.io/DependencyCheck/general/suppression.html
+
+### Official docs (code reference)
+- **OWASP Dependency-Check Maven plugin** — https://jeremylong.github.io/DependencyCheck/dependency-check-maven/
+- **OWASP Top 10** — https://owasp.org/www-project-top-ten/

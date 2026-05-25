@@ -265,3 +265,18 @@ Inject `io.micrometer.tracing.Tracer` and use `tracer.nextSpan().name("my-operat
 - [TASK-10.27](TASK-10.27-actuator-micrometer.md) — Actuator must be configured before tracing works
 - [TASK-10.29](TASK-10.29-grafana-prometheus-alerting.md) — Grafana can link log entries to Zipkin traces via the `traceId` field
 - [TASK-10.32](TASK-10.32-frontend-rum-sentry.md) — propagates `traceId` from the frontend to backend so a failed React render links to its server span
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Traces & spans** — how a request is broken into timed units — https://opentelemetry.io/docs/concepts/signals/traces/
+- **Context propagation (W3C Trace Context)** — the `traceparent` header across services — https://www.w3.org/TR/trace-context/
+- **Micrometer Tracing** — Spring Boot 3's tracing bridge — https://docs.micrometer.io/tracing/reference/
+
+### Official docs (code reference)
+- **OpenTelemetry documentation** — https://opentelemetry.io/docs/
+- **Jaeger (trace backend)** — https://www.jaegertracing.io/docs/

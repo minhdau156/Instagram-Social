@@ -484,3 +484,19 @@ Most domain exceptions map to 4xx HTTP status codes and represent expected busin
 - [TASK-10.25](TASK-10.25-trace-request-end-to-end.md) — trace a request manually; motivates why good log format matters
 - [TASK-10.26](TASK-10.26-structured-logging-mdc.md) — adds `requestId`/`userId` MDC fields; works best when all log calls use parameterized format (this task)
 - [TASK-10.49](TASK-10.49-troubleshooting-runbook.md) — the troubleshooting runbook that log quality directly enables
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Log levels & when to use them** — ERROR/WARN/INFO/DEBUG/TRACE — https://www.slf4j.org/manual.html
+- **Parameterized logging** — `log.info("user {}", id)` avoids string concat cost — https://www.slf4j.org/faq.html#logging_performance
+- **Log to stdout (12-Factor)** — let the platform handle log routing — https://12factor.net/logs
+- **Never log secrets/PII** — what to redact and why — https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html
+
+### Official docs (code reference)
+- **SLF4J manual** — https://www.slf4j.org/manual.html
+- **OWASP Logging Cheat Sheet** — https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html

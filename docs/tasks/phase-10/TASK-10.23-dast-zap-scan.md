@@ -322,3 +322,18 @@ The Swagger UI serves HTML with inline scripts, which triggers "Anti-CSRF Tokens
 - [OWASP ZAP — zap-baseline.py](https://www.zaproxy.org/docs/docker/baseline-scan/)
 - [OWASP ZAP — Docker images](https://www.zaproxy.org/docs/docker/)
 - [OWASP ZAP — Scan rules](https://www.zaproxy.org/docs/alerts/)
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **DAST vs SAST** — testing the running app vs static code analysis — https://www.zaproxy.org/getting-started/
+- **ZAP baseline scan** — a fast, passive, CI-friendly scan — https://www.zaproxy.org/docs/docker/baseline-scan/
+- **Automating ZAP** — scripting scans for the pipeline — https://www.zaproxy.org/docs/automate/
+
+### Official docs (code reference)
+- **OWASP ZAP documentation** — https://www.zaproxy.org/docs/
+- **ZAP GitHub Action (baseline)** — https://github.com/zaproxy/action-baseline

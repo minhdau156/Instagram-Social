@@ -578,3 +578,18 @@ https://docs.spring.io/spring-batch/docs/current/reference/html/
 **Cross-task references:**
 - TASK-10.11 (streaming exports) is the inverse of this task — exporting posts in a streaming fashion.
 - TASK-10.10 (async processing) — the `POST /api/v1/admin/imports/posts` endpoint can return `202 Accepted` and run the `JobLauncher.run()` call asynchronously on the `mediaExecutor` so the HTTP response returns immediately.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Spring Batch concepts** — Job, Step, JobRepository — https://spring.io/guides/gs/batch-processing/
+- **ItemReader / Processor / Writer** — the read-transform-write pipeline — https://docs.spring.io/spring-batch/reference/
+- **Chunk-oriented processing** — commit in batches for throughput & restartability — https://docs.spring.io/spring-batch/reference/
+
+### Official docs (code reference)
+- **Spring Batch reference** — https://docs.spring.io/spring-batch/reference/
+- **Batch processing (Spring guide)** — https://spring.io/guides/gs/batch-processing/

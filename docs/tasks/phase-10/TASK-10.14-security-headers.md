@@ -227,3 +227,19 @@ The `Strict-Transport-Security` header must only be sent over HTTPS. Sending it 
 - [OWASP Secure Headers Project](https://owasp.org/www-project-secure-headers/)
 - [Spring Security — HTTP Security Headers](https://docs.spring.io/spring-security/reference/features/exploits/headers.html)
 - [MDN — Content-Security-Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy)
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **HTTP security headers overview** — what each header defends against — https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html
+- **Content-Security-Policy (CSP)** — restrict where scripts/styles can load from — https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+- **HSTS** — force HTTPS for future visits — https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+- **X-Content-Type-Options / X-Frame-Options** — block MIME sniffing & clickjacking — https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+
+### Official docs (code reference)
+- **Spring Security default headers** — https://docs.spring.io/spring-security/reference/servlet/exploits/headers.html
+- **Test your headers (MDN Observatory)** — https://developer.mozilla.org/en-US/observatory

@@ -293,3 +293,18 @@ docker stop frontend-test
 - Related tasks: [TASK-10.41](TASK-10.41-dockerignore.md), [TASK-10.44](TASK-10.44-dockerfile-backend.md), [TASK-10.46](TASK-10.46-docker-compose.md), [TASK-10.47](TASK-10.47-cicd-docker-build-push.md).
 
 - Official reference: [nginx beginner's guide](https://nginx.org/en/docs/beginners_guide.html), [Docker multi-stage builds](https://docs.docker.com/build/building/multi-stage/).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Multi-stage build (build → serve)** — compile with Node, serve static files with nginx — https://docs.docker.com/build/building/multi-stage/
+- **Deploying a Vite SPA** — building static assets for production — https://vitejs.dev/guide/static-deploy.html
+- **nginx for SPA routing** — fall back to `index.html` for client-side routes — https://nginx.org/en/docs/beginners_guide.html
+
+### Official docs (code reference)
+- **Dockerfile reference** — https://docs.docker.com/reference/dockerfile/
+- **nginx documentation** — https://nginx.org/en/docs/

@@ -510,3 +510,18 @@ If the backend crashes after writing the post to the database but before writing
 - [Stripe — Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
 - [IETF Draft — Idempotency-Key HTTP Header Field](https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/)
 - [Spring — `ContentCachingRequestWrapper`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/util/ContentCachingRequestWrapper.html)
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Idempotency in HTTP** — the same request applied twice has the same effect once — https://developer.mozilla.org/en-US/docs/Glossary/Idempotent
+- **HTTP method semantics** — which verbs are safe/idempotent by spec — https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
+- **Idempotency-Key pattern** — how Stripe makes retried POSTs safe — https://docs.stripe.com/api/idempotent_requests
+
+### Official docs (code reference)
+- **Stripe idempotent requests** — https://docs.stripe.com/api/idempotent_requests
+- **Spring Data Redis (key store for keys)** — https://docs.spring.io/spring-data/redis/reference/

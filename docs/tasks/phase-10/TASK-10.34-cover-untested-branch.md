@@ -240,3 +240,18 @@ Passing result: the test suite exits with `BUILD SUCCESS` and the branch you tar
 - Related tasks: [TASK-10.35](TASK-10.35-coverage-gate.md) adds the automated gate that enforces this discipline on every pull request.
 
 - Official docs: [JaCoCo — Understanding the Report](https://www.jacoco.org/jacoco/trunk/doc/index.html), [JUnit 5 — `assertThrows`](https://junit.org/junit5/docs/current/user-guide/#writing-tests-assertions).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Line vs branch coverage** — covering a line isn't covering both `if` paths — https://www.jacoco.org/jacoco/trunk/doc/counters.html
+- **Reading a JaCoCo report** — red/yellow/green and missed branches — https://www.jacoco.org/jacoco/trunk/doc/
+- **Writing focused unit tests** — one behaviour per test, arrange-act-assert — https://junit.org/junit5/docs/current/user-guide/
+
+### Official docs (code reference)
+- **JUnit 5 user guide** — https://junit.org/junit5/docs/current/user-guide/
+- **JaCoCo documentation** — https://www.jacoco.org/jacoco/trunk/doc/

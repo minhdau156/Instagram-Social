@@ -294,3 +294,18 @@ This will catch any image that builds successfully but fails to start or connect
 - **Do not hardcode tokens in the script.** Always pass them via environment variables (`SMOKE_TOKEN`) or CI secrets. A token hardcoded in a script will eventually be committed to Git.
 
 - Related tasks: [TASK-10.46](TASK-10.46-docker-compose.md), [TASK-10.47](TASK-10.47-cicd-docker-build-push.md), [TASK-10.49](TASK-10.49-troubleshooting-runbook.md).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **What a smoke test is** — a fast "is it alive?" check after deploy — https://en.wikipedia.org/wiki/Smoke_testing_(software)
+- **curl for API checks** — status codes, headers, exit codes in scripts — https://curl.se/docs/manual.html
+- **Health endpoints** — `/actuator/health` as the smoke-test target — https://spring.io/guides/gs/actuator-service/
+
+### Official docs (code reference)
+- **curl documentation** — https://curl.se/docs/
+- **Bash reference manual** — https://www.gnu.org/software/bash/manual/bash.html

@@ -407,3 +407,18 @@ Confirm the Loki container is healthy (`docker compose ps loki`). The Grafana da
 - [TASK-10.26](TASK-10.26-structured-logging-mdc.md) — the MDC filter and JSON format that makes these queries possible
 - [TASK-10.28](TASK-10.28-distributed-tracing.md) — the `traceId` field that links a Loki log line to a Zipkin span
 - [TASK-10.29](TASK-10.29-grafana-prometheus-alerting.md) — the Grafana instance that Loki is added to as a second datasource
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Log aggregation with Loki** — index labels, not full text, for cheap storage — https://grafana.com/docs/loki/latest/
+- **Promtail / shipping logs** — agents that tail and forward logs to Loki — https://grafana.com/docs/loki/latest/send-data/promtail/
+- **LogQL** — querying logs the Prometheus way — https://grafana.com/docs/loki/latest/query/
+
+### Official docs (code reference)
+- **Grafana Loki documentation** — https://grafana.com/docs/loki/latest/
+- **Grafana documentation** — https://grafana.com/docs/grafana/latest/

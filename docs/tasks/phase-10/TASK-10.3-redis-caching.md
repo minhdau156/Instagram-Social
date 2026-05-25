@@ -404,3 +404,19 @@ https://docs.spring.io/spring-framework/reference/integration/cache.html
 - Run TASK-10.1's `EXPLAIN ANALYZE` again after this task and compare execution times — the second request should show near-zero Postgres time.
 - TASK-10.7 (index audit) reduces the Postgres time for the first (cache-miss) request.
 - TASK-10.2 (HikariCP tuning) reduces the connection-wait time on that first request.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Spring Cache abstraction** — how `@Cacheable` / `@CacheEvict` intercept method calls — https://docs.spring.io/spring-framework/reference/integration/cache.html
+- **Caching, step by step** — the official getting-started walkthrough — https://spring.io/guides/gs/caching/
+- **Redis & key expiry (TTL)** — in-memory key/value store and automatic expiry — https://redis.io/docs/
+- **HTTP Cache-Control** — how browsers/CDNs cache responses — https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+
+### Official docs (code reference)
+- **Spring Data Redis** — https://docs.spring.io/spring-data/redis/reference/
+- **Spring Boot + Redis cache (Baeldung)** — https://www.baeldung.com/spring-boot-redis-cache

@@ -474,3 +474,18 @@ MinIO follows the S3 spec: part numbers must be between 1 and 10,000 (inclusive)
 - TASK-10.10 (async processing) — thumbnail generation is triggered asynchronously after `complete` succeeds.
 - TASK-10.48 (ShedLock scheduled jobs) — the stale session cleanup job described in the Gotchas section.
 - TASK-10.5 (CDN URLs) — `completeMultipartUpload` returns a CDN URL for the assembled object.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Resumable upload protocol** — the tus open standard for chunked, resumable uploads — https://tus.io/protocols/resumable-upload
+- **HTTP Range requests** — `Content-Range` and partial transfers — https://developer.mozilla.org/en-US/docs/Web/HTTP/Range_requests
+- **S3/MinIO multipart upload** — uploading a large object in parts, then completing — https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html
+
+### Official docs (code reference)
+- **AWS S3 multipart upload** — https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html
+- **MinIO documentation** — https://min.io/docs/minio/linux/index.html

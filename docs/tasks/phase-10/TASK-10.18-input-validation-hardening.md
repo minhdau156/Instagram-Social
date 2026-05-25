@@ -375,3 +375,19 @@ The domain layer must remain free of infrastructure dependencies. HTML sanitizat
 - [OWASP AntiSamy](https://owasp.org/www-project-antisamy/)
 - [OWASP XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)
 - [Spring Validation — Bean Validation](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#validation-beanvalidation)
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Input validation principles** — validate at the boundary, allow-list not deny-list — https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html
+- **Jakarta Bean Validation** — `@NotNull`, `@Size`, `@Pattern` and friends — https://www.baeldung.com/javax-validation
+- **Validating request bodies in Spring** — `@Valid` + the official walkthrough — https://spring.io/guides/gs/validating-form-input/
+- **Mass assignment / over-posting** — never bind requests straight to entities — https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html
+
+### Official docs (code reference)
+- **Hibernate Validator** — https://hibernate.org/validator/documentation/
+- **Spring validation reference** — https://docs.spring.io/spring-framework/reference/core/validation/beanvalidation.html

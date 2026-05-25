@@ -314,3 +314,18 @@ The architecture tests run in the `test` phase, before the JaCoCo coverage gate 
 - **ArchUnit version** — 1.3.0 is the recommended version as of early 2026. Check [Maven Central](https://central.sonatype.com/artifact/com.tngtech.archunit/archunit-junit5) before pinning a different version.
 
 - Official docs: [ArchUnit User Guide](https://www.archunit.org/userguide/html/000_Index.html), [ArchUnit — `layeredArchitecture()`](https://www.archunit.org/userguide/html/000_Index.html#_layer_checks).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Architecture fitness functions** — automated tests that guard design rules — https://www.archunit.org/
+- **Enforcing layer/dependency direction** — make the hexagonal rule executable — https://www.archunit.org/userguide/html/000_Index.html
+- **Why "dependencies point inward"** — see the project's own architecture diagram — https://www.archunit.org/userguide/html/000_Index.html
+
+### Official docs (code reference)
+- **ArchUnit user guide** — https://www.archunit.org/userguide/html/000_Index.html
+- **ArchUnit examples (GitHub)** — https://github.com/TNG/ArchUnit-Examples

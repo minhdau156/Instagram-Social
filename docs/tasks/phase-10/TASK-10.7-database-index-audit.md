@@ -315,3 +315,19 @@ https://www.postgresql.org/docs/15/indexes.html
 - TASK-10.1 produced the baseline that this task improves. Update `docs/infra/query-baseline.md` with the new numbers.
 - TASK-10.8 (keyset pagination) requires the composite `(created_at DESC, id DESC)` index added in step 3 — coordinate to avoid creating it twice.
 - TASK-10.3 (Redis caching) hides slow queries on cache hits; this task fixes them for cache misses.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **How database indexes work** — B-tree structure and lookup cost — https://use-the-index-luke.com/
+- **Index types (B-tree, GIN, GiST)** — choosing the right one per column — https://www.postgresql.org/docs/current/indexes-types.html
+- **Multicolumn & covering indexes** — column order and index-only scans — https://www.postgresql.org/docs/current/indexes-multicolumn.html
+- **Finding unused indexes** — read `pg_stat_user_indexes` before adding/dropping — https://www.postgresql.org/docs/current/monitoring-stats.html
+
+### Official docs (code reference)
+- **PostgreSQL indexes** — https://www.postgresql.org/docs/current/indexes.html
+- **Using EXPLAIN** — https://www.postgresql.org/docs/current/using-explain.html

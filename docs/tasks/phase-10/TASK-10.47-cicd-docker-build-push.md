@@ -289,3 +289,18 @@ Replace `<owner>` with your GitHub username or organisation name.
 - Related tasks: [TASK-10.44](TASK-10.44-dockerfile-backend.md), [TASK-10.45](TASK-10.45-dockerfile-frontend.md), [TASK-10.46](TASK-10.46-docker-compose.md), [TASK-10.42](TASK-10.42-smoke-test-script.md).
 
 - Official reference: [GitHub Container Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry), [docker/build-push-action](https://github.com/docker/build-push-action), [docker/metadata-action](https://github.com/docker/metadata-action).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **GitHub Actions basics** — workflows, jobs, steps, triggers — https://docs.github.com/en/actions
+- **Building & pushing images in CI** — the official Docker + Actions guide — https://docs.docker.com/build/ci/github-actions/
+- **Registries & image tags** — pushing to GHCR and tagging by SHA/version — https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry
+
+### Official docs (code reference)
+- **docker/build-push-action** — https://github.com/docker/build-push-action
+- **GitHub Actions documentation** — https://docs.github.com/en/actions

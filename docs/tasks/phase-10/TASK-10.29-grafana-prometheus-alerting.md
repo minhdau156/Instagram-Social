@@ -545,3 +545,19 @@ Grafana 10+ can send alerts directly to Slack/email/PagerDuty without Alertmanag
 - [TASK-10.27](TASK-10.27-actuator-micrometer.md) — the Prometheus scrape endpoint and custom counters built here
 - [TASK-10.30](TASK-10.30-loki-log-aggregation.md) — adds Loki as a second Grafana datasource alongside Prometheus
 - [TASK-10.31](TASK-10.31-sli-slo-error-budget.md) — adds recording rules and burn-rate alerts on top of the Prometheus setup
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Prometheus data model & scraping** — pull-based metric collection — https://prometheus.io/docs/introduction/overview/
+- **PromQL basics** — querying time-series — https://prometheus.io/docs/prometheus/latest/querying/basics/
+- **Alerting rules** — express thresholds that fire alerts — https://prometheus.io/docs/alerting/latest/configuration/
+- **Building Grafana dashboards** — panels, variables, data sources — https://grafana.com/docs/grafana/latest/dashboards/
+
+### Official docs (code reference)
+- **Prometheus documentation** — https://prometheus.io/docs/
+- **Grafana documentation** — https://grafana.com/docs/grafana/latest/

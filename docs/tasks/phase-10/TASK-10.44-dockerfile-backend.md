@@ -253,3 +253,19 @@ appuser
 - Related tasks: [TASK-10.41](TASK-10.41-dockerignore.md), [TASK-10.45](TASK-10.45-dockerfile-frontend.md), [TASK-10.46](TASK-10.46-docker-compose.md), [TASK-10.47](TASK-10.47-cicd-docker-build-push.md).
 
 - Official reference: [Docker multi-stage builds](https://docs.docker.com/build/building/multi-stage/), [eclipse-temurin on Docker Hub](https://hub.docker.com/_/eclipse-temurin).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Dockerfile basics** — `FROM`, `COPY`, `RUN`, `ENTRYPOINT` — https://docs.docker.com/reference/dockerfile/
+- **Multi-stage builds** — build with the JDK, ship with a slim JRE — https://docs.docker.com/build/building/multi-stage/
+- **Layer caching & best practices** — order layers so deps cache across builds — https://docs.docker.com/build/building/best-practices/
+- **Spring Boot in Docker** — official packaging guidance — https://spring.io/guides/gs/spring-boot-docker/
+
+### Official docs (code reference)
+- **Dockerfile reference** — https://docs.docker.com/reference/dockerfile/
+- **Spring Boot Docker (guide)** — https://spring.io/guides/gs/spring-boot-docker/

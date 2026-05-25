@@ -188,3 +188,18 @@ docker run --rm instagram-frontend-test ls /node_modules 2>&1
 - Related tasks: [TASK-10.44](TASK-10.44-dockerfile-backend.md), [TASK-10.45](TASK-10.45-dockerfile-frontend.md), [TASK-10.46](TASK-10.46-docker-compose.md).
 
 - Official reference: [Docker `.dockerignore` file](https://docs.docker.com/reference/dockerfile/#dockerignore-file).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **The build context** — what Docker sends to the daemon, and why a big context is slow — https://docs.docker.com/build/concepts/context/
+- **.dockerignore syntax** — patterns that exclude `node_modules`, `target`, `.git` — https://docs.docker.com/build/concepts/context/#dockerignore-files
+- **Smaller context = faster builds & better caching** — keep secrets out of images too — https://docs.docker.com/build/cache/
+
+### Official docs (code reference)
+- **Docker build context** — https://docs.docker.com/build/concepts/context/
+- **Dockerfile reference** — https://docs.docker.com/reference/dockerfile/

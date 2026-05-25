@@ -452,3 +452,18 @@ Keep it in one file while the project is small. A single file is easier to `Ctrl
 - [TASK-10.46](TASK-10.46-docker-compose.md) — the Docker Compose services described in the port and health-check entries
 - [TASK-10.51](TASK-10.51-oom-heap-dump-lab.md) — the heap-dump entry at the bottom of the runbook
 - [TASK-10.15](TASK-10.15-secrets-hygiene.md) — deeper treatment of secrets and env-var hygiene
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Incident response & runbooks** — the SRE approach to handling outages — https://sre.google/workbook/incident-response/
+- **Writing effective runbooks** — symptom → diagnosis → fix, written for 3 a.m. — https://www.atlassian.com/incident-management/devops/runbooks
+- **Reading logs & stack traces fast** — find the first real error, not the last — https://www.slf4j.org/manual.html
+
+### Official docs (code reference)
+- **Google SRE Workbook** — https://sre.google/workbook/table-of-contents/
+- **Atlassian incident management** — https://www.atlassian.com/incident-management

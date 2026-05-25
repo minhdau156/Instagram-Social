@@ -397,3 +397,18 @@ The plugin is conditionally included in `vite.config.ts` using `process.env.SENT
 - [TASK-10.26](TASK-10.26-structured-logging-mdc.md) — the `MdcLoggingFilter` that sets `requestId` in MDC; also the source of `traceId` values
 - [TASK-10.28](TASK-10.28-distributed-tracing.md) — the distributed tracing setup that generates `traceId` values propagated to the frontend
 - [TASK-10.45](../phase-10/TASK-10.45-dockerfile-frontend.md) — the frontend Docker build where source map upload runs in CI
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Real User Monitoring (RUM)** — measure performance from actual users' browsers — https://web.dev/articles/vitals
+- **Core Web Vitals** — LCP, INP, CLS and why they matter — https://web.dev/articles/vitals
+- **Source maps for error tracking** — map minified stack traces back to source — https://docs.sentry.io/platforms/javascript/sourcemaps/
+
+### Official docs (code reference)
+- **Sentry for React** — https://docs.sentry.io/platforms/javascript/guides/react/
+- **Sentry documentation** — https://docs.sentry.io/

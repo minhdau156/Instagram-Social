@@ -270,3 +270,19 @@ https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
 **Cross-task references:**
 - TASK-10.27 adds the full Actuator + Micrometer setup needed to expose `/actuator/metrics`.
 - TASK-10.3 adds Redis caching, which reduces the number of database hits and thus reduces how often the pool is under pressure.
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Connection pooling basics** — why reusing connections beats reconnecting per request — https://www.baeldung.com/java-connection-pooling
+- **Pool sizing math** — the counter-intuitive "fewer connections can be faster" result — https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
+- **Spring Boot + HikariCP** — wiring and tuning the default pool — https://www.baeldung.com/spring-boot-hikari
+- **Leak detection & timeouts** — `leakDetectionThreshold`, `connectionTimeout`, `maxLifetime` — https://github.com/brettwooldridge/HikariCP
+
+### Official docs (code reference)
+- **HikariCP (README + config knobs)** — https://github.com/brettwooldridge/HikariCP
+- **Accessing data with JPA (Spring guide)** — https://spring.io/guides/gs/accessing-data-jpa/

@@ -549,3 +549,18 @@ and exit code 99. Revert the change.
 - **HikariCP default pool size** — The default pool size is 10 connections. At 100 VUs hitting the feed endpoint simultaneously, each VU may need a connection. If `p99` latency spikes during the feed soak test, check `hikaricp.connections.pending` via the Actuator — you likely need to tune the pool (see [TASK-10.2](TASK-10.2-hikaricp-pool-tuning.md)).
 
 - Official docs: [k6 — Getting started](https://k6.io/docs/get-started/running-k6/), [k6 — Thresholds](https://k6.io/docs/using-k6/thresholds/), [k6 — Scenarios](https://k6.io/docs/using-k6/scenarios/), [k6 — `setup()` and `teardown()`](https://k6.io/docs/using-k6/test-lifecycle/).
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **Load vs stress vs soak testing** — different shapes of sustained traffic — https://grafana.com/docs/k6/latest/
+- **Thresholds (pass/fail)** — turn a load test into a CI gate — https://grafana.com/docs/k6/latest/using-k6/thresholds/
+- **k6 metrics** — VUs, iterations, p95 latency, error rate — https://grafana.com/docs/k6/latest/using-k6/metrics/
+
+### Official docs (code reference)
+- **k6 documentation** — https://grafana.com/docs/k6/latest/
+- **k6 examples** — https://grafana.com/docs/k6/latest/examples/

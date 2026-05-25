@@ -487,3 +487,18 @@ Then create separate burn-rate alerts per `uri` label.
 **Cross-task references:**
 - [TASK-10.27](TASK-10.27-actuator-micrometer.md) — the `http_server_requests_seconds` metric this task builds on
 - [TASK-10.29](TASK-10.29-grafana-prometheus-alerting.md) — the Prometheus and Grafana setup required here
+
+---
+
+## Learning Resources
+
+> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
+
+### Concepts to learn
+- **SLI vs SLO vs SLA** — indicators, objectives, agreements — https://sre.google/sre-book/service-level-objectives/
+- **Implementing SLOs** — choosing good indicators and targets — https://sre.google/workbook/implementing-slos/
+- **Error budgets & burn-rate alerts** — alert on how fast you're spending reliability — https://sre.google/workbook/alerting-on-slos/
+
+### Official docs (code reference)
+- **Google SRE Book (free)** — https://sre.google/sre-book/table-of-contents/
+- **Prometheus recording rules** — https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/
