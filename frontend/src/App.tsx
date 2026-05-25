@@ -29,6 +29,9 @@ const ChatPage = React.lazy(() => import('./pages/messaging/ChatPage'));
 const NotificationsPage = React.lazy(() => import('./pages/notifications/NotificationsPage'));
 const NotificationSettingsPage = React.lazy(() => import('./pages/notifications/NotificationSettingsPage'));
 const BlockedAccountsPage = React.lazy(() => import('./pages/settings/BlockedAccountsPage'));
+const AdminDashboardPage = React.lazy(() => import('./pages/admin/AdminDashboardPage'));
+const AdminReportsPage = React.lazy(() => import('./pages/admin/AdminReportsPage'));
+const AdminUsersPage = React.lazy(() => import('./pages/admin/AdminUsersPage'));
 const SearchPage = React.lazy(() => import('./pages/search/SearchPage'));
 const HashtagPage = React.lazy(() => import('./pages/search/HashtagPage'));
 
@@ -77,6 +80,9 @@ export default function App() {
                 <Route path="/notifications" element={<ErrorBoundary><NotificationsPage /></ErrorBoundary>} />
                 <Route path="/settings/notifications" element={<ErrorBoundary><NotificationSettingsPage /></ErrorBoundary>} />
                 <Route path="/settings/blocked" element={<ErrorBoundary><BlockedAccountsPage /></ErrorBoundary>} />
+                <Route path="/admin" element={<ErrorBoundary><AdminDashboardPage /></ErrorBoundary>} />
+                <Route path="/admin/reports" element={<ErrorBoundary><AdminReportsPage /></ErrorBoundary>} />
+                <Route path="/admin/users" element={<ErrorBoundary><AdminUsersPage /></ErrorBoundary>} />
                 <Route path="/search" element={<ErrorBoundary><SearchPage /></ErrorBoundary>} />
                 <Route path="/hashtag/:name" element={<ErrorBoundary><HashtagPage /></ErrorBoundary>} />
               </Route>

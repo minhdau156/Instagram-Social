@@ -33,11 +33,11 @@ frontend/src/components/admin/ReviewReportDialog.tsx
 
 Create the following hooks in `frontend/src/hooks/admin/` before building the pages:
 
-- [ ] `useAdminReports.ts` — uses `useQuery` with key `['admin-reports', status, page]`. Calls `adminApi.getReports(status, page, size)`. Returns `{ reports, isLoading, isError }`.
-- [ ] `useReviewReport.ts` — uses `useMutation` calling `adminApi.reviewReport(id, payload)`. On success, invalidates `['admin-reports']` queries so the list refreshes.
-- [ ] `useAdminUsers.ts` — uses `useQuery` with key `['admin-users', filters, page]`. Calls `adminApi.getAdminUsers(filters, page, size)`. Returns `{ users, isLoading, isError }`.
-- [ ] `useSuspendUser.ts` — uses `useMutation` calling `adminApi.suspendUser(id, payload)`. On success, invalidates `['admin-users']`.
-- [ ] `useUnsuspendUser.ts` — uses `useMutation` calling `adminApi.unsuspendUser(id)`. On success, invalidates `['admin-users']`.
+- [x] `useAdminReports.ts` — uses `useQuery` with key `['admin-reports', status, page]`. Calls `adminApi.getReports(status, page, size)`. Returns `{ reports, isLoading, isError }`.
+- [x] `useReviewReport.ts` — uses `useMutation` calling `adminApi.reviewReport(id, payload)`. On success, invalidates `['admin-reports']` queries so the list refreshes.
+- [x] `useAdminUsers.ts` — uses `useQuery` with key `['admin-users', filters, page]`. Calls `adminApi.getAdminUsers(filters, page, size)`. Returns `{ users, isLoading, isError }`.
+- [x] `useSuspendUser.ts` — uses `useMutation` calling `adminApi.suspendUser(id, payload)`. On success, invalidates `['admin-users']`.
+- [x] `useUnsuspendUser.ts` — uses `useMutation` calling `adminApi.unsuspendUser(id)`. On success, invalidates `['admin-users']`.
 
 ---
 
@@ -49,18 +49,18 @@ The landing page of the admin panel. Shows an at-a-glance summary of platform he
 
 #### Layout
 
-- [ ] Page title: MUI `Typography variant="h4" fontWeight={700} mb={3}` — "Admin Dashboard".
-- [ ] Stats cards row: MUI `Grid container spacing={2}`. Render one `Grid item xs={12} sm={6} md={3}` per stat card. Each card is a MUI `Card` with a `CardContent` block containing:
+- [x] Page title: MUI `Typography variant="h4" fontWeight={700} mb={3}` — "Admin Dashboard".
+- [x] Stats cards row: MUI `Grid container spacing={2}`. Render one `Grid item xs={12} sm={6} md={3}` per stat card. Each card is a MUI `Card` with a `CardContent` block containing:
   - `Typography variant="h3" fontWeight={700}` — the numeric value (e.g., total users count).
   - `Typography variant="body2" color="text.secondary"` — the label (e.g., "Total Users").
   - An icon from `@mui/icons-material` appropriate to the stat (e.g., `PeopleIcon`, `ArticleIcon`, `ReportIcon`, `BlockIcon`).
-- [ ] Stats to show (four cards):
+- [x] Stats to show (four cards):
   - **Pending Reports** — calls `adminApi.getReports('PENDING', 0, 1)` and uses the list length as a proxy count (or add a dedicated `countByStatus` API endpoint if available).
   - **Total Users** — calls `adminApi.getAdminUsers(undefined, 0, 0)` to get the user list (the total count, if the API returns it in a `totalElements` field, use that; otherwise display the current page count as a placeholder).
   - **Suspended Users** — calls `adminApi.getAdminUsers({ status: 'SUSPENDED' }, 0, 1)` for a count.
   - **Reports Resolved Today** — calls `adminApi.getReports('RESOLVED', 0, 100)` and filters client-side by `createdAt` being today's date. Note this is an approximation — a dedicated endpoint would be better but is out of scope.
-- [ ] Loading state for each card: show `Skeleton variant="rectangular" height={80}` while data is fetching.
-- [ ] Quick-action buttons below the stats row:
+- [x] Loading state for each card: show `Skeleton variant="rectangular" height={80}` while data is fetching.
+- [x] Quick-action buttons below the stats row:
   - MUI `Button variant="contained"` — "Review Pending Reports" — navigates to `/admin/reports?status=PENDING`.
   - MUI `Button variant="outlined"` — "Manage Users" — navigates to `/admin/users`.
 
@@ -74,22 +74,22 @@ Full table of content reports. Admins can filter by status and take action (reso
 
 #### URL-driven state
 
-- [ ] Use `useSearchParams()` to read `status` from the URL. This allows deep-linking to filtered views (e.g., `/admin/reports?status=PENDING`).
-- [ ] Declare a tab bar at the top: "All" | "Pending" | "Reviewed" | "Resolved" | "Dismissed". Each tab updates the `status` URL param via `setSearchParams`.
+- [x] Use `useSearchParams()` to read `status` from the URL. This allows deep-linking to filtered views (e.g., `/admin/reports?status=PENDING`).
+- [x] Declare a tab bar at the top: "All" | "Pending" | "Reviewed" | "Resolved" | "Dismissed". Each tab updates the `status` URL param via `setSearchParams`.
 
 #### Layout
 
-- [ ] Page title: `Typography variant="h5" fontWeight={600}` — "Content Reports".
-- [ ] MUI `Tabs` + `Tab` bar below the title. Tab values: `undefined` (All), `PENDING`, `REVIEWED`, `RESOLVED`, `DISMISSED`. The active tab is derived from the `status` URL param.
-- [ ] Data: call `useAdminReports(activeStatus, page, 20)`. Pass `activeStatus` as `undefined` when the "All" tab is active.
+- [x] Page title: `Typography variant="h5" fontWeight={600}` — "Content Reports".
+- [x] MUI `Tabs` + `Tab` bar below the title. Tab values: `undefined` (All), `PENDING`, `REVIEWED`, `RESOLVED`, `DISMISSED`. The active tab is derived from the `status` URL param.
+- [x] Data: call `useAdminReports(activeStatus, page, 20)`. Pass `activeStatus` as `undefined` when the "All" tab is active.
 
 #### Reports table
 
-- [ ] MUI `TableContainer` with `Paper`:
+- [x] MUI `TableContainer` with `Paper`:
   - `Table` with columns: Reporter, Entity Type, Reason, Status, Submitted Date, Actions.
   - `TableHead` with `TableRow` of `TableCell` headers.
   - `TableBody` with one `TableRow` per report.
-- [ ] Each data row (`TableRow`):
+- [x] Each data row (`TableRow`):
   - **Reporter** cell: `reporterUsername` — show as a plain text string.
   - **Entity Type** cell: a MUI `Chip` label set to `report.entityType` with a size-appropriate colour. Suggested colour scheme: `POST → primary`, `COMMENT → default`, `USER → secondary`, `MESSAGE → warning`.
   - **Reason** cell: `report.reason` — plain text.
@@ -99,15 +99,15 @@ Full table of content reports. Admins can filter by status and take action (reso
 
 #### Loading state
 
-- [ ] While `isLoading`: render 8 skeleton table rows using `Skeleton variant="rectangular" height={52}`.
+- [x] While `isLoading`: render 8 skeleton table rows using `Skeleton variant="rectangular" height={52}`.
 
 #### Empty state
 
-- [ ] When the filtered list is empty: render a centred MUI `Box py={6}` with `Typography color="text.secondary"` — "No reports matching the current filter."
+- [x] When the filtered list is empty: render a centred MUI `Box py={6}` with `Typography color="text.secondary"` — "No reports matching the current filter."
 
 #### Pagination
 
-- [ ] Below the table: a `useState(0)` for `page`. Show MUI `Pagination` component with a `count` of `Math.ceil(totalCount / 20)`. Since the backend returns a list (not a total count), use a simple "previous / next" approach: disable "Next" when the list has fewer than 20 items, disable "Previous" when on page 0.
+- [x] Below the table: a `useState(0)` for `page`. Show MUI `Pagination` component with a `count` of `Math.ceil(totalCount / 20)`. Since the backend returns a list (not a total count), use a simple "previous / next" approach: disable "Next" when the list has fewer than 20 items, disable "Previous" when on page 0.
 
 ---
 
@@ -119,15 +119,15 @@ A searchable, filterable table of all registered users. Admins can suspend or un
 
 #### Layout
 
-- [ ] Page title: `Typography variant="h5" fontWeight={600}` — "User Management".
-- [ ] Filter bar above the table:
+- [x] Page title: `Typography variant="h5" fontWeight={600}` — "User Management".
+- [x] Filter bar above the table:
   - MUI `TextField size="small" placeholder="Search by username..."` — debounced with 300 ms `useState`+`useEffect` before triggering the query (same pattern as `useSearch` in Phase 8).
   - MUI `Select` for account status filter: options "All", "Active", "Suspended", "Deactivated".
   - These controls update local state that is passed to `useAdminUsers(filters, page, 20)`.
 
 #### Users table
 
-- [ ] MUI `TableContainer` with `Paper`:
+- [x] MUI `TableContainer` with `Paper`:
   - Columns: Avatar, Username, Email, Full Name, Status, Verified, Joined Date, Actions.
   - **Avatar** cell: small MUI `Avatar src={user.avatarUrl ?? undefined}` — note: `AdminUserResponse` may not carry `avatarUrl`. If it does not, show a generic person icon.
   - **Username** cell: `user.username` as a clickable link that navigates to `/profile/{user.username}` (so the admin can see the public profile).
@@ -142,7 +142,7 @@ A searchable, filterable table of all registered users. Admins can suspend or un
 
 #### Suspension confirmation dialog (inline)
 
-- [ ] Declare a local `suspendTarget: AdminUser | null` state. When the admin selects "Suspend User", set `suspendTarget`. Show a MUI `Dialog` when `suspendTarget !== null`:
+- [x] Declare a local `suspendTarget: AdminUser | null` state. When the admin selects "Suspend User", set `suspendTarget`. Show a MUI `Dialog` when `suspendTarget !== null`:
   - Title: "Suspend @{suspendTarget.username}?".
   - Body: `TextField multiline rows={3} label="Reason" required` bound to a local `suspendReason` string state.
   - Actions: "Cancel" (clears `suspendTarget`) and "Suspend" button (calls `suspendUser(suspendTarget.id, { reason: suspendReason })` and clears `suspendTarget` on success).
@@ -150,8 +150,8 @@ A searchable, filterable table of all registered users. Admins can suspend or un
 
 #### Loading and empty states
 
-- [ ] Loading: 10 skeleton table rows.
-- [ ] Empty: `Typography color="text.secondary" align="center" py={4}` — "No users found matching the current filters."
+- [x] Loading: 10 skeleton table rows.
+- [x] Empty: `Typography color="text.secondary" align="center" py={4}` — "No users found matching the current filters."
 
 ---
 
@@ -163,30 +163,30 @@ A shared dialog used by `AdminReportsPage` to let an admin choose a review actio
 
 #### Props interface
 
-- [ ] `open: boolean`
-- [ ] `onClose: () => void`
-- [ ] `report: Report | null` — the report to review; `null` when the dialog is not open.
-- [ ] `defaultAction?: ReviewAction` — pre-select an action (e.g., "Resolve" when the admin clicked the "Resolve" menu item directly).
+- [x] `open: boolean`
+- [x] `onClose: () => void`
+- [x] `report: Report | null` — the report to review; `null` when the dialog is not open.
+- [x] `defaultAction?: ReviewAction` — pre-select an action (e.g., "Resolve" when the admin clicked the "Resolve" menu item directly).
 
 #### Internal state
 
-- [ ] `selectedAction: ReviewAction | null` — initialised from `defaultAction` when the dialog opens.
+- [x] `selectedAction: ReviewAction | null` — initialised from `defaultAction` when the dialog opens.
 
 #### Hooks to call inside the component
 
-- [ ] `const { mutate: reviewReport, isPending } = useReviewReport()`.
+- [x] `const { mutate: reviewReport, isPending } = useReviewReport()`.
 
 #### Layout
 
-- [ ] MUI `Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth`.
-- [ ] `DialogTitle`: "Review Report" with a `CloseIcon` button top-right.
-- [ ] `DialogContent`:
+- [x] MUI `Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth`.
+- [x] `DialogTitle`: "Review Report" with a `CloseIcon` button top-right.
+- [x] `DialogContent`:
   - If `report !== null`, show a brief summary of the report: entity type chip + reason text + "Reported by @{reporterUsername}" + creation date.
   - MUI `FormControl` with `RadioGroup` for the action:
     - `RESOLVE` — label "Resolve: Take action and close this report"
     - `DISMISS` — label "Dismiss: No violation found, close this report"
     - `MARK_REVIEWED` — label "Mark as Reviewed: Acknowledged but monitoring"
-- [ ] `DialogActions`:
+- [x] `DialogActions`:
   - "Cancel" button calls `onClose`. Disabled while `isPending`.
   - "Confirm" button — disabled if `selectedAction === null` or `isPending`. Shows `CircularProgress size={16}` while `isPending`. On click: calls `reviewReport({ id: report.id, payload: { action: selectedAction } }, { onSuccess: onClose })`.
 
