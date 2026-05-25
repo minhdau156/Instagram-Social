@@ -1,7 +1,9 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { notificationsApi } from "../../api/notificationsApi";
+import { useAuth } from "../useAuth";
 
 export const useNotifications = () => {
+    const { isAuthenticated } = useAuth();
     const queryClient = useQueryClient();
     const { data, isError, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
         queryKey: ['notifications'],
@@ -10,7 +12,8 @@ export const useNotifications = () => {
         },
         initialPageParam: 0,
         getNextPageParam: (lastPage, allPages) =>
-            lastPage.length < 20 ? undefined : allPages.length
+            lastPage.length < 20 ? undefined : allPages.length,
+        enabled: isAuthenticated,
     });
     const notifications = data?.pages.flat() || [];
 
