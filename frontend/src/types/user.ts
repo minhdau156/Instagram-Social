@@ -7,6 +7,7 @@ export interface User {
     avatarUrl: string | null;
     isPrivate: boolean;
     isVerified: boolean;
+    role: string;
 }
 
 export interface UserProfile {

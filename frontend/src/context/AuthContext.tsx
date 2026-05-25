@@ -9,6 +9,7 @@ interface AuthContextValue {
     tokens: AuthTokens | null;
     isLoading: boolean;
     isAuthenticated: boolean;
+    isAdmin: boolean;
     login: (payload: LoginPayload) => Promise<void>;
     register: (payload: RegisterPayload) => Promise<void>;
     logout: () => Promise<void>;
@@ -21,6 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [tokens, setTokens] = useState<AuthTokens | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+
 
     useEffect(() => {
         const accessToken = localStorage.getItem('accessToken');
@@ -39,6 +41,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             })
             .finally(() => setIsLoading(false));
     }, []);
+
+    const isAdmin = profile?.user.role === "ADMIN";
 
     const login = async (payload: LoginPayload) => {
         const tokens = await authApi.login(payload);
@@ -68,7 +72,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ profile, tokens, isLoading, isAuthenticated, login, register, logout }}>
+        <AuthContext.Provider value={{ profile, tokens, isLoading, isAuthenticated, isAdmin, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );

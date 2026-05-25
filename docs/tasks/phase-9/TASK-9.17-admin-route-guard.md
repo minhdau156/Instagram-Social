@@ -27,12 +27,12 @@ frontend/src/components/common/AdminRoute.tsx
 
 ### Prerequisites: Auth Context must expose `role`
 
-- [ ] Before implementing `AdminRoute`, verify that `AuthContext` (or the `useAuth()` hook) exposes the current user's role. Open `frontend/src/hooks/useAuth.ts` (or equivalent) and check whether the `profile` object includes an `isAdmin` flag or a `role` string.
-- [ ] If the role is not currently exposed:
+- [x] Before implementing `AdminRoute`, verify that `AuthContext` (or the `useAuth()` hook) exposes the current user's role. Open `frontend/src/hooks/useAuth.ts` (or equivalent) and check whether the `profile` object includes an `isAdmin` flag or a `role` string.
+- [x] If the role is not currently exposed:
   - Check whether the JWT payload includes a role claim. If not, the backend JWT generation (TASK-9.5 prerequisite) must be updated first.
   - If the JWT carries the role, update the JWT parsing logic in `useAuth` / `AuthContext` to extract and expose it. Add an `isAdmin: boolean` derived field: `isAdmin = profile?.role === 'ADMIN'` (or `roles.includes('ROLE_ADMIN')` depending on the JWT structure).
   - Do not add a new API call to fetch the role — derive it from the already-decoded JWT stored in context.
-- [ ] Add `isAdmin?: boolean` (or `role?: string`) to the TypeScript user profile type in `frontend/src/types/` to avoid `any` casts.
+- [x] Add `isAdmin?: boolean` (or `role?: string`) to the TypeScript user profile type in `frontend/src/types/` to avoid `any` casts.
 
 ---
 
@@ -40,29 +40,29 @@ frontend/src/components/common/AdminRoute.tsx
 
 #### Props interface
 
-- [ ] `children: React.ReactNode` — the page component(s) to render when the user is an admin.
+- [x] `children: React.ReactNode` — the page component(s) to render when the user is an admin.
 
 #### Hooks to call inside the component
 
-- [ ] `const { profile, isLoading } = useAuth()` — use whatever the existing auth hook exposes. The exact field names must match the current hook signature; do not rename them.
-- [ ] `const navigate = useNavigate()` from `react-router-dom`.
+- [x] `const { profile, isLoading } = useAuth()` — use whatever the existing auth hook exposes. The exact field names must match the current hook signature; do not rename them.
+- [x] `const navigate = useNavigate()` from `react-router-dom`.
 
 #### Logic
 
-- [ ] While `isLoading` is `true` (auth state is not yet resolved): render a centred `CircularProgress` fullscreen spinner — do not redirect while loading because the user's role has not yet been determined. This prevents a flash-redirect on page refresh for legitimate admins.
-- [ ] Once loading is complete:
+- [x] While `isLoading` is `true` (auth state is not yet resolved): render a centred `CircularProgress` fullscreen spinner — do not redirect while loading because the user's role has not yet been determined. This prevents a flash-redirect on page refresh for legitimate admins.
+- [x] Once loading is complete:
   - If `profile` is `null` or `undefined` (user is not authenticated): redirect to `/login` using `<Navigate to="/login" replace />`. The standard `ProtectedRoute` already handles this case, but `AdminRoute` should be self-contained so it can be used independently.
   - If `profile` is present but `isAdmin` is `false` (user is authenticated but not an admin): show a toast/snackbar with the message "You don't have permission to access this page." then redirect to `/` using `<Navigate to="/" replace />`. The toast should appear briefly before the redirect happens — use a `useEffect` to show the toast on the first render when this condition is met, then redirect on the next render or after a short delay.
   - If `profile` is present and `isAdmin` is `true`: render `children`.
 
 #### Snackbar/toast integration
 
-- [ ] Check how other components in the project display error toasts. If the project uses a global `Snackbar` or `notistack`, use that. If there is no shared toast system, render a local MUI `Snackbar` with `autoHideDuration={3000}` and then redirect after 1 second (enough time for the user to read the message before being redirected).
-- [ ] Alternatively, use the redirect immediately and let the landing page show a dismissable `Alert` component. Choose whichever approach is most consistent with the existing codebase.
+- [x] Check how other components in the project display error toasts. If the project uses a global `Snackbar` or `notistack`, use that. If there is no shared toast system, render a local MUI `Snackbar` with `autoHideDuration={3000}` and then redirect after 1 second (enough time for the user to read the message before being redirected).
+- [x] Alternatively, use the redirect immediately and let the landing page show a dismissable `Alert` component. Choose whichever approach is most consistent with the existing codebase.
 
 #### Suspense integration
 
-- [ ] `AdminRoute` itself does not need to render a `Suspense` boundary — the route registration in `App.tsx` (TASK-9.18) wraps each lazy page in `Suspense`. `AdminRoute` just needs to render `{children}` when access is granted.
+- [x] `AdminRoute` itself does not need to render a `Suspense` boundary — the route registration in `App.tsx` (TASK-9.18) wraps each lazy page in `Suspense`. `AdminRoute` just needs to render `{children}` when access is granted.
 
 ---
 
