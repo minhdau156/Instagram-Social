@@ -95,8 +95,10 @@ public class UserService
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
                 .build();
+        User saved = userRepository.save(user);
+        userStatsRepository.create(UserStats.zero(saved.getId()));
 
-        return userRepository.save(user);
+        return saved;
     }
 
     // ── LoginUseCase ─────────────────────────────────────────────────────────
@@ -129,7 +131,10 @@ public class UserService
         UUID userId = tokenPort.validateRefreshToken(command.refreshToken())
                 .orElseThrow(InvalidCredentialsException::new);
 
-        String accessToken = tokenPort.generateAccessToken(userId, DEFAULT_ROLE);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserNotFoundException.withId(userId));
+
+        String accessToken = tokenPort.generateAccessToken(userId, user.getRole().name());
         String refreshToken = tokenPort.generateRefreshToken(userId);
 
         return new AuthResult(accessToken, refreshToken, ACCESS_TOKEN_EXPIRES_IN);
