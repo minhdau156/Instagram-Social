@@ -138,3 +138,73 @@
 - [ ] Add `/admin` → `AdminDashboardPage` (AdminRoute)
 - [ ] Add `/admin/reports` → `AdminReportsPage` (AdminRoute)
 - [ ] Add `/admin/users` → `AdminUsersPage` (AdminRoute)
+
+---
+
+## Authorization & RBAC (Phase 9 extension)
+
+> Full role/permission access control. Detailed per-task files live in [`phase-9/`](phase-9/) as TASK-9.19–9.33.
+> **New DB tables:** `roles`, `permissions`, `role_permissions`, `user_roles`.
+> **Roles:** `USER`, `MODERATOR`, `ADMIN`, `SUPER_ADMIN`.
+> **Permissions:** `REPORT_VIEW`, `REPORT_REVIEW`, `CONTENT_MODERATE`, `USER_VIEW`, `USER_SUSPEND`, `USER_UNSUSPEND`, `AUDIT_LOG_VIEW`, `ROLE_VIEW`, `ROLE_ASSIGN`, `ROLE_PERMISSION_MANAGE`.
+> **Known gap this closes:** `JwtTokenProvider` writes a `role` claim, but `JwtAuthenticationFilter` builds authorities from `Collections.emptyList()` — so `hasRole('ADMIN')` never passes today. TASK-9.27 fixes this.
+
+### Backend
+
+### TASK-9.19 — Flyway migration: RBAC schema & seed
+- [ ] Create `V4__add_rbac_tables.sql` (confirm V4 is the next free version)
+- [ ] Tables: `roles`, `permissions`, `role_permissions` (PK role_id+permission_id), `user_roles` (PK user_id+role_id, `assigned_by`, `assigned_at`) + `idx_user_roles_user`
+- [ ] Seed 4 system roles, the 10 permissions, role→permission mapping (MODERATOR⊂ADMIN⊂SUPER_ADMIN); assign `USER` to all existing users; bootstrap one `SUPER_ADMIN`
+
+### TASK-9.20 — Domain models: Role, Permission & User extension
+- [ ] `RoleName`, `PermissionName` enums; `Permission`, `Role` (with `grants(PermissionName)`)
+- [ ] Extend `User` with `Set<Role> roles` + `hasRole`, `hasPermission`, `permissionNames()` (pure Java)
+
+### TASK-9.21 — Domain exceptions (RBAC)
+- [ ] `RoleNotFoundException` (404), `RoleAlreadyAssignedException` (409), `RoleNotAssignedException`, `InsufficientPrivilegeException` (403), `ProtectedRoleException` (409) + `GlobalExceptionHandler` mappings + `AccessDeniedException` → 403 JSON
+
+### TASK-9.22 — Out-ports: RoleRepository, PermissionRepository
+- [ ] `RoleRepository` (findByName/Id, findRolesByUserId, findPermissionNamesByUserId, assign/revoke, countUsersWithRole, replaceRolePermissions)
+- [ ] `PermissionRepository` (findAll, findByName, findByIds)
+
+### TASK-9.23 — In-ports: RBAC use cases
+- [ ] `AssignRoleToUserUseCase`, `RevokeRoleFromUserUseCase`, `GetUserRolesUseCase`, `GetUserPermissionsUseCase`, `ListRolesUseCase`, `UpdateRolePermissionsUseCase`, `AssignDefaultRoleUseCase`
+
+### TASK-9.24 — Domain service: RbacService
+- [ ] Implements all RBAC in-ports; privilege-escalation guard (only SUPER_ADMIN grants ADMIN/SUPER_ADMIN); last-super-admin guard; protect `ROLE_PERMISSION_MANAGE` on SUPER_ADMIN; audit every mutation via `AuditLogRepository`
+
+### TASK-9.25 — JPA entities & repositories (RBAC)
+- [ ] `RoleJpaEntity` (@ManyToMany permissions), `PermissionJpaEntity`, `UserRoleJpaEntity` (composite PK)
+- [ ] Repos with `@EntityGraph` for role+permissions and a one-query projection for permission names by user
+
+### TASK-9.26 — Persistence adapter: RbacPersistenceAdapter
+- [ ] `implements RoleRepository, PermissionRepository`; private `toDomain` mappers; enum `valueOf` at the boundary; no JPA entity escapes
+
+### TASK-9.27 — Authorization wiring: JWT authorities & auth filter
+- [ ] Load roles+permissions per request (DB-backed, Approach A) → `ROLE_<NAME>` + bare permission `GrantedAuthority`s in `JwtAuthenticationFilter` (replaces `Collections.emptyList()`)
+- [ ] Keep principal = userId so `currentUserId()` is unchanged; note Redis cache hook for TASK-10.3
+
+### TASK-9.28 — SecurityConfig & method-level authorization
+- [ ] `@EnableMethodSecurity`; `requestMatchers("/api/v1/admin/**").hasAnyRole(MODERATOR,ADMIN,SUPER_ADMIN)`; JSON `AccessDeniedHandler`
+- [ ] `@PreAuthorize` per action mapped to its permission (REPORT_VIEW/REVIEW, USER_SUSPEND, ROLE_ASSIGN, ROLE_PERMISSION_MANAGE, …)
+
+### TASK-9.29 — REST controllers & DTOs (role management)
+- [ ] `RoleAdminController`: GET /admin/roles, GET /admin/permissions, PUT /admin/roles/{name}/permissions, GET/POST /admin/users/{id}/roles, DELETE /admin/users/{id}/roles/{name}, GET /users/me/permissions
+- [ ] DTOs: `AssignRoleRequest`, `UpdateRolePermissionsRequest`, `RoleResponse`, `PermissionResponse`, `UserRolesResponse`
+
+### TASK-9.30 — Tests (RBAC & authorization)
+- [ ] `RbacServiceTest` (guards + audit), `RbacPersistenceAdapterIT`, `RoleAdminControllerTest`, `AuthorizationIT` — emphasise deny paths (moderator can't suspend; plain user blocked from /admin; admin can't grant super-admin)
+
+### Frontend
+
+### TASK-9.31 — TypeScript types & API services
+- [ ] `types/rbac.ts` (`RoleName`, `PermissionName`, `Role`, `Permission`, `UserRoles`, `MyGrants`)
+- [ ] `api/rbacApi.ts` (listRoles, listPermissions, updateRolePermissions, getUserRoles, assignRole, revokeRole, getMyGrants)
+
+### TASK-9.32 — Frontend authorization primitives
+- [ ] `usePermissions` hook (fetch `/users/me/permissions`, default-deny while loading)
+- [ ] `<PermissionGate>`; `<SuperAdminRoute>`; make `AdminRoute` permission-aware (`hasAnyRole`)
+
+### TASK-9.33 — Admin RBAC pages & route registration
+- [ ] `RoleManagementPage` (super-admin, permission matrix via `RolePermissionEditor`), `UserRolesPanel` in `AdminUsersPage`
+- [ ] Register `/admin/roles` (SuperAdminRoute, lazy + ErrorBoundary) + nav entry
