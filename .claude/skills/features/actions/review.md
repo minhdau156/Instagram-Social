@@ -10,7 +10,13 @@
    - ⚠️ Code quality issues or bugs
    - 🚫 Scope creep (code beyond goals)
 5. Must check the checklist in current task
-5. Final verdict: Ready to complete or needs changes
+6. Final verdict: Ready to complete or needs changes
+
+## Tools RULES:
+- Always use srcwalk skill: for best codebase/files/dirs exploration, discover, searching.
+- Always prefer srcwalk CLI over read/glob/grep tool.
+- Prefer fd over find.
+- Prefer rg over grep.
 
 ##References
 @agents/skills/code-quality/SKILL.md to improve code quality

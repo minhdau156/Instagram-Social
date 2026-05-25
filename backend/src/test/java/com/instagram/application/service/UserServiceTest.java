@@ -30,6 +30,7 @@ import com.instagram.domain.port.out.EmailPort;
 import com.instagram.domain.port.out.PasswordHashPort;
 import com.instagram.domain.port.out.TokenPort;
 import com.instagram.domain.port.out.UserRepository;
+import com.instagram.domain.port.out.UserStatsRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -40,6 +41,8 @@ public class UserServiceTest {
     private PasswordHashPort passwordHashPort;
     @Mock
     private TokenPort tokenPort;
+    @Mock
+    private UserStatsRepository userStatsRepository;
     @Mock
     private EmailPort emailPort;
     @InjectMocks
