@@ -1,22 +1,16 @@
-# Current Feature: Phase 9 — TASK-9.15 User-Facing Pages: BlockedAccountsPage
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- `useBlockedUsers` hook (`queryKey: ['blocked-users']`, `staleTime: 60_000`, returns `{ blockedUsers, isLoading, isError }`)
-- `BlockedAccountsPage` at `/settings/blocked` with loading skeletons, error alert, empty state, and blocked-user list with per-row Unblock button
-- Route registered in `App.tsx`
+<!-- -->
 
 ## Notes
-- `useUnblockUser` already invalidates `['blocked-users']` (done in TASK-9.14)
-- `date-fns` is available (`^4.1.0`)
-- Reference layout: `NotificationSettingsPage` — `maxWidth: 500px`, `mx: 'auto'`, `py: 2`
-- This page uses `maxWidth: 600` per spec
-- `UserBlock` fields: `blockedUserId`, `username`, `fullName | null`, `avatarUrl | null`, `blockedAt`
-- Track in-flight unblock with `pendingUsername: string | null` state
+<!-- -->
 
 ## History
+- TASK-9.15 — User-Facing Pages: `useBlockedUsers` hook (`queryKey: ['blocked-users']`, `staleTime: 60_000`, returns `{ blockedUsers, isLoading, isError }`); `BlockedAccountsPage` (`/settings/blocked`) with back button, 5-row wave skeletons, error Alert, empty state, `List`+`Divider` blocked-user list with per-row `pendingUsername`-tracked Unblock button; route registered in `App.tsx`.
 - TASK-9.14 — User-Facing Components: `useSubmitReport`, `useBlockUser` (invalidates user profile query), `useUnblockUser` (invalidates `['blocked-users']` + user profile query) hooks in `hooks/moderation/`; `ReportDialog` (RadioGroup of 8 `ReportReason` values, `details` TextField for OTHER, resets on open, closes on success via `onSuccess: onClose`); `BlockButton` (block with confirmation dialog + `color="error"`, unblock direct, `aria-label` on both buttons, `onToggle?.()` on success).
 - TASK-9.13 — API Services: `moderationApi.ts` (4 functions: `submitReport`, `blockUser`, `unblockUser`, `getBlockedUsers`) + `adminApi.ts` (5 functions: `getReports` with optional status filter, `reviewReport`, `suspendUser`, `unsuspendUser`, `getAdminUsers` with optional filters spread). All typed from `../types/moderation`, all responses unwrapped via `.then(r => r.data.data)`, void endpoints use `.then(() => undefined)`.
 - TASK-9.12 — TypeScript Types: `moderation.ts` — 5 string literal union types (`ReportEntityType`, `ReportStatus`, `ReportReason` 8 values, `ReviewAction`, `AccountStatus`); 3 response interfaces (`Report` 11 fields, `UserBlock` 5 fields, `AdminUser` 8 fields); 3 request payload interfaces (`SubmitReportPayload`, `ReviewReportPayload`, `SuspendUserPayload`); 1 optional `AuditLog` interface (8 fields). No `any`, no `enum` keyword, all named exports.
