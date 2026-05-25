@@ -27,7 +27,7 @@ frontend/src/pages/settings/BlockedAccountsPage.tsx
 
 ### Custom hook prerequisite
 
-- [ ] Create `frontend/src/hooks/moderation/useBlockedUsers.ts` before building this page.
+- [x] Create `frontend/src/hooks/moderation/useBlockedUsers.ts` before building this page.
   - Uses `useQuery` with `queryKey: ['blocked-users']` and `queryFn: () => moderationApi.getBlockedUsers(0, 100)`.
   - Returns `{ blockedUsers, isLoading, isError }` where `blockedUsers` is `UserBlock[]` (defaulting to `[]`).
   - `staleTime`: `60_000` (1 minute) — the blocked list does not change frequently.
@@ -39,33 +39,33 @@ frontend/src/pages/settings/BlockedAccountsPage.tsx
 
 #### Layout root
 
-- [ ] MUI `Box` with `maxWidth: 600`, `mx: 'auto'`, `py: 3`, `px: { xs: 2, sm: 3 }` — centred narrow column consistent with other settings pages.
+- [x] MUI `Box` with `maxWidth: 600`, `mx: 'auto'`, `py: 3`, `px: { xs: 2, sm: 3 }` — centred narrow column consistent with other settings pages.
 
 #### Page header
 
-- [ ] MUI `Typography variant="h5" fontWeight={600} mb={1}` — "Blocked Accounts".
-- [ ] MUI `Typography variant="body2" color="text.secondary" mb={3}` — "People you've blocked can't see your posts or find your profile. They won't be notified when you unblock them."
+- [x] MUI `Typography variant="h5" fontWeight={600} mb={1}` — "Blocked Accounts".
+- [x] MUI `Typography variant="body2" color="text.secondary" mb={3}` — "People you've blocked can't see your posts or find your profile. They won't be notified when you unblock them."
 
 #### Data fetching
 
-- [ ] Call `const { blockedUsers, isLoading, isError } = useBlockedUsers()`.
+- [x] Call `const { blockedUsers, isLoading, isError } = useBlockedUsers()`.
 
 #### Loading state
 
-- [ ] While `isLoading` is `true`: render a list of 5 skeleton rows. Each skeleton row mimics the shape of a real item: circular `Skeleton` (avatar) + rectangular `Skeleton` (username + display name) side by side, with a rectangular `Skeleton` button on the right. Use MUI `Skeleton` component with `animation="wave"`.
+- [x] While `isLoading` is `true`: render a list of 5 skeleton rows. Each skeleton row mimics the shape of a real item: circular `Skeleton` (avatar) + rectangular `Skeleton` (username + display name) side by side, with a rectangular `Skeleton` button on the right. Use MUI `Skeleton` component with `animation="wave"`.
 
 #### Error state
 
-- [ ] When `isError` is `true`: render an MUI `Alert severity="error"` component with the message "Could not load blocked accounts. Please try again."
+- [x] When `isError` is `true`: render an MUI `Alert severity="error"` component with the message "Could not load blocked accounts. Please try again."
 
 #### Empty state
 
-- [ ] When `!isLoading && !isError && blockedUsers.length === 0`: render a centred MUI `Box` with `py: 6` containing `Typography color="text.secondary" align="center"` — "You haven't blocked anyone yet."
+- [x] When `!isLoading && !isError && blockedUsers.length === 0`: render a centred MUI `Box` with `py: 6` containing `Typography color="text.secondary" align="center"` — "You haven't blocked anyone yet."
 
 #### Blocked users list
 
-- [ ] When `blockedUsers.length > 0`: render MUI `List disablePadding` with a `Divider` between each item.
-- [ ] Each item is a `ListItem` (not a `ListItemButton` — clicking the row does nothing, only the Unblock button is interactive):
+- [x] When `blockedUsers.length > 0`: render MUI `List disablePadding` with a `Divider` between each item.
+- [x] Each item is a `ListItem` (not a `ListItemButton` — clicking the row does nothing, only the Unblock button is interactive):
   - `ListItemAvatar`: MUI `Avatar` with `src={user.avatarUrl ?? undefined}` and the first letter of `user.username` as fallback text.
   - `ListItemText`:
     - `primary`: MUI `Typography variant="body2" fontWeight={500}` — `user.username`.
@@ -76,11 +76,12 @@ frontend/src/pages/settings/BlockedAccountsPage.tsx
 
 #### Tracking pending unblocks
 
-- [ ] Because `useUnblockUser` is a single mutation shared across all rows, you need to know which row is "in flight". Declare `const [pendingUsername, setPendingUsername] = useState<string | null>(null)`. On the Unblock button's `onClick`: set `setPendingUsername(user.username)`, then call `unblock(user.username, { onSettled: () => setPendingUsername(null) })`. Disable the specific Unblock button where `pendingUsername === user.username`.
+
+- [x] Because `useUnblockUser` is a single mutation shared across all rows, you need to know which row is "in flight". Declare `const [pendingUsername, setPendingUsername] = useState<string | null>(null)`. On the Unblock button's `onClick`: set `setPendingUsername(user.username)`, then call `unblock(user.username, { onSettled: () => setPendingUsername(null) })`. Disable the specific Unblock button where `pendingUsername === user.username`.
 
 #### Navigation back link
 
-- [ ] At the top of the page, above the header, add a MUI `Button variant="text" startIcon={<ArrowBackIcon />}` — "Back to Settings" — that calls `navigate(-1)` from `useNavigate()`. This allows mobile users to return to the settings menu without using the browser back button.
+- [x] At the top of the page, above the header, add a MUI `Button variant="text" startIcon={<ArrowBackIcon />}` — "Back to Settings" — that calls `navigate(-1)` from `useNavigate()`. This allows mobile users to return to the settings menu without using the browser back button.
 
 ---
 
