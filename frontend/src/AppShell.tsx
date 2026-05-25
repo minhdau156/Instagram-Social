@@ -1,12 +1,15 @@
-import { AppBar, Badge, Box, Container, IconButton, Toolbar, Typography, alpha } from '@mui/material';
+import { AppBar, Badge, Box, Container, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography, alpha } from '@mui/material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import BlockIcon from '@mui/icons-material/Block';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import ExploreIcon from '@mui/icons-material/Explore';
 import ExploreOutlinedIcon from '@mui/icons-material/ExploreOutlined';
 import MailIcon from '@mui/icons-material/Mail';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { WebSocketProvider, useWebSocketContext } from './context/WebSocketContext';
 import { useConversations } from './hooks/messaging/useConversations';
@@ -30,7 +33,9 @@ function AppShellContent() {
   const { conversations } = useConversations();
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [settingsAnchorEl, setSettingsAnchorEl] = useState<HTMLButtonElement | null>(null);
   const { unreadCountNotification } = useUnreadNotifications();
+  const navigate = useNavigate();
 
 
   const unreadCount =
@@ -119,6 +124,13 @@ function AppShellContent() {
                 unreadCount={unreadCountNotification}
                 onClick={(e) => setAnchorEl(e.currentTarget)}
               />
+              <IconButton
+                color="inherit"
+                aria-label="Settings"
+                onClick={(e) => setSettingsAnchorEl(e.currentTarget)}
+              >
+                <SettingsIcon />
+              </IconButton>
             </Box>
           )}
         </Toolbar>
@@ -133,6 +145,22 @@ function AppShellContent() {
         anchorEl={anchorEl}
         onClose={() => setAnchorEl(null)}
       />
+
+      {/* Settings menu — only for settings-related links */}
+      <Menu
+        anchorEl={settingsAnchorEl}
+        open={Boolean(settingsAnchorEl)}
+        onClose={() => setSettingsAnchorEl(null)}
+      >
+        <MenuItem onClick={() => { navigate('/settings/notifications'); setSettingsAnchorEl(null); }}>
+          <ListItemIcon><NotificationsNoneIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Notification Settings</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => { navigate('/settings/blocked'); setSettingsAnchorEl(null); }}>
+          <ListItemIcon><BlockIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Blocked Accounts</ListItemText>
+        </MenuItem>
+      </Menu>
     </Box>
   );
 }

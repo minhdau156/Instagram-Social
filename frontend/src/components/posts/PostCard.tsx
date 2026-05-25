@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { Post } from "../../types/post";
 import { MoreVert, ChevronLeft, ChevronRight } from "@mui/icons-material";
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import { Card, CardHeader, Avatar, Typography, IconButton, CardMedia, CardContent, Button, Box } from "@mui/material";
+import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined';
+import { Card, CardHeader, Avatar, Typography, IconButton, CardMedia, CardContent, Button, Box, Menu, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
 import { useAuth } from "../../hooks/useAuth";
 import { LikeButton } from "./LikeButton";
 import { SaveButton } from "./SaveButton";
 import { ShareMenu } from "./ShareMenu";
 import { LikersTooltip } from "./LikersTooltip";
 import { PostDetailModal } from "./PostDetailModal";
+import { ReportDialog } from "../moderation/ReportDialog";
 import { usersApi } from "../../api/usersApi";
 import { useMutation } from "@tanstack/react-query";
 
@@ -18,6 +20,8 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     const [mediaIndex, setMediaIndex] = useState(0);
     const [openDetail, setOpenDetail] = useState(false);
     const [autoFocusComment, setAutoFocusComment] = useState(false);
+    const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const [reportDialogOpen, setReportDialogOpen] = useState(false);
 
     const { data, mutate } = useMutation({
         mutationFn: () => usersApi.getUserById(post.userId),
@@ -57,7 +61,11 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                 avatar={<Avatar src={user?.avatarUrl ? user?.avatarUrl : undefined} />}
                 title={<Typography fontWeight="bold">{user?.username}</Typography>}
                 subheader={post.location}
-                action={<IconButton><MoreVert /></IconButton>}
+                action={
+                    <IconButton onClick={(e) => setMenuAnchorEl(e.currentTarget)}>
+                        <MoreVert />
+                    </IconButton>
+                }
             />
             {/* Carousel for multiple media */}
             <Box sx={{ position: 'relative' }}>
@@ -166,9 +174,29 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                     post={post}
                     onClose={handleCloseDetail}
                     autoFocusComment={autoFocusComment}
-
                 />
             )}
+
+            <Menu
+                anchorEl={menuAnchorEl}
+                open={Boolean(menuAnchorEl)}
+                onClose={() => setMenuAnchorEl(null)}
+            >
+                {profile?.user && post.userId !== profile.user.id && (
+                    <MenuItem onClick={() => { setMenuAnchorEl(null); setReportDialogOpen(true); }}>
+                        <ListItemIcon><FlagOutlinedIcon fontSize="small" /></ListItemIcon>
+                        <ListItemText>Report</ListItemText>
+                    </MenuItem>
+                )}
+            </Menu>
+
+            <ReportDialog
+                open={reportDialogOpen}
+                onClose={() => setReportDialogOpen(false)}
+                entityType="POST"
+                entityId={post.id}
+                title="Report this post"
+            />
         </Card>
     );
 };

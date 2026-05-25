@@ -6,6 +6,8 @@ import { PageLoader } from "../../components/common/PageLoader";
 import { followKeys } from "../../hooks/follow/queryKeys";
 import { useAuth } from "../../hooks/useAuth";
 import { FollowButton } from "../../components/follow/FollowButton";
+import { BlockButton } from "../../components/moderation/BlockButton";
+import { useBlockedUsers } from "../../hooks/moderation/useBlockedUsers";
 import { useState } from "react";
 import { FollowingDialog } from "../../components/follow/FollowingDialog";
 import { FollowerDialog } from "../../components/follow/FollowerDialog";
@@ -23,6 +25,8 @@ export const PublicProfilePage = () => {
 
     const { profile } = useAuth();
     const isOwnProfile = profile?.user?.username === data?.user?.username;
+    const { blockedUsers } = useBlockedUsers();
+    const isBlocked = blockedUsers.some(b => b.blockedUserId === data?.user?.id);
 
     const [followersOpen, setFollowersOpen] = useState(false);
     const [followingOpen, setFollowingOpen] = useState(false);
@@ -47,13 +51,18 @@ export const PublicProfilePage = () => {
                                     <Typography variant="body2" onClick={() => { setFollowingOpen(true) }} style={{ cursor: "pointer" }}>{data?.followingCount ?? 0} following</Typography>
                                 </Stack>
 
-                                {!isOwnProfile &&
-                                    <FollowButton
-                                        username={username!}
-                                        status={data?.followStatus ?? null}
-
-                                    />
-                                }
+                                {!isOwnProfile && (
+                                    <Stack direction="row" spacing={1}>
+                                        <FollowButton
+                                            username={username!}
+                                            status={data?.followStatus ?? null}
+                                        />
+                                        <BlockButton
+                                            username={username!}
+                                            isBlocked={isBlocked}
+                                        />
+                                    </Stack>
+                                )}
                             </Stack>
 
                         </Stack>
