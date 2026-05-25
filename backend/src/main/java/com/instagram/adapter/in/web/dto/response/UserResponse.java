@@ -21,7 +21,11 @@ public record UserResponse(
 
         @Schema(description = "Whether the user's profile is private", example = "false") boolean isPrivate,
 
-        @Schema(description = "Whether the user is verified", example = "false") boolean isVerified) {
+        @Schema(description = "Whether the user is verified", example = "false") boolean isVerified,
+
+        String role
+
+) {
     public static UserResponse from(User user) {
         return new UserResponse(
                 user.getId(),
@@ -31,6 +35,7 @@ public record UserResponse(
                 user.getBio(),
                 user.getProfilePictureUrl(),
                 user.getPrivacyLevel() == PrivacyLevel.PRIVATE,
-                user.isVerified());
+                user.isVerified(),
+                user.getRole().name());
     }
 }
