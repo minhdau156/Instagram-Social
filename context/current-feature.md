@@ -1,13 +1,20 @@
-# Current Feature
+# Current Feature: Phase 9 — TASK-9.15 User-Facing Pages: BlockedAccountsPage
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- -->
+- `useBlockedUsers` hook (`queryKey: ['blocked-users']`, `staleTime: 60_000`, returns `{ blockedUsers, isLoading, isError }`)
+- `BlockedAccountsPage` at `/settings/blocked` with loading skeletons, error alert, empty state, and blocked-user list with per-row Unblock button
+- Route registered in `App.tsx`
 
 ## Notes
-<!-- -->
+- `useUnblockUser` already invalidates `['blocked-users']` (done in TASK-9.14)
+- `date-fns` is available (`^4.1.0`)
+- Reference layout: `NotificationSettingsPage` — `maxWidth: 500px`, `mx: 'auto'`, `py: 2`
+- This page uses `maxWidth: 600` per spec
+- `UserBlock` fields: `blockedUserId`, `username`, `fullName | null`, `avatarUrl | null`, `blockedAt`
+- Track in-flight unblock with `pendingUsername: string | null` state
 
 ## History
 - TASK-9.14 — User-Facing Components: `useSubmitReport`, `useBlockUser` (invalidates user profile query), `useUnblockUser` (invalidates `['blocked-users']` + user profile query) hooks in `hooks/moderation/`; `ReportDialog` (RadioGroup of 8 `ReportReason` values, `details` TextField for OTHER, resets on open, closes on success via `onSuccess: onClose`); `BlockButton` (block with confirmation dialog + `color="error"`, unblock direct, `aria-label` on both buttons, `onToggle?.()` on success).
