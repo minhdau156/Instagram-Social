@@ -12,6 +12,7 @@ import { RegisterPage } from './pages/auth/RegisterPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { ProfilePage } from './pages/users/ProfllePage';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
+import { AdminRoute } from './components/common/AdminRoute';
 import { OAuth2CallbackPage } from './pages/auth/OAuth2CallbackPage';
 
 import { PostPage } from './pages/posts/PostPage';
@@ -80,9 +81,10 @@ export default function App() {
                 <Route path="/notifications" element={<ErrorBoundary><NotificationsPage /></ErrorBoundary>} />
                 <Route path="/settings/notifications" element={<ErrorBoundary><NotificationSettingsPage /></ErrorBoundary>} />
                 <Route path="/settings/blocked" element={<ErrorBoundary><BlockedAccountsPage /></ErrorBoundary>} />
-                <Route path="/admin" element={<ErrorBoundary><AdminDashboardPage /></ErrorBoundary>} />
-                <Route path="/admin/reports" element={<ErrorBoundary><AdminReportsPage /></ErrorBoundary>} />
-                <Route path="/admin/users" element={<ErrorBoundary><AdminUsersPage /></ErrorBoundary>} />
+                {/* AdminRoute handles both unauthenticated (→ /login) and non-admin (→ /) redirects */}
+                <Route path="/admin" element={<AdminRoute><ErrorBoundary><AdminDashboardPage /></ErrorBoundary></AdminRoute>} />
+                <Route path="/admin/reports" element={<AdminRoute><ErrorBoundary><AdminReportsPage /></ErrorBoundary></AdminRoute>} />
+                <Route path="/admin/users" element={<AdminRoute><ErrorBoundary><AdminUsersPage /></ErrorBoundary></AdminRoute>} />
                 <Route path="/search" element={<ErrorBoundary><SearchPage /></ErrorBoundary>} />
                 <Route path="/hashtag/:name" element={<ErrorBoundary><HashtagPage /></ErrorBoundary>} />
               </Route>
