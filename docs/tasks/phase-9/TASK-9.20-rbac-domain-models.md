@@ -30,31 +30,31 @@ backend/src/main/java/com/instagram/domain/model/User.java              ← modi
 
 ### `RoleName` enum
 
-- [ ] Values: `USER`, `MODERATOR`, `ADMIN`, `SUPER_ADMIN` — exactly matching the seeded `roles.name` values from [TASK-9.19](TASK-9.19-rbac-flyway-migration.md).
+- [x] Values: `USER`, `MODERATOR`, `ADMIN`, `SUPER_ADMIN` — exactly matching the seeded `roles.name` values from [TASK-9.19](TASK-9.19-rbac-flyway-migration.md).
 
 ### `PermissionName` enum
 
-- [ ] Values matching the seeded `permissions.name` set: `REPORT_VIEW`, `REPORT_REVIEW`, `CONTENT_MODERATE`, `USER_VIEW`, `USER_SUSPEND`, `USER_UNSUSPEND`, `AUDIT_LOG_VIEW`, `ROLE_VIEW`, `ROLE_ASSIGN`, `ROLE_PERMISSION_MANAGE`.
+- [x] Values matching the seeded `permissions.name` set: `REPORT_VIEW`, `REPORT_REVIEW`, `CONTENT_MODERATE`, `USER_VIEW`, `USER_SUSPEND`, `USER_UNSUSPEND`, `AUDIT_LOG_VIEW`, `ROLE_VIEW`, `ROLE_ASSIGN`, `ROLE_PERMISSION_MANAGE`.
 
 ### `Permission`
 
-- [ ] Fields: `UUID id`, `PermissionName name`, `String description`.
-- [ ] Hand-written Builder; plain getters; no setters.
+- [x] Fields: `UUID id`, `PermissionName name`, `String description`.
+- [x] Hand-written Builder; plain getters; no setters.
 
 ### `Role`
 
-- [ ] Fields: `UUID id`, `RoleName name`, `String description`, `boolean system`, `Set<Permission> permissions`.
-- [ ] Hand-written Builder; `permissions` defaults to an empty `Set` in `build()` if null.
-- [ ] Method `boolean grants(PermissionName permission)` — true if any permission in the set matches.
+- [x] Fields: `UUID id`, `RoleName name`, `String description`, `boolean system`, `Set<Permission> permissions`.
+- [x] Hand-written Builder; `permissions` defaults to an empty `Set` in `build()` if null.
+- [x] Method `boolean grants(PermissionName permission)` — true if any permission in the set matches.
 
 ### `User` (modify)
 
-- [ ] Add field `Set<Role> roles` (default empty set).
-- [ ] Add it to the Builder and to the private `copy()` so existing `withXxx()` methods preserve roles.
-- [ ] Add `User withRoles(Set<Role> roles)` returning a new instance via `copy()`.
-- [ ] Add `boolean hasRole(RoleName roleName)` — true if any held role has that name.
-- [ ] Add `boolean hasPermission(PermissionName permission)` — true if **any** held role `grants(permission)`.
-- [ ] Add `Set<PermissionName> permissionNames()` — the flattened, de-duplicated set of all permissions across the user's roles (used to build authorities in [TASK-9.27](TASK-9.27-authorization-jwt-authorities.md)).
+- [x] Add field `Set<Role> roles` (default empty set).
+- [x] Add it to the Builder and to the private `copy()` so existing `withXxx()` methods preserve roles.
+- [x] Add `User withRoles(Set<Role> roles)` returning a new instance via `copy()`.
+- [x] Add `boolean hasRole(RoleName roleName)` — true if any held role has that name.
+- [x] Add `boolean hasPermission(PermissionName permission)` — true if **any** held role `grants(permission)`.
+- [x] Add `Set<PermissionName> permissionNames()` — the flattened, de-duplicated set of all permissions across the user's roles (used to build authorities in [TASK-9.27](TASK-9.27-authorization-jwt-authorities.md)).
 
 ---
 

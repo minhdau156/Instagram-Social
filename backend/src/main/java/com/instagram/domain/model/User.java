@@ -1,7 +1,10 @@
 package com.instagram.domain.model;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class User {
     private UUID id;
@@ -20,6 +23,7 @@ public class User {
     private OffsetDateTime updatedAt;
     private OffsetDateTime lastLoginAt;
     private UserRole role;
+    private Set<Role> roles;
 
     public User() {
 
@@ -89,6 +93,10 @@ public class User {
         return role;
     }
 
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
     private Builder copy() {
         return User.builder()
                 .id(this.id)
@@ -106,7 +114,8 @@ public class User {
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)
                 .role(this.role)
-                .lastLoginAt(this.lastLoginAt);
+                .lastLoginAt(this.lastLoginAt)
+                .roles(this.roles);
     }
 
     public static Builder builder() {
@@ -196,7 +205,15 @@ public class User {
             return this;
         }
 
+        public Builder roles(Set<Role> roles) {
+            user.roles = roles;
+            return this;
+        }
+
         public User build() {
+            if (user.roles == null) {
+                user.roles = Collections.emptySet();
+            }
             return user;
         }
     }
@@ -246,6 +263,25 @@ public class User {
 
     public boolean isActive() {
         return this.status == UserStatus.ACTIVE;
+    }
+
+    public User withRoles(Set<Role> roles) {
+        return this.copy().roles(roles).build();
+    }
+
+    public boolean hasRole(RoleName roleName) {
+        return roles.stream().anyMatch(r -> r.getName() == roleName);
+    }
+
+    public boolean hasPermission(PermissionName permission) {
+        return roles.stream().anyMatch(r -> r.grants(permission));
+    }
+
+    public Set<PermissionName> permissionNames() {
+        return roles.stream()
+                .flatMap(r -> r.getPermissions().stream())
+                .map(Permission::getName)
+                .collect(Collectors.toSet());
     }
 
 }
