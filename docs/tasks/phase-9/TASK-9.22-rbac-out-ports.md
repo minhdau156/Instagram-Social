@@ -19,22 +19,22 @@ backend/src/main/java/com/instagram/domain/port/out/PermissionRepository.java  �
 
 ### `RoleRepository`
 
-- [ ] `Optional<Role> findByName(RoleName name)`
-- [ ] `Optional<Role> findById(UUID roleId)`
-- [ ] `List<Role> findAll()` — all four system roles, each with its permissions populated.
-- [ ] `Set<Role> findRolesByUserId(UUID userId)` — the roles a user holds, **with permissions eagerly populated** (the filter needs permissions in one call).
-- [ ] `Set<PermissionName> findPermissionNamesByUserId(UUID userId)` — flattened permission names for a user; the hot path used on every authenticated request in [TASK-9.27](TASK-9.27-authorization-jwt-authorities.md). Provide this as a dedicated, projection-style method so the adapter can issue a single optimized query.
-- [ ] `void assignRoleToUser(UUID userId, UUID roleId, UUID assignedBy)` — idempotency is the caller's concern (the service checks first); the adapter may also rely on the `user_roles` PK.
-- [ ] `void revokeRoleFromUser(UUID userId, UUID roleId)`
-- [ ] `boolean userHasRole(UUID userId, RoleName name)`
-- [ ] `long countUsersWithRole(RoleName name)` — needed for the "cannot remove the last `SUPER_ADMIN`" guard.
-- [ ] `void replaceRolePermissions(UUID roleId, Set<UUID> permissionIds)` — overwrite a role's permission set (used by the manage-permissions endpoint).
+- [x] `Optional<Role> findByName(RoleName name)`
+- [x] `Optional<Role> findById(UUID roleId)`
+- [x] `List<Role> findAll()` — all four system roles, each with its permissions populated.
+- [x] `Set<Role> findRolesByUserId(UUID userId)` — the roles a user holds, **with permissions eagerly populated** (the filter needs permissions in one call).
+- [x] `Set<PermissionName> findPermissionNamesByUserId(UUID userId)` — flattened permission names for a user; the hot path used on every authenticated request in [TASK-9.27](TASK-9.27-authorization-jwt-authorities.md). Provide this as a dedicated, projection-style method so the adapter can issue a single optimized query.
+- [x] `void assignRoleToUser(UUID userId, UUID roleId, UUID assignedBy)` — idempotency is the caller's concern (the service checks first); the adapter may also rely on the `user_roles` PK.
+- [x] `void revokeRoleFromUser(UUID userId, UUID roleId)`
+- [x] `boolean userHasRole(UUID userId, RoleName name)`
+- [x] `long countUsersWithRole(RoleName name)` — needed for the "cannot remove the last `SUPER_ADMIN`" guard.
+- [x] `void replaceRolePermissions(UUID roleId, Set<UUID> permissionIds)` — overwrite a role's permission set (used by the manage-permissions endpoint).
 
 ### `PermissionRepository`
 
-- [ ] `List<Permission> findAll()`
-- [ ] `Optional<Permission> findByName(PermissionName name)`
-- [ ] `Set<Permission> findByIds(Collection<UUID> ids)` — resolve a submitted id set when replacing a role's permissions.
+- [x] `List<Permission> findAll()`
+- [x] `Optional<Permission> findByName(PermissionName name)`
+- [x] `Set<Permission> findByIds(Collection<UUID> ids)` — resolve a submitted id set when replacing a role's permissions.
 
 ---
 
