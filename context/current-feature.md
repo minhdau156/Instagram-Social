@@ -10,6 +10,7 @@ Not Started
 <!-- -->
 
 ## History
+- TASK-9.22 — Out-ports (RBAC): `RoleRepository` (10 methods: findByName, findById, findAll, findRolesByUserId, findPermissionNamesByUserId, assignRoleToUser, revokeRoleFromUser, userHasRole, countUsersWithRole, replaceRolePermissions) and `PermissionRepository` (3 methods: findAll, findByName, findByIds) — pure Java, no Spring/JPA imports, all return domain types.
 - TASK-9.21 — Domain exceptions (RBAC): `RoleNotFoundException` (404), `RoleAlreadyAssignedException` (409), `RoleNotAssignedException` (404), `InsufficientPrivilegeException` (403), `ProtectedRoleException` (409) — all pure Java; 5 `@ExceptionHandler` methods + `AuthorizationDeniedException` handler added to `GlobalExceptionHandler`.
 - TASK-9.20 — Domain models: `RoleName` (4 values) and `PermissionName` (10 values) enums; `Permission` and `Role` pure-Java domain objects with hand-written Builders; `Role.grants(PermissionName)`; `User` extended with `Set<Role> roles`, `withRoles`, `hasRole`, `hasPermission`, `permissionNames`.
 - TASK-9.19 — Flyway migration V4: RBAC tables (`roles`, `permissions`, `role_permissions`, `user_roles`), 4 system roles, 10 permissions, role→permission mapping, bulk USER assignment, dev super-admin bootstrap.
