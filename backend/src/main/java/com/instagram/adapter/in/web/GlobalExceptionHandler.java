@@ -4,6 +4,11 @@ import com.instagram.adapter.in.web.dto.response.ApiResponse;
 import com.instagram.domain.exception.AlreadyBlockedException;
 import com.instagram.domain.exception.AlreadyReportedException;
 import com.instagram.domain.exception.AlreadyFollowingException;
+import com.instagram.domain.exception.InsufficientPrivilegeException;
+import com.instagram.domain.exception.ProtectedRoleException;
+import com.instagram.domain.exception.RoleAlreadyAssignedException;
+import com.instagram.domain.exception.RoleNotFoundException;
+import com.instagram.domain.exception.RoleNotAssignedException;
 import com.instagram.domain.exception.AlreadyLikedException;
 import com.instagram.domain.exception.AlreadySavedException;
 import com.instagram.domain.exception.CannotFollowYourselfException;
@@ -44,6 +49,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 
 import java.util.stream.Collectors;
 
@@ -256,6 +262,42 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleAlreadyReported(AlreadyReportedException ex) {
         log.warn(ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRoleNotFound(RoleNotFoundException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(RoleAlreadyAssignedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRoleAlreadyAssigned(RoleAlreadyAssignedException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(RoleNotAssignedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRoleNotAssigned(RoleNotAssignedException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(InsufficientPrivilegeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInsufficientPrivilege(InsufficientPrivilegeException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(ProtectedRoleException.class)
+    public ResponseEntity<ApiResponse<Void>> handleProtectedRole(ProtectedRoleException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthorizationDenied(AuthorizationDeniedException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

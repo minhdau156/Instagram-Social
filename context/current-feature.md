@@ -1,13 +1,22 @@
-# Current Feature
+# Current Feature: TASK-9.21 — Domain exceptions (RBAC)
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- -->
+- Create `RoleNotFoundException` (404)
+- Create `RoleAlreadyAssignedException` (409)
+- Create `RoleNotAssignedException` (404)
+- Create `InsufficientPrivilegeException` (403)
+- Create `ProtectedRoleException` (409)
+- Add one `@ExceptionHandler` per exception in `GlobalExceptionHandler`
+- Add handler for `AuthorizationDeniedException` → 403
 
 ## Notes
-<!-- -->
+- All exceptions: pure Java, no framework annotations, no `@ResponseStatus`
+- Handlers: `log.warn(...)`, `ApiResponse.error(ex.getMessage())`
+- `RoleNotAssignedException` → 404, consistent with `NotBlockedException` (TASK-9.2)
+- `AccessDeniedException` handler already exists; add `AuthorizationDeniedException` separately
 
 ## History
 - TASK-9.20 — Domain models: `RoleName` (4 values) and `PermissionName` (10 values) enums; `Permission` and `Role` pure-Java domain objects with hand-written Builders; `Role.grants(PermissionName)`; `User` extended with `Set<Role> roles`, `withRoles`, `hasRole`, `hasPermission`, `permissionNames`.
