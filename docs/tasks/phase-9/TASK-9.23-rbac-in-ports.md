@@ -22,13 +22,13 @@ backend/src/main/java/com/instagram/domain/port/in/rbac/AssignDefaultRoleUseCase
 
 ## Checklist
 
-- [ ] `AssignRoleToUserUseCase` — `Command(UUID actorId, UUID targetUserId, RoleName roleName)`; returns the updated `Set<Role>` (or `void`). `actorId` is the admin performing the action (for privilege checks + audit).
-- [ ] `RevokeRoleFromUserUseCase` — `Command(UUID actorId, UUID targetUserId, RoleName roleName)`.
-- [ ] `GetUserRolesUseCase` — `Query(UUID targetUserId)` → `Set<Role>` (with permissions populated).
-- [ ] `GetUserPermissionsUseCase` — `Query(UUID userId)` → `Set<PermissionName>`. Used by the security filter to build authorities; keep it lightweight.
-- [ ] `ListRolesUseCase` — no args (or an empty marker) → `List<Role>` with their permissions; powers the role-management UI.
-- [ ] `UpdateRolePermissionsUseCase` — `Command(UUID actorId, RoleName roleName, Set<PermissionName> permissions)`; the **super-admin-only** operation that overwrites a role's permission set.
-- [ ] `AssignDefaultRoleUseCase` — `Command(UUID userId)`; grants `USER` to a freshly registered account. Called from the signup flow so new users always have a role.
+- [x] `AssignRoleToUserUseCase` — `Command(UUID actorId, UUID targetUserId, RoleName roleName)`; returns the updated `Set<Role>` (or `void`). `actorId` is the admin performing the action (for privilege checks + audit).
+- [x] `RevokeRoleFromUserUseCase` — `Command(UUID actorId, UUID targetUserId, RoleName roleName)`.
+- [x] `GetUserRolesUseCase` — `Query(UUID targetUserId)` → `Set<Role>` (with permissions populated).
+- [x] `GetUserPermissionsUseCase` — `Query(UUID userId)` → `Set<PermissionName>`. Used by the security filter to build authorities; keep it lightweight.
+- [x] `ListRolesUseCase` — no args (or an empty marker) → `List<Role>` with their permissions; powers the role-management UI.
+- [x] `UpdateRolePermissionsUseCase` — `Command(UUID actorId, RoleName roleName, Set<PermissionName> permissions)`; the **super-admin-only** operation that overwrites a role's permission set.
+- [x] `AssignDefaultRoleUseCase` — `Command(UUID userId)`; grants `USER` to a freshly registered account. Called from the signup flow so new users always have a role.
 
 ---
 
