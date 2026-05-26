@@ -23,34 +23,34 @@ backend/src/main/java/com/instagram/adapter/out/persistence/UserRoleJpaRepositor
 
 ### `RoleJpaEntity`
 
-- [ ] `@Entity @Table(name = "roles")`. Fields: `id`, `name` (String), `description`, `system` (`@Column(name = "is_system")`), `createdAt`.
-- [ ] Map permissions with `@ManyToMany(fetch = FetchType.LAZY)` + `@JoinTable(name = "role_permissions", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))` → `Set<PermissionJpaEntity>`.
+- [x] `@Entity @Table(name = "roles")`. Fields: `id`, `name` (String), `description`, `system` (`@Column(name = "is_system")`), `createdAt`.
+- [x] Map permissions with `@ManyToMany(fetch = FetchType.LAZY)` + `@JoinTable(name = "role_permissions", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))` → `Set<PermissionJpaEntity>`.
 
 ### `PermissionJpaEntity`
 
-- [ ] `@Entity @Table(name = "permissions")`. Fields: `id`, `name`, `description`, `createdAt`.
+- [x] `@Entity @Table(name = "permissions")`. Fields: `id`, `name`, `description`, `createdAt`.
 
 ### `UserRoleJpaEntity`
 
-- [ ] `@Entity @Table(name = "user_roles")` with a composite key (`@IdClass` or `@EmbeddedId`) over (`user_id`, `role_id`) — mirror the composite-key approach used by `ConversationMemberJpaEntity` / `UserBlockJpaEntity` so the codebase stays consistent.
-- [ ] Fields: `userId`, `roleId`, `assignedBy`, `assignedAt`. Store raw UUIDs (no `@ManyToOne` to `UserJpaEntity`) to avoid pulling the user graph — same pattern as `SearchHistoryJpaEntity`.
+- [x] `@Entity @Table(name = "user_roles")` with a composite key (`@IdClass` or `@EmbeddedId`) over (`user_id`, `role_id`) — mirror the composite-key approach used by `ConversationMemberJpaEntity` / `UserBlockJpaEntity` so the codebase stays consistent.
+- [x] Fields: `userId`, `roleId`, `assignedBy`, `assignedAt`. Store raw UUIDs (no `@ManyToOne` to `UserJpaEntity`) to avoid pulling the user graph — same pattern as `SearchHistoryJpaEntity`.
 
 ### `RoleJpaRepository`
 
-- [ ] `Optional<RoleJpaEntity> findByName(String name)`; `List<RoleJpaEntity> findAll()` (inherited).
-- [ ] `@EntityGraph(attributePaths = "permissions")` on `findByName` / a `findAllWithPermissions()` to fetch roles + permissions without N+1.
+- [x] `Optional<RoleJpaEntity> findByName(String name)`; `List<RoleJpaEntity> findAll()` (inherited).
+- [x] `@EntityGraph(attributePaths = "permissions")` on `findByName` / a `findAllWithPermissions()` to fetch roles + permissions without N+1.
 
 ### `PermissionJpaRepository`
 
-- [ ] `Optional<PermissionJpaEntity> findByName(String name)`; `List<PermissionJpaEntity> findByIdIn(Collection<UUID> ids)`.
+- [x] `Optional<PermissionJpaEntity> findByName(String name)`; `List<PermissionJpaEntity> findByIdIn(Collection<UUID> ids)`.
 
 ### `UserRoleJpaRepository`
 
-- [ ] `List<UserRoleJpaEntity> findByUserId(UUID userId)`.
-- [ ] `boolean existsByUserIdAndRoleId(UUID userId, UUID roleId)`.
-- [ ] `@Modifying @Transactional void deleteByUserIdAndRoleId(UUID userId, UUID roleId)`.
-- [ ] `long countByRoleId(UUID roleId)` — backs the last-super-admin guard.
-- [ ] A projection query for the hot path: `@Query("SELECT p.name FROM UserRoleJpaEntity ur JOIN RoleJpaEntity r ON r.id = ur.roleId JOIN r.permissions p WHERE ur.userId = :userId")` → `Set<String>` of permission names. Adjust the JPQL to your exact mappings; the goal is **one query** to fetch a user's permission names.
+- [x] `List<UserRoleJpaEntity> findByUserId(UUID userId)`.
+- [x] `boolean existsByUserIdAndRoleId(UUID userId, UUID roleId)`.
+- [x] `@Modifying @Transactional void deleteByUserIdAndRoleId(UUID userId, UUID roleId)`.
+- [x] `long countByRoleId(UUID roleId)` — backs the last-super-admin guard.
+- [x] A projection query for the hot path: `@Query("SELECT p.name FROM UserRoleJpaEntity ur JOIN RoleJpaEntity r ON r.id = ur.roleId JOIN r.permissions p WHERE ur.userId = :userId")` → `Set<String>` of permission names. Adjust the JPQL to your exact mappings; the goal is **one query** to fetch a user's permission names.
 
 ---
 

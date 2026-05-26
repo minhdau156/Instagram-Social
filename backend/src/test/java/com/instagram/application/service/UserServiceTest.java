@@ -26,6 +26,7 @@ import com.instagram.domain.model.UserStatus;
 import com.instagram.domain.port.in.LoginUseCase;
 import com.instagram.domain.port.in.RegisterUserUseCase;
 import com.instagram.domain.port.in.UpdateProfileUseCase;
+import com.instagram.domain.port.in.rbac.AssignDefaultRoleUseCase;
 import com.instagram.domain.port.out.EmailPort;
 import com.instagram.domain.port.out.PasswordHashPort;
 import com.instagram.domain.port.out.TokenPort;
@@ -45,6 +46,8 @@ public class UserServiceTest {
     private UserStatsRepository userStatsRepository;
     @Mock
     private EmailPort emailPort;
+    @Mock
+    private AssignDefaultRoleUseCase assignRoleUseCase;
     @InjectMocks
     private UserService userService;
 
