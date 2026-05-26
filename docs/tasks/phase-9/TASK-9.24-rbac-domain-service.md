@@ -18,41 +18,41 @@ backend/src/main/java/com/instagram/domain/service/RbacService.java   ← create
 
 ### Wiring
 
-- [ ] `@Service`; constructor-inject `RoleRepository`, `PermissionRepository`, `AuditLogRepository` — all `final`.
-- [ ] Implements `AssignRoleToUserUseCase`, `RevokeRoleFromUserUseCase`, `GetUserRolesUseCase`, `GetUserPermissionsUseCase`, `ListRolesUseCase`, `UpdateRolePermissionsUseCase`, `AssignDefaultRoleUseCase`.
+- [x] `@Service`; constructor-inject `RoleRepository`, `PermissionRepository`, `AuditLogRepository` — all `final`.
+- [x] Implements `AssignRoleToUserUseCase`, `RevokeRoleFromUserUseCase`, `GetUserRolesUseCase`, `GetUserPermissionsUseCase`, `ListRolesUseCase`, `UpdateRolePermissionsUseCase`, `AssignDefaultRoleUseCase`.
 
 ### `assignRoleToUser`
 
-- [ ] Resolve the target `Role` by name → `RoleNotFoundException` if absent.
-- [ ] **Privilege-escalation guard:** load the actor's roles. Only a `SUPER_ADMIN` may grant `ADMIN` or `SUPER_ADMIN`. An `ADMIN` may grant only `USER` / `MODERATOR`. Otherwise → `InsufficientPrivilegeException`.
-- [ ] If the user already holds the role → `RoleAlreadyAssignedException`.
-- [ ] Persist via `roleRepository.assignRoleToUser(targetUserId, roleId, actorId)`.
-- [ ] Audit: `auditLogRepository.log(actorId, "ROLE_ASSIGNED", "USER", targetUserId, "role=" + roleName)`.
-- [ ] `@Transactional`.
+- [x] Resolve the target `Role` by name → `RoleNotFoundException` if absent.
+- [x] **Privilege-escalation guard:** load the actor's roles. Only a `SUPER_ADMIN` may grant `ADMIN` or `SUPER_ADMIN`. An `ADMIN` may grant only `USER` / `MODERATOR`. Otherwise → `InsufficientPrivilegeException`.
+- [x] If the user already holds the role → `RoleAlreadyAssignedException`.
+- [x] Persist via `roleRepository.assignRoleToUser(targetUserId, roleId, actorId)`.
+- [x] Audit: `auditLogRepository.log(actorId, "ROLE_ASSIGNED", "USER", targetUserId, "role=" + roleName)`.
+- [x] `@Transactional`.
 
 ### `revokeRoleFromUser`
 
-- [ ] Same privilege guard as assignment (you may only revoke roles you could grant).
-- [ ] If the user does not hold the role → `RoleNotAssignedException`.
-- [ ] **Last-super-admin guard:** if revoking `SUPER_ADMIN` and `countUsersWithRole(SUPER_ADMIN) <= 1` → `InsufficientPrivilegeException` ("cannot remove the last super-admin").
-- [ ] Persist + audit (`"ROLE_REVOKED"`). `@Transactional`.
+- [x] Same privilege guard as assignment (you may only revoke roles you could grant).
+- [x] If the user does not hold the role → `RoleNotAssignedException`.
+- [x] **Last-super-admin guard:** if revoking `SUPER_ADMIN` and `countUsersWithRole(SUPER_ADMIN) <= 1` → `InsufficientPrivilegeException` ("cannot remove the last super-admin").
+- [x] Persist + audit (`"ROLE_REVOKED"`). `@Transactional`.
 
 ### `updateRolePermissions` (super-admin only)
 
-- [ ] Caller must hold `SUPER_ADMIN` (enforced again here even though the endpoint is gated — defence in depth) → else `InsufficientPrivilegeException`.
-- [ ] **Lockout guard:** refuse to remove `ROLE_PERMISSION_MANAGE` from the `SUPER_ADMIN` role → `ProtectedRoleException` (otherwise no one could ever edit permissions again).
-- [ ] Resolve submitted `PermissionName`s to ids via `PermissionRepository`; unknown names → `IllegalArgumentException` / 400.
-- [ ] `roleRepository.replaceRolePermissions(roleId, permissionIds)`.
-- [ ] Audit (`"ROLE_PERMISSIONS_UPDATED"`, detail = the new permission set). `@Transactional`.
+- [x] Caller must hold `SUPER_ADMIN` (enforced again here even though the endpoint is gated — defence in depth) → else `InsufficientPrivilegeException`.
+- [x] **Lockout guard:** refuse to remove `ROLE_PERMISSION_MANAGE` from the `SUPER_ADMIN` role → `ProtectedRoleException` (otherwise no one could ever edit permissions again).
+- [x] Resolve submitted `PermissionName`s to ids via `PermissionRepository`; unknown names → `IllegalArgumentException` / 400.
+- [x] `roleRepository.replaceRolePermissions(roleId, permissionIds)`.
+- [x] Audit (`"ROLE_PERMISSIONS_UPDATED"`, detail = the new permission set). `@Transactional`.
 
 ### Reads
 
-- [ ] `getUserRoles` / `listRoles` — straight delegation to the repository.
-- [ ] `getUserPermissions` — delegate to `findPermissionNamesByUserId`; return an empty set for a user with no roles (never null).
+- [x] `getUserRoles` / `listRoles` — straight delegation to the repository.
+- [x] `getUserPermissions` — delegate to `findPermissionNamesByUserId`; return an empty set for a user with no roles (never null).
 
 ### `assignDefaultRole`
 
-- [ ] Grant `USER` (resolved by name) to the given user id, `assignedBy = null` (system). No privilege guard. Skip if already assigned (idempotent). Wire this into the existing signup flow (`UserService` registration) so every new account gets `USER`.
+- [x] Grant `USER` (resolved by name) to the given user id, `assignedBy = null` (system). No privilege guard. Skip if already assigned (idempotent). Wire this into the existing signup flow (`UserService` registration) so every new account gets `USER`.
 
 ---
 

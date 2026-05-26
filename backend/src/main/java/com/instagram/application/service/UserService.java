@@ -29,6 +29,7 @@ import com.instagram.domain.port.in.RefreshTokenUseCase;
 import com.instagram.domain.port.in.RegisterUserUseCase;
 import com.instagram.domain.port.in.RequestPasswordResetUseCase;
 import com.instagram.domain.port.in.UpdateProfileUseCase;
+import com.instagram.domain.port.in.rbac.AssignDefaultRoleUseCase;
 import com.instagram.domain.port.in.user.FindAllUserUseCase;
 import com.instagram.domain.port.in.user.GetUserStatsUseCase;
 import com.instagram.domain.port.in.user.GetUserUseCase;
@@ -60,16 +61,18 @@ public class UserService
     private final EmailPort emailPort;
     private final UserStatsRepository userStatsRepository;
     private final FollowRepository followRepository;
+    private final AssignDefaultRoleUseCase assignDefaultRoleUseCase;
 
     public UserService(UserRepository userRepository, PasswordHashPort passwordHashPort,
             TokenPort tokenPort, EmailPort emailPort, UserStatsRepository userStatsRepository,
-            FollowRepository followRepository) {
+            FollowRepository followRepository, AssignDefaultRoleUseCase assignDefaultRoleUseCase) {
         this.userRepository = userRepository;
         this.passwordHashPort = passwordHashPort;
         this.tokenPort = tokenPort;
         this.emailPort = emailPort;
         this.userStatsRepository = userStatsRepository;
         this.followRepository = followRepository;
+        this.assignDefaultRoleUseCase = assignDefaultRoleUseCase;
     }
 
     // ── RegisterUserUseCase ──────────────────────────────────────────────────
@@ -97,6 +100,7 @@ public class UserService
                 .build();
         User saved = userRepository.save(user);
         userStatsRepository.create(UserStats.zero(saved.getId()));
+        assignDefaultRoleUseCase.assignDefaultRole(new AssignDefaultRoleUseCase.Command(saved.getId()));
 
         return saved;
     }
