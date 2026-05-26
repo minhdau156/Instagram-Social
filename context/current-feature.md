@@ -1,24 +1,16 @@
-# Current Feature: TASK-9.21 — Domain exceptions (RBAC)
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Create `RoleNotFoundException` (404)
-- Create `RoleAlreadyAssignedException` (409)
-- Create `RoleNotAssignedException` (404)
-- Create `InsufficientPrivilegeException` (403)
-- Create `ProtectedRoleException` (409)
-- Add one `@ExceptionHandler` per exception in `GlobalExceptionHandler`
-- Add handler for `AuthorizationDeniedException` → 403
+<!-- -->
 
 ## Notes
-- All exceptions: pure Java, no framework annotations, no `@ResponseStatus`
-- Handlers: `log.warn(...)`, `ApiResponse.error(ex.getMessage())`
-- `RoleNotAssignedException` → 404, consistent with `NotBlockedException` (TASK-9.2)
-- `AccessDeniedException` handler already exists; add `AuthorizationDeniedException` separately
+<!-- -->
 
 ## History
+- TASK-9.21 — Domain exceptions (RBAC): `RoleNotFoundException` (404), `RoleAlreadyAssignedException` (409), `RoleNotAssignedException` (404), `InsufficientPrivilegeException` (403), `ProtectedRoleException` (409) — all pure Java; 5 `@ExceptionHandler` methods + `AuthorizationDeniedException` handler added to `GlobalExceptionHandler`.
 - TASK-9.20 — Domain models: `RoleName` (4 values) and `PermissionName` (10 values) enums; `Permission` and `Role` pure-Java domain objects with hand-written Builders; `Role.grants(PermissionName)`; `User` extended with `Set<Role> roles`, `withRoles`, `hasRole`, `hasPermission`, `permissionNames`.
 - TASK-9.19 — Flyway migration V4: RBAC tables (`roles`, `permissions`, `role_permissions`, `user_roles`), 4 system roles, 10 permissions, role→permission mapping, bulk USER assignment, dev super-admin bootstrap.
 - TASK-9.18 — Register Routes: `React.lazy` imports for `BlockedAccountsPage`, `AdminDashboardPage`, `AdminReportsPage`, `AdminUsersPage`; `/settings/blocked` in `ProtectedRoute`; `/admin*` routes wrapped with `AdminRoute` (comment documents no-ProtectedRoute decision); `SettingsIcon` dropdown in `AppShell` with "Notification Settings" + "Blocked Accounts" menu items; `PostCard` kebab menu with "Report" `MenuItem` (non-owner) → `ReportDialog`; `BlockButton` on `PublicProfilePage` (non-self, `isBlocked` from `useBlockedUsers`).
