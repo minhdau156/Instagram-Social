@@ -56,7 +56,6 @@ CREATE TABLE users (
     updated_at          TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
     last_login_at       TIMESTAMPTZ,
     search_tsv   tsvector  GENERATED ALWAYS AS (to_tsvector('simple', coalesce(username::text, '') || ' ' || coalesce(full_name, ''))) STORED,
-    role                VARCHAR(50)     NOT NULL DEFAULT 'USER',
 
     CONSTRAINT chk_contact CHECK (email IS NOT NULL OR phone_number IS NOT NULL)
 );
@@ -505,6 +504,44 @@ CREATE TABLE audit_logs (
 
 CREATE INDEX idx_audit_user   ON audit_logs (user_id, created_at DESC);
 CREATE INDEX idx_audit_action ON audit_logs (action, created_at DESC);
+
+
+-- =============================================================================
+-- 15. AUTHORIZATION / RBAC (Admin Stories)
+-- =============================================================================
+
+CREATE TABLE roles (
+    id          UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name        VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT,
+    is_system   BOOLEAN     NOT NULL DEFAULT TRUE,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE permissions (
+    id          UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name        VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE role_permissions (
+    role_id       UUID NOT NULL REFERENCES roles       (id) ON DELETE CASCADE,
+    permission_id UUID NOT NULL REFERENCES permissions (id) ON DELETE CASCADE,
+
+    PRIMARY KEY (role_id, permission_id)
+);
+
+CREATE TABLE user_roles (
+    user_id     UUID        NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    role_id     UUID        NOT NULL REFERENCES roles (id) ON DELETE CASCADE,
+    assigned_by UUID        REFERENCES users (id),
+    assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    PRIMARY KEY (user_id, role_id)
+);
+
+CREATE INDEX idx_user_roles_user ON user_roles (user_id);
 
 
 -- =============================================================================

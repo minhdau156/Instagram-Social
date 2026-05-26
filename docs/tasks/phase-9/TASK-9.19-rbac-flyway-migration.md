@@ -30,19 +30,19 @@ backend/src/main/resources/db/migration/V4__add_rbac_tables.sql   ← create
 
 ### Tables
 
-- [ ] `roles` — `id UUID PK DEFAULT uuid_generate_v4()`, `name VARCHAR(50) NOT NULL UNIQUE`, `description TEXT`, `is_system BOOLEAN NOT NULL DEFAULT TRUE`, `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`.
-- [ ] `permissions` — `id UUID PK`, `name VARCHAR(100) NOT NULL UNIQUE`, `description TEXT`, `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`.
-- [ ] `role_permissions` — `role_id UUID NOT NULL REFERENCES roles(id) ON DELETE CASCADE`, `permission_id UUID NOT NULL REFERENCES permissions(id) ON DELETE CASCADE`, `PRIMARY KEY (role_id, permission_id)`.
-- [ ] `user_roles` — `user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE`, `role_id UUID NOT NULL REFERENCES roles(id) ON DELETE CASCADE`, `assigned_by UUID REFERENCES users(id)`, `assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`, `PRIMARY KEY (user_id, role_id)`.
-- [ ] Index `idx_user_roles_user ON user_roles(user_id)` — the authority lookup in [TASK-9.27](TASK-9.27-authorization-jwt-authorities.md) filters by `user_id` on every request.
+- [x] `roles` — `id UUID PK DEFAULT uuid_generate_v4()`, `name VARCHAR(50) NOT NULL UNIQUE`, `description TEXT`, `is_system BOOLEAN NOT NULL DEFAULT TRUE`, `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`.
+- [x] `permissions` — `id UUID PK`, `name VARCHAR(100) NOT NULL UNIQUE`, `description TEXT`, `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`.
+- [x] `role_permissions` — `role_id UUID NOT NULL REFERENCES roles(id) ON DELETE CASCADE`, `permission_id UUID NOT NULL REFERENCES permissions(id) ON DELETE CASCADE`, `PRIMARY KEY (role_id, permission_id)`.
+- [x] `user_roles` — `user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE`, `role_id UUID NOT NULL REFERENCES roles(id) ON DELETE CASCADE`, `assigned_by UUID REFERENCES users(id)`, `assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`, `PRIMARY KEY (user_id, role_id)`.
+- [x] Index `idx_user_roles_user ON user_roles(user_id)` — the authority lookup in [TASK-9.27](TASK-9.27-authorization-jwt-authorities.md) filters by `user_id` on every request.
 
 ### Seed — roles
 
-- [ ] Insert the four system roles: `USER`, `MODERATOR`, `ADMIN`, `SUPER_ADMIN` (all `is_system = TRUE`).
+- [x] Insert the four system roles: `USER`, `MODERATOR`, `ADMIN`, `SUPER_ADMIN` (all `is_system = TRUE`).
 
 ### Seed — permissions
 
-- [ ] Insert the canonical permission set (this list is the contract used by [TASK-9.20](TASK-9.20-rbac-domain-models.md) and [TASK-9.28](TASK-9.28-securityconfig-method-security.md)):
+- [x] Insert the canonical permission set (this list is the contract used by [TASK-9.20](TASK-9.20-rbac-domain-models.md) and [TASK-9.28](TASK-9.28-securityconfig-method-security.md)):
   - `REPORT_VIEW`, `REPORT_REVIEW`
   - `CONTENT_MODERATE`
   - `USER_VIEW`, `USER_SUSPEND`, `USER_UNSUSPEND`
@@ -51,16 +51,16 @@ backend/src/main/resources/db/migration/V4__add_rbac_tables.sql   ← create
 
 ### Seed — role → permission mapping
 
-- [ ] `USER` → (none of the above; a normal user holds no admin/moderation permissions).
-- [ ] `MODERATOR` → `REPORT_VIEW`, `REPORT_REVIEW`, `CONTENT_MODERATE`, `USER_VIEW`.
-- [ ] `ADMIN` → all `MODERATOR` permissions **plus** `USER_SUSPEND`, `USER_UNSUSPEND`, `AUDIT_LOG_VIEW`, `ROLE_VIEW`, `ROLE_ASSIGN`.
-- [ ] `SUPER_ADMIN` → all `ADMIN` permissions **plus** `ROLE_PERMISSION_MANAGE`.
-- [ ] Write the mapping as `INSERT ... SELECT` joins on `roles.name` / `permissions.name` so it does not depend on the generated UUIDs.
+- [x] `USER` → (none of the above; a normal user holds no admin/moderation permissions).
+- [x] `MODERATOR` → `REPORT_VIEW`, `REPORT_REVIEW`, `CONTENT_MODERATE`, `USER_VIEW`.
+- [x] `ADMIN` → all `MODERATOR` permissions **plus** `USER_SUSPEND`, `USER_UNSUSPEND`, `AUDIT_LOG_VIEW`, `ROLE_VIEW`, `ROLE_ASSIGN`.
+- [x] `SUPER_ADMIN` → all `ADMIN` permissions **plus** `ROLE_PERMISSION_MANAGE`.
+- [x] Write the mapping as `INSERT ... SELECT` joins on `roles.name` / `permissions.name` so it does not depend on the generated UUIDs.
 
 ### Seed — assignments
 
-- [ ] Assign the `USER` role to every existing row in `users` (`INSERT INTO user_roles (user_id, role_id) SELECT u.id, r.id FROM users u CROSS JOIN roles r WHERE r.name = 'USER'`).
-- [ ] Bootstrap one `SUPER_ADMIN`: assign the `SUPER_ADMIN` role to a single known account. Do **not** hardcode a production email in the migration — instead document that the local/dev super-admin is the seed user from `V2__seed_data.sql`, and that production bootstrapping happens via a separate, environment-specific step. (See Notes.)
+- [x] Assign the `USER` role to every existing row in `users` (`INSERT INTO user_roles (user_id, role_id) SELECT u.id, r.id FROM users u CROSS JOIN roles r WHERE r.name = 'USER'`).
+- [x] Bootstrap one `SUPER_ADMIN`: assign the `SUPER_ADMIN` role to a single known account. Do **not** hardcode a production email in the migration — instead document that the local/dev super-admin is the seed user from `V2__seed_data.sql`, and that production bootstrapping happens via a separate, environment-specific step. (See Notes.)
 
 ---
 
