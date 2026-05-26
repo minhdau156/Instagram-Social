@@ -10,6 +10,7 @@ Not Started
 <!-- -->
 
 ## History
+- TASK-9.20 — Domain models: `RoleName` (4 values) and `PermissionName` (10 values) enums; `Permission` and `Role` pure-Java domain objects with hand-written Builders; `Role.grants(PermissionName)`; `User` extended with `Set<Role> roles`, `withRoles`, `hasRole`, `hasPermission`, `permissionNames`.
 - TASK-9.19 — Flyway migration V4: RBAC tables (`roles`, `permissions`, `role_permissions`, `user_roles`), 4 system roles, 10 permissions, role→permission mapping, bulk USER assignment, dev super-admin bootstrap.
 - TASK-9.18 — Register Routes: `React.lazy` imports for `BlockedAccountsPage`, `AdminDashboardPage`, `AdminReportsPage`, `AdminUsersPage`; `/settings/blocked` in `ProtectedRoute`; `/admin*` routes wrapped with `AdminRoute` (comment documents no-ProtectedRoute decision); `SettingsIcon` dropdown in `AppShell` with "Notification Settings" + "Blocked Accounts" menu items; `PostCard` kebab menu with "Report" `MenuItem` (non-owner) → `ReportDialog`; `BlockButton` on `PublicProfilePage` (non-self, `isBlocked` from `useBlockedUsers`).
 - TASK-9.17 — Admin Route Guard: `AdminRoute` named export in `components/common/`; `useEffect`-based `toast.error()` for non-admin access; `<Navigate replace />` for unauthenticated and non-admin cases; `isAdmin` from `AuthContext` (`profile?.user.role === 'ADMIN'`); `role: string` on `User` type; `isAdmin: boolean` exposed on `AuthContextValue`.
