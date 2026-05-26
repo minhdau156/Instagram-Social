@@ -23,18 +23,18 @@ backend/src/main/java/com/instagram/adapter/in/web/GlobalExceptionHandler.java  
 
 ### Exceptions (pure Java, no framework annotations, no `@ResponseStatus`)
 
-- [ ] `RoleNotFoundException` — a role name/id was not found in the DB. → **404**
-- [ ] `RoleAlreadyAssignedException` — the user already holds the role being assigned. → **409**
-- [ ] `RoleNotAssignedException` — attempted to revoke a role the user does not hold. → **404** (or 409 — pick one and stay consistent with the block/unblock choice in [TASK-9.2](TASK-9.2-domain-exceptions.md)).
-- [ ] `InsufficientPrivilegeException` — the caller may not perform this assignment (e.g. an `ADMIN` trying to grant `SUPER_ADMIN`, or removing the last super-admin). → **403**
-- [ ] `ProtectedRoleException` — attempt to delete/rename a `is_system` role, or to strip `ROLE_PERMISSION_MANAGE` from `SUPER_ADMIN`. → **409**
-- [ ] Each carries a clear message including the offending role/user identifier.
+- [x] `RoleNotFoundException` — a role name/id was not found in the DB. → **404**
+- [x] `RoleAlreadyAssignedException` — the user already holds the role being assigned. → **409**
+- [x] `RoleNotAssignedException` — attempted to revoke a role the user does not hold. → **404** (or 409 — pick one and stay consistent with the block/unblock choice in [TASK-9.2](TASK-9.2-domain-exceptions.md)).
+- [x] `InsufficientPrivilegeException` — the caller may not perform this assignment (e.g. an `ADMIN` trying to grant `SUPER_ADMIN`, or removing the last super-admin). → **403**
+- [x] `ProtectedRoleException` — attempt to delete/rename a `is_system` role, or to strip `ROLE_PERMISSION_MANAGE` from `SUPER_ADMIN`. → **409**
+- [x] Each carries a clear message including the offending role/user identifier.
 
 ### `GlobalExceptionHandler` (modify)
 
-- [ ] Add one `@ExceptionHandler` method per exception above, returning `ApiResponse.error(...)` with the mapped status.
-- [ ] Use `log.warn(...)` (not `error`) — these are expected client/authorization failures, mirroring the existing moderation handlers from [TASK-9.2](TASK-9.2-domain-exceptions.md).
-- [ ] Add a handler for Spring Security's `AuthorizationDeniedException` / `AccessDeniedException` → **403** with the `ApiResponse` envelope, so `@PreAuthorize` denials ([TASK-9.28](TASK-9.28-securityconfig-method-security.md)) return a consistent JSON body instead of the default Spring error page. (Note: filter-chain denials are handled separately — see Notes.)
+- [x] Add one `@ExceptionHandler` method per exception above, returning `ApiResponse.error(...)` with the mapped status.
+- [x] Use `log.warn(...)` (not `error`) — these are expected client/authorization failures, mirroring the existing moderation handlers from [TASK-9.2](TASK-9.2-domain-exceptions.md).
+- [x] Add a handler for Spring Security's `AuthorizationDeniedException` / `AccessDeniedException` → **403** with the `ApiResponse` envelope, so `@PreAuthorize` denials ([TASK-9.28](TASK-9.28-securityconfig-method-security.md)) return a consistent JSON body instead of the default Spring error page. (Note: filter-chain denials are handled separately — see Notes.)
 
 ---
 
