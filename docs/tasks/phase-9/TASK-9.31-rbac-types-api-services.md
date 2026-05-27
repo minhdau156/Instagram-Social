@@ -19,24 +19,24 @@ frontend/src/api/rbacApi.ts        ← create
 
 ### `types/rbac.ts`
 
-- [ ] `export type RoleName = 'USER' | 'MODERATOR' | 'ADMIN' | 'SUPER_ADMIN';`
-- [ ] `export type PermissionName =` string-literal union of the 10 permissions: `'REPORT_VIEW' | 'REPORT_REVIEW' | 'CONTENT_MODERATE' | 'USER_VIEW' | 'USER_SUSPEND' | 'USER_UNSUSPEND' | 'AUDIT_LOG_VIEW' | 'ROLE_VIEW' | 'ROLE_ASSIGN' | 'ROLE_PERMISSION_MANAGE';`
-- [ ] `export interface Permission { id: string; name: PermissionName; description: string; }`
-- [ ] `export interface Role { id: string; name: RoleName; description: string; system: boolean; permissions: PermissionName[]; }`
-- [ ] `export interface UserRoles { userId: string; roles: Role[]; }`
-- [ ] `export interface MyGrants { roles: RoleName[]; permissions: PermissionName[]; }` — shape of `GET /users/me/permissions`.
-- [ ] No `any`. These unions are the single source of truth the UI gates on.
+- [x] `export type RoleName = 'USER' | 'MODERATOR' | 'ADMIN' | 'SUPER_ADMIN';`
+- [x] `export type PermissionName =` string-literal union of the 10 permissions: `'REPORT_VIEW' | 'REPORT_REVIEW' | 'CONTENT_MODERATE' | 'USER_VIEW' | 'USER_SUSPEND' | 'USER_UNSUSPEND' | 'AUDIT_LOG_VIEW' | 'ROLE_VIEW' | 'ROLE_ASSIGN' | 'ROLE_PERMISSION_MANAGE';`
+- [x] `export interface Permission { id: string; name: PermissionName; description: string; }`
+- [x] `export interface Role { id: string; name: RoleName; description: string; system: boolean; permissions: PermissionName[]; }`
+- [x] `export interface UserRoles { userId: string; roles: Role[]; }`
+- [x] `export interface MyGrants { roles: RoleName[]; permissions: PermissionName[]; }` — shape of `GET /users/me/permissions`.
+- [x] No `any`. These unions are the single source of truth the UI gates on.
 
 ### `api/rbacApi.ts`
 
-- [ ] `listRoles(): Promise<Role[]>` → `GET /api/v1/admin/roles`
-- [ ] `listPermissions(): Promise<Permission[]>` → `GET /api/v1/admin/permissions`
-- [ ] `updateRolePermissions(roleName: RoleName, permissions: PermissionName[]): Promise<Role>` → `PUT /api/v1/admin/roles/${roleName}/permissions`
-- [ ] `getUserRoles(userId: string): Promise<UserRoles>` → `GET /api/v1/admin/users/${userId}/roles`
-- [ ] `assignRole(userId: string, roleName: RoleName): Promise<UserRoles>` → `POST /api/v1/admin/users/${userId}/roles`
-- [ ] `revokeRole(userId: string, roleName: RoleName): Promise<void>` → `DELETE /api/v1/admin/users/${userId}/roles/${roleName}`
-- [ ] `getMyGrants(): Promise<MyGrants>` → `GET /api/v1/users/me/permissions`
-- [ ] All functions `async`, use the shared `api` Axios instance, and unwrap `data.data` exactly like the other service files.
+- [x] `listRoles(): Promise<Role[]>` → `GET /api/v1/admin/roles`
+- [x] `listPermissions(): Promise<Permission[]>` → `GET /api/v1/admin/permissions`
+- [x] `updateRolePermissions(roleName: RoleName, permissions: PermissionName[]): Promise<Role>` → `PUT /api/v1/admin/roles/${roleName}/permissions`
+- [x] `getUserRoles(userId: string): Promise<UserRoles>` → `GET /api/v1/admin/users/${userId}/roles`
+- [x] `assignRole(userId: string, roleName: RoleName): Promise<UserRoles>` → `POST /api/v1/admin/users/${userId}/roles`
+- [x] `revokeRole(userId: string, roleName: RoleName): Promise<void>` → `DELETE /api/v1/admin/users/${userId}/roles/${roleName}`
+- [x] `getMyGrants(): Promise<MyGrants>` → `GET /api/v1/users/me/permissions`
+- [x] All functions `async`, use the shared `api` Axios instance, and unwrap `data.data` exactly like the other service files.
 
 ---
 
