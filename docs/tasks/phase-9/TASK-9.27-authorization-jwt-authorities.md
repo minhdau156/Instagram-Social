@@ -35,22 +35,22 @@ backend/src/main/java/com/instagram/infrastructure/security/JwtTokenProvider.jav
 
 ### `JwtAuthenticationFilter` (modify)
 
-- [ ] Constructor-inject `GetUserPermissionsUseCase` and `RoleRepository` (or a single `GetUserRolesUseCase`) alongside the existing `JwtTokenProvider`.
-- [ ] After `validateAccessToken` yields the `userId`, load:
+- [x] Constructor-inject `GetUserPermissionsUseCase` and `RoleRepository` (or a single `GetUserRolesUseCase`) alongside the existing `JwtTokenProvider`.
+- [x] After `validateAccessToken` yields the `userId`, load:
   - the user's roles → map each to `new SimpleGrantedAuthority("ROLE_" + roleName.name())`
   - the user's permissions → map each to `new SimpleGrantedAuthority(permissionName.name())`
-- [ ] Build the `UserDetails` (or principal) with the **combined** authority list — replace `Collections.emptyList()`.
-- [ ] Set the resulting `UsernamePasswordAuthenticationToken(principal, null, authorities)` on the `SecurityContextHolder`.
-- [ ] Keep the principal name = `userId.toString()` so the existing `currentUserId()` helper in controllers keeps working unchanged.
-- [ ] If authority loading fails (user deleted, etc.), leave the context unauthenticated and continue the chain — never throw out of the filter.
+- [x] Build the `UserDetails` (or principal) with the **combined** authority list — replace `Collections.emptyList()`.
+- [x] Set the resulting `UsernamePasswordAuthenticationToken(principal, null, authorities)` on the `SecurityContextHolder`.
+- [x] Keep the principal name = `userId.toString()` so the existing `currentUserId()` helper in controllers keeps working unchanged.
+- [x] If authority loading fails (user deleted, etc.), leave the context unauthenticated and continue the chain — never throw out of the filter.
 
 ### `JwtTokenProvider` (optional)
 
-- [ ] No change is required for Approach A. If you want the frontend to read roles straight from the token, change the claim from a single `role` String to a `roles` list and populate it at login — but treat it as **display only**, never as the authorization source.
+- [x] No change is required for Approach A. If you want the frontend to read roles straight from the token, change the claim from a single `role` String to a `roles` list and populate it at login — but treat it as **display only**, never as the authorization source.
 
 ### Performance
 
-- [ ] The per-request lookup must be a single indexed query (`findPermissionNamesByUserId`, backed by `idx_user_roles_user`). Note in a comment that this is the place to add a short-TTL Redis cache keyed by `userId` once [TASK-10.3](../phase-10/TASK-10.3-redis-caching.md) lands.
+- [x] The per-request lookup must be a single indexed query (`findPermissionNamesByUserId`, backed by `idx_user_roles_user`). Note in a comment that this is the place to add a short-TTL Redis cache keyed by `userId` once [TASK-10.3](../phase-10/TASK-10.3-redis-caching.md) lands.
 
 ---
 
