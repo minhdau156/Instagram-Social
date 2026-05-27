@@ -14,7 +14,7 @@ public interface RoleRepository {
 
     Optional<Role> findById(UUID roleId);
 
-    List<Role> findAll();
+    List<Role> findAllRoles();
 
     Set<Role> findRolesByUserId(UUID userId);
 

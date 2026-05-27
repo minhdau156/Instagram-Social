@@ -105,7 +105,7 @@ public class RbacService implements AssignDefaultRoleUseCase, AssignRoleToUserUs
 
     @Override
     public List<Role> listRoles(ListRolesUseCase.Query query) {
-        return roleRepository.findAll();
+        return roleRepository.findAllRoles();
     }
 
     @Override

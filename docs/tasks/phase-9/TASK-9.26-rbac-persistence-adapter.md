@@ -18,16 +18,16 @@ backend/src/main/java/com/instagram/adapter/out/persistence/RbacPersistenceAdapt
 
 ## Checklist
 
-- [ ] `@Component`; constructor-inject `RoleJpaRepository`, `PermissionJpaRepository`, `UserRoleJpaRepository` (all `final`).
-- [ ] `implements RoleRepository, PermissionRepository`.
-- [ ] Implement every method from [TASK-9.22](TASK-9.22-rbac-out-ports.md).
-- [ ] `findRolesByUserId` — read `UserRoleJpaEntity` rows for the user, load each `RoleJpaEntity` with its permissions (use the `@EntityGraph` finder, or batch-load to avoid N+1), map to `Set<Role>`.
-- [ ] `findPermissionNamesByUserId` — call the projection query and map `Set<String>` → `Set<PermissionName>` via `PermissionName.valueOf(...)`.
-- [ ] `assignRoleToUser` — build and `save` a `UserRoleJpaEntity` (`userId`, `roleId`, `assignedBy`, `assignedAt = OffsetDateTime.now()`).
-- [ ] `revokeRoleFromUser` — `deleteByUserIdAndRoleId`.
-- [ ] `replaceRolePermissions(roleId, permissionIds)` — load the `RoleJpaEntity`, set its `permissions` to the resolved `PermissionJpaEntity` set, `save`. (JPA reconciles the `role_permissions` join rows.)
-- [ ] `countUsersWithRole(name)` → resolve role id, then `userRoleJpaRepository.countByRoleId`.
-- [ ] Private `toDomain(RoleJpaEntity)`, `toDomain(PermissionJpaEntity)` mappers; convert `String name` → `RoleName.valueOf` / `PermissionName.valueOf`.
+- [x] `@Component`; constructor-inject `RoleJpaRepository`, `PermissionJpaRepository`, `UserRoleJpaRepository` (all `final`).
+- [x] `implements RoleRepository, PermissionRepository`.
+- [x] Implement every method from [TASK-9.22](TASK-9.22-rbac-out-ports.md).
+- [x] `findRolesByUserId` — read `UserRoleJpaEntity` rows for the user, load each `RoleJpaEntity` with its permissions (use the `@EntityGraph` finder, or batch-load to avoid N+1), map to `Set<Role>`.
+- [x] `findPermissionNamesByUserId` — call the projection query and map `Set<String>` → `Set<PermissionName>` via `PermissionName.valueOf(...)`.
+- [x] `assignRoleToUser` — build and `save` a `UserRoleJpaEntity` (`userId`, `roleId`, `assignedBy`, `assignedAt = OffsetDateTime.now()`).
+- [x] `revokeRoleFromUser` — `deleteByUserIdAndRoleId`.
+- [x] `replaceRolePermissions(roleId, permissionIds)` — load the `RoleJpaEntity`, set its `permissions` to the resolved `PermissionJpaEntity` set, `save`. (JPA reconciles the `role_permissions` join rows.)
+- [x] `countUsersWithRole(name)` → resolve role id, then `userRoleJpaRepository.countByRoleId`.
+- [x] Private `toDomain(RoleJpaEntity)`, `toDomain(PermissionJpaEntity)` mappers; convert `String name` → `RoleName.valueOf` / `PermissionName.valueOf`.
 
 ---
 

@@ -10,7 +10,7 @@ import com.instagram.domain.model.Permission;
 import com.instagram.domain.model.PermissionName;
 
 public interface PermissionRepository {
-    List<Permission> findAll();
+    List<Permission> findAllPermissions();
 
     Optional<Permission> findByName(PermissionName name);
 
