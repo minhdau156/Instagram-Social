@@ -1,13 +1,19 @@
-# Current Feature
+# Current Feature: TASK-9.30 — Tests (RBAC & authorization)
 
 ## Status
-Not Started
+Complete
 
 ## Goals
-<!-- -->
+- `RbacServiceTest`: unit tests for domain guards — assign happy path, privilege-escalation guard, duplicate-role guard, last-super-admin revoke guard, `updateRolePermissions` on `SUPER_ADMIN` (ProtectedRoleException), `updateRolePermissions` by non-super-admin, `assignDefaultRole` idempotency, `getUserPermissions` empty-set guarantee
+- `RbacPersistenceAdapterIT`: DataJpaTest — `findRolesByUserId` with populated permissions, `findPermissionNamesByUserId` flattened/de-duped, assign+`userHasRole`→true / revoke→false, `replaceRolePermissions` overwrites join rows, `countUsersWithRole` accuracy
+- `RoleAdminControllerTest`: WebMvcTest + MockMvc — `GET /admin/roles` with/without `ROLE_VIEW`, `PUT /admin/roles/{name}/permissions` with `ROLE_PERMISSION_MANAGE` vs `ROLE_ASSIGN` only, `POST /admin/users/{id}/roles` with `ROLE_ASSIGN` vs unauthenticated
+- `AuthorizationIT`: full SpringBootTest filter chain — MODERATOR can review reports (200) but cannot suspend users (403), plain USER on any `/api/v1/admin/**` gets 403 with JSON `ApiResponse`, ADMIN assigning SUPER_ADMIN gets 403, no auth header on admin route gets 401
 
 ## Notes
-<!-- -->
+- Negative tests are the primary deliverable — moderator-cannot-suspend and user-cannot-reach-admin are what protect the system
+- Authorities, not just roles: mock principals with bare permission authorities (e.g. `REPORT_REVIEW`) as TASK-9.27 does — `@PreAuthorize("hasAuthority(...)")` won't match role grants
+- Mirror conventions from `ModerationServiceTest` / `ModerationPersistenceAdapterIT` / `ModerationControllerIT`
+- `*Test` suffix for unit/MockMvc, `*IT` suffix for integration tests
 
 ## History
 - TASK-9.29 — `RoleAdminController` (6 endpoints under `/api/v1/admin`: GET/PUT roles, GET/POST/DELETE user roles); DTOs: `AssignRoleRequest`, `UpdateRolePermissionsRequest`, `RoleResponse`, `PermissionResponse`, `UserRolesResponse`, `UserGrantsResponse`; `GET /users/me/permissions` added to `UserController`.
