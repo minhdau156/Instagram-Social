@@ -21,36 +21,36 @@ backend/src/test/java/com/instagram/infrastructure/security/AuthorizationIT.java
 
 ### `RbacServiceTest` (JUnit 5 + Mockito)
 
-- [ ] assign role: happy path persists + writes audit log (verify `AuditLogRepository.log` with `ArgumentCaptor`).
-- [ ] assign `ADMIN` by a non-super-admin actor → `InsufficientPrivilegeException`.
-- [ ] assign a role the user already holds → `RoleAlreadyAssignedException`.
-- [ ] revoke `SUPER_ADMIN` when `countUsersWithRole(SUPER_ADMIN) == 1` → `InsufficientPrivilegeException` (last-super-admin guard).
-- [ ] `updateRolePermissions` removing `ROLE_PERMISSION_MANAGE` from `SUPER_ADMIN` → `ProtectedRoleException`.
-- [ ] `updateRolePermissions` by non-super-admin → `InsufficientPrivilegeException`.
-- [ ] `assignDefaultRole` grants `USER` and is idempotent (no duplicate when already held).
-- [ ] `getUserPermissions` for a user with no roles → empty set, never null.
+- [x] assign role: happy path persists + writes audit log (verify `AuditLogRepository.log` with `ArgumentCaptor`).
+- [x] assign `ADMIN` by a non-super-admin actor → `InsufficientPrivilegeException`.
+- [x] assign a role the user already holds → `RoleAlreadyAssignedException`.
+- [x] revoke `SUPER_ADMIN` when `countUsersWithRole(SUPER_ADMIN) == 1` → `InsufficientPrivilegeException` (last-super-admin guard).
+- [x] `updateRolePermissions` removing `ROLE_PERMISSION_MANAGE` from `SUPER_ADMIN` → `ProtectedRoleException`.
+- [x] `updateRolePermissions` by non-super-admin → `InsufficientPrivilegeException`.
+- [x] `assignDefaultRole` grants `USER` and is idempotent (no duplicate when already held).
+- [x] `getUserPermissions` for a user with no roles → empty set, never null.
 
 ### `RbacPersistenceAdapterIT` (`@DataJpaTest`)
 
-- [ ] Seed roles/permissions/join rows (via `@Sql` or builder inserts), then `findRolesByUserId` returns roles with permissions populated.
-- [ ] `findPermissionNamesByUserId` returns the flattened, de-duplicated set (assert no N+1 if you can — count queries).
-- [ ] `assignRoleToUser` then `userHasRole` → true; `revokeRoleFromUser` → false.
-- [ ] `replaceRolePermissions` overwrites the join rows (old removed, new present).
-- [ ] `countUsersWithRole` reflects assignments.
+- [x] Seed roles/permissions/join rows (via `@Sql` or builder inserts), then `findRolesByUserId` returns roles with permissions populated.
+- [x] `findPermissionNamesByUserId` returns the flattened, de-duplicated set (assert no N+1 if you can — count queries).
+- [x] `assignRoleToUser` then `userHasRole` → true; `revokeRoleFromUser` → false.
+- [x] `replaceRolePermissions` overwrites the join rows (old removed, new present).
+- [x] `countUsersWithRole` reflects assignments.
 
 ### `RoleAdminControllerTest` (`@WebMvcTest` + MockMvc, use-case `@MockBean`s)
 
-- [ ] `GET /admin/roles` with a principal holding `ROLE_VIEW` → 200; without it → 403.
-- [ ] `PUT /admin/roles/{name}/permissions` with `ROLE_PERMISSION_MANAGE` → 200; with only `ROLE_ASSIGN` → 403.
-- [ ] `POST /admin/users/{id}/roles` with `ROLE_ASSIGN` → 200/201; unauthenticated → 401.
-- [ ] Use `@WithMockUser(authorities = {...})` (or a JWT post-processor) to set the exact authorities per case.
+- [x] `GET /admin/roles` with a principal holding `ROLE_VIEW` → 200; without it → 403.
+- [x] `PUT /admin/roles/{name}/permissions` with `ROLE_PERMISSION_MANAGE` → 200; with only `ROLE_ASSIGN` → 403.
+- [x] `POST /admin/users/{id}/roles` with `ROLE_ASSIGN` → 200/201; unauthenticated → 401.
+- [x] Use `@WithMockUser(authorities = {...})` (or a JWT post-processor) to set the exact authorities per case.
 
 ### `AuthorizationIT` (`@SpringBootTest`, full filter chain)
 
-- [ ] A real token for a `MODERATOR` can `PUT /admin/reports/{id}` (200) but is **forbidden** `PUT /admin/users/{id}/suspend` (403).
-- [ ] A plain `USER` hitting any `/api/v1/admin/**` → 403 (denied at the filter chain, returns the JSON `ApiResponse` from the `AccessDeniedHandler`).
-- [ ] An `ADMIN` assigning `SUPER_ADMIN` → 403 (privilege-escalation guard surfaces as the mapped status).
-- [ ] No `Authorization` header on an admin route → 401.
+- [x] A real token for a `MODERATOR` can `PUT /admin/reports/{id}` (200) but is **forbidden** `PUT /admin/users/{id}/suspend` (403).
+- [x] A plain `USER` hitting any `/api/v1/admin/**` → 403 (denied at the filter chain, returns the JSON `ApiResponse` from the `AccessDeniedHandler`).
+- [x] An `ADMIN` assigning `SUPER_ADMIN` → 403 (privilege-escalation guard surfaces as the mapped status).
+- [x] No `Authorization` header on an admin route → 401.
 
 ---
 
