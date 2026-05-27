@@ -1,5 +1,6 @@
 package com.instagram.infrastructure.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -24,16 +25,16 @@ public class SecurityConfig {
         private final CorsConfigurationSource corsConfigurationSource;
         private final JwtAuthenticationFilter jwtAuthenticatonFilter;
         private final OAuth2SuccessHandler oAuth2SuccessHandler;
-        private final RestAccessDeniedHandler restAccessDeniedHandler;
+        private final ObjectMapper objectMapper;
 
         public SecurityConfig(CorsConfigurationSource corsConfigurationSource,
                         JwtAuthenticationFilter jwtAuthenticatonFilter,
                         OAuth2SuccessHandler oAuth2SuccessHandler,
-                        RestAccessDeniedHandler restAccessDeniedHandler) {
+                        ObjectMapper objectMapper) {
                 this.corsConfigurationSource = corsConfigurationSource;
                 this.jwtAuthenticatonFilter = jwtAuthenticatonFilter;
                 this.oAuth2SuccessHandler = oAuth2SuccessHandler;
-                this.restAccessDeniedHandler = restAccessDeniedHandler;
+                this.objectMapper = objectMapper;
         }
 
         @Bean
@@ -46,7 +47,7 @@ public class SecurityConfig {
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .exceptionHandling(exceptions -> exceptions
                                                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                                                .accessDeniedHandler(restAccessDeniedHandler))
+                                                .accessDeniedHandler(new RestAccessDeniedHandler(objectMapper)))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/api/v1/auth/**").permitAll()
                                                 .requestMatchers("/api/v1/users/{username}").permitAll()
