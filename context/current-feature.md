@@ -1,21 +1,16 @@
-# Current Feature: TASK-9.30 — Tests (RBAC & authorization)
+# Current Feature
 
 ## Status
-Complete
+Not Started
 
 ## Goals
-- `RbacServiceTest`: unit tests for domain guards — assign happy path, privilege-escalation guard, duplicate-role guard, last-super-admin revoke guard, `updateRolePermissions` on `SUPER_ADMIN` (ProtectedRoleException), `updateRolePermissions` by non-super-admin, `assignDefaultRole` idempotency, `getUserPermissions` empty-set guarantee
-- `RbacPersistenceAdapterIT`: DataJpaTest — `findRolesByUserId` with populated permissions, `findPermissionNamesByUserId` flattened/de-duped, assign+`userHasRole`→true / revoke→false, `replaceRolePermissions` overwrites join rows, `countUsersWithRole` accuracy
-- `RoleAdminControllerTest`: WebMvcTest + MockMvc — `GET /admin/roles` with/without `ROLE_VIEW`, `PUT /admin/roles/{name}/permissions` with `ROLE_PERMISSION_MANAGE` vs `ROLE_ASSIGN` only, `POST /admin/users/{id}/roles` with `ROLE_ASSIGN` vs unauthenticated
-- `AuthorizationIT`: full SpringBootTest filter chain — MODERATOR can review reports (200) but cannot suspend users (403), plain USER on any `/api/v1/admin/**` gets 403 with JSON `ApiResponse`, ADMIN assigning SUPER_ADMIN gets 403, no auth header on admin route gets 401
+<!-- -->
 
 ## Notes
-- Negative tests are the primary deliverable — moderator-cannot-suspend and user-cannot-reach-admin are what protect the system
-- Authorities, not just roles: mock principals with bare permission authorities (e.g. `REPORT_REVIEW`) as TASK-9.27 does — `@PreAuthorize("hasAuthority(...)")` won't match role grants
-- Mirror conventions from `ModerationServiceTest` / `ModerationPersistenceAdapterIT` / `ModerationControllerIT`
-- `*Test` suffix for unit/MockMvc, `*IT` suffix for integration tests
+<!-- -->
 
 ## History
+- TASK-9.30 — `RbacServiceTest` (8 unit tests: assign happy path + ArgumentCaptor audit, privilege-escalation, duplicate-role, last-super-admin, ProtectedRoleException, non-super-admin permissions update, idempotent default role, null-safe empty permissions); `RbacPersistenceAdapterIT` (5 DataJpaTest: findRolesByUserId with permissions, findPermissionNamesByUserId flat/dedup, assign+revoke lifecycle, replaceRolePermissions, countUsersWithRole); `RoleAdminControllerTest` (6 WebMvcTest: ROLE_VIEW/403, ROLE_PERMISSION_MANAGE/403, ROLE_ASSIGN/401); `AuthorizationIT` (5 WebMvcTest + real AdminService/RbacService: MODERATOR review→200/suspend→403, USER→filter-chain-403 with JSON body, ADMIN privilege-escalation→403, no-auth→401). 210/210 tests green.
 - TASK-9.29 — `RoleAdminController` (6 endpoints under `/api/v1/admin`: GET/PUT roles, GET/POST/DELETE user roles); DTOs: `AssignRoleRequest`, `UpdateRolePermissionsRequest`, `RoleResponse`, `PermissionResponse`, `UserRolesResponse`, `UserGrantsResponse`; `GET /users/me/permissions` added to `UserController`.
 - TASK-9.28 — `RestAccessDeniedHandler` (HTTP 403 + `ApiResponse.error` JSON); `SecurityConfig` broadened admin path guard to `hasAnyRole(MODERATOR,ADMIN,SUPER_ADMIN)` + wired handler; `@PreAuthorize` per permission on `AdminService` (REPORT_VIEW, REPORT_REVIEW, USER_SUSPEND, USER_UNSUSPEND), `AdminController.searchUsers` (USER_VIEW), `RbacService` (ROLE_VIEW, ROLE_ASSIGN, ROLE_PERMISSION_MANAGE).
 - TASK-9.27 — `JwtAuthenticationFilter` loads roles → `ROLE_<NAME>` + permissions → bare name from DB per request; `try/catch` ensures authority-load failures leave the request unauthenticated without throwing; removed unused `GetUserPermissionsUseCase` injection; `Collections` import cleaned up.
