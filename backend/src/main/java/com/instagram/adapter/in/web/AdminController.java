@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -120,6 +121,7 @@ public class AdminController {
     }
 
     @GetMapping("/users")
+    @PreAuthorize("hasAuthority('USER_VIEW')")
     public ResponseEntity<ApiResponse<List<AdminUserResponse>>> searchUsers(
             @RequestParam(required = false) String username,
             @RequestParam(defaultValue = "0") int page,

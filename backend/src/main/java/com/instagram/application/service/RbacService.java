@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +44,7 @@ public class RbacService implements AssignDefaultRoleUseCase, AssignRoleToUserUs
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ROLE_ASSIGN')")
     public Set<Role> assignRoleToUser(AssignRoleToUserUseCase.Command command) {
         Role role = roleRepository.findByName(command.roleName())
                 .orElseThrow(() -> new RoleNotFoundException(command.roleName()));
@@ -72,6 +74,7 @@ public class RbacService implements AssignDefaultRoleUseCase, AssignRoleToUserUs
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ROLE_ASSIGN')")
     public void revokeRoleFromUser(RevokeRoleFromUserUseCase.Command command) {
         Role role = roleRepository.findByName(command.roleName())
                 .orElseThrow(() -> new RoleNotFoundException(command.roleName()));
@@ -104,11 +107,13 @@ public class RbacService implements AssignDefaultRoleUseCase, AssignRoleToUserUs
     }
 
     @Override
+    @PreAuthorize("hasAuthority('ROLE_VIEW')")
     public List<Role> listRoles(ListRolesUseCase.Query query) {
         return roleRepository.findAllRoles();
     }
 
     @Override
+    @PreAuthorize("hasAuthority('ROLE_VIEW')")
     public Set<Role> getUserRoles(GetUserRolesUseCase.Query query) {
         return roleRepository.findRolesByUserId(query.targetUserId());
     }
@@ -124,6 +129,7 @@ public class RbacService implements AssignDefaultRoleUseCase, AssignRoleToUserUs
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ROLE_PERMISSION_MANAGE')")
     public void updateRolePermissions(UpdateRolePermissionsUseCase.Command command) {
         Set<Role> actorRoles = roleRepository.findRolesByUserId(command.actorId());
         boolean actorIsSuperAdmin = actorRoles.stream().anyMatch(r -> r.getName() == RoleName.SUPER_ADMIN);

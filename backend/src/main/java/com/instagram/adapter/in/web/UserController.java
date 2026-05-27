@@ -19,9 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.instagram.domain.model.PermissionName;
+import com.instagram.domain.model.RoleName;
 import com.instagram.domain.model.User;
 import com.instagram.domain.port.in.GetUserProfileUseCase;
 import com.instagram.domain.port.in.UpdateProfileUseCase;
+import com.instagram.domain.port.in.rbac.GetUserPermissionsUseCase;
+import com.instagram.domain.port.in.rbac.GetUserRolesUseCase;
 import com.instagram.domain.port.in.user.GetUserUseCase;
 import com.instagram.domain.port.in.user.SearchUsersUseCase;
 import com.instagram.domain.port.out.MediaStoragePort;
@@ -32,10 +36,12 @@ import jakarta.validation.Valid;
 
 import com.instagram.adapter.in.web.dto.request.UpdateProfileRequest;
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
+import com.instagram.adapter.in.web.dto.response.UserGrantsResponse;
 import com.instagram.adapter.in.web.dto.response.UserProfileResponse;
 import com.instagram.adapter.in.web.dto.response.UserResponse;
 
 import java.util.List;
+import java.util.Set;
 import com.instagram.domain.model.UserProfile;
 import com.instagram.domain.model.PrivacyLevel;
 
@@ -52,6 +58,8 @@ public class UserController {
     private final MediaStoragePort mediaStoragePort;
     private final GetUserUseCase getUserUseCase;
     private final SearchUsersUseCase searchUsersUseCase;
+    private final GetUserRolesUseCase getUserRolesUseCase;
+    private final GetUserPermissionsUseCase getUserPermissionsUseCase;
 
     private UUID currentUserId() {
         org.springframework.security.core.Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -158,6 +166,18 @@ public class UserController {
                 .map(UserResponse::from)
                 .toList();
         return ResponseEntity.ok(ApiResponse.ok(results));
+    }
+
+    @GetMapping("/me/permissions")
+    public ResponseEntity<ApiResponse<UserGrantsResponse>> getMyGrants() {
+        UUID userId = currentUserId();
+        Set<RoleName> roles = getUserRolesUseCase.getUserRoles(new GetUserRolesUseCase.Query(userId))
+                .stream()
+                .map(u -> u.getName())
+                .collect(java.util.stream.Collectors.toSet());
+        Set<PermissionName> permissions = getUserPermissionsUseCase
+                .getUserPermissions(new GetUserPermissionsUseCase.Query(userId));
+        return ResponseEntity.ok(ApiResponse.ok(new UserGrantsResponse(roles, permissions)));
     }
 
 }

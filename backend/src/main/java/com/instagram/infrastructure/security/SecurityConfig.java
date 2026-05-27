@@ -24,13 +24,16 @@ public class SecurityConfig {
         private final CorsConfigurationSource corsConfigurationSource;
         private final JwtAuthenticationFilter jwtAuthenticatonFilter;
         private final OAuth2SuccessHandler oAuth2SuccessHandler;
+        private final RestAccessDeniedHandler restAccessDeniedHandler;
 
         public SecurityConfig(CorsConfigurationSource corsConfigurationSource,
                         JwtAuthenticationFilter jwtAuthenticatonFilter,
-                        OAuth2SuccessHandler oAuth2SuccessHandler) {
+                        OAuth2SuccessHandler oAuth2SuccessHandler,
+                        RestAccessDeniedHandler restAccessDeniedHandler) {
                 this.corsConfigurationSource = corsConfigurationSource;
                 this.jwtAuthenticatonFilter = jwtAuthenticatonFilter;
                 this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+                this.restAccessDeniedHandler = restAccessDeniedHandler;
         }
 
         @Bean
@@ -42,13 +45,8 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .exceptionHandling(exceptions -> exceptions
-                                                .authenticationEntryPoint(
-                                                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) // Return
-                                                                                                                   // 401
-                                                                                                                   // instead
-                                                                                                                   // of
-                                                                                                                   // redirect
-                                )
+                                                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                                                .accessDeniedHandler(restAccessDeniedHandler))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/api/v1/auth/**").permitAll()
                                                 .requestMatchers("/api/v1/users/{username}").permitAll()
@@ -58,7 +56,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/oauth2/**").permitAll()
                                                 .requestMatchers("/login/oauth2/**").permitAll()
                                                 .requestMatchers("/ws/**").permitAll()
-                                                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                                                .requestMatchers("/api/v1/admin/**").hasAnyRole("MODERATOR", "ADMIN", "SUPER_ADMIN")
                                                 .anyRequest().authenticated())
                                 .oauth2Login(oauth2 -> oauth2
                                                 .successHandler(oAuth2SuccessHandler));

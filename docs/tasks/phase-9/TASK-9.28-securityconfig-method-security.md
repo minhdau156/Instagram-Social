@@ -21,31 +21,31 @@ backend/src/main/java/com/instagram/infrastructure/security/RestAccessDeniedHand
 
 ### `SecurityConfig` (modify)
 
-- [ ] Add `@EnableMethodSecurity` to the config class — activates `@PreAuthorize`.
-- [ ] In `authorizeHttpRequests`, add **before** `anyRequest().authenticated()`:
-  - [ ] `.requestMatchers("/api/v1/admin/roles/**").hasAuthority("ROLE_PERMISSION_MANAGE")` is **too coarse** — instead keep role/permission specificity at the method layer and use a broad guard here: `.requestMatchers("/api/v1/admin/**").hasAnyRole("MODERATOR", "ADMIN", "SUPER_ADMIN")`. This blocks plain users at the edge; the precise permission is enforced per endpoint by `@PreAuthorize`.
-- [ ] Register the `RestAccessDeniedHandler` via `.exceptionHandling(e -> e.accessDeniedHandler(restAccessDeniedHandler))` so filter-chain 403s return JSON.
-- [ ] Leave the existing `permitAll` rules (`/api/v1/auth/**`, `GET /api/v1/users/{username}`, swagger, oauth2, `/ws/**`) unchanged.
+- [x] Add `@EnableMethodSecurity` to the config class — activates `@PreAuthorize`.
+- [x] In `authorizeHttpRequests`, add **before** `anyRequest().authenticated()`:
+  - [x] `.requestMatchers("/api/v1/admin/roles/**").hasAuthority("ROLE_PERMISSION_MANAGE")` is **too coarse** — instead keep role/permission specificity at the method layer and use a broad guard here: `.requestMatchers("/api/v1/admin/**").hasAnyRole("MODERATOR", "ADMIN", "SUPER_ADMIN")`. This blocks plain users at the edge; the precise permission is enforced per endpoint by `@PreAuthorize`.
+- [x] Register the `RestAccessDeniedHandler` via `.exceptionHandling(e -> e.accessDeniedHandler(restAccessDeniedHandler))` so filter-chain 403s return JSON.
+- [x] Leave the existing `permitAll` rules (`/api/v1/auth/**`, `GET /api/v1/users/{username}`, swagger, oauth2, `/ws/**`) unchanged.
 
 ### `RestAccessDeniedHandler` (create)
 
-- [ ] `implements AccessDeniedHandler`; write HTTP 403 with `Content-Type: application/json` and an `ApiResponse.error(...)` body. Keep the message generic ("Access denied") — don't leak which permission was missing.
+- [x] `implements AccessDeniedHandler`; write HTTP 403 with `Content-Type: application/json` and an `ApiResponse.error(...)` body. Keep the message generic ("Access denied") — don't leak which permission was missing.
 
 ### `@PreAuthorize` on services — endpoint → permission map
 
 Annotate the use-case methods (or controller methods) so each maps to the right permission. The canonical map:
 
-- [ ] `GET /api/v1/admin/reports` → `@PreAuthorize("hasAuthority('REPORT_VIEW')")`
-- [ ] `PUT /api/v1/admin/reports/{id}` → `hasAuthority('REPORT_REVIEW')`
-- [ ] `GET /api/v1/admin/users` → `hasAuthority('USER_VIEW')`
-- [ ] `PUT /api/v1/admin/users/{id}/suspend` → `hasAuthority('USER_SUSPEND')`
-- [ ] `PUT /api/v1/admin/users/{id}/unsuspend` → `hasAuthority('USER_UNSUSPEND')`
-- [ ] `GET /api/v1/admin/audit-logs` (if exposed) → `hasAuthority('AUDIT_LOG_VIEW')`
-- [ ] `GET /api/v1/admin/roles`, `GET /api/v1/admin/users/{id}/roles` → `hasAuthority('ROLE_VIEW')`
-- [ ] `POST/DELETE /api/v1/admin/users/{id}/roles` → `hasAuthority('ROLE_ASSIGN')`
-- [ ] `PUT /api/v1/admin/roles/{name}/permissions` → `hasAuthority('ROLE_PERMISSION_MANAGE')`
+- [x] `GET /api/v1/admin/reports` → `@PreAuthorize("hasAuthority('REPORT_VIEW')")` — on `AdminService.getReports`
+- [x] `PUT /api/v1/admin/reports/{id}` → `hasAuthority('REPORT_REVIEW')` — on `AdminService.reviewReport`
+- [x] `GET /api/v1/admin/users` → `hasAuthority('USER_VIEW')` — on `AdminController.searchUsers` (service is shared with regular search; controller annotation is the correct exception)
+- [x] `PUT /api/v1/admin/users/{id}/suspend` → `hasAuthority('USER_SUSPEND')` — on `AdminService.suspendUser`
+- [x] `PUT /api/v1/admin/users/{id}/unsuspend` → `hasAuthority('USER_UNSUSPEND')` — on `AdminService.unsuspendUser`
+- [x] `GET /api/v1/admin/audit-logs` (if exposed) → `hasAuthority('AUDIT_LOG_VIEW')` — endpoint not exposed; skipped
+- [x] `GET /api/v1/admin/roles`, `GET /api/v1/admin/users/{id}/roles` → `hasAuthority('ROLE_VIEW')` — on `RbacService.listRoles` and `RbacService.getUserRoles`
+- [x] `POST/DELETE /api/v1/admin/users/{id}/roles` → `hasAuthority('ROLE_ASSIGN')` — on `RbacService.assignRoleToUser` and `RbacService.revokeRoleFromUser`
+- [x] `PUT /api/v1/admin/roles/{name}/permissions` → `hasAuthority('ROLE_PERMISSION_MANAGE')` — on `RbacService.updateRolePermissions`
 
-- [ ] Put the annotation in **one** place per action (prefer the service method so it's enforced regardless of caller) and document the choice. Do not double-annotate controller + service with conflicting expressions.
+- [x] Put the annotation in **one** place per action (prefer the service method so it's enforced regardless of caller) and document the choice. Do not double-annotate controller + service with conflicting expressions.
 
 ---
 

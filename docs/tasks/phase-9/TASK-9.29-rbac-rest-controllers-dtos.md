@@ -23,30 +23,30 @@ backend/src/main/java/com/instagram/adapter/in/web/dto/UserRolesResponse.java   
 
 ### `RoleAdminController`
 
-- [ ] `@RestController @RequestMapping("/api/v1/admin")`, `@Tag(name = "Admin · Roles")`.
-- [ ] Constructor-inject (all `final`): `ListRolesUseCase`, `UpdateRolePermissionsUseCase`, `AssignRoleToUserUseCase`, `RevokeRoleFromUserUseCase`, `GetUserRolesUseCase`.
-- [ ] Use the existing `currentUserId()` helper for the acting admin's id (passed as `actorId`).
+- [x] `@RestController @RequestMapping("/api/v1/admin")`, `@Tag(name = "Admin · Roles")`.
+- [x] Constructor-inject (all `final`): `ListRolesUseCase`, `UpdateRolePermissionsUseCase`, `AssignRoleToUserUseCase`, `RevokeRoleFromUserUseCase`, `GetUserRolesUseCase`.
+- [x] Use the existing `currentUserId()` helper for the acting admin's id (passed as `actorId`).
 
 #### Endpoints
 
-- [ ] `GET /roles` → `ListRolesUseCase`; returns `List<RoleResponse>` (each with its permissions). `@PreAuthorize("hasAuthority('ROLE_VIEW')")`.
-- [ ] `GET /permissions` → `List<PermissionResponse>` of all assignable permissions (for the editing UI). `ROLE_VIEW`.
-- [ ] `PUT /roles/{roleName}/permissions` → body `UpdateRolePermissionsRequest`; calls `UpdateRolePermissionsUseCase` with `currentUserId()`. `hasAuthority('ROLE_PERMISSION_MANAGE')`. Returns the updated `RoleResponse`.
-- [ ] `GET /users/{id}/roles` → `GetUserRolesUseCase`; returns `UserRolesResponse`. `ROLE_VIEW`.
-- [ ] `POST /users/{id}/roles` → body `AssignRoleRequest`; calls `AssignRoleToUserUseCase(currentUserId(), id, roleName)`. `ROLE_ASSIGN`. Returns `200/201` with the user's new role set.
-- [ ] `DELETE /users/{id}/roles/{roleName}` → `RevokeRoleFromUserUseCase`. `ROLE_ASSIGN`. Returns `204`.
+- [x] `GET /roles` → `ListRolesUseCase`; returns `List<RoleResponse>` (each with its permissions). `@PreAuthorize("hasAuthority('ROLE_VIEW')")` — enforced on `RbacService.listRoles`.
+- [x] `GET /permissions` → `List<PermissionResponse>` of all assignable permissions (for the editing UI). `ROLE_VIEW` — enforced on controller (no service call; returns `PermissionName.values()`).
+- [x] `PUT /roles/{roleName}/permissions` → body `UpdateRolePermissionsRequest`; calls `UpdateRolePermissionsUseCase` with `currentUserId()`. `hasAuthority('ROLE_PERMISSION_MANAGE')` — enforced on `RbacService.updateRolePermissions`. Returns the updated `RoleResponse`.
+- [x] `GET /users/{id}/roles` → `GetUserRolesUseCase`; returns `UserRolesResponse`. `ROLE_VIEW` — enforced on `RbacService.getUserRoles`.
+- [x] `POST /users/{id}/roles` → body `AssignRoleRequest`; calls `AssignRoleToUserUseCase(currentUserId(), id, roleName)`. `ROLE_ASSIGN` — enforced on `RbacService.assignRoleToUser`. Returns `200` with the user's new role set.
+- [x] `DELETE /users/{id}/roles/{roleName}` → `RevokeRoleFromUserUseCase`. `ROLE_ASSIGN` — enforced on `RbacService.revokeRoleFromUser`. Returns `204`.
 
 ### DTOs (records)
 
-- [ ] `AssignRoleRequest(@NotNull RoleName roleName)`.
-- [ ] `UpdateRolePermissionsRequest(@NotNull Set<PermissionName> permissions)`.
-- [ ] `RoleResponse(UUID id, RoleName name, String description, boolean system, Set<PermissionName> permissions)` + static `from(Role)`.
-- [ ] `PermissionResponse(UUID id, PermissionName name, String description)` + static `from(Permission)`.
-- [ ] `UserRolesResponse(UUID userId, Set<RoleResponse> roles)` + factory.
+- [x] `AssignRoleRequest(@NotNull RoleName roleName)`.
+- [x] `UpdateRolePermissionsRequest(@NotNull Set<PermissionName> permissions)`.
+- [x] `RoleResponse(UUID id, RoleName name, String description, boolean system, Set<PermissionName> permissions)` + static `from(Role)`.
+- [x] `PermissionResponse(UUID id, PermissionName name, String description)` + static `from(Permission)`.
+- [x] `UserRolesResponse(UUID userId, Set<RoleResponse> roles)` + factory.
 
 ### Frontend convenience — expose the caller's own grants
 
-- [ ] Add `GET /api/v1/users/me/permissions` (in `UserController` or here) returning the current user's `Set<RoleName>` + `Set<PermissionName>`. The frontend uses this to gate UI ([TASK-9.32](TASK-9.32-frontend-authorization.md)) — authenticated, no special permission required (a user may always read their own grants).
+- [x] Add `GET /api/v1/users/me/permissions` (in `UserController`) returning the current user's `Set<RoleName>` + `Set<PermissionName>` as `UserGrantsResponse`. Authenticated, no special permission required.
 
 ---
 

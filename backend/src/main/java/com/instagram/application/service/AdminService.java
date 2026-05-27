@@ -39,14 +39,14 @@ public class AdminService implements ReviewReportUseCase,
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('REPORT_VIEW')")
     public List<Report> getReports(AdminGetReportsUseCase.Query query) {
         return moderationRepository.findAllReports(query.status(), PageRequest.of(query.page(), query.size()));
     }
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('USER_UNSUSPEND')")
     public User unsuspendUser(UnsuspendUserUseCase.Command command) {
         User targetUser = userRepository.findById(command.targetUserId())
                 .orElseThrow(() -> UserNotFoundException.withId(command.targetUserId()));
@@ -70,7 +70,7 @@ public class AdminService implements ReviewReportUseCase,
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('USER_SUSPEND')")
     public User suspendUser(SuspendUserUseCase.Command command) {
         User targetUser = userRepository.findById(command.targetUserId())
                 .orElseThrow(() -> UserNotFoundException.withId(command.targetUserId()));
@@ -93,7 +93,7 @@ public class AdminService implements ReviewReportUseCase,
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('REPORT_REVIEW')")
     @Transactional
     public Report reviewReport(ReviewReportUseCase.Command command) {
         Report report = moderationRepository.findReportById(command.reportId())
