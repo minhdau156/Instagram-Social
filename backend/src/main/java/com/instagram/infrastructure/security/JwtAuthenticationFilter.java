@@ -37,9 +37,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider tokenProvider;
     private final RoleRepository roleRepository;
 
-    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, RoleRepository roleRepository) {
+    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, Optional<RoleRepository> roleRepository) {
         this.tokenProvider = tokenProvider;
-        this.roleRepository = roleRepository;
+        this.roleRepository = roleRepository.orElse(null);
     }
 
     @Override
