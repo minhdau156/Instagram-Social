@@ -10,6 +10,7 @@ Not Started
 <!-- -->
 
 ## History
+- TASK-9.27 — `JwtAuthenticationFilter` loads roles → `ROLE_<NAME>` + permissions → bare name from DB per request; `try/catch` ensures authority-load failures leave the request unauthenticated without throwing; removed unused `GetUserPermissionsUseCase` injection; `Collections` import cleaned up.
 - TASK-9.26 — RbacPersistenceAdapter implementing RoleRepository + PermissionRepository; `findByUserId` fixed to use JPQL subquery via `UserRoleJpaEntity`; `findAllRoles` uses `findAllWithPermissions()` for N+1 safety; all 13 out-port methods implemented with `toRoleDomain`/`toPermissionDomain` helpers.
 - TASK-9.25 — JPA entities & repositories (RBAC): `RoleJpaEntity` (`roles`, `@ManyToMany` → `PermissionJpaEntity` via `role_permissions`, `@EntityGraph`-backed); `PermissionJpaEntity` (`permissions`); `UserRoleJpaEntity` (`user_roles`, `@EmbeddedId UserRoleId`); `RoleJpaRepository` (`findByName` + `findAllWithPermissions` both with `@EntityGraph`); `PermissionJpaRepository` (`findByName`, `findByIdIn`); `UserRoleJpaRepository` (`findByIdUserId`, `existsByIdUserIdAndIdRoleId`, `deleteByUserIdAndRoleId`, `countByIdRoleId`, single-JPQL `findPermissionNamesByUserId`).
 - TASK-9.24 — RbacService: 7 RBAC use cases in `application/service/`; privilege-escalation, last-super-admin, and lockout guards; all mutations audited via `AuditLogRepository`; `assignDefaultRole` wired into `UserService.register()`.
