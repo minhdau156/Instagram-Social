@@ -13,6 +13,7 @@ import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { ProfilePage } from './pages/users/ProfllePage';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
 import { AdminRoute } from './components/common/AdminRoute';
+import { SuperAdminRoute } from './components/common/SuperAdminRoute';
 import { OAuth2CallbackPage } from './pages/auth/OAuth2CallbackPage';
 
 import { PostPage } from './pages/posts/PostPage';
@@ -33,6 +34,7 @@ const BlockedAccountsPage = React.lazy(() => import('./pages/settings/BlockedAcc
 const AdminDashboardPage = React.lazy(() => import('./pages/admin/AdminDashboardPage'));
 const AdminReportsPage = React.lazy(() => import('./pages/admin/AdminReportsPage'));
 const AdminUsersPage = React.lazy(() => import('./pages/admin/AdminUsersPage'));
+const RoleManagementPage = React.lazy(() => import('./pages/admin/RoleManagementPage'));
 const SearchPage = React.lazy(() => import('./pages/search/SearchPage'));
 const HashtagPage = React.lazy(() => import('./pages/search/HashtagPage'));
 
@@ -85,6 +87,7 @@ export default function App() {
                 <Route path="/admin" element={<AdminRoute><ErrorBoundary><AdminDashboardPage /></ErrorBoundary></AdminRoute>} />
                 <Route path="/admin/reports" element={<AdminRoute><ErrorBoundary><AdminReportsPage /></ErrorBoundary></AdminRoute>} />
                 <Route path="/admin/users" element={<AdminRoute><ErrorBoundary><AdminUsersPage /></ErrorBoundary></AdminRoute>} />
+                <Route path="/admin/roles" element={<SuperAdminRoute><ErrorBoundary><RoleManagementPage /></ErrorBoundary></SuperAdminRoute>} />
                 <Route path="/search" element={<ErrorBoundary><SearchPage /></ErrorBoundary>} />
                 <Route path="/hashtag/:name" element={<ErrorBoundary><HashtagPage /></ErrorBoundary>} />
               </Route>

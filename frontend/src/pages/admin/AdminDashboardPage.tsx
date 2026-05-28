@@ -7,6 +7,7 @@ import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import { useNavigate } from 'react-router-dom';
 import { useAdminReports } from '../../hooks/admin/useAdminReports';
 import { useAdminUsers } from '../../hooks/admin/useAdminUsers';
+import { PermissionGate } from '../../components/common/PermissionGate';
 
 export default function AdminDashboardPage() {
     const navigate = useNavigate();
@@ -77,6 +78,11 @@ export default function AdminDashboardPage() {
                 <Button variant="outlined" onClick={() => navigate('/admin/users')}>
                     Manage Users
                 </Button>
+                <PermissionGate role="SUPER_ADMIN">
+                    <Button variant="outlined" onClick={() => navigate('/admin/roles')}>
+                        Roles &amp; Permissions
+                    </Button>
+                </PermissionGate>
             </Box>
         </Box>
     );

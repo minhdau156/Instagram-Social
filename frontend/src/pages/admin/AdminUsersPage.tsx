@@ -13,6 +13,7 @@ import { useAdminUsers } from '../../hooks/admin/useAdminUsers';
 import { useSuspendUser } from '../../hooks/admin/useSuspendUser';
 import { useUnsuspendUser } from '../../hooks/admin/useUnsuspendUser';
 import type { AccountStatus, AdminUser } from '../../types/moderation';
+import { UserRolesPanel } from '../../components/admin/UserRolesPanel';
 
 type ChipColor = 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
 
@@ -36,6 +37,7 @@ export default function AdminUsersPage() {
 
     const { mutate: suspendUser, isPending: isSuspending } = useSuspendUser();
     const { mutate: unsuspendUser } = useUnsuspendUser();
+    const [rolesTarget, setRolesTarget] = useState<AdminUser | null>(null);
 
     useEffect(() => {
         const t = setTimeout(() => { setDebouncedSearch(searchInput); setPage(0); }, 300);
@@ -195,6 +197,9 @@ export default function AdminUsersPage() {
                         Unsuspend User
                     </MenuItem>
                 )}
+                <MenuItem onClick={() => { setRolesTarget(menuAnchor!.user); setMenuAnchor(null); }}>
+                    Manage roles
+                </MenuItem>
             </Menu>
 
             <Dialog
@@ -229,6 +234,19 @@ export default function AdminUsersPage() {
                         Suspend
                     </Button>
                 </DialogActions>
+            </Dialog>
+            <Dialog
+                open={!!rolesTarget}
+                onClose={() => setRolesTarget(null)}
+                fullWidth
+                maxWidth="sm"
+            >
+                <DialogTitle>Roles — {rolesTarget?.username}</DialogTitle>
+                <DialogContent>
+                    {rolesTarget && (
+                        <UserRolesPanel userId={rolesTarget.id} onClose={() => setRolesTarget(null)} />
+                    )}
+                </DialogContent>
             </Dialog>
         </Box>
     );
