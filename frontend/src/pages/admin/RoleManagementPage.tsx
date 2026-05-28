@@ -11,7 +11,7 @@ import { usePermissions } from "../../hooks/usePermissions";
 import { RolePermissionEditor } from "../../components/admin/RolePermissionEditor";
 import theme from "../../theme";
 
-export const RoleManagementPage = () => {
+export default function RoleManagementPage() {
 
     const { data: roles, isLoading: rolesLoading, isError: rolesError } = useQuery({
         queryKey: ['admin', 'roles'],
