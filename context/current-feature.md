@@ -1,13 +1,19 @@
-# Current Feature
+# Current Feature: TASK-9.32 Frontend Authorization Primitives
 
 ## Status
-Not Started
+Complete
 
 ## Goals
-<!-- -->
+- `usePermissions` hook: fetches `GET /users/me/permissions` via `rbacApi.getMyGrants()`, keyed `['me', 'grants']`, `staleTime` 5 min; returns `{ roles, permissions, hasPermission, hasRole, hasAnyRole, isLoading }`; defaults to denied (false) while loading
+- `<PermissionGate>` component: props `permission?`, `role?`, `requireAll?`, `fallback?`, `children`; renders children only when requirement satisfied (any-of by default, all-of with `requireAll`); calls `usePermissions`, no data mutation
+- `<SuperAdminRoute>` component: mirrors `AdminRoute` — redirects to `/` with toast error if user lacks `SUPER_ADMIN` role
+- `AdminRoute` (modify): change gate from `isAdmin` to `hasAnyRole(['MODERATOR','ADMIN','SUPER_ADMIN'])` so moderators can access admin shell
 
 ## Notes
-<!-- -->
+- Client-side checks are UX only — server re-checks every request
+- Default-deny while loading — never flash privileged UI before grants resolve
+- One source of truth: always call `getMyGrants()`, never decode JWT roles client-side
+- Route guards should check auth first, then grants (sequential) to avoid premature redirects
 
 ## History
 - TASK-9.31 — `frontend/src/types/rbac.ts` (`RoleName`, `PermissionName` 10-value union, `Permission`, `Role`, `UserRoles`, `MyGrants` interfaces — no `any`); `frontend/src/api/rbacApi.ts` (7 async functions: `listRoles`, `listPermissions`, `updateRolePermissions`, `getUserRoles`, `assignRole`, `revokeRole`, `getMyGrants` — shared `api` Axios instance, `data.data` unwrap).

@@ -21,24 +21,24 @@ frontend/src/components/common/AdminRoute.tsx              ← modify (make perm
 
 ### `usePermissions` hook
 
-- [ ] Uses React Query (`useQuery`) keyed `['me', 'grants']` to fetch `rbacApi.getMyGrants()`; `staleTime` ~5 min.
-- [ ] Returns `{ roles, permissions, hasPermission, hasRole, hasAnyRole, isLoading }`.
-- [ ] `hasPermission(p: PermissionName): boolean` and `hasRole(r: RoleName): boolean` are pure lookups over the fetched sets.
-- [ ] While loading, gates should default to **denied** (return `false`) — never flash privileged UI before grants resolve.
+- [x] Uses React Query (`useQuery`) keyed `['me', 'grants']` to fetch `rbacApi.getMyGrants()`; `staleTime` ~5 min.
+- [x] Returns `{ roles, permissions, hasPermission, hasRole, hasAnyRole, isLoading }`.
+- [x] `hasPermission(p: PermissionName): boolean` and `hasRole(r: RoleName): boolean` are pure lookups over the fetched sets.
+- [x] While loading, gates should default to **denied** (return `false`) — never flash privileged UI before grants resolve.
 
 ### `<PermissionGate>`
 
-- [ ] Props: `permission?: PermissionName | PermissionName[]`, `role?: RoleName | RoleName[]`, `requireAll?: boolean`, `fallback?: ReactNode`, `children`.
-- [ ] Renders `children` only if the current user satisfies the requirement (any-of by default, all-of when `requireAll`); otherwise renders `fallback ?? null`.
-- [ ] Pure presentational gate — it calls `usePermissions`, no data mutation.
+- [x] Props: `permission?: PermissionName | PermissionName[]`, `role?: RoleName | RoleName[]`, `requireAll?: boolean`, `fallback?: ReactNode`, `children`.
+- [x] Renders `children` only if the current user satisfies the requirement (any-of by default, all-of when `requireAll`); otherwise renders `fallback ?? null`.
+- [x] Pure presentational gate — it calls `usePermissions`, no data mutation.
 
 ### `<SuperAdminRoute>`
 
-- [ ] Mirror `AdminRoute`: if the user lacks `SUPER_ADMIN`, redirect to `/` with a toast error; otherwise render `<Outlet />` / children.
+- [x] Mirror `AdminRoute`: if the user lacks `SUPER_ADMIN`, redirect to `/` with a toast error; otherwise render `<Outlet />` / children.
 
 ### `AdminRoute` (modify)
 
-- [ ] Change the gate from "is admin" to "has any admin-surface role" — `hasAnyRole(['MODERATOR','ADMIN','SUPER_ADMIN'])` — so moderators can reach the admin shell, while individual pages/actions inside are gated by permission via `<PermissionGate>`.
+- [x] Change the gate from "is admin" to "has any admin-surface role" — `hasAnyRole(['MODERATOR','ADMIN','SUPER_ADMIN'])` — so moderators can reach the admin shell, while individual pages/actions inside are gated by permission via `<PermissionGate>`.
 
 ---
 
