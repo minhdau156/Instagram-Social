@@ -1,21 +1,16 @@
-# Current Feature: TASK-9.32 Frontend Authorization Primitives
+# Current Feature
 
 ## Status
-Complete
+Not Started
 
 ## Goals
-- `usePermissions` hook: fetches `GET /users/me/permissions` via `rbacApi.getMyGrants()`, keyed `['me', 'grants']`, `staleTime` 5 min; returns `{ roles, permissions, hasPermission, hasRole, hasAnyRole, isLoading }`; defaults to denied (false) while loading
-- `<PermissionGate>` component: props `permission?`, `role?`, `requireAll?`, `fallback?`, `children`; renders children only when requirement satisfied (any-of by default, all-of with `requireAll`); calls `usePermissions`, no data mutation
-- `<SuperAdminRoute>` component: mirrors `AdminRoute` — redirects to `/` with toast error if user lacks `SUPER_ADMIN` role
-- `AdminRoute` (modify): change gate from `isAdmin` to `hasAnyRole(['MODERATOR','ADMIN','SUPER_ADMIN'])` so moderators can access admin shell
+<!-- -->
 
 ## Notes
-- Client-side checks are UX only — server re-checks every request
-- Default-deny while loading — never flash privileged UI before grants resolve
-- One source of truth: always call `getMyGrants()`, never decode JWT roles client-side
-- Route guards should check auth first, then grants (sequential) to avoid premature redirects
+<!-- -->
 
 ## History
+- TASK-9.32 — `usePermissions` hook (`['me','grants']`, 5-min staleTime, default-deny while loading, `hasPermission`/`hasRole`/`hasAnyRole`); `PermissionGate` component (permission/role arrays, `requireAll`, `fallback`); `SuperAdminRoute` (redirects unless `SUPER_ADMIN`); `AdminRoute` updated to `hasAnyRole(['MODERATOR','ADMIN','SUPER_ADMIN'])`.
 - TASK-9.31 — `frontend/src/types/rbac.ts` (`RoleName`, `PermissionName` 10-value union, `Permission`, `Role`, `UserRoles`, `MyGrants` interfaces — no `any`); `frontend/src/api/rbacApi.ts` (7 async functions: `listRoles`, `listPermissions`, `updateRolePermissions`, `getUserRoles`, `assignRole`, `revokeRole`, `getMyGrants` — shared `api` Axios instance, `data.data` unwrap).
 - TASK-9.30 — `RbacServiceTest` (8 unit tests: assign happy path + ArgumentCaptor audit, privilege-escalation, duplicate-role, last-super-admin, ProtectedRoleException, non-super-admin permissions update, idempotent default role, null-safe empty permissions); `RbacPersistenceAdapterIT` (5 DataJpaTest: findRolesByUserId with permissions, findPermissionNamesByUserId flat/dedup, assign+revoke lifecycle, replaceRolePermissions, countUsersWithRole); `RoleAdminControllerTest` (6 WebMvcTest: ROLE_VIEW/403, ROLE_PERMISSION_MANAGE/403, ROLE_ASSIGN/401); `AuthorizationIT` (5 WebMvcTest + real AdminService/RbacService: MODERATOR review→200/suspend→403, USER→filter-chain-403 with JSON body, ADMIN privilege-escalation→403, no-auth→401). 210/210 tests green.
 - TASK-9.29 — `RoleAdminController` (6 endpoints under `/api/v1/admin`: GET/PUT roles, GET/POST/DELETE user roles); DTOs: `AssignRoleRequest`, `UpdateRolePermissionsRequest`, `RoleResponse`, `PermissionResponse`, `UserRolesResponse`, `UserGrantsResponse`; `GET /users/me/permissions` added to `UserController`.
