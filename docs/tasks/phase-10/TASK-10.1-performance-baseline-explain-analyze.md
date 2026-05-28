@@ -233,9 +233,9 @@ Come back to this file after completing those tasks. Add the "after" numbers in 
 
 ## Checklist
 
-- [ ] Run `EXPLAIN ANALYZE` on the home-feed query in `psql` and record the execution time
-- [ ] Note whether the planner uses an index scan or a sequential scan
-- [ ] Re-run after TASK-10.3 / 10.7 and compare the numbers
+- [x] Run `EXPLAIN ANALYZE` on the home-feed query in `psql` and record the execution time
+- [x] Note whether the planner uses an index scan or a sequential scan
+- [x] Re-run after TASK-10.3 / 10.7 and compare the numbers
 
 ---
 
