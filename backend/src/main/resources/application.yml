@@ -36,6 +36,18 @@ spring:
             scope: email, profile
             # Spring auto-sets redirect-uri to: {baseUrl}/login/oauth2/code/google
             # Add http://localhost:8080/login/oauth2/code/google in Google Console
+  
+  datasource:
+    hikari:
+      # Formula: (cpu_cores * 2) + 1; capped at 10 for local dev to avoid
+      # overwhelming Postgres with connections on a shared developer machine.
+      # Raise to 15-20 in production once connection metrics are observed.
+      maximum-pool-size: 10
+      minimum-idle: 10          # fixed-size pool — avoids idle-connection teardown churn
+      connection-timeout: 30000 # ms — how long a thread waits for a free connection
+      idle-timeout: 600000      # ms — how long an idle connection is kept (10 min)
+      max-lifetime: 1800000     # ms — max age of a connection (30 min), below Postgres default
+      pool-name: InstagramPool
 
 springdoc:
   api-docs:

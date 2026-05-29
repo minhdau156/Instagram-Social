@@ -201,9 +201,9 @@ If `pending` climbs above 0 regularly, increase `maximum-pool-size`. If `active`
 
 ## Checklist
 
-- [ ] Read the Hikari docs on pool sizing (start around `CPU cores * 2`)
-- [ ] Set `maximum-pool-size` explicitly and add a comment explaining your reasoning
-- [ ] Watch the pool metrics under load via `/actuator/metrics/hikaricp.connections.active`
+- [x] Read the Hikari docs on pool sizing (start around `CPU cores * 2`)
+- [x] Set `maximum-pool-size` explicitly and add a comment explaining your reasoning
+- [x] Watch the pool metrics under load via `/actuator/metrics/hikaricp.connections.active`
 
 ---
 
