@@ -304,12 +304,12 @@ Unable to connect to Redis
 
 ## Checklist
 
-- [ ] Add `spring-boot-starter-data-redis` to `pom.xml`
-- [ ] Create `RedisConfig.java` in `infrastructure/config/` — configure `RedisTemplate<String, Object>` with JSON serializer
-- [ ] Wrap `FeedService.getHomeFeed(cursor=null)` with a 60-second Redis cache (key: `feed:{userId}:page1`)
-- [ ] Wrap `UserService.getUserProfile(username)` with a 5-minute Redis cache (key: `profile:{username}`)
-- [ ] Evict profile cache on `UpdateProfileService` execution
-- [ ] Add `Cache-Control: public, max-age=300` header on `GET /api/v1/users/{username}` for public profiles
+- [x] Add `spring-boot-starter-data-redis` to `pom.xml`
+- [x] Create `RedisConfig.java` in `infrastructure/config/` — configure `RedisTemplate<String, Object>` with JSON serializer
+- [x] Wrap `FeedService.getHomeFeed(cursor=null)` with a 60-second Redis cache (key: `feed:{userId}:page1`)
+- [x] Wrap `UserService.getUserProfile(username)` with a 5-minute Redis cache (key: `profile:{username}`)
+- [x] Evict profile cache on `UpdateProfileService` execution
+- [x] Cache-Control header skipped — profile response includes `isFollowing` (viewer-specific); header would conflict with TanStack Query refetch logic
 
 ---
 

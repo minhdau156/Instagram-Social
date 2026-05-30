@@ -12,6 +12,9 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -97,6 +100,9 @@ public class MessagingService implements
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "conversations", allEntries = true)
+    })
     public SendMessageUseCase.MessageView sendMessage(SendMessageUseCase.Command command) {
         if (!conversationRepository.isMember(command.conversationId(), command.senderId())) {
             throw new NotConversationMemberException(command.senderId(), command.conversationId());
@@ -146,6 +152,7 @@ public class MessagingService implements
 
     @Override
     @Transactional
+    @Cacheable(value = "conversations", key = "'conversations:' + #query.userId")
     public List<GetConversationsUseCase.ConversationView> getConversations(GetConversationsUseCase.Query query) {
         List<Conversation> conversations = conversationRepository.findByMemberId(query.userId(),
                 PageRequest.of(query.page(), query.size()));
@@ -202,6 +209,9 @@ public class MessagingService implements
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "conversations", allEntries = true)
+    })
     public Conversation createConversation(CreateConversationUseCase.Command command) {
         if (!command.isGroup()) {
             if (command.participantIds().size() != 1) {

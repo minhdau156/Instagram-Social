@@ -26,12 +26,15 @@ import com.instagram.domain.port.in.GetUserProfileUseCase;
 import com.instagram.domain.port.in.UpdateProfileUseCase;
 import com.instagram.domain.port.in.rbac.GetUserPermissionsUseCase;
 import com.instagram.domain.port.in.rbac.GetUserRolesUseCase;
+import com.instagram.domain.port.in.search.SearchUsersUseCase;
 import com.instagram.domain.port.in.user.GetUserUseCase;
-import com.instagram.domain.port.in.user.SearchUsersUseCase;
+
 import com.instagram.domain.port.out.MediaStoragePort;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 
 import com.instagram.adapter.in.web.dto.request.UpdateProfileRequest;
@@ -60,17 +63,6 @@ public class UserController {
     private final SearchUsersUseCase searchUsersUseCase;
     private final GetUserRolesUseCase getUserRolesUseCase;
     private final GetUserPermissionsUseCase getUserPermissionsUseCase;
-
-    private UUID currentUserId() {
-        org.springframework.security.core.Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-            return null;
-        }
-        if (auth.getPrincipal() instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
-            return UUID.fromString(userDetails.getUsername());
-        }
-        return UUID.fromString(auth.getPrincipal().toString());
-    }
 
     @Operation(summary = "Get Current User Profile", description = "Retrieves the profile of the currently authenticated user")
     @ApiResponses({
@@ -159,9 +151,11 @@ public class UserController {
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<UserResponse>>> searchUsers(
             @RequestParam String q,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int limit) {
+        UUID userId = currentUserId();
         List<UserResponse> results = searchUsersUseCase
-                .searchUsers(new SearchUsersUseCase.Command(q, limit))
+                .searchUsers(new SearchUsersUseCase.Query(q, userId, page, limit))
                 .stream()
                 .map(UserResponse::from)
                 .toList();
@@ -178,6 +172,26 @@ public class UserController {
         Set<PermissionName> permissions = getUserPermissionsUseCase
                 .getUserPermissions(new GetUserPermissionsUseCase.Query(userId));
         return ResponseEntity.ok(ApiResponse.ok(new UserGrantsResponse(roles, permissions)));
+    }
+
+    @Nullable
+    private UUID currentUserIdOrNull() {
+        org.springframework.security.core.Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return null;
+        }
+        if (auth.getPrincipal() instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
+            return UUID.fromString(userDetails.getUsername());
+        }
+        return UUID.fromString(auth.getPrincipal().toString());
+    }
+
+    private UUID currentUserId() {
+        UUID userId = currentUserIdOrNull();
+        if (userId == null) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        return userId;
     }
 
 }

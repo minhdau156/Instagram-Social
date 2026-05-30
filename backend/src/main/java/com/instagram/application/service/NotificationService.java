@@ -3,6 +3,8 @@ package com.instagram.application.service;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,7 @@ public class NotificationService
 
     @Override
     @Transactional
+    @CacheEvict(value = "notifSettings", key = "'notifSettings:' + #command.userId")
     public NotificationSettings updateSettings(UpdateNotificationSettingsUseCase.Command command) {
         NotificationSettings settings = notificationSettingsRepository.findByUserId(command.userId())
                 .orElse(NotificationSettings.defaultsFor(command.userId()));
@@ -54,6 +57,7 @@ public class NotificationService
     }
 
     @Override
+    @Cacheable(value = "notifSettings", key = "'notifSettings:' + #query.userId")
     public NotificationSettings getSettings(GetNotificationSettingsUseCase.Query query) {
         return notificationSettingsRepository.findByUserId(query.userId())
                 .orElse(NotificationSettings.defaultsFor(query.userId()));

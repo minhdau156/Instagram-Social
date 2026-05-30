@@ -48,6 +48,16 @@ spring:
       idle-timeout: 600000      # ms — how long an idle connection is kept (10 min)
       max-lifetime: 1800000     # ms — max age of a connection (30 min), below Postgres default
       pool-name: InstagramPool
+  
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      
+  cache:
+    type: redis
+    redis:
+      time-to-live: 60000
 
 springdoc:
   api-docs:

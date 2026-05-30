@@ -7,8 +7,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -61,6 +63,13 @@ public class PostService implements
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "feed", allEntries = true),
+            @CacheEvict(value = "userStats", key = "'userStats:' + command.userId"),
+            @CacheEvict(value = "exploreFeed", allEntries = true),
+            @CacheEvict(value = "userPosts", key = "'userPosts:' + command.userId + ':page1'")
+    })
+
     public Post createPost(CreatePostUseCase.Command command) {
         Post post = Post.builder()
                 .id(UUID.randomUUID())
@@ -118,6 +127,7 @@ public class PostService implements
     }
 
     @Override
+    @Cacheable(value = "postMedia", key = "'postMedia:' + #postId")
     public List<PostMedia> getPostMedia(UUID postId) {
         return postMediaRepository.findByPostId(postId);
     }
@@ -137,6 +147,10 @@ public class PostService implements
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "userStats", key = "'userStats:' + command.userId"),
+            @CacheEvict(value = "userPosts", key = "'userPosts:' + command.userId + ':page1'")
+    })
     public void deletePost(DeletePostUseCase.Command command) {
         Post existing = postRepository.findById(command.id())
                 .orElseThrow(() -> new PostNotFoundException(command.id()));
@@ -146,6 +160,7 @@ public class PostService implements
     }
 
     @Override
+    @Cacheable(value = "userPosts", key = "'userPosts:' + #query.targetUserId + ':page1'", condition = "query.page == 0")
     public Page<Post> getUserPosts(GetUserPostsUseCase.Query query) {
         return postRepository.findByUserId(query.targetUserId(), PageRequest.of(query.page(), query.size()));
     }

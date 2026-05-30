@@ -8,6 +8,9 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,196 +34,235 @@ import com.instagram.domain.port.out.UserStatsRepository;
 
 @Service
 public class FollowService implements FollowUserUseCase,
-        UnfollowUserUseCase,
-        ApproveFollowRequestUseCase,
-        DeclineFollowRequestUseCase,
-        GetFollowRequestsUseCase,
-        GetFollowersUseCase,
-        GetFollowingUseCase {
+                UnfollowUserUseCase,
+                ApproveFollowRequestUseCase,
+                DeclineFollowRequestUseCase,
+                GetFollowRequestsUseCase,
+                GetFollowersUseCase,
+                GetFollowingUseCase {
 
-    private final FollowRepository followRepository;
-    private final UserRepository userRepository;
-    private final UserStatsRepository userStatsRepository;
-    private final ApplicationEventPublisher eventPublisher;
+        private final FollowRepository followRepository;
+        private final UserRepository userRepository;
+        private final UserStatsRepository userStatsRepository;
+        private final ApplicationEventPublisher eventPublisher;
 
-    public FollowService(FollowRepository followRepository,
-            UserRepository userRepository,
-            UserStatsRepository userStatsRepository,
-            ApplicationEventPublisher eventPublisher) {
-        this.followRepository = followRepository;
-        this.userRepository = userRepository;
-        this.userStatsRepository = userStatsRepository;
-        this.eventPublisher = eventPublisher;
-    }
-
-    @Override
-    public Follow follow(FollowUserUseCase.Command command) {
-        User targetUser = userRepository.findByUsername(command.targetUsername())
-                .orElseThrow(() -> new UserNotFoundException(command.targetUsername()));
-
-        if (command.followerId().equals(targetUser.getId())) {
-            throw new CannotFollowYourselfException();
+        public FollowService(FollowRepository followRepository,
+                        UserRepository userRepository,
+                        UserStatsRepository userStatsRepository,
+                        ApplicationEventPublisher eventPublisher) {
+                this.followRepository = followRepository;
+                this.userRepository = userRepository;
+                this.userStatsRepository = userStatsRepository;
+                this.eventPublisher = eventPublisher;
         }
 
-        if (followRepository.findByFollowerIdAndFollowingId(command.followerId(), targetUser.getId()).isPresent()) {
-            throw new AlreadyFollowingException();
+        @Override
+        @Caching(evict = {
+                        @CacheEvict(value = "feed", key = "'feed:' + #command.followerId + ':page1'"),
+                        @CacheEvict(value = "userStats", key = "'userStats:' + #command.followerId"),
+                        @CacheEvict(value = "userStats", key = "'userStats:' + @followService.getFollowingId(#command.targetUsername)"),
+                        @CacheEvict(value = "exploreFeed", key = "'exploreFeed:' + #command.followerId + ':page1'"),
+                        @CacheEvict(value = "followings", key = "'followings:' + #command.followerId + ':page1'"),
+                        @CacheEvict(value = "followers", key = "'followers:' + @followService.getUserId(#command.targetUsername) + ':page1'")
+        })
+        public Follow follow(FollowUserUseCase.Command command) {
+                User targetUser = userRepository.findByUsername(command.targetUsername())
+                                .orElseThrow(() -> new UserNotFoundException(command.targetUsername()));
+
+                if (command.followerId().equals(targetUser.getId())) {
+                        throw new CannotFollowYourselfException();
+                }
+
+                if (followRepository.findByFollowerIdAndFollowingId(command.followerId(), targetUser.getId())
+                                .isPresent()) {
+                        throw new AlreadyFollowingException();
+                }
+
+                FollowStatus status = targetUser.getPrivacyLevel() == PrivacyLevel.PRIVATE ? FollowStatus.PENDING
+                                : FollowStatus.ACCEPTED;
+
+                Follow follow = Follow.of(command.followerId(), targetUser.getId(), status);
+                Follow saved = followRepository.save(follow);
+
+                if (status == FollowStatus.ACCEPTED) {
+                        userStatsRepository.incrementFollowerCount(targetUser.getId());
+                        userStatsRepository.incrementFollowingCount(command.followerId());
+                }
+
+                eventPublisher.publishEvent(new NotificationEvent(
+                                this,
+                                status == FollowStatus.ACCEPTED ? Notification.NotificationType.FOLLOW
+                                                : Notification.NotificationType.FOLLOW_REQUEST,
+                                targetUser.getId(),
+                                command.followerId(),
+                                Notification.EntityType.FOLLOW,
+                                null));
+
+                return saved;
         }
 
-        FollowStatus status = targetUser.getPrivacyLevel() == PrivacyLevel.PRIVATE ? FollowStatus.PENDING
-                : FollowStatus.ACCEPTED;
-
-        Follow follow = Follow.of(command.followerId(), targetUser.getId(), status);
-        Follow saved = followRepository.save(follow);
-
-        if (status == FollowStatus.ACCEPTED) {
-            userStatsRepository.incrementFollowerCount(targetUser.getId());
-            userStatsRepository.incrementFollowingCount(command.followerId());
+        public UUID getFollowingId(String username) {
+                return this.userRepository.findByUsername(username).orElseThrow(
+                                () -> new UserNotFoundException(username)).getId();
         }
 
-        eventPublisher.publishEvent(new NotificationEvent(
-                this,
-                status == FollowStatus.ACCEPTED ? Notification.NotificationType.FOLLOW
-                        : Notification.NotificationType.FOLLOW_REQUEST,
-                targetUser.getId(),
-                command.followerId(),
-                Notification.EntityType.FOLLOW,
-                null));
+        @Override
+        @Caching(evict = {
+                        @CacheEvict(value = "feed", key = "'feed:' + #command.followerId + ':page1'"),
+                        @CacheEvict(value = "userStats", key = "'userStats:' + #command.followerId"),
+                        @CacheEvict(value = "userStats", key = "'userStats:' + @followService.getFollowingId(#command.targetUsername)"),
+                        @CacheEvict(value = "exploreFeed", key = "'exploreFeed:' + #command.followerId + ':page1'"),
+                        @CacheEvict(value = "followings", key = "'followings:' + #command.followerId + ':page1'"),
+                        @CacheEvict(value = "followers", key = "'followers:' + @followService.getUserId(#command.targetUsername) + ':page1'")
+        })
+        public void unfollow(UnfollowUserUseCase.Command command) {
+                User targetUser = userRepository.findByUsername(command.targetUsername())
+                                .orElseThrow(() -> new UserNotFoundException(command.targetUsername()));
+                Follow follow = followRepository
+                                .findByFollowerIdAndFollowingId(command.followerId(), targetUser.getId())
+                                .orElseThrow(() -> new FollowRequestNotFoundException(command.followerId()));
+                followRepository.delete(command.followerId(), targetUser.getId());
+                if (follow.getStatus() == FollowStatus.ACCEPTED) {
+                        userStatsRepository.decrementFollowerCount(targetUser.getId());
+                        userStatsRepository.decrementFollowingCount(command.followerId());
+                }
 
-        return saved;
-    }
-
-    @Override
-    public void unfollow(UnfollowUserUseCase.Command command) {
-        User targetUser = userRepository.findByUsername(command.targetUsername())
-                .orElseThrow(() -> new UserNotFoundException(command.targetUsername()));
-        Follow follow = followRepository.findByFollowerIdAndFollowingId(command.followerId(), targetUser.getId())
-                .orElseThrow(() -> new FollowRequestNotFoundException(command.followerId()));
-        followRepository.delete(command.followerId(), targetUser.getId());
-        if (follow.getStatus() == FollowStatus.ACCEPTED) {
-            userStatsRepository.decrementFollowerCount(targetUser.getId());
-            userStatsRepository.decrementFollowingCount(command.followerId());
         }
 
-    }
-
-    @Override
-    public Follow approve(ApproveFollowRequestUseCase.Command command) {
-        Follow follow = followRepository
-                .findByFollowerIdAndFollowingId(command.followRequestId(), command.followingId())
-                .orElseThrow(() -> new FollowRequestNotFoundException(command.followRequestId()));
-        Follow acceptedFollow = follow.withAccepted();
-        followRepository.save(acceptedFollow);
-        userStatsRepository.incrementFollowerCount(command.followingId());
-        userStatsRepository.incrementFollowingCount(command.followRequestId());
-        return acceptedFollow;
-    }
-
-    @Override
-    public void decline(DeclineFollowRequestUseCase.Command command) {
-        Follow follow = followRepository
-                .findByFollowerIdAndFollowingId(command.followRequestId(), command.followingId())
-                .orElseThrow(() -> new FollowRequestNotFoundException(command.followRequestId()));
-        followRepository.delete(command.followRequestId(), command.followingId());
-    }
-
-    @Override
-    public List<UserSummary> getFollowRequests(GetFollowRequestsUseCase.Query query) {
-        List<Follow> pendingFollows = followRepository.findPendingRequestsByFollowingId(query.userId());
-        Set<UUID> followerIds = pendingFollows.stream()
-                .map(Follow::getFollowerId)
-                .collect(Collectors.toSet());
-        Map<UUID, User> userById = userRepository.findAllByIds(followerIds).stream()
-                .collect(Collectors.toMap(User::getId, Function.identity()));
-
-        // 1 query: all people the current user already follows — for isFollowing flag
-
-        return pendingFollows.stream().map(follow -> {
-            User user = userById.get(follow.getFollowerId());
-            return new UserSummary(
-                    user.getId(),
-                    user.getUsername(),
-                    user.getFullName(),
-                    user.getProfilePictureUrl(),
-                    user.isVerified(),
-                    user.getPrivacyLevel() == PrivacyLevel.PRIVATE,
-                    FollowStatus.PENDING);
-        }).toList();
-    }
-
-    @Override
-    public List<UserSummary> getFollowers(GetFollowersUseCase.Query query) {
-        Pageable pageable = PageRequest.of(query.page(), query.size());
-        Optional<User> targetUser = userRepository.findByUsername(query.targetUsername());
-        if (targetUser.isEmpty()) {
-            throw new UserNotFoundException(query.targetUsername());
+        @Override
+        @Caching(evict = {
+                        @CacheEvict(value = "followers",     key = "'followers:' + #command.followingId + ':page1'"),
+                        @CacheEvict(value = "followings",    key = "'followings:' + #command.followRequestId + ':page1'"),
+                        @CacheEvict(value = "userStats",     key = "'userStats:' + #command.followingId"),
+                        @CacheEvict(value = "userStats",     key = "'userStats:' + #command.followRequestId"),
+                        @CacheEvict(value = "followRequests", key = "'followRequests:' + #command.followingId")
+        })
+        public Follow approve(ApproveFollowRequestUseCase.Command command) {
+                Follow follow = followRepository
+                                .findByFollowerIdAndFollowingId(command.followRequestId(), command.followingId())
+                                .orElseThrow(() -> new FollowRequestNotFoundException(command.followRequestId()));
+                Follow acceptedFollow = follow.withAccepted();
+                followRepository.save(acceptedFollow);
+                userStatsRepository.incrementFollowerCount(command.followingId());
+                userStatsRepository.incrementFollowingCount(command.followRequestId());
+                return acceptedFollow;
         }
-        UUID targetUserId = targetUser.get().getId();
 
-        // 1 query: all accepted followers of the target user
-        List<Follow> follows = followRepository.findFollowersByUserId(targetUserId, pageable);
-        if (follows.isEmpty())
-            return List.of();
-
-        // 1 query: batch-load all follower User objects — no N+1
-        Set<UUID> followerIds = follows.stream()
-                .map(Follow::getFollowerId)
-                .collect(Collectors.toSet());
-        Map<UUID, User> userById = userRepository.findAllByIds(followerIds).stream()
-                .collect(Collectors.toMap(User::getId, Function.identity()));
-
-        // 1 query: all people the current user already follows — for isFollowing flag
-        List<Follow> currentUserFollowing = followRepository.findFollowingByUserId(
-                query.currentUserId(), Pageable.unpaged());
-        Map<UUID, FollowStatus> followingIds = currentUserFollowing.stream()
-                .collect(Collectors.toMap(Follow::getFollowingId, Follow::getStatus));
-
-        return follows.stream().map(follow -> {
-            User user = userById.get(follow.getFollowerId());
-            FollowStatus status = followingIds.getOrDefault(user.getId(), null);
-            return new UserSummary(
-                    user.getId(),
-                    user.getUsername(),
-                    user.getFullName(),
-                    user.getProfilePictureUrl(),
-                    user.isVerified(),
-                    user.getPrivacyLevel() == PrivacyLevel.PRIVATE,
-                    status);
-        }).toList();
-    }
-
-    @Override
-    public List<UserSummary> getFollowing(GetFollowingUseCase.Query query) {
-        Pageable pageable = PageRequest.of(query.page(), query.size());
-
-        Optional<User> targetUser = userRepository.findByUsername(query.targetUsername());
-        if (targetUser.isEmpty()) {
-            throw new UserNotFoundException(query.targetUsername());
+        @Override
+        @CacheEvict(value = "followRequests", key = "'followRequests:' + #command.followingId")
+        public void decline(DeclineFollowRequestUseCase.Command command) {
+                Follow follow = followRepository
+                                .findByFollowerIdAndFollowingId(command.followRequestId(), command.followingId())
+                                .orElseThrow(() -> new FollowRequestNotFoundException(command.followRequestId()));
+                followRepository.delete(command.followRequestId(), command.followingId());
         }
-        UUID targetUserId = targetUser.get().getId();
 
-        // 1 query: all accepted follows made by the target user
-        List<Follow> follows = followRepository.findFollowingByUserId(targetUserId, pageable);
-        if (follows.isEmpty())
-            return List.of();
+        @Override
+        @Cacheable(value = "followRequests", key = "'followRequests:' + #query.userId")
+        public List<UserSummary> getFollowRequests(GetFollowRequestsUseCase.Query query) {
+                List<Follow> pendingFollows = followRepository.findPendingRequestsByFollowingId(query.userId());
+                Set<UUID> followerIds = pendingFollows.stream()
+                                .map(Follow::getFollowerId)
+                                .collect(Collectors.toSet());
+                Map<UUID, User> userById = userRepository.findAllByIds(followerIds).stream()
+                                .collect(Collectors.toMap(User::getId, Function.identity()));
 
-        // 1 query: batch-load all followed User objects — no N+1
-        Set<UUID> followingIds = follows.stream()
-                .map(Follow::getFollowingId)
-                .collect(Collectors.toSet());
-        Map<UUID, User> userById = userRepository.findAllByIds(followingIds).stream()
-                .collect(Collectors.toMap(User::getId, Function.identity()));
+                // 1 query: all people the current user already follows — for isFollowing flag
 
-        return follows.stream().map(follow -> {
-            User user = userById.get(follow.getFollowingId());
-            return new UserSummary(
-                    user.getId(),
-                    user.getUsername(),
-                    user.getFullName(),
-                    user.getProfilePictureUrl(),
-                    user.isVerified(),
-                    user.getPrivacyLevel() == PrivacyLevel.PRIVATE,
-                    FollowStatus.ACCEPTED);
-        }).toList();
-    }
+                return pendingFollows.stream().map(follow -> {
+                        User user = userById.get(follow.getFollowerId());
+                        return new UserSummary(
+                                        user.getId(),
+                                        user.getUsername(),
+                                        user.getFullName(),
+                                        user.getProfilePictureUrl(),
+                                        user.isVerified(),
+                                        user.getPrivacyLevel() == PrivacyLevel.PRIVATE,
+                                        FollowStatus.PENDING);
+                }).toList();
+        }
+
+        public UUID getUserId(String targetName) {
+                return this.userRepository.findByUsername(targetName)
+                                .orElseThrow(() -> new UserNotFoundException(targetName)).getId();
+        }
+
+        @Override
+        @Cacheable(value = "followers", key = "'followers:' + @followService.getUserId(#query.targetUsername) + ':page1'", condition = "#query.page() == 0")
+        public List<UserSummary> getFollowers(GetFollowersUseCase.Query query) {
+                Pageable pageable = PageRequest.of(query.page(), query.size());
+                Optional<User> targetUser = userRepository.findByUsername(query.targetUsername());
+                if (targetUser.isEmpty()) {
+                        throw new UserNotFoundException(query.targetUsername());
+                }
+                UUID targetUserId = targetUser.get().getId();
+
+                // 1 query: all accepted followers of the target user
+                List<Follow> follows = followRepository.findFollowersByUserId(targetUserId, pageable);
+                if (follows.isEmpty())
+                        return List.of();
+
+                // 1 query: batch-load all follower User objects — no N+1
+                Set<UUID> followerIds = follows.stream()
+                                .map(Follow::getFollowerId)
+                                .collect(Collectors.toSet());
+                Map<UUID, User> userById = userRepository.findAllByIds(followerIds).stream()
+                                .collect(Collectors.toMap(User::getId, Function.identity()));
+
+                // 1 query: all people the current user already follows — for isFollowing flag
+                List<Follow> currentUserFollowing = followRepository.findFollowingByUserId(
+                                query.currentUserId(), Pageable.unpaged());
+                Map<UUID, FollowStatus> followingIds = currentUserFollowing.stream()
+                                .collect(Collectors.toMap(Follow::getFollowingId, Follow::getStatus));
+
+                return follows.stream().map(follow -> {
+                        User user = userById.get(follow.getFollowerId());
+                        FollowStatus status = followingIds.getOrDefault(user.getId(), null);
+                        return new UserSummary(
+                                        user.getId(),
+                                        user.getUsername(),
+                                        user.getFullName(),
+                                        user.getProfilePictureUrl(),
+                                        user.isVerified(),
+                                        user.getPrivacyLevel() == PrivacyLevel.PRIVATE,
+                                        status);
+                }).toList();
+        }
+
+        @Override
+        @Cacheable(value = "followings", key = "'followings:' + @followService.getUserId(#query.targetUsername) + ':page1'", condition = "#query.page() == 0")
+        public List<UserSummary> getFollowing(GetFollowingUseCase.Query query) {
+                Pageable pageable = PageRequest.of(query.page(), query.size());
+
+                Optional<User> targetUser = userRepository.findByUsername(query.targetUsername());
+                if (targetUser.isEmpty()) {
+                        throw new UserNotFoundException(query.targetUsername());
+                }
+                UUID targetUserId = targetUser.get().getId();
+
+                // 1 query: all accepted follows made by the target user
+                List<Follow> follows = followRepository.findFollowingByUserId(targetUserId, pageable);
+                if (follows.isEmpty())
+                        return List.of();
+
+                // 1 query: batch-load all followed User objects — no N+1
+                Set<UUID> followingIds = follows.stream()
+                                .map(Follow::getFollowingId)
+                                .collect(Collectors.toSet());
+                Map<UUID, User> userById = userRepository.findAllByIds(followingIds).stream()
+                                .collect(Collectors.toMap(User::getId, Function.identity()));
+
+                return follows.stream().map(follow -> {
+                        User user = userById.get(follow.getFollowingId());
+                        return new UserSummary(
+                                        user.getId(),
+                                        user.getUsername(),
+                                        user.getFullName(),
+                                        user.getProfilePictureUrl(),
+                                        user.isVerified(),
+                                        user.getPrivacyLevel() == PrivacyLevel.PRIVATE,
+                                        FollowStatus.ACCEPTED);
+                }).toList();
+        }
 
 }

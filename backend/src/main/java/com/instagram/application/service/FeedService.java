@@ -4,10 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.instagram.domain.model.Post;
@@ -32,8 +31,8 @@ public class FeedService
         private final LikeRepository likeRepository;
 
         @Override
+        @Cacheable(value = "feed", key = "'feed:' + #query.userId + ':page1'", condition = "#query.cursor == null")
         public GetHomeFeedUseCase.FeedPage getHomeFeed(GetHomeFeedUseCase.Query query) {
-                // TODO: add Redis cache for cursor=null (page 1) after Phase 10
                 List<Post> posts = feedRepository.getHomeFeed(
                                 query.userId(), query.cursor(), query.limit());
                 List<UUID> postIds = posts.stream().map(Post::getId).toList();
@@ -56,6 +55,7 @@ public class FeedService
         }
 
         @Override
+        @Cacheable(value = "exploreFeed", key = "'exploreFeed:' + #query.userId + ':page1'", condition = "#query.cursor == null")
         public GetExploreFeedUseCase.FeedPage getExploreFeed(GetExploreFeedUseCase.Query query) {
                 List<Post> posts = feedRepository.getExploreFeed(
                                 query.userId(), query.cursor(), query.limit());

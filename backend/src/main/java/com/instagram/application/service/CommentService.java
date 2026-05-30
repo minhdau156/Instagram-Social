@@ -3,11 +3,15 @@ package com.instagram.application.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -78,6 +82,10 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "comments", key = "'comments:' + @commentService.getPostId(#command.commentId) + ':page1'"),
+
+    })
     public void deleteComment(DeleteCommentUseCase.Command command) {
         Comment comment = this.commentRepository.findById(command.commentId())
                 .orElseThrow(() -> new CommentNotFoundException(command.commentId()));
@@ -95,6 +103,10 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "comments", key = "'comments:' + @commentService.getPostId(#command.commentId) + ':page1'"),
+
+    })
     public Comment editComment(EditCommentUseCase.Command command) {
         Comment comment = this.commentRepository.findById(command.commentId())
                 .orElseThrow(() -> new CommentNotFoundException(command.commentId()));
@@ -113,8 +125,18 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
         return editComment;
     }
 
+    public UUID getPostId(UUID commentId) {
+        Comment comment = this.commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
+        return comment.getPostId();
+    }
+
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "comments", key = "'comments:' + #command.postId + ':page1'"),
+
+    })
     public Comment addComment(AddCommentUseCase.Command command) {
         Comment comment = Comment.of(command.postId(), command.userId(), command.content(), command.parentId());
         Comment newComment = this.commentRepository.save(comment);
@@ -158,6 +180,7 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
 
     @Override
     @Transactional
+    @Cacheable(value = "comments", key = "'comments:' + #query.postId + ':page1'", condition = "query.page == 0")
     public Page<Comment> getComments(GetCommentsUseCase.Query query) {
         Page<Comment> comments = commentRepository
                 .findByPostId(query.postId(), PageRequest.of(query.page(), query.size()));

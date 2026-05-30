@@ -2,6 +2,9 @@ package com.instagram.application.service;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +27,7 @@ public class SavedPostService implements SavePostUseCase, UnsavePostUseCase, Get
     private final SavedPostRepository savedPostRepository;
 
     @Override
+    @Cacheable(value = "savedPosts", key = "'savedPosts:' + #query.userId + ':page1'", condition = "#query.page == 0")
     public Page<SavedPost> getSavedPosts(GetSavedPostsUseCase.Query query) {
         Pageable pageable = PageRequest.of(query.page(), query.size());
         Page<SavedPost> page = savedPostRepository.findByUserId(query.userId(), pageable);
@@ -31,6 +35,9 @@ public class SavedPostService implements SavePostUseCase, UnsavePostUseCase, Get
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "savedPosts", key = "'savedPosts:' + #command.userId + ':page1'")
+    })
     public void unsave(UnsavePostUseCase.Command command) {
         if (!savedPostRepository.existsByPostIdAndUserId(command.postId(), command.userId())) {
             throw new NotSavedException(command.postId(), command.userId());
@@ -39,6 +46,9 @@ public class SavedPostService implements SavePostUseCase, UnsavePostUseCase, Get
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "savedPosts", key = "'savedPosts:' + #command.userId + ':page1'")
+    })
     public SavedPost save(SavePostUseCase.Command command) {
         if (savedPostRepository.existsByPostIdAndUserId(command.postId(), command.userId())) {
             throw new AlreadySavedException(command.postId(), command.userId());

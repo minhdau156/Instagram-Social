@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.instagram.domain.exception.InvalidCredentialsException;
@@ -216,6 +218,7 @@ public class UserService
     // ── GetUserProfileUseCase ────────────────────────────────────────────────
 
     @Override
+    @Cacheable(value = "profile", key = "'profile:' + #query.targetUsername()", condition = "#query.targetUsername() != null")
     public UserProfile getUserProfile(GetUserProfileUseCase.Query query) {
 
         if (query.targetUsername() == null) {
@@ -244,6 +247,7 @@ public class UserService
     // ── UpdateProfileUseCase ─────────────────────────────────────────────────
 
     @Override
+    @CacheEvict(value = "profile", key = "'profile:' + @userService.getUserName(#command.userId)")
     public User updateProfile(UpdateProfileUseCase.Command command) {
         User user = userRepository.findById(UUID.fromString(command.userId()))
                 .orElseThrow(() -> UserNotFoundException.withId(UUID.fromString(command.userId())));
@@ -256,6 +260,11 @@ public class UserService
                 command.privacyLevel());
 
         return userRepository.save(updated);
+    }
+
+    public String getUserName(UUID userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> UserNotFoundException.withId(userId)).getUsername();
     }
 
     @Override
@@ -272,6 +281,7 @@ public class UserService
     }
 
     @Override
+    @Cacheable(value = "userStats", key = "'userStats:' + #userId")
     public UserStats getUserStats(UUID userId) {
         return userStatsRepository.findByUserId(userId)
                 .orElseThrow(() -> UserNotFoundException.withId(userId));
