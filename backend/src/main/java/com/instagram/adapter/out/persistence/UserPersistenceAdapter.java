@@ -97,7 +97,6 @@ public class UserPersistenceAdapter implements UserRepository {
                 .isVerified(user.isVerified())
                 .status(user.getStatus())
                 .lastLoginAt(user.getLastLoginAt())
-                .role("USER")
                 .build();
     }
 
@@ -116,7 +115,6 @@ public class UserPersistenceAdapter implements UserRepository {
                 .isVerified(entity.isVerified())
                 .status(entity.getStatus())
                 .lastLoginAt(entity.getLastLoginAt())
-                .role(entity.getRole() == "USER" ? UserRole.USER : UserRole.ADMIN)
                 .build();
     }
 }

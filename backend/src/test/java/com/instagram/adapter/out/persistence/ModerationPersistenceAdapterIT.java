@@ -60,7 +60,6 @@ public class ModerationPersistenceAdapterIT {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
-                .role("USER")
                 .build();
     }
 
@@ -273,8 +272,8 @@ public class ModerationPersistenceAdapterIT {
     @Test
     void selfBlockGuard_whenSameBlockerAndBlockedId_throwIllegalArgumentException() {
         UUID id = UUID.randomUUID();
-        assertThrows(IllegalArgumentException.class, () ->
-                UserBlock.builder().blockerId(id).blockedId(id).createdAt(OffsetDateTime.now()).build());
+        assertThrows(IllegalArgumentException.class,
+                () -> UserBlock.builder().blockerId(id).blockedId(id).createdAt(OffsetDateTime.now()).build());
     }
 
     @Test

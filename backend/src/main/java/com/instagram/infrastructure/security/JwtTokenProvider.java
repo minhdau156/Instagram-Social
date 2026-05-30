@@ -48,7 +48,7 @@ public class JwtTokenProvider implements TokenPort {
     public String generateAccessToken(UUID userId, String role) {
         String accessToken = Jwts.builder()
                 .subject(userId.toString())
-                .claim("role", role)
+                .claim("role", "")
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpiryMs))
                 .signWith(signingKey, Jwts.SIG.HS256)

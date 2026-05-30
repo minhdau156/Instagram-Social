@@ -122,7 +122,7 @@ public class UserService
             throw new InvalidCredentialsException();
         }
 
-        String accessToken = tokenPort.generateAccessToken(user.getId(), user.getRole().name());
+        String accessToken = tokenPort.generateAccessToken(user.getId(), null);
         String refreshToken = tokenPort.generateRefreshToken(user.getId());
 
         return new AuthResult(accessToken, refreshToken, ACCESS_TOKEN_EXPIRES_IN);

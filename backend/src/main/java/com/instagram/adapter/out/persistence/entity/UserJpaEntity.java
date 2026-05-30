@@ -65,7 +65,4 @@ public class UserJpaEntity extends BaseJpaEntity {
     @Column(name = "last_login_at")
     private OffsetDateTime lastLoginAt;
 
-    @Column(name = "role")
-    private String role;
-
 }

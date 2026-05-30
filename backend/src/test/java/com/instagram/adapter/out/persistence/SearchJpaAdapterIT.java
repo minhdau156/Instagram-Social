@@ -432,7 +432,6 @@ class SearchJpaAdapterIT {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
-                .role("USER")
                 .build();
     }
 

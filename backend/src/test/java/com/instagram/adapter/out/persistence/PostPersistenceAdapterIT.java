@@ -47,7 +47,6 @@ public class PostPersistenceAdapterIT {
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .isVerified(false)
-                .role("USER")
                 .build());
     }
 
