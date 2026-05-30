@@ -128,7 +128,7 @@ public class UserServiceTest {
         // ACT
         when(userRepository.findByUsername(command.identifier())).thenReturn(Optional.of(user));
         when(passwordHashPort.verify(command.password(), user.getPasswordHash())).thenReturn(true);
-        when(tokenPort.generateAccessToken(user.getId(), "USER")).thenReturn("accessToken");
+        when(tokenPort.generateAccessToken(user.getId(), null)).thenReturn("accessToken");
         when(tokenPort.generateRefreshToken(user.getId())).thenReturn("refreshToken");
 
         // ASSERT
