@@ -178,9 +178,9 @@ class SearchJpaAdapterIT {
     void searchPosts_matchesCaptionIlikeCaseInsensitive() {
         UserJpaEntity user = tem.persistAndFlush(buildUser("poster1", "Post User One"));
         tem.persistAndFlush(PostJpaEntity.builder()
-                .user(user).caption("Beautiful Sunset view").status(PostStatus.PUBLISHED).build());
+                .userId(user.getId()).caption("Beautiful Sunset view").status(PostStatus.PUBLISHED).build());
         tem.persistAndFlush(PostJpaEntity.builder()
-                .user(user).caption("Mountain hike").status(PostStatus.PUBLISHED).build());
+                .userId(user.getId()).caption("Mountain hike").status(PostStatus.PUBLISHED).build());
         tem.clear();
 
         List<Post> results = adapter.searchPosts(UUID.randomUUID(), "SUNSET", Pageable.ofSize(20));
@@ -193,7 +193,7 @@ class SearchJpaAdapterIT {
     void searchPosts_excludesSoftDeletedPosts() {
         UserJpaEntity user = tem.persistAndFlush(buildUser("poster2", "Post User Two"));
         tem.persistAndFlush(PostJpaEntity.builder()
-                .user(user).caption("Sunset deleted post").status(PostStatus.PUBLISHED)
+                .userId(user.getId()).caption("Sunset deleted post").status(PostStatus.PUBLISHED)
                 .deletedAt(OffsetDateTime.now()).build());
         tem.clear();
 
@@ -206,7 +206,7 @@ class SearchJpaAdapterIT {
     void searchPosts_noMatch_returnsEmptyList() {
         UserJpaEntity user = tem.persistAndFlush(buildUser("poster3", "Post User Three"));
         tem.persistAndFlush(PostJpaEntity.builder()
-                .user(user).caption("Completely unrelated content").status(PostStatus.PUBLISHED).build());
+                .userId(user.getId()).caption("Completely unrelated content").status(PostStatus.PUBLISHED).build());
         tem.clear();
 
         List<Post> results = adapter.searchPosts(UUID.randomUUID(), "zzz_no_match", Pageable.ofSize(20));
@@ -220,9 +220,9 @@ class SearchJpaAdapterIT {
     void findPostsByHashtag_returnsOnlyLinkedPosts() {
         UserJpaEntity user = tem.persistAndFlush(buildUser("poster4", "Post User Four"));
         PostJpaEntity linkedPost = tem.persistAndFlush(PostJpaEntity.builder()
-                .user(user).caption("My travel photo").status(PostStatus.PUBLISHED).build());
+                .userId(user.getId()).caption("My travel photo").status(PostStatus.PUBLISHED).build());
         tem.persistAndFlush(PostJpaEntity.builder()
-                .user(user).caption("Not tagged").status(PostStatus.PUBLISHED).build());
+                .userId(user.getId()).caption("Not tagged").status(PostStatus.PUBLISHED).build());
         HashtagJpaEntity hashtag = tem.persistAndFlush(buildHashtag("travel_d", 1));
 
         tem.getEntityManager()
@@ -243,7 +243,7 @@ class SearchJpaAdapterIT {
     void findPostsByHashtag_excludesSoftDeletedPosts() {
         UserJpaEntity user = tem.persistAndFlush(buildUser("poster5", "Post User Five"));
         PostJpaEntity deletedPost = tem.persistAndFlush(PostJpaEntity.builder()
-                .user(user).caption("Travel deleted").status(PostStatus.PUBLISHED)
+                .userId(user.getId()).caption("Travel deleted").status(PostStatus.PUBLISHED)
                 .deletedAt(OffsetDateTime.now()).build());
         HashtagJpaEntity hashtag = tem.persistAndFlush(buildHashtag("travel_e", 1));
 
@@ -308,7 +308,8 @@ class SearchJpaAdapterIT {
     void searchPosts_ftsStemming() {
         UserJpaEntity user = tem.persistAndFlush(buildUser("stem_poster", "Stemming User"));
         tem.persistAndFlush(PostJpaEntity.builder()
-                .user(user).caption("Running along the beautiful beach").status(PostStatus.PUBLISHED).build());
+                .userId(user.getId()).caption("Running along the beautiful beach").status(PostStatus.PUBLISHED)
+                .build());
         tem.clear();
 
         // "running" stems to "run" in English FTS. Searching "run" should match.
@@ -322,7 +323,8 @@ class SearchJpaAdapterIT {
     void searchPosts_ftsMultiWord() {
         UserJpaEntity user = tem.persistAndFlush(buildUser("bridge_poster", "Bridge User"));
         tem.persistAndFlush(PostJpaEntity.builder()
-                .user(user).caption("Beautiful walk on the Golden Gate Bridge").status(PostStatus.PUBLISHED).build());
+                .userId(user.getId()).caption("Beautiful walk on the Golden Gate Bridge").status(PostStatus.PUBLISHED)
+                .build());
         tem.clear();
 
         List<Post> results = adapter.searchPosts(UUID.randomUUID(), "golden gate", Pageable.ofSize(20));
@@ -335,10 +337,12 @@ class SearchJpaAdapterIT {
     void searchPosts_ftsRelevanceOrdering() {
         UserJpaEntity user = tem.persistAndFlush(buildUser("rank_poster", "Ranking User"));
         PostJpaEntity postLowDensity = tem.persistAndFlush(PostJpaEntity.builder()
-                .user(user).caption("A beautiful sunset is happening in Bali right now").status(PostStatus.PUBLISHED)
+                .userId(user.getId()).caption("A beautiful sunset is happening in Bali right now")
+                .status(PostStatus.PUBLISHED)
                 .build());
         PostJpaEntity postHighDensity = tem.persistAndFlush(PostJpaEntity.builder()
-                .user(user).caption("sunset sunset sunset is sunset beach").status(PostStatus.PUBLISHED).build());
+                .userId(user.getId()).caption("sunset sunset sunset is sunset beach").status(PostStatus.PUBLISHED)
+                .build());
         tem.clear();
 
         List<Post> results = adapter.searchPosts(UUID.randomUUID(), "sunset", Pageable.ofSize(20));
@@ -354,7 +358,7 @@ class SearchJpaAdapterIT {
     void searchPosts_shortQueryFallback() {
         UserJpaEntity user = tem.persistAndFlush(buildUser("fallback_poster", "Fallback User"));
         tem.persistAndFlush(PostJpaEntity.builder()
-                .user(user).caption("Beautiful sunset in Bali").status(PostStatus.PUBLISHED).build());
+                .userId(user.getId()).caption("Beautiful sunset in Bali").status(PostStatus.PUBLISHED).build());
         tem.clear();
 
         // Query "ba" is length 2 (< 3 min length). Under FTS it won't match "Bali",

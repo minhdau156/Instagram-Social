@@ -108,7 +108,7 @@ public class FeedJpaQueryAdapter implements FeedRepository {
         // Do NOT call PostPersistenceAdapter directly — copy/adapt the mapping
         return Post.builder()
                 .id(entity.getId())
-                .userId(entity.getUser().getId())
+                .userId(entity.getUserId())
                 .caption(entity.getCaption())
                 .location(entity.getLocation())
                 .status(entity.getStatus())

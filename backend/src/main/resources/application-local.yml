@@ -18,12 +18,14 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         default_schema: public
+        generate_statistics: true
 
 logging:
   level:
     com.instagram: DEBUG
     org.springframework.web: INFO
     org.hibernate.SQL: DEBUG
+    org.hibernate.stat: DEBUG
 
 app:
   storage:

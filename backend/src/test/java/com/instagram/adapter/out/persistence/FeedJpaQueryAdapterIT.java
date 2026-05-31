@@ -9,6 +9,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.SessionFactory;
+import org.hibernate.stat.Statistics;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +89,7 @@ class FeedJpaQueryAdapterIT {
         List<PostJpaEntity> feed = feedJpaRepository.findHomeFeed(follower.getId(), null, 20);
 
         assertThat(feed).hasSize(2);
-        assertThat(feed).allMatch(p -> p.getUser().getId().equals(followed.getId()));
+        assertThat(feed).allMatch(p -> p.getUserId().equals(followed.getId()));
     }
 
     @Test
@@ -94,7 +97,7 @@ class FeedJpaQueryAdapterIT {
         List<PostJpaEntity> explore = feedJpaRepository.findExploreFeed(follower.getId(), null, 20);
 
         assertThat(explore).hasSize(1);
-        assertThat(explore.get(0).getUser().getId()).isEqualTo(stranger.getId());
+        assertThat(explore.get(0).getUserId()).isEqualTo(stranger.getId());
     }
 
     @Test
@@ -106,6 +109,29 @@ class FeedJpaQueryAdapterIT {
         List<PostJpaEntity> page = feedJpaRepository.findHomeFeed(follower.getId(), minUuid, 20);
 
         assertThat(page).isEmpty();
+    }
+
+    @Test
+    void getHomeFeed_noN1_statementCountBelowThreshold() {
+        // Seed 5 additional posts (7 total from followed). With the old N+1
+        // (entity.getUser().getId()), this would fire 1 list query + 7 lazy-load
+        // queries = 8 statements. With the fix (entity.getUserId()), only 1.
+        for (int i = 0; i < 5; i++) {
+            tem.persistAndFlush(buildPost(followed));
+        }
+        tem.flush();
+        tem.clear();
+
+        Statistics stats = tem.getEntityManager()
+                .getEntityManagerFactory()
+                .unwrap(SessionFactory.class)
+                .getStatistics();
+        stats.setStatisticsEnabled(true);
+        stats.clear();
+
+        adapter.getHomeFeed(follower.getId(), null, 20);
+
+        assertThat(stats.getPrepareStatementCount()).isLessThan(5);
     }
 
     private UserJpaEntity buildUser(String username) {
@@ -120,7 +146,7 @@ class FeedJpaQueryAdapterIT {
 
     private PostJpaEntity buildPost(UserJpaEntity user) {
         return PostJpaEntity.builder()
-                .user(user)
+                .userId(user.getId())
                 .status(PostStatus.PUBLISHED)
                 .build();
     }

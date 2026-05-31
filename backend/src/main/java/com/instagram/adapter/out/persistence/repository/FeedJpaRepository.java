@@ -21,6 +21,7 @@ public interface FeedJpaRepository extends JpaRepository<PostJpaEntity, UUID> {
             ORDER BY p.created_at DESC
             LIMIT :limit
             """, nativeQuery = true)
+
     List<PostJpaEntity> findHomeFeed(
             @Param("userId") UUID userId,
             @Param("cursor") UUID cursor,

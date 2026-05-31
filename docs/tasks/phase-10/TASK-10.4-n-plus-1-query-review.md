@@ -203,9 +203,9 @@ void feedEndpoint_shouldNotProduceNPlusOneQueries() {
 
 ## Checklist
 
-- [ ] Audit all `@OneToMany` and `@ManyToOne` relationships — replace `FetchType.EAGER` with `FetchType.LAZY` where missing
-- [ ] Add `@EntityGraph` or `JOIN FETCH` to queries that need multiple associations in one call (e.g., `PostJpaRepository` loading `PostMedia` in the feed)
-- [ ] Run integration tests with Hibernate statistics enabled to verify no N+1 on feed endpoint
+- [x] Audit all `@OneToMany` and `@ManyToOne` relationships — replace `FetchType.EAGER` with `FetchType.LAZY` where missing
+- [x] Add `@EntityGraph` or `JOIN FETCH` to queries that need multiple associations in one call (e.g., `PostJpaRepository` loading `PostMedia` in the feed)
+- [x] Run integration tests with Hibernate statistics enabled to verify no N+1 on feed endpoint
 
 ---
 
