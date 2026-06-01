@@ -1,13 +1,20 @@
-# Current Feature
+# Current Feature: TASK-10.6 Frontend Image Optimization
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- -->
+- Add `loading="lazy"` to all `<img>` tags in `PostCard.tsx`, `PostGrid.tsx`, `ProfilePage.tsx`, and `PublicProfilePage.tsx` (use `imgProps={{ loading: 'lazy' }}` for MUI `<Avatar>`)
+- Add Accept-header-based image format hint endpoint (`GET /images/{key}`) to `MediaController.java` as a documented stub for AVIF/WebP detection
+- Verify all large page components in `App.tsx` use `React.lazy` + `<Suspense>` — convert any static imports to dynamic imports
+- Install `rollup-plugin-visualizer` and wire it into `vite.config.ts`; run `npm run build` and confirm separate route chunks with no single file over 500 KB uncompressed
 
 ## Notes
-<!-- -->
+- Pairs with TASK-10.5 (CDN-backed media URLs already done — images are served from edge, lazy loading prevents requesting them before needed)
+- The backend `Accept`-header endpoint is a stub only; actual image transcoding (AVIF/WebP conversion) is out of scope — no transcoder is configured
+- MUI `<Avatar>` does not support `loading` directly; pass via `imgProps={{ loading: 'lazy' }}`
+- `React.lazy` only works with default exports; use a re-export wrapper shim if a page uses named exports
+- Visualizer output: `dist/bundle-stats.html`; look for page-specific code leaking into the main `index` chunk
 
 ## History
 - TASK-10.5 — CDN-backed media URLs: `MinioStorageAdapter` injects `cdnBaseUrl` from `app.minio.cdn-base-url`; `uploadFile` returns CDN-rooted URL; `getPublicUrl(key)` added to adapter and `MediaStoragePort`; `generatePresignedPutUrl` unchanged (targets MinIO directly); `application.yml` adds `cdn-base-url` property (env-var driven, defaults to MinIO endpoint); `application-local.yml` fixes path to `app.minio.cdn-base-url: http://localhost:9000`; `docs/infra/cdn-setup.md` created with local dev, CloudFront/S3, and nginx/MinIO reference configs.
