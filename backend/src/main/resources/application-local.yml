@@ -28,12 +28,8 @@ logging:
     org.hibernate.stat: DEBUG
 
 app:
-  storage:
-    minio:
-      endpoint: ${MINIO_URL:http://localhost:9000}
-      access-key: ${MINIO_ACCESS_KEY:admin}
-      secret-key: ${MINIO_SECRET_KEY:password}
-      bucket: ${MINIO_BUCKET:instagram-media}
+  minio:
+    cdn-base-url: http://localhost:9000   # local: serve directly from MinIO, no CDN needed
 
   cors:
     allowed-origins: http://localhost:5173

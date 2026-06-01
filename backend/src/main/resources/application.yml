@@ -81,3 +81,4 @@ app:
     access-key: ${MINIO_ACCESS_KEY:minioadmin}
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
     bucket: ${MINIO_BUCKET:instagram-media}
+    cdn-base-url: ${CDN_BASE_URL:${MINIO_ENDPOINT:http://localhost:9000}}

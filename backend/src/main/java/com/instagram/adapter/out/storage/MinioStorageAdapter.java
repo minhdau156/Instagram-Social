@@ -21,13 +21,16 @@ public class MinioStorageAdapter implements MediaStoragePort {
     private final MinioClient minioClient;
     private final String bucket;
     private final String endpoint;
+    private final String cdnBaseUrl;
 
     public MinioStorageAdapter(MinioClient minioClient,
             @Value("${app.minio.bucket}") String bucket,
-            @Value("${app.minio.endpoint}") String endpoint) {
+            @Value("${app.minio.endpoint}") String endpoint,
+            @Value("${app.minio.cdn-base-url}") String cdnBaseUrl) {
         this.minioClient = minioClient;
         this.bucket = bucket;
         this.endpoint = endpoint;
+        this.cdnBaseUrl = cdnBaseUrl;
     }
 
     @Override
@@ -39,7 +42,7 @@ public class MinioStorageAdapter implements MediaStoragePort {
                     .stream(new ByteArrayInputStream(data), data.length, -1)
                     .contentType(contentType)
                     .build());
-            return String.format("%s/%s/%s", endpoint, bucket, key);
+            return String.format("%s/%s/%s", cdnBaseUrl, bucket, key);
         } catch (Exception e) {
             throw new MediaUploadException("Failed to upload file to MinIO");
         }
@@ -59,4 +62,10 @@ public class MinioStorageAdapter implements MediaStoragePort {
             throw new MediaUploadException("Failed to generate presigned put URL for MinIO");
         }
     }
+
+    @Override
+    public String getPublicUrl(String key) {
+        return String.format("%s/%s/%s", cdnBaseUrl, bucket, key);
+    }
+
 }

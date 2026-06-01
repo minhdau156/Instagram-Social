@@ -237,8 +237,8 @@ Set `CDN_BASE_URL=https://cdn.example.com` in your production `.env`.
 
 ## Checklist
 
-- [ ] Update `MinioStorageAdapter.generatePresignedPutUrl` to produce URLs rooted at `VITE_CDN_BASE_URL` env var
-- [ ] Add CloudFront / MinIO CDN proxy config example to `docs/` (optional: `docs/infra/cdn-setup.md`)
+- [x] Update `MinioStorageAdapter.generatePresignedPutUrl` to produce URLs rooted at `VITE_CDN_BASE_URL` env var
+- [x] Add CloudFront / MinIO CDN proxy config example to `docs/` (optional: `docs/infra/cdn-setup.md`)
 
 ---
 
