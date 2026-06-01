@@ -1,20 +1,13 @@
-# Current Feature: TASK-10.6 Frontend Image Optimization
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Add `loading="lazy"` to all `<img>` tags in `PostCard.tsx`, `PostGrid.tsx`, `ProfilePage.tsx`, and `PublicProfilePage.tsx` (use `imgProps={{ loading: 'lazy' }}` for MUI `<Avatar>`)
-- Add Accept-header-based image format hint endpoint (`GET /images/{key}`) to `MediaController.java` as a documented stub for AVIF/WebP detection
-- Verify all large page components in `App.tsx` use `React.lazy` + `<Suspense>` — convert any static imports to dynamic imports
-- Install `rollup-plugin-visualizer` and wire it into `vite.config.ts`; run `npm run build` and confirm separate route chunks with no single file over 500 KB uncompressed
+<!-- -->
 
 ## Notes
-- Pairs with TASK-10.5 (CDN-backed media URLs already done — images are served from edge, lazy loading prevents requesting them before needed)
-- The backend `Accept`-header endpoint is a stub only; actual image transcoding (AVIF/WebP conversion) is out of scope — no transcoder is configured
-- MUI `<Avatar>` does not support `loading` directly; pass via `imgProps={{ loading: 'lazy' }}`
-- `React.lazy` only works with default exports; use a re-export wrapper shim if a page uses named exports
-- Visualizer output: `dist/bundle-stats.html`; look for page-specific code leaking into the main `index` chunk
+<!-- -->
 
 ## History
 - TASK-10.5 — CDN-backed media URLs: `MinioStorageAdapter` injects `cdnBaseUrl` from `app.minio.cdn-base-url`; `uploadFile` returns CDN-rooted URL; `getPublicUrl(key)` added to adapter and `MediaStoragePort`; `generatePresignedPutUrl` unchanged (targets MinIO directly); `application.yml` adds `cdn-base-url` property (env-var driven, defaults to MinIO endpoint); `application-local.yml` fixes path to `app.minio.cdn-base-url: http://localhost:9000`; `docs/infra/cdn-setup.md` created with local dev, CloudFront/S3, and nginx/MinIO reference configs.
@@ -54,4 +47,5 @@ In Progress
 - TASK-9.1 — Domain Models: Report, UserBlock
 - TASK-10.1 — `docs/infra/query-baseline.md`: EXPLAIN ANALYZE output for 22 queries; seed SQL (`seed-10k.sql`); placeholder sections for TASK-10.3 (Redis) and TASK-10.7 (index audit).
 - TASK-10.2 — HikariCP pool tuning: `spring.datasource.hikari` section in `application.yml` (max-pool 10, fixed-size, 30 s timeout, 30 min max-lifetime, pool-name InstagramPool); local override in `application-local.yml` (max 5, min-idle 2); actuator dependency confirmed in `pom.xml`.
+- TASK-10.6 — Frontend image optimization: `loading="lazy"` on all `<img>` in `PostCard` (CardMedia + Avatar imgProps), `PostGrid`, `ProfllePage` (Avatar), `PublicProfilePage` (Avatar); `GET /api/v1/media/images/{key}` Accept-header stub in `MediaController` (AVIF/WebP detection, 204 response, CDN-redirect hook); `ProfilePage`, `PostPage`, `CreatePostModalPage`, `PublicProfilePage`, `FollowRequestsPage`, `SavedPostsPage` converted to `React.lazy` in `App.tsx` (named-export shim via `.then(m => ({ default: m.X }))`); `rollup-plugin-visualizer` installed + wired into `vite.config.ts`; build produces `dist/bundle-stats.html` with all route chunks ≤ 39 KB each.
 - TASK-10.3 — Redis caching: `RedisConfig` (16 named caches with per-cache TTLs); `@Cacheable`/`@CacheEvict` across all 15 service classes (Tier 1: feed, profile, userStats, userPermissions, postMedia, conversations; Tier 2: exploreFeed, userPosts, comments, followers, followings; Tier 3: savedPosts, followRequests, notifSettings, userRoles, roles); key-collision and cache-name bugs fixed; `src/test/resources/application.yml` disables cache in tests.
