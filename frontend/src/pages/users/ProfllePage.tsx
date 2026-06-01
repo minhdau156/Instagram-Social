@@ -48,7 +48,7 @@ export const ProfilePage = () => {
             <Container maxWidth={"md"}>
                 <Container maxWidth={"sm"} style={{ marginTop: "2rem" }}>
                     <Stack direction="row" style={{ marginTop: "2rem" }} spacing={4}>
-                        <Avatar src={profile?.user?.avatarUrl ?? undefined} sx={{ width: 150, height: 150 }} />
+                        <Avatar src={profile?.user?.avatarUrl ?? undefined} sx={{ width: 150, height: 150 }} imgProps={{ loading: 'lazy' }} />
 
                         <Stack spacing={1}>
                             <Typography variant="h6" >{profile?.user?.username}</Typography>

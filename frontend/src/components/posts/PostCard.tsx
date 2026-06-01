@@ -58,7 +58,7 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     return (
         <Card sx={{ maxWidth: 600, mb: 2 }}>
             <CardHeader
-                avatar={<Avatar src={user?.avatarUrl ? user?.avatarUrl : undefined} />}
+                avatar={<Avatar src={user?.avatarUrl ? user?.avatarUrl : undefined} imgProps={{ loading: 'lazy' }} />}
                 title={<Typography fontWeight="bold">{user?.username}</Typography>}
                 subheader={post.location}
                 action={
@@ -72,6 +72,7 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
                 <CardMedia
                     component="img"
                     image={`http://localhost:9000/instagram-media/${post.mediaItems?.[mediaIndex]?.mediaUrl}`}
+                    loading="lazy"
                     sx={{ aspectRatio: '1/1', objectFit: 'cover' }}
                 />
                 {hasMultipleMedia && mediaIndex > 0 && (

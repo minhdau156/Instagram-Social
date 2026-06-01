@@ -21,7 +21,7 @@ export const PostGrid: React.FC<{ posts: Post[] }> = ({ posts }) => {
                                 '&:hover .overlay': { opacity: 1 }
                             }}
                         >
-                            <img src={imageUrl} style={{ aspectRatio: '1/1', objectFit: 'cover' }} alt="Post thumbnail" />
+                            <img src={imageUrl} loading="lazy" style={{ aspectRatio: '1/1', objectFit: 'cover' }} alt="Post thumbnail" />
                             <Box
                                 className="overlay"
                                 sx={{

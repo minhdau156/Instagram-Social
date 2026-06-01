@@ -10,20 +10,19 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { PageLoader } from './components/common/PageLoader';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
-import { ProfilePage } from './pages/users/ProfllePage';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
 import { AdminRoute } from './components/common/AdminRoute';
 import { SuperAdminRoute } from './components/common/SuperAdminRoute';
 import { OAuth2CallbackPage } from './pages/auth/OAuth2CallbackPage';
-
-import { PostPage } from './pages/posts/PostPage';
-import { CreatePostModalPage } from './pages/posts/CreatePostModalPage';
-import { PublicProfilePage } from './pages/users/PublicProfilePage';
-import FollowRequestsPage from './pages/follow/FollowRequestsPage';
-import SavedPostsPage from './pages/profile/SavedPostsPage';
 import React from 'react';
 
 
+const ProfilePage = React.lazy(() => import('./pages/users/ProfllePage').then(m => ({ default: m.ProfilePage })));
+const PostPage = React.lazy(() => import('./pages/posts/PostPage').then(m => ({ default: m.PostPage })));
+const CreatePostModalPage = React.lazy(() => import('./pages/posts/CreatePostModalPage').then(m => ({ default: m.CreatePostModalPage })));
+const PublicProfilePage = React.lazy(() => import('./pages/users/PublicProfilePage').then(m => ({ default: m.PublicProfilePage })));
+const FollowRequestsPage = React.lazy(() => import('./pages/follow/FollowRequestsPage'));
+const SavedPostsPage = React.lazy(() => import('./pages/profile/SavedPostsPage'));
 const HomePage = React.lazy(() => import('./pages/feed/HomePage'));
 const ExplorePage = React.lazy(() => import('./pages/explore/ExplorePage'));
 const InboxPage = React.lazy(() => import('./pages/messaging/InboxPage'));

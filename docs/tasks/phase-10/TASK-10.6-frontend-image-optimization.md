@@ -264,9 +264,9 @@ Open Chrome DevTools → Network tab → filter by "Img". Scroll down in the fee
 
 ## Checklist
 
-- [ ] Add `loading="lazy"` to all `<img>` tags in `PostCard`, `PostGrid`, `ProfilePage`
-- [ ] Serve AVIF/WebP from backend (hint via `Accept` header handling in `MediaController`)
-- [ ] Run `vite-bundle-visualizer` to identify oversized chunks; apply dynamic import (`React.lazy`) to large page components
+- [x] Add `loading="lazy"` to all `<img>` tags in `PostCard`, `PostGrid`, `ProfilePage`
+- [x] Serve AVIF/WebP from backend (hint via `Accept` header handling in `MediaController`)
+- [x] Run `vite-bundle-visualizer` to identify oversized chunks; apply dynamic import (`React.lazy`) to large page components
 
 ---
 
