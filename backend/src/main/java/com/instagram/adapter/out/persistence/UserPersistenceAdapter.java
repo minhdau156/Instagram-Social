@@ -117,4 +117,11 @@ public class UserPersistenceAdapter implements UserRepository {
                 .lastLoginAt(entity.getLastLoginAt())
                 .build();
     }
+
+    @Override
+    public List<User> findByUsernames(List<String> usernames) {
+        return jpaRepository.findByUsernameIn(usernames).stream()
+                .map(this::toDomain)
+                .toList();
+    }
 }

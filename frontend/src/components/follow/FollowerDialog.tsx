@@ -29,7 +29,7 @@ export const FollowerDialog = ({ username, open, setOpen }: FollowerDialogProps)
         if (node) observer.current.observe(node);
     }, [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage]);
 
-    const followers = data?.pages.flatMap(page => page) || [];
+    const followers = data?.pages.flatMap(page => page.items) || [];
     const isEmpty = followers.length === 0 && !isLoading;
 
     return (

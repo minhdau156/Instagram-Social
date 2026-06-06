@@ -7,15 +7,14 @@ export const useNotifications = () => {
     const queryClient = useQueryClient();
     const { data, isError, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
         queryKey: ['notifications'],
-        queryFn: async ({ pageParam = 0 }) => {
-            return notificationsApi.getNotifications(pageParam)
+        queryFn: async ({ pageParam = null }) => {
+            return notificationsApi.getNotifications(pageParam as string | null)
         },
-        initialPageParam: 0,
-        getNextPageParam: (lastPage, allPages) =>
-            lastPage.length < 20 ? undefined : allPages.length,
+        initialPageParam: null as string | null,
+        getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
         enabled: isAuthenticated,
     });
-    const notifications = data?.pages.flat() || [];
+    const notifications = data?.pages.flatMap(page => page.items) || [];
 
     const markRead = useMutation({
         mutationFn: ({ id }: { id: string }) => notificationsApi.markRead(id),
@@ -31,9 +30,10 @@ export const useNotifications = () => {
             const previous = queryClient.getQueryData(['notifications']);
             queryClient.setQueryData(['notifications'], (old: any) => {
                 return {
-                    pages: old.pages.map((page: any) =>
-                        page.map((notification: any) => ({ ...notification, isRead: true }))
-                    ),
+                    pages: old.pages.map((page: any) => ({
+                        ...page,
+                        items: page.items.map((notification: any) => ({ ...notification, isRead: true }))
+                    })),
                     pageParams: old.pageParams
                 };
             });

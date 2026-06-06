@@ -3,11 +3,13 @@ package com.instagram.application.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -72,7 +74,7 @@ public class CommentServiceTest {
                 .id(UUID.randomUUID())
                 .build();
         when(postRepository.findById(any(UUID.class))).thenReturn(Optional.of(post));
-        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(mentionedUser));
+        when(userRepository.findByUsernames(anyList())).thenReturn(List.of(mentionedUser));
 
         Comment addedComment = commentService.addComment(new AddCommentUseCase.Command(postId, userId, content, null));
 
@@ -101,7 +103,7 @@ public class CommentServiceTest {
                 .id(UUID.randomUUID())
                 .build();
         when(postRepository.findById(any(UUID.class))).thenReturn(Optional.of(post));
-        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(mentionedUser));
+        when(userRepository.findByUsernames(anyList())).thenReturn(List.of(mentionedUser));
         Comment addedComment = commentService
                 .addComment(new AddCommentUseCase.Command(postId, userId, content, parentId));
 

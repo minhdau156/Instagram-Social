@@ -1,7 +1,9 @@
 package com.instagram.adapter.out.persistence;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -111,6 +113,39 @@ public class FollowPersistenceAdapter implements FollowRepository {
                 .status(entity.isApproved() ? FollowStatus.ACCEPTED : FollowStatus.PENDING)
                 .createdAt(entity.getCreatedAt())
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Follow> findFollowersByUserIdKeyset(UUID userId, String cursorTs, UUID cursorId, int size) {
+        return followJpaRepository.findFollowersKeysetBefore(userId, cursorTs, cursorId, size)
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Follow> findFollowingByUserIdKeyset(UUID userId, String cursorTs, UUID cursorId, int size) {
+        return followJpaRepository.findFollowingKeysetBefore(userId, cursorTs, cursorId, size)
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Map<UUID, FollowStatus> findFollowStatusByFollowerIdAndFollowingIds(UUID followerId,
+            List<UUID> followingIds) {
+        List<Follow> follows = this.followJpaRepository.findByIdFollowerIdAndIdFollowingIdIn(followerId, followingIds)
+                .stream()
+                .map(this::toDomain)
+                .toList();
+
+        Map<UUID, FollowStatus> followStatusMap = new HashMap<>();
+        for (Follow follow : follows) {
+            followStatusMap.put(follow.getFollowingId(), follow.getStatus());
+        }
+        return followStatusMap;
     }
 
 }

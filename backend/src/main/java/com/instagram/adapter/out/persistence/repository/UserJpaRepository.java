@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
 
@@ -20,4 +21,7 @@ public interface UserJpaRepository extends JpaRepository<UserJpaEntity, UUID> {
     boolean existsByEmail(String email);
 
     List<UserJpaEntity> findByUsernameContainingIgnoreCase(String term, Pageable pageable);
+
+    @Query("SELECT u FROM UserJpaEntity u WHERE u.username IN :usernames")
+    List<UserJpaEntity> findByUsernameIn(List<String> usernames);
 }

@@ -2,6 +2,7 @@ package com.instagram.adapter.out.persistence;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -88,4 +89,13 @@ public class LikePersistenceAdapter implements LikeRepository {
         return commentLikeJpaRepository.existsByIdCommentIdAndIdUserId(commentId, userId);
     }
 
+    @Override
+    public Set<UUID> findLikedPostIdsByUserIdAndPostIds(UUID userId, List<UUID> postIds) {
+        return postLikeJpaRepository.findByUserIdAndPostIdIn(userId, postIds);
+    }
+
+    @Override
+    public Set<UUID> findLikedCommentIdsByUserIdAndCommentIds(UUID userId, List<UUID> commentIds) {
+        return commentLikeJpaRepository.findByUserIdAndCommentIdIn(userId, commentIds);
+    }
 }

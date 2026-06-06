@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.instagram.adapter.in.web.dto.request.NotificationSettingsRequest;
 import com.instagram.adapter.in.web.dto.request.RegisterDeviceTokenRequest;
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
+import com.instagram.adapter.in.web.dto.response.CursorPageResponse;
 import com.instagram.adapter.in.web.dto.response.NotificationResponse;
+import com.instagram.infrastructure.util.CursorEncoder;
 import com.instagram.adapter.out.persistence.entity.DeviceTokenJpaEntity;
 import com.instagram.adapter.out.persistence.repository.DeviceTokenJpaRepository;
 import com.instagram.domain.model.Notification;
@@ -86,12 +88,12 @@ public class NotificationController {
     }
 
     @GetMapping("/notifications")
-    public ResponseEntity<ApiResponse<List<NotificationResponse>>> getNotifications(
-            @RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<ApiResponse<CursorPageResponse<NotificationResponse>>> getNotifications(
+            @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "20") int size) {
 
         List<Notification> notifications = getNotificationsUseCase
-                .getNotifications(new GetNotificationsUseCase.Query(currentUserId(), page, size));
+                .getNotifications(new GetNotificationsUseCase.Query(currentUserId(), cursor, size));
 
         Map<UUID, User> actorMap = new HashMap<>();
         for (Notification notification : notifications) {
@@ -101,11 +103,16 @@ public class NotificationController {
             }
         }
 
-        List<NotificationResponse> responses = notifications.stream()
+        List<NotificationResponse> items = notifications.stream()
                 .map(notification -> NotificationResponse.from(notification, actorMap.get(notification.getActorId())))
                 .toList();
-        return ResponseEntity.ok(ApiResponse.ok(responses));
 
+        String nextCursor = notifications.size() < size ? null
+                : CursorEncoder.encode(
+                        notifications.getLast().getCreatedAt().toInstant(),
+                        notifications.getLast().getId());
+
+        return ResponseEntity.ok(ApiResponse.ok(CursorPageResponse.of(items, nextCursor)));
     }
 
     @PutMapping("/notifications/read-all")

@@ -1,7 +1,9 @@
 package com.instagram.adapter.out.persistence;
 
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -95,6 +97,23 @@ public class MessagePersistenceAdapter implements MessageRepository {
                 .replyToMessageId(messageJpaEntity.getReplyToMessageId())
                 .updatedAt(messageJpaEntity.getUpdatedAt())
                 .build();
+    }
+
+    @Override
+    public List<Message> findLatestByConversationIds(List<UUID> conversationIds) {
+        return this.messageJpaRepository.findLatestByConversationIdsIn(conversationIds).stream()
+                .map(this::toDomain).toList();
+    }
+
+    @Override
+    public Map<UUID, Long> getUnreadCountsByConversationIds(List<UUID> conversationIds, UUID userId) {
+        List<Object[]> results = this.messageReadJpaRepository.countUnreadMessagesPerConversation(conversationIds,
+                userId);
+        Map<UUID, Long> unreadCounts = new HashMap<>();
+        for (Object[] result : results) {
+            unreadCounts.put((UUID) result[0], (Long) result[1]);
+        }
+        return unreadCounts;
     }
 
 }

@@ -3,7 +3,9 @@ package com.instagram.application.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -276,17 +278,17 @@ public class FollowServiceTest {
         User followerUser = buildUser(FOLLOWER_ID, PrivacyLevel.PUBLIC, "minh");
 
         when(userRepository.findByUsername(any())).thenReturn(Optional.of(publicUser));
-        when(followRepository.findFollowersByUserId(any(), any())).thenReturn(List.of(acceptedFollow));
+        when(followRepository.findFollowersByUserIdKeyset(any(), isNull(), isNull(), anyInt())).thenReturn(List.of(acceptedFollow));
         when(userRepository.findAllByIds(any())).thenReturn(List.of(followerUser));
         // Return a follow whose followingId == followerUser.id so isFollowing resolves
         // to true
         Follow currentUserFollowsFollower = Follow.of(FOLLOWING_ID, FOLLOWER_ID, FollowStatus.ACCEPTED);
         when(followRepository.findFollowingByUserId(any(), any())).thenReturn(List.of(currentUserFollowsFollower));
 
-        List<UserSummary> follows = followService.getFollowers(
-                new GetFollowersUseCase.Query("test", FOLLOWER_ID, 0, 10));
+        GetFollowersUseCase.FollowersPage result = followService.getFollowers(
+                new GetFollowersUseCase.Query("test", FOLLOWER_ID, null, 10));
 
-        assertEquals(1, follows.size());
+        assertEquals(1, result.items().size());
 
     }
 
@@ -298,13 +300,13 @@ public class FollowServiceTest {
         User followingUser = buildUser(FOLLOWING_ID, PrivacyLevel.PUBLIC, "duy");
 
         when(userRepository.findByUsername(any())).thenReturn(Optional.of(targetUser));
-        when(followRepository.findFollowingByUserId(any(), any())).thenReturn(List.of(acceptedFollow));
+        when(followRepository.findFollowingByUserIdKeyset(any(), isNull(), isNull(), anyInt())).thenReturn(List.of(acceptedFollow));
         when(userRepository.findAllByIds(any())).thenReturn(List.of(followingUser));
 
-        List<UserSummary> follows = followService.getFollowing(
-                new GetFollowingUseCase.Query("minh", FOLLOWER_ID, 0, 10));
+        GetFollowingUseCase.FollowingPage result = followService.getFollowing(
+                new GetFollowingUseCase.Query("minh", FOLLOWER_ID, null, 10));
 
-        assertEquals(1, follows.size());
+        assertEquals(1, result.items().size());
 
     }
 }

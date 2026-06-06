@@ -293,11 +293,11 @@ queryFn: ({ pageParam = null }) =>
 
 ## Checklist
 
-- [ ] Standardize a `CursorPage<T>` response shape (items + `nextCursor`) across list endpoints
-- [ ] Replace `OFFSET`-based queries with keyset `WHERE (created_at, id) < (:cursorTs, :cursorId) ORDER BY created_at DESC, id DESC LIMIT :size`
-- [ ] Encode/decode the cursor opaquely (base64 of the sort key) so clients don't depend on its internals
-- [ ] Ensure a composite index backs the sort key (coordinate with TASK-10.7)
-- [ ] Update the frontend infinite-scroll hooks to pass `nextCursor` instead of an incrementing page index
+- [x] Standardize a `CursorPage<T>` response shape (items + `nextCursor`) across list endpoints
+- [x] Replace `OFFSET`-based queries with keyset `WHERE (created_at, id) < (:cursorTs, :cursorId) ORDER BY created_at DESC, id DESC LIMIT :size`
+- [x] Encode/decode the cursor opaquely (base64 of the sort key) so clients don't depend on its internals
+- [x] Ensure a composite index backs the sort key (coordinate with TASK-10.7)
+- [x] Update the frontend infinite-scroll hooks to pass `nextCursor` instead of an incrementing page index
 
 ---
 

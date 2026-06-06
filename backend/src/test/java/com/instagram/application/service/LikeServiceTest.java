@@ -7,7 +7,6 @@ import com.instagram.domain.exception.NotLikedException;
 import com.instagram.domain.exception.PostNotFoundException;
 import com.instagram.domain.model.Comment;
 import com.instagram.domain.model.CommentStatus;
-import com.instagram.domain.model.Follow;
 import com.instagram.domain.model.FollowStatus;
 import com.instagram.domain.model.Post;
 import com.instagram.domain.model.PrivacyLevel;
@@ -41,8 +40,11 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+
+import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
 class LikeServiceTest {
@@ -215,17 +217,11 @@ class LikeServiceTest {
                 .privacyLevel(PrivacyLevel.PUBLIC)
                 .build();
 
-        Follow follow = Follow.builder()
-                .id(userId)
-                .followerId(requestingUserId)
-                .followingId(userId)
-                .status(FollowStatus.ACCEPTED)
-                .build();
-
         when(likeRepository.findPostLikerIds(eq(postId), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(likerIds, Pageable.unpaged(), 1));
         when(userRepository.findAllByIds(likerIds)).thenReturn(List.of(user));
-        when(followRepository.findByFollowerIdAndFollowingId(requestingUserId, userId)).thenReturn(Optional.of(follow));
+        when(followRepository.findFollowStatusByFollowerIdAndFollowingIds(eq(requestingUserId), anyList()))
+                .thenReturn(Map.of(userId, FollowStatus.ACCEPTED));
 
         Page<UserSummary> summaries = likeService.getPostLikers(query);
 

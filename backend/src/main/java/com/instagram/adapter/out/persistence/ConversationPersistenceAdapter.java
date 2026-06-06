@@ -1,6 +1,9 @@
 package com.instagram.adapter.out.persistence;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -118,6 +121,18 @@ public class ConversationPersistenceAdapter implements ConversationRepository {
                 .lastReadAt(memberJpaEntity.getLastReadAt())
                 .leftAt(memberJpaEntity.getLeftAt())
                 .build();
+    }
+
+    @Override
+    public Map<UUID, List<UUID>> findMemberIdsByConversationIds(List<UUID> conversationIds) {
+        List<Object[]> result = conversationMemberJpaRepository.findUserIdsByConversationIds(conversationIds);
+        Map<UUID, List<UUID>> memberIdsByConversationId = new HashMap<>();
+        for (Object[] row : result) {
+            UUID conversationId = (UUID) row[0];
+            UUID userId = (UUID) row[1];
+            memberIdsByConversationId.computeIfAbsent(conversationId, k -> new ArrayList<>()).add(userId);
+        }
+        return memberIdsByConversationId;
     }
 
 }

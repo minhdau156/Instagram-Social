@@ -21,6 +21,7 @@ import com.instagram.adapter.in.web.dto.request.AddCommentRequest;
 import com.instagram.adapter.in.web.dto.request.EditCommentRequest;
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
 import com.instagram.adapter.in.web.dto.response.CommentResponse;
+import com.instagram.adapter.in.web.dto.response.CursorPageResponse;
 import com.instagram.domain.model.Comment;
 import com.instagram.domain.model.User;
 import com.instagram.domain.port.in.comment.AddCommentUseCase;
@@ -29,6 +30,7 @@ import com.instagram.domain.port.in.comment.EditCommentUseCase;
 import com.instagram.domain.port.in.comment.GetCommentsUseCase;
 import com.instagram.domain.port.in.comment.GetRepliesUseCase;
 import com.instagram.domain.port.in.user.GetUserUseCase;
+import com.instagram.infrastructure.util.CursorEncoder;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
@@ -102,20 +104,25 @@ public class CommentController {
     }
 
     @GetMapping("/api/v1/posts/{id}/comments")
-    public ResponseEntity<ApiResponse<Page<CommentResponse>>> getComments(
+    public ResponseEntity<ApiResponse<CursorPageResponse<CommentResponse>>> getComments(
             @PathVariable UUID id,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "20") int size) {
 
-        Page<Comment> comments = getCommentsUseCase
-                .getComments(new GetCommentsUseCase.Query(id, currentUserId(), page, size));
+        List<Comment> comments = getCommentsUseCase
+                .getComments(new GetCommentsUseCase.Query(id, currentUserId(), cursor, size));
 
-        Page<CommentResponse> commentResponses = comments.map(comment -> {
+        List<CommentResponse> commentResponses = comments.stream().map(comment -> {
             User user = getUserUseCase.getUser(new GetUserUseCase.Query(comment.getUserId()));
             return CommentResponse.from(comment, user);
-        });
+        }).toList();
 
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok(commentResponses));
+        String nextCursor = comments.size() < size ? null
+                : CursorEncoder.encode(comments.getLast().getCreatedAt(),
+                        comments.getLast().getId());
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.ok(CursorPageResponse.of(commentResponses, nextCursor)));
 
     }
 

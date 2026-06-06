@@ -2,9 +2,11 @@ package com.instagram.application.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -42,10 +44,9 @@ public class FeedService
                         postMediasMap.putIfAbsent(postMedia.getPostId(), new ArrayList<>());
                         postMediasMap.get(postMedia.getPostId()).add(postMedia);
                 }
-                for (Post post : posts) {
-                        boolean hasLiked = likeRepository.hasLikedPost(post.getId(), query.userId());
-                        post.setLikedByCurrentUser(hasLiked);
-                }
+
+                Set<UUID> likedIds = likeRepository.findLikedPostIdsByUserIdAndPostIds(query.userId(), postIds);
+                posts.forEach(p -> p.setLikedByCurrentUser(likedIds.contains(p.getId())));
 
                 UUID nextCursor = posts.size() < query.limit()
                                 ? null

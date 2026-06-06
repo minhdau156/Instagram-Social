@@ -19,9 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -97,14 +95,14 @@ class CommentControllerTest {
                 User user = User.builder().id(userId).username("testuser").build();
 
                 when(getCommentsUseCase.getComments(any(GetCommentsUseCase.Query.class)))
-                                .thenReturn(new PageImpl<>(List.of(comment)));
+                                .thenReturn(List.of(comment));
                 when(getUserUseCase.getUser(any(GetUserUseCase.Query.class))).thenReturn(user);
 
                 mockMvc.perform(get("/api/v1/posts/{id}/comments", postId))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.data.content").isArray())
-                                .andExpect(jsonPath("$.data.content[0].content").value("Test Comment"))
-                                .andExpect(jsonPath("$.data.content[0].username").value("testuser"));
+                                .andExpect(jsonPath("$.data.items").isArray())
+                                .andExpect(jsonPath("$.data.items[0].content").value("Test Comment"))
+                                .andExpect(jsonPath("$.data.items[0].username").value("testuser"));
         }
 
         @Test

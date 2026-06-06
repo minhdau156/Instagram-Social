@@ -1,6 +1,8 @@
 package com.instagram.adapter.out.persistence;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -44,8 +46,9 @@ public class CommentPersistenceAdapter implements CommentRepository {
 
     @Override
     @Transactional
-    public Page<Comment> findByPostId(UUID postId, Pageable pageable) {
-        return commentJpaRepository.findTopLevelByPostId(postId, pageable).map(this::toDomain);
+    public List<Comment> findByPostId(UUID postId, String cursorTs, UUID cursorId, int size) {
+        return commentJpaRepository.findByPostIdKeysetAfter(postId, cursorTs, cursorId, size).stream()
+                .map(this::toDomain).toList();
     }
 
     @Override

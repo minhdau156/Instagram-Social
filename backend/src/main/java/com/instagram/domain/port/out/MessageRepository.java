@@ -2,6 +2,7 @@ package com.instagram.domain.port.out;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,4 +20,8 @@ public interface MessageRepository {
     int getUnreadCount(UUID conversationId, UUID userId);
 
     Optional<Message> findLatestByConversationId(UUID conversationId);
+
+    List<Message> findLatestByConversationIds(List<UUID> conversationIds);
+
+    Map<UUID, Long> getUnreadCountsByConversationIds(List<UUID> conversationIds, UUID userId);
 }

@@ -3,6 +3,7 @@ package com.instagram.application.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,6 +37,7 @@ import com.instagram.domain.port.out.LikeRepository;
 import com.instagram.domain.port.out.PostRepository;
 import com.instagram.domain.port.out.UserInterestPort;
 import com.instagram.domain.port.out.UserRepository;
+import com.instagram.infrastructure.util.CursorEncoder;
 
 import jakarta.transaction.Transactional;
 
@@ -72,8 +74,14 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
                 .findByParentId(query.commentId(), PageRequest.of(query.page(), query.size()));
         User currentUser = userRepository.findById(query.currentUserId())
                 .orElseThrow(() -> new UserNotFoundException(query.currentUserId().toString()));
+
+        List<UUID> commentIds = comments.getContent().stream()
+                .map(Comment::getId)
+                .toList();
+        Set<UUID> likedCommentIds = this.likeRepository.findLikedCommentIdsByUserIdAndCommentIds(query.currentUserId(),
+                commentIds);
         return comments.map(comment -> {
-            boolean isLikedByCurrentUser = this.likeRepository.hasLikedComment(comment.getId(), currentUser.getId());
+            boolean isLikedByCurrentUser = likedCommentIds.contains(comment.getId());
             return comment.builder()
                     .isLikedByCurrentUser(isLikedByCurrentUser)
                     .build();
@@ -159,41 +167,50 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
         }
 
         List<String> mentions = extractMentions(command.content());
-        for (String username : mentions) {
-            userRepository.findByUsername(username)
-                    .ifPresent(mentionedUser -> {
-                        if (!mentionedUser.getId().equals(command.userId())) {
-                            eventPublisher.publishEvent(new NotificationEvent(
-                                    this,
-                                    Notification.NotificationType.MENTION_COMMENT,
-                                    mentionedUser.getId(),
-                                    command.userId(),
-                                    Notification.EntityType.COMMENT,
-                                    comment.getId()));
-                        }
-                    });
+        List<User> mentionedUsers = userRepository.findByUsernames(mentions);
 
+        for (User mentionedUser : mentionedUsers) {
+
+            if (!mentionedUser.getId().equals(command.userId())) {
+                eventPublisher.publishEvent(new NotificationEvent(
+                        this,
+                        Notification.NotificationType.MENTION_COMMENT,
+                        mentionedUser.getId(),
+                        command.userId(),
+                        Notification.EntityType.COMMENT,
+                        comment.getId()));
+            }
         }
-
         return newComment;
     }
 
     @Override
     @Transactional
-    @Cacheable(value = "comments", key = "'comments:' + #query.postId + ':page1'", condition = "query.page == 0")
-    public Page<Comment> getComments(GetCommentsUseCase.Query query) {
-        Page<Comment> comments = commentRepository
-                .findByPostId(query.postId(), PageRequest.of(query.page(), query.size()));
+    @Cacheable(value = "comments", key = "'comments:' + #query.postId + ':page1'", condition = "#query.cursor() == null")
+    public List<Comment> getComments(GetCommentsUseCase.Query query) {
+        CursorEncoder.DecodedCursor decoded = query.cursor() != null
+                ? CursorEncoder.decode(query.cursor())
+                : null;
+        String cursorTs = decoded != null ? decoded.createdAt().toString() : null;
+        UUID cursorId = decoded != null ? decoded.id() : null;
+
+        List<Comment> comments = commentRepository
+                .findByPostId(query.postId(), cursorTs, cursorId, query.size());
 
         User currentUser = userRepository.findById(query.currentUserId())
                 .orElseThrow(() -> new UserNotFoundException(query.currentUserId().toString()));
+        List<UUID> commentIds = comments.stream()
+                .map(Comment::getId)
+                .toList();
+        Set<UUID> likedCommentIds = this.likeRepository.findLikedCommentIdsByUserIdAndCommentIds(query.currentUserId(),
+                commentIds);
 
-        return comments.map(comment -> {
-            boolean isLikedByCurrentUser = this.likeRepository.hasLikedComment(comment.getId(), currentUser.getId());
+        return comments.stream().map(comment -> {
+            boolean isLikedByCurrentUser = likedCommentIds.contains(comment.getId());
             return comment.copy()
                     .isLikedByCurrentUser(isLikedByCurrentUser)
                     .build();
-        });
+        }).toList();
     }
 
     private List<String> extractMentions(String content) {

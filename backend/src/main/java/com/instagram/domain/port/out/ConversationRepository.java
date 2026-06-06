@@ -1,6 +1,7 @@
 package com.instagram.domain.port.out;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,5 +28,7 @@ public interface ConversationRepository {
     Optional<ConversationMember> findMember(UUID conversationId, UUID userId);
 
     List<UUID> findMemberIds(UUID conversationId);
+
+    Map<UUID, List<UUID>> findMemberIdsByConversationIds(List<UUID> conversationIds);
 
 }

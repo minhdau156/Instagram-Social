@@ -141,16 +141,14 @@ public class LikeService implements LikePostUseCase,
         Map<UUID, User> idToUser = userRepository.findAllByIds(postLikerIds.getContent())
                 .stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
+        Map<UUID, FollowStatus> followStatusMap = followRepository
+                .findFollowStatusByFollowerIdAndFollowingIds(query.requestingUserId(), postLikerIds.getContent());
 
         Page<UserSummary> likers = postLikerIds.map(id -> {
             User user = idToUser.get(id);
             FollowStatus followStatus = null;
             if (query.requestingUserId() != null) {
-                Optional<Follow> followOpt = followRepository.findByFollowerIdAndFollowingId(query.requestingUserId(),
-                        user.getId());
-                if (followOpt.isPresent()) {
-                    followStatus = followOpt.get().getStatus();
-                }
+                followStatus = followStatusMap.get(id);
             }
             return new UserSummary(
                     id,

@@ -105,7 +105,7 @@ public class NotificationControllerIT {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.data[0].id").value(notification.getId().toString()));
+                .andExpect(jsonPath("$.data.items[0].id").value(notification.getId().toString()));
     }
 
     @Test

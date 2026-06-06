@@ -4,8 +4,10 @@ import type { Notification, NotificationSettings, RegisterDeviceTokenPayload } f
 const BASE_URL = '/api/v1/notifications';
 
 export const notificationsApi = {
-    getNotifications: async (page = 0, size = 20): Promise<Notification[]> => {
-        const { data } = await api.get(BASE_URL, { params: { page, size } });
+    getNotifications: async (cursor: string | null = null, size = 20): Promise<{ items: Notification[]; nextCursor: string | null; hasMore: boolean }> => {
+        const params: Record<string, unknown> = { size };
+        if (cursor) params.cursor = cursor;
+        const { data } = await api.get(BASE_URL, { params });
         return data.data;
     },
 

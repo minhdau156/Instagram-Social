@@ -1,6 +1,7 @@
 package com.instagram.domain.port.out;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -81,4 +82,8 @@ public interface LikeRepository {
      * @return {@code true} if the like exists; {@code false} otherwise
      */
     boolean hasLikedComment(UUID commentId, UUID userId);
+
+    Set<UUID> findLikedPostIdsByUserIdAndPostIds(UUID userId, List<UUID> postIds);
+
+    Set<UUID> findLikedCommentIdsByUserIdAndCommentIds(UUID userId, List<UUID> commentIds);
 }

@@ -8,8 +8,8 @@ import org.springframework.data.domain.Page;
 import com.instagram.domain.model.Comment;
 
 public interface GetCommentsUseCase {
-    Page<Comment> getComments(Query query);
+    List<Comment> getComments(Query query);
 
-    record Query(UUID postId, UUID currentUserId, int page, int size) {
+    record Query(UUID postId, UUID currentUserId, String cursor, int size) {
     }
 }

@@ -1,5 +1,6 @@
 package com.instagram.adapter.out.persistence.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -39,5 +40,23 @@ public interface CommentJpaRepository extends JpaRepository<CommentJpaEntity, UU
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE CommentJpaEntity c SET c.likeCount = GREATEST(c.likeCount - 1, 0) WHERE c.id = :id")
     void decrementLikeCount(@Param("id") UUID id);
+
+    @Query(value = """
+            SELECT c.* FROM comments c
+            WHERE c.post_id   = :postId
+              AND NOT c.is_deleted
+              AND c.parent_id IS NULL
+              AND (
+                  :cursorTs IS NULL
+                  OR (c.created_at, c.id) > (:cursorTs::timestamptz, :cursorId::uuid)
+              )
+            ORDER BY c.created_at ASC, c.id ASC
+            LIMIT :size
+            """, nativeQuery = true)
+    List<CommentJpaEntity> findByPostIdKeysetAfter(
+            @Param("postId") UUID postId,
+            @Param("cursorTs") String cursorTs, // ISO-8601 string or null
+            @Param("cursorId") UUID cursorId,
+            @Param("size") int size);
 
 }

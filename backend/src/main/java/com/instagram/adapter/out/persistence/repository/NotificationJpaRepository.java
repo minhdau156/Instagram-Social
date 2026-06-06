@@ -2,6 +2,7 @@ package com.instagram.adapter.out.persistence.repository;
 
 import com.instagram.adapter.out.persistence.entity.NotificationJpaEntity;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -26,4 +27,20 @@ public interface NotificationJpaRepository extends JpaRepository<NotificationJpa
     void markAllAsRead(@Param("recipientId") UUID recipientId);
 
     long countByRecipientIdAndIsReadFalse(UUID recipientId);
+
+    @Query(value = """
+            SELECT n.* FROM notifications n
+            WHERE n.recipient_id = :recipientId
+              AND (
+                  :cursorTs IS NULL
+                  OR (n.created_at, n.id) < (:cursorTs::timestamptz, :cursorId::uuid)
+              )
+            ORDER BY n.created_at DESC, n.id DESC
+            LIMIT :size
+            """, nativeQuery = true)
+    List<NotificationJpaEntity> findByRecipientIdKeysetBefore(
+            @Param("recipientId") UUID recipientId,
+            @Param("cursorTs") String cursorTs,
+            @Param("cursorId") UUID cursorId,
+            @Param("size") int size);
 }

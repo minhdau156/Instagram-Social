@@ -15,6 +15,7 @@ public interface GetConversationsUseCase {
     record MessageView(Message message, String senderUsername, String senderAvatarUrl) {
     }
 
-    record ConversationView(Conversation conversation, int unreadCount, MessageView lastMessage, String eachOtherName) {
+    record ConversationView(Conversation conversation, long unreadCount, MessageView lastMessage,
+            String eachOtherName) {
     }
 }

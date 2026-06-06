@@ -2,6 +2,7 @@ package com.instagram.domain.port.out;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -25,7 +26,7 @@ public interface CommentRepository {
      * != DELETED),
      * ordered by createdAt ascending.
      */
-    Page<Comment> findByPostId(UUID postId, Pageable pageable);
+    List<Comment> findByPostId(UUID postId, String cursorTs, UUID cursorId, int size);
 
     /**
      * Returns paginated replies for a given parent comment (parentId = parentId and

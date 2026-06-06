@@ -156,30 +156,28 @@ public class MessagingService implements
     public List<GetConversationsUseCase.ConversationView> getConversations(GetConversationsUseCase.Query query) {
         List<Conversation> conversations = conversationRepository.findByMemberId(query.userId(),
                 PageRequest.of(query.page(), query.size()));
+        List<UUID> conversationIds = conversations.stream().map(Conversation::getId).toList();
 
         Map<UUID, Message> lastMessages = new HashMap<>();
-        for (Conversation c : conversations) {
-            messageRepository.findLatestByConversationId(c.getId())
-                    .ifPresent(m -> lastMessages.put(c.getId(), m));
+
+        List<Message> latestMessages = messageRepository.findLatestByConversationIds(conversationIds);
+
+        for (Message m : latestMessages) {
+            lastMessages.put(m.getConversationId(), m);
         }
 
         // For 1-1 conversations, resolve the other member's ID
-        Map<UUID, UUID> conversationToOtherMember = new HashMap<>();
-        for (Conversation c : conversations) {
-            if (!c.isGroup()) {
-                conversationRepository.findMemberIds(c.getId()).stream()
-                        .filter(id -> !id.equals(query.userId()))
-                        .findFirst()
-                        .ifPresent(otherId -> conversationToOtherMember.put(c.getId(), otherId));
-            }
-        }
+        Map<UUID, List<UUID>> conversationToOtherMember = conversationRepository
+                .findMemberIdsByConversationIds(conversationIds);
 
         Set<UUID> allUserIds = new HashSet<>(
                 lastMessages.values().stream().map(Message::getSenderId).toList());
-        allUserIds.addAll(conversationToOtherMember.values());
+        allUserIds.addAll(conversationToOtherMember.values().stream().flatMap(List::stream).toList());
 
         Map<UUID, User> userMap = userRepository.findAllByIds(new ArrayList<>(allUserIds)).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
+        Map<UUID, Long> unreadCounts = messageRepository.getUnreadCountsByConversationIds(conversationIds,
+                query.userId());
 
         return conversations.stream()
                 .map(c -> {
@@ -194,13 +192,15 @@ public class MessagingService implements
                     }
                     String eachOtherName = null;
                     if (!c.isGroup()) {
-                        UUID otherId = conversationToOtherMember.get(c.getId());
+                        UUID otherId = conversationToOtherMember.get(c.getId()).stream()
+                                .filter(id -> !id.equals(query.userId()))
+                                .findFirst().get();
                         User other = otherId != null ? userMap.get(otherId) : null;
                         eachOtherName = other != null ? other.getUsername() : null;
                     }
                     return new GetConversationsUseCase.ConversationView(
                             c,
-                            messageRepository.getUnreadCount(c.getId(), query.userId()),
+                            unreadCounts.getOrDefault(c.getId(), 0L),
                             lastMessageView,
                             eachOtherName);
                 })

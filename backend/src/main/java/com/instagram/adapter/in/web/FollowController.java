@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
+import com.instagram.adapter.in.web.dto.response.CursorPageResponse;
 import com.instagram.adapter.in.web.dto.response.FollowResponse;
 import com.instagram.adapter.in.web.dto.response.UserSummaryResponse;
 import com.instagram.domain.model.Follow;
@@ -67,27 +68,29 @@ public class FollowController {
     }
 
     @GetMapping("/api/v1/users/{username}/followers")
-    public ResponseEntity<ApiResponse<List<UserSummaryResponse>>> getFollowers(
+    public ResponseEntity<ApiResponse<CursorPageResponse<UserSummaryResponse>>> getFollowers(
             @PathVariable String username,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "20") int size) {
-        List<UserSummary> followers = getFollowersUseCase.getFollowers(new GetFollowersUseCase.Query(
-                username, currentUserId(), page, size));
-        return ResponseEntity.ok(ApiResponse.ok(followers.stream()
+        GetFollowersUseCase.FollowersPage result = getFollowersUseCase.getFollowers(
+                new GetFollowersUseCase.Query(username, currentUserId(), cursor, size));
+        List<UserSummaryResponse> items = result.items().stream()
                 .map(UserSummaryResponse::from)
-                .toList()));
+                .toList();
+        return ResponseEntity.ok(ApiResponse.ok(CursorPageResponse.of(items, result.nextCursor())));
     }
 
     @GetMapping("/api/v1/users/{username}/following")
-    public ResponseEntity<ApiResponse<List<UserSummaryResponse>>> getFollowing(
+    public ResponseEntity<ApiResponse<CursorPageResponse<UserSummaryResponse>>> getFollowing(
             @PathVariable String username,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "20") int size) {
-        List<UserSummary> following = getFollowingUseCase.getFollowing(new GetFollowingUseCase.Query(
-                username, currentUserId(), page, size));
-        return ResponseEntity.ok(ApiResponse.ok(following.stream()
+        GetFollowingUseCase.FollowingPage result = getFollowingUseCase.getFollowing(
+                new GetFollowingUseCase.Query(username, currentUserId(), cursor, size));
+        List<UserSummaryResponse> items = result.items().stream()
                 .map(UserSummaryResponse::from)
-                .toList()));
+                .toList();
+        return ResponseEntity.ok(ApiResponse.ok(CursorPageResponse.of(items, result.nextCursor())));
     }
 
     @GetMapping("/api/v1/follow-requests")

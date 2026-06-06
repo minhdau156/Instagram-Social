@@ -2,10 +2,10 @@ package com.instagram.application.service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +23,7 @@ import com.instagram.domain.port.in.notification.MarkNotificationReadUseCase;
 import com.instagram.domain.port.in.notification.UpdateNotificationSettingsUseCase;
 import com.instagram.domain.port.out.NotificationRepository;
 import com.instagram.domain.port.out.NotificationSettingsRepository;
+import com.instagram.infrastructure.util.CursorEncoder;
 
 @Service
 public class NotificationService
@@ -81,7 +82,12 @@ public class NotificationService
 
     @Override
     public List<Notification> getNotifications(GetNotificationsUseCase.Query query) {
-        return notificationRepository.findByRecipientId(query.userId(), PageRequest.of(query.page(), query.size()));
+        CursorEncoder.DecodedCursor decoded = query.cursor() != null
+                ? CursorEncoder.decode(query.cursor())
+                : null;
+        String cursorTs = decoded != null ? decoded.createdAt().toString() : null;
+        UUID cursorId = decoded != null ? decoded.id() : null;
+        return notificationRepository.findByRecipientId(query.userId(), cursorTs, cursorId, query.size());
     }
 
     @Override

@@ -154,13 +154,13 @@ public class FollowControllerIT {
                                 false,
                                 FollowStatus.ACCEPTED);
                 when(getFollowersUseCase.getFollowers(any(GetFollowersUseCase.Query.class)))
-                                .thenReturn(java.util.List.of(follower));
+                                .thenReturn(new GetFollowersUseCase.FollowersPage(java.util.List.of(follower), null));
 
                 mockMvc.perform(get("/api/v1/users/{username}/followers", "minh")
                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andDo(print())
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.data[0].username").value("minh"));
+                                .andExpect(jsonPath("$.data.items[0].username").value("minh"));
         }
 
         @Test
@@ -175,13 +175,13 @@ public class FollowControllerIT {
                                 false,
                                 FollowStatus.ACCEPTED);
                 when(getFollowingUseCase.getFollowing(any(GetFollowingUseCase.Query.class)))
-                                .thenReturn(java.util.List.of(following));
+                                .thenReturn(new GetFollowingUseCase.FollowingPage(java.util.List.of(following), null));
 
                 mockMvc.perform(get("/api/v1/users/{username}/following", "minh")
                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andDo(print())
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.data[0].username").value("minh"));
+                                .andExpect(jsonPath("$.data.items[0].username").value("minh"));
         }
 
         @Test

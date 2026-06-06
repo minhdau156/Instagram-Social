@@ -28,7 +28,7 @@ export const FollowingDialog = ({ username, open, setOpen }: FollowingDialogProp
         if (node) observer.current.observe(node);
     }, [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage]);
 
-    const following = data?.pages.flatMap(page => page) || [];
+    const following = data?.pages.flatMap(page => page.items) || [];
     const isEmpty = following.length === 0 && !isLoading;
 
     return (

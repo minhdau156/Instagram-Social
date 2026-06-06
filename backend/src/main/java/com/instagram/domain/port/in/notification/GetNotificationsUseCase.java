@@ -8,6 +8,6 @@ import com.instagram.domain.model.Notification;
 public interface GetNotificationsUseCase {
     List<Notification> getNotifications(Query query);
 
-    record Query(UUID userId, int page, int size) {
+    record Query(UUID userId, String cursor, int size) {
     }
 }

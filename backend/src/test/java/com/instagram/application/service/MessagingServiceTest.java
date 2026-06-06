@@ -140,7 +140,6 @@ class MessagingServiceTest {
                                 .build();
                 GetConversationsUseCase.Query query = new GetConversationsUseCase.Query(userId, 0, 10);
                 when(conversationRepository.findByMemberId(any(), any())).thenReturn(List.of(conversation));
-                when(messageRepository.getUnreadCount(any(), any())).thenReturn(0);
                 // When
                 List<GetConversationsUseCase.ConversationView> res = messagingService.getConversations(query);
 

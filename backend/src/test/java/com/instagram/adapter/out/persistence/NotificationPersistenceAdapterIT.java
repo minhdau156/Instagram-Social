@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.TestPropertySource;
 
 import com.instagram.adapter.out.persistence.repository.NotificationJpaRepository;
@@ -74,7 +73,7 @@ public class NotificationPersistenceAdapterIT {
     void findByRecipientId_shouldReturnNotifications_shouldSuccess() {
         notification = notificationPersistenceAdapter.save(notification);
         List<Notification> notifications = notificationPersistenceAdapter
-                .findByRecipientId(notification.getRecipientId(), Pageable.unpaged());
+                .findByRecipientId(notification.getRecipientId(), null, null, 20);
         assertEquals(1, notifications.size());
         assertEquals(notification.getActorId(), notifications.get(0).getActorId());
         assertEquals(notification.getRecipientId(), notifications.get(0).getRecipientId());

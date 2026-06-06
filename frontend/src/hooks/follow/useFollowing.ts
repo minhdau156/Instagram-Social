@@ -5,9 +5,8 @@ import { followKeys } from "./queryKeys";
 export function useFollowing(username: string) {
     return useInfiniteQuery({
         queryKey: followKeys.following(username),
-        queryFn: ({ pageParam = 0 }) => getFollowing(username, pageParam),
-        getNextPageParam: (lastPage, allPages) =>
-            lastPage.length < 20 ? undefined : allPages.length,
-        initialPageParam: 0,
+        queryFn: ({ pageParam = null }) => getFollowing(username, pageParam as string | null),
+        getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+        initialPageParam: null as string | null,
     });
 }

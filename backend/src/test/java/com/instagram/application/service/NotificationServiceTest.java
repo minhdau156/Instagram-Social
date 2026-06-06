@@ -2,7 +2,9 @@ package com.instagram.application.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,7 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import com.instagram.domain.exception.NotificationNotFoundException;
@@ -97,10 +98,10 @@ public class NotificationServiceTest {
 
     @Test
     void getNotifications_shouldReturnNotifications_whenUserExists() {
-        when(notificationRepository.findByRecipientId(any(UUID.class), any(PageRequest.class)))
+        when(notificationRepository.findByRecipientId(any(UUID.class), isNull(), isNull(), anyInt()))
                 .thenReturn(List.of(notification));
-        notificationService.getNotifications(new GetNotificationsUseCase.Query(notification.getRecipientId(), 0, 10));
-        verify(notificationRepository).findByRecipientId(notification.getRecipientId(), PageRequest.of(0, 10));
+        notificationService.getNotifications(new GetNotificationsUseCase.Query(notification.getRecipientId(), null, 10));
+        verify(notificationRepository).findByRecipientId(notification.getRecipientId(), null, null, 10);
     }
 
     @Test

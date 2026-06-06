@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.instagram.adapter.out.persistence.entity.NotificationJpaEntity;
@@ -28,8 +27,8 @@ public class NotificationPersistenceAdapter implements NotificationRepository {
     }
 
     @Override
-    public List<Notification> findByRecipientId(UUID recipientId, Pageable pageable) {
-        return this.jpaRepository.findByRecipientIdOrderByCreatedAtDesc(recipientId, pageable)
+    public List<Notification> findByRecipientId(UUID recipientId, String cursorTs, UUID cursorId, int size) {
+        return this.jpaRepository.findByRecipientIdKeysetBefore(recipientId, cursorTs, cursorId, size)
                 .stream()
                 .map(this::toDomain)
                 .toList();

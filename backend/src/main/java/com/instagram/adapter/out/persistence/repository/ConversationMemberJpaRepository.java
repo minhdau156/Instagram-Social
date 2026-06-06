@@ -21,4 +21,7 @@ public interface ConversationMemberJpaRepository
     @Query("SELECT m.id.userId FROM ConversationMemberJpaEntity m WHERE m.id.conversationId = :conversationId")
     List<UUID> findUserIdsByConversationId(@Param("conversationId") UUID conversationId);
 
+    @Query(value = "SELECT conversation_id, user_id FROM conversation_members WHERE conversation_id IN :conversationIds", nativeQuery = true)
+    List<Object[]> findUserIdsByConversationIds(@Param("conversationIds") List<UUID> conversationIds);
+
 }

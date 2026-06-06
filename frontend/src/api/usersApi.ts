@@ -21,6 +21,6 @@ export const usersApi = {
     getUserById: (id: string) =>
         api.get<{ data: User }>(`/api/v1/users/get/${id}`).then(r => r.data.data),
 
-    search: (q: string, limit = 10) =>
-        api.get<{ data: User[] }>('/api/v1/users/search', { params: { q, limit } }).then(r => r.data.data),
+    search: (q: string, page = 0, limit = 10) =>
+        api.get<{ data: User[] }>('/api/v1/users/search', { params: { q, page, limit } }).then(r => r.data.data),
 }

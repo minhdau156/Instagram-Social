@@ -12,7 +12,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +30,7 @@ import com.instagram.domain.port.in.follow.*;
 import com.instagram.domain.port.out.FollowRepository;
 import com.instagram.domain.port.out.UserRepository;
 import com.instagram.domain.port.out.UserStatsRepository;
+import com.instagram.infrastructure.util.CursorEncoder;
 
 @Service
 public class FollowService implements FollowUserUseCase,
@@ -188,19 +188,24 @@ public class FollowService implements FollowUserUseCase,
         }
 
         @Override
-        @Cacheable(value = "followers", key = "'followers:' + @followService.getUserId(#query.targetUsername) + ':page1'", condition = "#query.page() == 0")
-        public List<UserSummary> getFollowers(GetFollowersUseCase.Query query) {
-                Pageable pageable = PageRequest.of(query.page(), query.size());
+        @Cacheable(value = "followers", key = "'followers:' + @followService.getUserId(#query.targetUsername) + ':page1'", condition = "#query.cursor() == null")
+        public GetFollowersUseCase.FollowersPage getFollowers(GetFollowersUseCase.Query query) {
+                CursorEncoder.DecodedCursor decoded = query.cursor() != null
+                                ? CursorEncoder.decode(query.cursor())
+                                : null;
+                String cursorTs = decoded != null ? decoded.createdAt().toString() : null;
+                UUID cursorId = decoded != null ? decoded.id() : null;
+
                 Optional<User> targetUser = userRepository.findByUsername(query.targetUsername());
                 if (targetUser.isEmpty()) {
                         throw new UserNotFoundException(query.targetUsername());
                 }
                 UUID targetUserId = targetUser.get().getId();
 
-                // 1 query: all accepted followers of the target user
-                List<Follow> follows = followRepository.findFollowersByUserId(targetUserId, pageable);
+                // 1 query: all accepted followers of the target user (keyset)
+                List<Follow> follows = followRepository.findFollowersByUserIdKeyset(targetUserId, cursorTs, cursorId, query.size());
                 if (follows.isEmpty())
-                        return List.of();
+                        return new GetFollowersUseCase.FollowersPage(List.of(), null);
 
                 // 1 query: batch-load all follower User objects — no N+1
                 Set<UUID> followerIds = follows.stream()
@@ -212,12 +217,12 @@ public class FollowService implements FollowUserUseCase,
                 // 1 query: all people the current user already follows — for isFollowing flag
                 List<Follow> currentUserFollowing = followRepository.findFollowingByUserId(
                                 query.currentUserId(), Pageable.unpaged());
-                Map<UUID, FollowStatus> followingIds = currentUserFollowing.stream()
+                Map<UUID, FollowStatus> followingStatusById = currentUserFollowing.stream()
                                 .collect(Collectors.toMap(Follow::getFollowingId, Follow::getStatus));
 
-                return follows.stream().map(follow -> {
+                List<UserSummary> items = follows.stream().map(follow -> {
                         User user = userById.get(follow.getFollowerId());
-                        FollowStatus status = followingIds.getOrDefault(user.getId(), null);
+                        FollowStatus status = followingStatusById.getOrDefault(user.getId(), null);
                         return new UserSummary(
                                         user.getId(),
                                         user.getUsername(),
@@ -227,12 +232,22 @@ public class FollowService implements FollowUserUseCase,
                                         user.getPrivacyLevel() == PrivacyLevel.PRIVATE,
                                         status);
                 }).toList();
+
+                // cursor from the last follow: (created_at, follower_id)
+                String nextCursor = follows.size() < query.size() ? null
+                                : CursorEncoder.encode(follows.getLast().getCreatedAt(), follows.getLast().getFollowerId());
+
+                return new GetFollowersUseCase.FollowersPage(items, nextCursor);
         }
 
         @Override
-        @Cacheable(value = "followings", key = "'followings:' + @followService.getUserId(#query.targetUsername) + ':page1'", condition = "#query.page() == 0")
-        public List<UserSummary> getFollowing(GetFollowingUseCase.Query query) {
-                Pageable pageable = PageRequest.of(query.page(), query.size());
+        @Cacheable(value = "followings", key = "'followings:' + @followService.getUserId(#query.targetUsername) + ':page1'", condition = "#query.cursor() == null")
+        public GetFollowingUseCase.FollowingPage getFollowing(GetFollowingUseCase.Query query) {
+                CursorEncoder.DecodedCursor decoded = query.cursor() != null
+                                ? CursorEncoder.decode(query.cursor())
+                                : null;
+                String cursorTs = decoded != null ? decoded.createdAt().toString() : null;
+                UUID cursorId = decoded != null ? decoded.id() : null;
 
                 Optional<User> targetUser = userRepository.findByUsername(query.targetUsername());
                 if (targetUser.isEmpty()) {
@@ -240,10 +255,10 @@ public class FollowService implements FollowUserUseCase,
                 }
                 UUID targetUserId = targetUser.get().getId();
 
-                // 1 query: all accepted follows made by the target user
-                List<Follow> follows = followRepository.findFollowingByUserId(targetUserId, pageable);
+                // 1 query: all accepted follows made by the target user (keyset)
+                List<Follow> follows = followRepository.findFollowingByUserIdKeyset(targetUserId, cursorTs, cursorId, query.size());
                 if (follows.isEmpty())
-                        return List.of();
+                        return new GetFollowingUseCase.FollowingPage(List.of(), null);
 
                 // 1 query: batch-load all followed User objects — no N+1
                 Set<UUID> followingIds = follows.stream()
@@ -252,7 +267,7 @@ public class FollowService implements FollowUserUseCase,
                 Map<UUID, User> userById = userRepository.findAllByIds(followingIds).stream()
                                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
-                return follows.stream().map(follow -> {
+                List<UserSummary> items = follows.stream().map(follow -> {
                         User user = userById.get(follow.getFollowingId());
                         return new UserSummary(
                                         user.getId(),
@@ -263,6 +278,12 @@ public class FollowService implements FollowUserUseCase,
                                         user.getPrivacyLevel() == PrivacyLevel.PRIVATE,
                                         FollowStatus.ACCEPTED);
                 }).toList();
+
+                // cursor from the last follow: (created_at, following_id)
+                String nextCursor = follows.size() < query.size() ? null
+                                : CursorEncoder.encode(follows.getLast().getCreatedAt(), follows.getLast().getFollowingId());
+
+                return new GetFollowingUseCase.FollowingPage(items, nextCursor);
         }
 
 }

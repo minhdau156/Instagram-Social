@@ -2,6 +2,7 @@ package com.instagram.adapter.out.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -85,10 +86,10 @@ class CommentPersistenceAdapterIT {
                                 .id(UUID.randomUUID()).postId(postId).userId(userId).content("Deleted")
                                 .status(CommentStatus.DELETED).build());
 
-                Page<Comment> result = adapter.findByPostId(postId, PageRequest.of(0, 10));
+                List<Comment> result = adapter.findByPostId(postId, null, null, 10);
 
-                assertThat(result.getContent()).hasSize(1);
-                assertThat(result.getContent().get(0).getId()).isEqualTo(topLevelActive.getId());
+                assertThat(result).hasSize(1);
+                assertThat(result.get(0).getId()).isEqualTo(topLevelActive.getId());
         }
 
         @Test
