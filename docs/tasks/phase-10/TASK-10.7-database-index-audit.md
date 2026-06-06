@@ -95,6 +95,7 @@ LIMIT 20;
 
 ```sql
 EXPLAIN (ANALYZE, BUFFERS)
+
 SELECT u.* FROM users u
 WHERE u.username ILIKE 'test%'
 ORDER BY u.follower_count DESC
@@ -239,11 +240,11 @@ Example expected improvement:
 
 ## Checklist
 
-- [ ] Audit the hot queries (feed, profile, follow graph, search, notifications) with `EXPLAIN ANALYZE` and list the ones doing sequential scans
-- [ ] Add a Flyway migration creating the missing indexes (FKs, `created_at` sort keys, `(user_id, created_at)` composites for cursor paging)
-- [ ] Add partial indexes where useful (e.g. `WHERE deleted_at IS NULL` on `posts`)
-- [ ] Re-run `EXPLAIN ANALYZE` and confirm the planner switched to index scans
-- [ ] Avoid over-indexing — note any index you considered and rejected because it would hurt write throughput
+- [x] Audit the hot queries (feed, profile, follow graph, search, notifications) with `EXPLAIN ANALYZE` and list the ones doing sequential scans
+- [x] Add a Flyway migration creating the missing indexes (FKs, `created_at` sort keys, `(user_id, created_at)` composites for cursor paging)
+- [x] Add partial indexes where useful (e.g. `WHERE deleted_at IS NULL` on `posts`)
+- [x] Re-run `EXPLAIN ANALYZE` and confirm the planner switched to index scans
+- [x] Avoid over-indexing — note any index you considered and rejected because it would hurt write throughput
 
 ---
 
