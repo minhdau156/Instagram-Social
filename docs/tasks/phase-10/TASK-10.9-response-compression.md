@@ -207,10 +207,10 @@ Brotli requires HTTPS (it does not apply to HTTP/1.1 over plain text).
 
 ## Checklist
 
-- [ ] Enable response compression in `application.yml` (`server.compression.enabled=true`, mime-types, `min-response-size`)
-- [ ] Audit response DTOs for fields the client never reads; drop them or split a lighter list DTO from the detail DTO
-- [ ] Confirm an `Accept-Encoding: gzip` request returns `Content-Encoding: gzip`
-- [ ] (Optional) Document enabling Brotli at the nginx/CDN layer (pairs with TASK-10.5)
+- [x] Enable response compression in `application.yml` (`server.compression.enabled=true`, mime-types, `min-response-size`)
+- [x] Audit response DTOs for fields the client never reads; drop them or split a lighter list DTO from the detail DTO
+- [x] Confirm an `Accept-Encoding: gzip` request returns `Content-Encoding: gzip`
+- [x] (Optional) Document enabling Brotli at the nginx/CDN layer (pairs with TASK-10.5)
 
 ---
 

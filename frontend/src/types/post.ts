@@ -1,5 +1,3 @@
-/** Mirror of the backend PostStatus enum */
-export type PostStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | 'DELETED';
 export type MediaType = 'IMAGE' | 'VIDEO';
 /** Response shape returned by GET /api/v1/posts and GET /api/v1/posts/:id */
 export interface Post {
@@ -7,17 +5,12 @@ export interface Post {
   userId: string;
   caption?: string;
   location?: string;
-  status: PostStatus;
-  viewCount: number;
   likeCount: number;
   commentCount: number;
-  saveCount: number;
-  shareCount?: number;
   likedByCurrentUser?: boolean;
   savedByCurrentUser?: boolean;
   mediaItems: PostMedia[];
-  createdAt: string;  // ISO-8601 OffsetDateTime
-  updatedAt: string;
+  createdAt: string;
 }
 
 export interface PostMedia {

@@ -17,16 +17,11 @@ public record PostResponse(
         UUID userId,
         String caption,
         String location,
-        String status,
-        long viewCount,
         int likeCount,
         int commentCount,
-        int saveCount,
-        int shareCount,
         boolean likedByCurrentUser,
         boolean savedByCurrentUser,
         String createdAt,
-        String updatedAt,
         List<MediaItemResponse> mediaItems) {
     public static PostResponse from(Post post, List<PostMedia> postMedias) {
         return new PostResponse(
@@ -34,16 +29,11 @@ public record PostResponse(
                 post.getUserId(),
                 post.getCaption(),
                 post.getLocation(),
-                post.getStatus().name(),
-                post.getViewCount(),
                 post.getLikeCount(),
                 post.getCommentCount(),
-                post.getSaveCount(),
-                post.getShareCount(),
                 post.isLikedByCurrentUser(),
                 post.isSavedByCurrentUser(),
                 post.getCreatedAt().toString(),
-                post.getUpdatedAt().toString(),
                 postMedias == null ? List.of() : postMedias.stream().map(MediaItemResponse::from).toList());
     }
 }

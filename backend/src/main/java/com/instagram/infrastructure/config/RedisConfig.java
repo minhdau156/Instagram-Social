@@ -16,25 +16,46 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 @Configuration
 @EnableCaching
 @ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
 public class RedisConfig {
 
+        private GenericJackson2JsonRedisSerializer jsonSerializer() {
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.registerModule(new JavaTimeModule());
+                mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+                mapper.activateDefaultTyping(
+                        BasicPolymorphicTypeValidator.builder()
+                                .allowIfSubType(Object.class)
+                                .build(),
+                        ObjectMapper.DefaultTyping.EVERYTHING,
+                        JsonTypeInfo.As.PROPERTY
+                );
+                return new GenericJackson2JsonRedisSerializer(mapper);
+        }
+
         @Bean
         public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+                GenericJackson2JsonRedisSerializer serializer = jsonSerializer();
                 RedisTemplate<String, Object> template = new RedisTemplate<>();
                 template.setConnectionFactory(factory);
                 template.setKeySerializer(new StringRedisSerializer());
-                template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+                template.setValueSerializer(serializer);
                 template.setHashKeySerializer(new StringRedisSerializer());
-                template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+                template.setHashValueSerializer(serializer);
                 return template;
         }
 
         @Bean
         public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
-                GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer();
+                GenericJackson2JsonRedisSerializer jsonSerializer = jsonSerializer();
 
                 RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                                 .serializeKeysWith(RedisSerializationContext.SerializationPair

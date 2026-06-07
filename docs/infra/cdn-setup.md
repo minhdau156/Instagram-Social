@@ -125,3 +125,14 @@ Restart the backend, upload a file, and confirm the returned URL starts with
 
 - **TASK-10.9** (response compression) — reduces API JSON payload size; pairs with this task to cut both image bandwidth and JSON bandwidth.
 - **TASK-10.12** (chunked/multipart upload) — extends `MinioStorageAdapter` with multipart support; must follow the same CDN URL pattern (`getPublicUrl` for stored URLs, presigned PUT for uploads).
+
+
+# nginx.conf — Brotli requires the ngx_brotli module
+brotli on;
+brotli_comp_level 6;
+brotli_types application/json application/javascript text/css text/html;
+
+# Also keep gzip as a fallback for older clients
+gzip on;
+gzip_types application/json application/javascript text/css text/html;
+gzip_comp_level 6;
