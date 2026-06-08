@@ -18,6 +18,10 @@ spring:
   application:
     name: instagram
 
+  threads:
+    virtual:
+      enabled: true
+
   jackson:
     serialization:
       write-dates-as-timestamps: false

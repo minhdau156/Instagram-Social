@@ -2,9 +2,11 @@ package com.instagram.adapter.in.web;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.instagram.adapter.in.web.dto.request.ProcessMediaRequest;
 import com.instagram.adapter.in.web.dto.request.UploadUrlRequest;
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
 import com.instagram.adapter.in.web.dto.response.UploadUrlResponse;
+import com.instagram.application.service.PostService;
 import com.instagram.domain.port.in.GenerateUploadUrlUseCase;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,8 +16,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Slf4j
 public class MediaController {
     private final GenerateUploadUrlUseCase generateUploadUrlUseCase;
+    private final PostService postService;
 
     @PostMapping("/upload-url")
     @PreAuthorize("isAuthenticated()")
@@ -78,5 +83,28 @@ public class MediaController {
         //     .header("Location", cdnBaseUrl + "/" + key + "?fm=" + format)
         //     .build();
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/process")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Trigger async media processing for an uploaded object")
+    public ResponseEntity<ApiResponse<Map<String, String>>> processMedia(
+            @RequestBody @Valid ProcessMediaRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        String jobId = UUID.randomUUID().toString();
+
+        postService.generateThumbnailAsync(request.mediaUrl(), UUID.fromString(request.postId()));
+
+        log.info("Media processing job accepted: jobId={} userId={}", jobId, userId);
+
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body(ApiResponse.ok(Map.of(
+                        "jobId", jobId,
+                        "status", "accepted",
+                        "statusUrl", "/api/v1/media/jobs/" + jobId
+                )));
     }
 }

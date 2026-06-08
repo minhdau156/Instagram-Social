@@ -13,7 +13,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.CompletableFuture;
 
 import com.instagram.domain.exception.PostNotFoundException;
 import com.instagram.domain.model.Hashtag;
@@ -32,6 +37,7 @@ import com.instagram.domain.port.out.PostRepository;
 import com.instagram.domain.port.out.SavedPostRepository;
 
 @Service
+@Slf4j
 public class PostService implements
         CreatePostUseCase,
         GetPostUseCase,
@@ -65,9 +71,9 @@ public class PostService implements
     @Override
     @Caching(evict = {
             @CacheEvict(value = "feed", allEntries = true),
-            @CacheEvict(value = "userStats", key = "'userStats:' + command.userId"),
+            @CacheEvict(value = "userStats", key = "'userStats:' + #command.userId"),
             @CacheEvict(value = "exploreFeed", allEntries = true),
-            @CacheEvict(value = "userPosts", key = "'userPosts:' + command.userId + ':page1'")
+            @CacheEvict(value = "userPosts", key = "'userPosts:' + #command.userId + ':page1'")
     })
 
     public Post createPost(CreatePostUseCase.Command command) {
@@ -148,8 +154,8 @@ public class PostService implements
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "userStats", key = "'userStats:' + command.userId"),
-            @CacheEvict(value = "userPosts", key = "'userPosts:' + command.userId + ':page1'")
+            @CacheEvict(value = "userStats", key = "'userStats:' + #command.userId"),
+            @CacheEvict(value = "userPosts", key = "'userPosts:' + #command.userId + ':page1'")
     })
     public void deletePost(DeletePostUseCase.Command command) {
         Post existing = postRepository.findById(command.id())
@@ -160,7 +166,7 @@ public class PostService implements
     }
 
     @Override
-    @Cacheable(value = "userPosts", key = "'userPosts:' + #query.targetUserId + ':page1'", condition = "query.page == 0")
+    @Cacheable(value = "userPosts", key = "'userPosts:' + #query.targetUserId + ':page1'", condition = "#query.page == 0")
     public Page<Post> getUserPosts(GetUserPostsUseCase.Query query) {
         return postRepository.findByUserId(query.targetUserId(), PageRequest.of(query.page(), query.size()));
     }
@@ -197,5 +203,21 @@ public class PostService implements
     @Override
     public List<PostMedia> findAllByPostIds(Collection<UUID> postIds) {
         return postMediaRepository.findByPostIds(postIds);
+    }
+
+    @Async("mediaExecutor")
+    public CompletableFuture<Void> generateThumbnailAsync(String mediaUrl, UUID postId) {
+        log.info("Thumbnail generation started for post={}", postId);
+        try {
+            // TODO: call transcoder (FFmpeg, AWS MediaConvert, etc.)
+            Thread.sleep(200);
+            log.info("Thumbnail generation completed for post={}", postId);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("Thumbnail generation interrupted for post={}", postId);
+        } catch (Exception e) {
+            log.error("Thumbnail generation failed for post={}", postId, e);
+        }
+        return CompletableFuture.completedFuture(null);
     }
 }

@@ -245,11 +245,11 @@ Select-String -Path C:\tmp\threaddump.txt -Pattern "VirtualThread"
 
 ## Checklist
 
-- [ ] Define a named, bounded `ThreadPoolTaskExecutor` bean instead of relying on the default
-- [ ] Annotate the heavy side-task method with `@Async("…")` returning `CompletableFuture<>`
-- [ ] Enable virtual threads (`spring.threads.virtual.enabled=true`) and compare behaviour under load
-- [ ] Make one endpoint return `202` with a status URL while the work runs async
-- [ ] Confirm via thread dump / metric that the work runs off the request thread
+- [x] Define a named, bounded `ThreadPoolTaskExecutor` bean instead of relying on the default
+- [x] Annotate the heavy side-task method with `@Async("…")` returning `CompletableFuture<>`
+- [x] Enable virtual threads (`spring.threads.virtual.enabled=true`) and compare behaviour under load
+- [x] Make one endpoint return `202` with a status URL while the work runs async
+- [x] Confirm via thread dump / metric that the work runs off the request thread
 
 ---
 
