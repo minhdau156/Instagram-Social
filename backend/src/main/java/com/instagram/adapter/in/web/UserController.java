@@ -7,10 +7,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.UUID;
 import java.io.IOException;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,10 +22,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.instagram.domain.model.PermissionName;
 import com.instagram.domain.model.RoleName;
 import com.instagram.domain.model.User;
+import com.instagram.domain.port.in.ExportUserDataUseCase;
 import com.instagram.domain.port.in.GetUserProfileUseCase;
 import com.instagram.domain.port.in.UpdateProfileUseCase;
 import com.instagram.domain.port.in.rbac.GetUserPermissionsUseCase;
@@ -63,6 +69,7 @@ public class UserController {
     private final SearchUsersUseCase searchUsersUseCase;
     private final GetUserRolesUseCase getUserRolesUseCase;
     private final GetUserPermissionsUseCase getUserPermissionsUseCase;
+    private final ExportUserDataUseCase exportUserDataUseCase;
 
     @Operation(summary = "Get Current User Profile", description = "Retrieves the profile of the currently authenticated user")
     @ApiResponses({
@@ -172,6 +179,21 @@ public class UserController {
         Set<PermissionName> permissions = getUserPermissionsUseCase
                 .getUserPermissions(new GetUserPermissionsUseCase.Query(userId));
         return ResponseEntity.ok(ApiResponse.ok(new UserGrantsResponse(roles, permissions)));
+    }
+
+    @GetMapping("/me/export")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Export all posts as a CSV file download")
+    public ResponseEntity<StreamingResponseBody> exportMyData(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        StreamingResponseBody body = outputStream ->
+                exportUserDataUseCase.exportPostsToCsv(
+                        new ExportUserDataUseCase.Command(userId, outputStream));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"posts-export.csv\"")
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(body);
     }
 
     @Nullable

@@ -2,6 +2,7 @@ package com.instagram.domain.port.out;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,4 +21,6 @@ public interface PostRepository {
     void incrementLikeCount(UUID postId);
 
     void decrementLikeCount(UUID postId);
+
+    Stream<Post> streamByUserId(UUID userId);
 }

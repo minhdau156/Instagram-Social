@@ -6,14 +6,17 @@ import com.instagram.adapter.out.persistence.repository.PostJpaRepository;
 import com.instagram.domain.model.Post;
 import com.instagram.domain.model.PostStatus;
 import com.instagram.domain.port.out.PostRepository;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * Persistence adapter — implements the {@link PostRepository} output port
@@ -74,6 +77,13 @@ public class PostPersistenceAdapter implements PostRepository {
     @Override
     public void decrementLikeCount(UUID postId) {
         jpaRepository.decrementLikeCount(postId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Stream<Post> streamByUserId(UUID userId) {
+        return jpaRepository.streamByUserId(userId)
+                .map(this::toDomain);
     }
 
     // ── Mapping ──────────────────────────────────────────────────────────── //

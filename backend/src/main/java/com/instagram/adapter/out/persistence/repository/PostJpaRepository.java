@@ -5,16 +5,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 
 import com.instagram.adapter.out.persistence.entity.PostJpaEntity;
 import com.instagram.domain.model.PostStatus;
 
+import jakarta.persistence.QueryHint;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * Spring Data JPA repository for {@link PostJpaEntity}.
@@ -51,4 +54,15 @@ public interface PostJpaRepository extends JpaRepository<PostJpaEntity, UUID> {
     @Transactional
     @Query("UPDATE PostJpaEntity p SET p.commentCount = GREATEST(p.commentCount - 1, 0) WHERE p.id = :postId")
     void decrementCommentCount(@Param("postId") UUID postId);
+
+    @Query("""
+            SELECT p FROM PostJpaEntity p
+            WHERE p.userId = :userId
+              AND p.deletedAt IS NULL
+            ORDER BY p.createdAt ASC
+            """)
+    @QueryHints(value = {
+            @QueryHint(name = org.hibernate.jpa.HibernateHints.HINT_FETCH_SIZE, value = "50")
+    })
+    Stream<PostJpaEntity> streamByUserId(@Param("userId") UUID userId);
 }

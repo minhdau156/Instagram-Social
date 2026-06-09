@@ -288,11 +288,11 @@ Invoke-WebRequest -Uri "http://localhost:8080/api/v1/users/me/export" `
 
 ## Checklist
 
-- [ ] Add an endpoint returning `StreamingResponseBody` with `Content-Disposition: attachment`
-- [ ] Stream rows from a cursor-based / `Stream<>` repository query — never collect the full result into a list
-- [ ] Use `@Transactional(readOnly = true)` + a JDBC fetch size so Hibernate streams instead of buffering
-- [ ] Build the ZIP/CSV incrementally, flushing per chunk
-- [ ] Verify against a large dataset that heap stays flat throughout the download
+- [x] Add an endpoint returning `StreamingResponseBody` with `Content-Disposition: attachment`
+- [x] Stream rows from a cursor-based / `Stream<>` repository query — never collect the full result into a list
+- [x] Use `@Transactional(readOnly = true)` + a JDBC fetch size so Hibernate streams instead of buffering
+- [x] Build the ZIP/CSV incrementally, flushing per chunk
+- [x] Verify against a large dataset that heap stays flat throughout the download
 
 ---
 
