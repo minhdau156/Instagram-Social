@@ -74,7 +74,7 @@ public interface MediaStoragePort {
     // New multipart methods:
 
     /** Initiates a multipart upload and returns the uploadId assigned by MinIO. */
-    String initiateMultipartUpload(String key, String contentType);
+String initiateMultipartUpload(String key, String contentType);
 
     /**
      * Generates a presigned URL for uploading one part.
@@ -392,11 +392,11 @@ public ResponseEntity<ApiResponse<Map<String, String>>> completeUpload(
 
 ## Checklist
 
-- [ ] Extend the storage out-port + `MinioStorageAdapter` to use multipart upload (`createMultipartUpload`, presigned `uploadPart` URLs, `completeMultipartUpload`, `abortMultipartUpload`)
-- [ ] Add `MediaController` endpoints: `POST /api/v1/media/uploads` (initiate → `uploadId`), `GET .../uploads/{uploadId}/parts` (which parts exist, for resume), `POST .../uploads/{uploadId}/complete`
-- [ ] Flyway migration for an `upload_session` table (uploadId, key, parts, status, created_at)
-- [ ] Enforce a 2 GB total cap + a per-part size (e.g. 5–10 MB) and validate part numbers
-- [ ] Abort/cleanup path for stale or cancelled sessions
+- [x] Extend the storage out-port + `MinioStorageAdapter` to use multipart upload (`createMultipartUpload`, presigned `uploadPart` URLs, `completeMultipartUpload`, `abortMultipartUpload`)
+- [x] Add `MediaController` endpoints: `POST /api/v1/media/uploads` (initiate → `uploadId`), `GET .../uploads/{uploadId}/parts` (which parts exist, for resume), `POST .../uploads/{uploadId}/complete`
+- [x] Flyway migration for an `upload_session` table (uploadId, key, parts, status, created_at)
+- [x] Enforce a 2 GB total cap + a per-part size (e.g. 5–10 MB) and validate part numbers
+- [x] Abort/cleanup path for stale or cancelled sessions
 
 ---
 

@@ -2,27 +2,39 @@ package com.instagram.adapter.in.web;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.instagram.adapter.in.web.dto.request.CompleteUploadRequest;
+import com.instagram.adapter.in.web.dto.request.InitiateUploadRequest;
 import com.instagram.adapter.in.web.dto.request.ProcessMediaRequest;
 import com.instagram.adapter.in.web.dto.request.UploadUrlRequest;
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
+import com.instagram.adapter.in.web.dto.response.InitiateUploadResponse;
+import com.instagram.adapter.in.web.dto.response.UploadPartsResponse;
 import com.instagram.adapter.in.web.dto.response.UploadUrlResponse;
+import com.instagram.adapter.out.persistence.entity.UploadSessionJpaEntity;
+import com.instagram.adapter.out.persistence.repository.UploadSessionJpaRepository;
 import com.instagram.application.service.PostService;
 import com.instagram.domain.port.in.GenerateUploadUrlUseCase;
+import com.instagram.domain.port.out.MediaStoragePort;
 
 import io.swagger.v3.oas.annotations.Operation;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,6 +50,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class MediaController {
     private final GenerateUploadUrlUseCase generateUploadUrlUseCase;
     private final PostService postService;
+    private final MediaStoragePort mediaStoragePort;
+    private final UploadSessionJpaRepository uploadSessionRepository;
+
+    @Nullable
+    private UUID currentUserIdOrNull() {
+        org.springframework.security.core.Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return null;
+        }
+        if (auth.getPrincipal() instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
+            return UUID.fromString(userDetails.getUsername());
+        }
+        return UUID.fromString(auth.getPrincipal().toString());
+    }
+
+    private UUID currentUserId() {
+        UUID userId = currentUserIdOrNull();
+        if (userId == null) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+        return userId;
+    }
 
     @PostMapping("/upload-url")
     @PreAuthorize("isAuthenticated()")
@@ -59,8 +93,10 @@ public class MediaController {
 
     /**
      * Stub: detects the best image format the client supports via the Accept header
-     * (AVIF > WebP > JPEG fallback) and logs it. A real implementation would redirect
-     * to a CDN URL with a format query parameter once an image transcoder is configured
+     * (AVIF > WebP > JPEG fallback) and logs it. A real implementation would
+     * redirect
+     * to a CDN URL with a format query parameter once an image transcoder is
+     * configured
      * (e.g. Imgix, Cloudinary, or AWS Lambda@Edge with sharp).
      */
     @GetMapping("/images/{key}")
@@ -80,8 +116,8 @@ public class MediaController {
 
         // When a CDN transcoder is available, replace with:
         // return ResponseEntity.status(HttpStatus.FOUND)
-        //     .header("Location", cdnBaseUrl + "/" + key + "?fm=" + format)
-        //     .build();
+        // .header("Location", cdnBaseUrl + "/" + key + "?fm=" + format)
+        // .build();
         return ResponseEntity.noContent().build();
     }
 
@@ -104,7 +140,93 @@ public class MediaController {
                 .body(ApiResponse.ok(Map.of(
                         "jobId", jobId,
                         "status", "accepted",
-                        "statusUrl", "/api/v1/media/jobs/" + jobId
-                )));
+                        "statusUrl", "/api/v1/media/jobs/" + jobId)));
+    }
+
+    @PostMapping("/uploads")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Initiate a multipart upload session")
+    public ResponseEntity<ApiResponse<Object>> initiateUpload(
+            @RequestBody @Valid InitiateUploadRequest request) {
+
+        UUID userId = currentUserId();
+
+        // Validate file size cap: 2 GB
+        if (request.totalSizeBytes() > 2L * 1024 * 1024 * 1024) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.ok("file exceed 2 gb limit"));
+        }
+        // Validate part size: 5–10 MB per part
+        if (request.partSizeBytes() < 5 * 1024 * 1024 || request.partSizeBytes() > 10 * 1024 * 1024) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.ok("Part size must be between 5 MB and 10 MB"));
+        }
+
+        String key = "uploads/" + userId + "/" + UUID.randomUUID() + "/" + request.filename();
+        String uploadId = mediaStoragePort.initiateMultipartUpload(key, request.contentType());
+
+        UploadSessionJpaEntity session = UploadSessionJpaEntity.builder()
+                .uploadId(uploadId)
+                .objectKey(key)
+                .contentType(request.contentType())
+                .userId(userId)
+                .totalParts(request.totalParts())
+                .build();
+        uploadSessionRepository.save(session);
+
+        // Generate presigned URLs for all parts
+        List<String> partUrls = IntStream.rangeClosed(1, request.totalParts())
+                .mapToObj(partNum -> mediaStoragePort.generatePresignedPartUrl(
+                        key, uploadId, partNum, Duration.ofHours(2)))
+                .toList();
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok(new InitiateUploadResponse(uploadId, key, partUrls)));
+    }
+
+    @GetMapping("/uploads/{uploadId}/parts")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "List uploaded parts for a multipart upload session (used to resume)")
+    public ResponseEntity<ApiResponse<UploadPartsResponse>> listUploadedParts(
+            @PathVariable String uploadId) {
+
+        UUID userId = currentUserId();
+
+        UploadSessionJpaEntity session = uploadSessionRepository.findByUploadId(uploadId)
+                .filter(s -> s.getUserId().equals(userId))
+                .orElseThrow(() -> new IllegalArgumentException("Upload session not found"));
+
+        List<UploadPartsResponse.UploadedPart> parts = mediaStoragePort.listUploadedParts(session.getObjectKey(), uploadId)
+                .stream()
+                .map(p -> new UploadPartsResponse.UploadedPart(p.partNumber(), p.etag(), p.sizeBytes()))
+                .toList();
+
+        return ResponseEntity.ok(ApiResponse.ok(new UploadPartsResponse(uploadId, parts)));
+    }
+
+    @PostMapping("/uploads/{uploadId}/complete")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Complete a multipart upload by providing all part ETags")
+    public ResponseEntity<ApiResponse<Map<String, String>>> completeUpload(
+            @PathVariable String uploadId,
+            @RequestBody @Valid CompleteUploadRequest request) {
+
+        UUID userId = currentUserId();
+
+        UploadSessionJpaEntity session = uploadSessionRepository.findByUploadId(uploadId)
+                .filter(s -> s.getUserId().equals(userId))
+                .orElseThrow(() -> new IllegalArgumentException("Upload session not found"));
+
+        List<MediaStoragePort.PartETag> partETags = request.parts().stream()
+                .map(p -> new MediaStoragePort.PartETag(p.partNumber(), p.etag()))
+                .toList();
+
+        String publicUrl = mediaStoragePort.completeMultipartUpload(
+                session.getObjectKey(), uploadId, partETags);
+
+        session.setStatus("COMPLETED");
+        uploadSessionRepository.save(session);
+
+        return ResponseEntity.ok(ApiResponse.ok(Map.of("url", publicUrl)));
     }
 }

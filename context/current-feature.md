@@ -1,13 +1,30 @@
-# Current Feature
+# Current Feature: TASK-10.12 — Chunked / Resumable Large-File Upload (up to 2 GB)
 
 ## Status
 Not Started
 
 ## Goals
-<!-- -->
+- Extend `MediaStoragePort` out-port with four multipart methods: `initiateMultipartUpload`, `generatePresignedPartUrl`, `completeMultipartUpload`, `abortMultipartUpload`
+- Implement those four methods in `MinioStorageAdapter` using the MinIO Java SDK
+- Create Flyway migration (`V5__upload_sessions.sql`) for the `upload_sessions` tracking table
+- Create `UploadSessionJpaEntity` and `UploadSessionJpaRepository`
+- Add three endpoints to `MediaController`: `POST /api/v1/media/uploads` (initiate), `GET /uploads/{uploadId}/parts` (list parts for resume), `POST /uploads/{uploadId}/complete`
+- Create request DTOs: `InitiateUploadRequest`, `CompleteUploadRequest`
+- Create response DTOs: `InitiateUploadResponse`, `UploadPartsResponse`
+- Enforce 2 GB total file size cap and 5–10 MB per-part size validation
+- Abort/cleanup path: abort MultipartUpload on stale/cancelled sessions
 
 ## Notes
-<!-- -->
+- MinIO Java SDK (`io.minio:minio:8.5.11`) is already in `pom.xml`
+- `MediaStoragePort` and `MinioStorageAdapter` already exist from Phase 2
+- Spring Boot multipart size limit (`10MB`) does not apply here — client uploads parts directly to MinIO via presigned URLs, bypassing the Spring Boot server
+- Multipart lifecycle: `createMultipartUpload` → n × `uploadPart` (presigned) → `completeMultipartUpload` (or `abortMultipartUpload`)
+- `uploadId` is MinIO-assigned; all parts reference it; ETags from each part upload must be sent at complete time
+- `extraQueryParams` with `uploadId` + `partNumber` are required in presigned part URLs (without them, URL targets plain PUT, not multipart part)
+- There is already a `V5__add_performance_indexes.sql` — the migration for upload_sessions must use a different version number (V6 or higher)
+- `completeMultipartUpload` should return the CDN URL (format: `{cdnBaseUrl}/{bucket}/{key}`)
+- Stale session cleanup is deferred to TASK-10.48 (ShedLock scheduled jobs)
+- Post-complete thumbnail generation hooks into TASK-10.10 async processing
 
 ## History
 - TASK-10.5 — CDN-backed media URLs: `MinioStorageAdapter` injects `cdnBaseUrl` from `app.minio.cdn-base-url`; `uploadFile` returns CDN-rooted URL; `getPublicUrl(key)` added to adapter and `MediaStoragePort`; `generatePresignedPutUrl` unchanged (targets MinIO directly); `application.yml` adds `cdn-base-url` property (env-var driven, defaults to MinIO endpoint); `application-local.yml` fixes path to `app.minio.cdn-base-url: http://localhost:9000`; `docs/infra/cdn-setup.md` created with local dev, CloudFront/S3, and nginx/MinIO reference configs.
