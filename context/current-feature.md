@@ -1,30 +1,13 @@
-# Current Feature: TASK-10.12 — Chunked / Resumable Large-File Upload (up to 2 GB)
+# Current Feature
 
 ## Status
 Not Started
 
 ## Goals
-- Extend `MediaStoragePort` out-port with four multipart methods: `initiateMultipartUpload`, `generatePresignedPartUrl`, `completeMultipartUpload`, `abortMultipartUpload`
-- Implement those four methods in `MinioStorageAdapter` using the MinIO Java SDK
-- Create Flyway migration (`V5__upload_sessions.sql`) for the `upload_sessions` tracking table
-- Create `UploadSessionJpaEntity` and `UploadSessionJpaRepository`
-- Add three endpoints to `MediaController`: `POST /api/v1/media/uploads` (initiate), `GET /uploads/{uploadId}/parts` (list parts for resume), `POST /uploads/{uploadId}/complete`
-- Create request DTOs: `InitiateUploadRequest`, `CompleteUploadRequest`
-- Create response DTOs: `InitiateUploadResponse`, `UploadPartsResponse`
-- Enforce 2 GB total file size cap and 5–10 MB per-part size validation
-- Abort/cleanup path: abort MultipartUpload on stale/cancelled sessions
+<!-- -->
 
 ## Notes
-- MinIO Java SDK (`io.minio:minio:8.5.11`) is already in `pom.xml`
-- `MediaStoragePort` and `MinioStorageAdapter` already exist from Phase 2
-- Spring Boot multipart size limit (`10MB`) does not apply here — client uploads parts directly to MinIO via presigned URLs, bypassing the Spring Boot server
-- Multipart lifecycle: `createMultipartUpload` → n × `uploadPart` (presigned) → `completeMultipartUpload` (or `abortMultipartUpload`)
-- `uploadId` is MinIO-assigned; all parts reference it; ETags from each part upload must be sent at complete time
-- `extraQueryParams` with `uploadId` + `partNumber` are required in presigned part URLs (without them, URL targets plain PUT, not multipart part)
-- There is already a `V5__add_performance_indexes.sql` — the migration for upload_sessions must use a different version number (V6 or higher)
-- `completeMultipartUpload` should return the CDN URL (format: `{cdnBaseUrl}/{bucket}/{key}`)
-- Stale session cleanup is deferred to TASK-10.48 (ShedLock scheduled jobs)
-- Post-complete thumbnail generation hooks into TASK-10.10 async processing
+<!-- -->
 
 ## History
 - TASK-10.5 — CDN-backed media URLs: `MinioStorageAdapter` injects `cdnBaseUrl` from `app.minio.cdn-base-url`; `uploadFile` returns CDN-rooted URL; `getPublicUrl(key)` added to adapter and `MediaStoragePort`; `generatePresignedPutUrl` unchanged (targets MinIO directly); `application.yml` adds `cdn-base-url` property (env-var driven, defaults to MinIO endpoint); `application-local.yml` fixes path to `app.minio.cdn-base-url: http://localhost:9000`; `docs/infra/cdn-setup.md` created with local dev, CloudFront/S3, and nginx/MinIO reference configs.
@@ -71,3 +54,4 @@ Not Started
 - TASK-10.9 — HTTP response compression & payload slimming: `server.compression` enabled in `application.yml` (gzip, 1 KB threshold, JSON/text MIME types); `RedisConfig` `ObjectMapper` gains `JavaTimeModule` + `EVERYTHING` default typing (fixes `OffsetDateTime` serialization and `record` deserialization from cache); `PostResponse` drops 5 unused fields (`viewCount`, `saveCount`, `shareCount`, `updatedAt`, `status`); frontend `Post` type synced, unused `PostStatus` type removed; Brotli nginx config documented in `docs/infra/cdn-setup.md`; `generate_statistics` disabled and `org.hibernate.stat` removed from `application-local.yml`.
 - TASK-10.10 — Async processing with virtual threads: `mediaExecutor` bounded bean in `AsyncConfig` (core 2, max 4, queue 50, `CallerRunsPolicy`); `PostService.generateThumbnailAsync` stub annotated `@Async("mediaExecutor")` returning `CompletableFuture<Void>`; `POST /api/v1/media/process` endpoint returns `202 Accepted` with `jobId` + `statusUrl`; `ProcessMediaRequest` DTO; `spring.threads.virtual.enabled=true` enables Java 21 virtual threads for Tomcat request threads.
 - TASK-10.11 — Streaming large exports: `GET /api/v1/users/me/export` streams all user posts as CSV via `StreamingResponseBody`; `PostJpaRepository.streamByUserId` uses `Stream<PostJpaEntity>` + `@QueryHints(HINT_FETCH_SIZE=50)`; `PostPersistenceAdapter.streamByUserId` is `@Transactional(readOnly=true)`; `UserDataExportService` consumes the stream with `try-with-resources` and `PrintWriter(autoFlush=true)`; `ExportUserDataUseCase` in-port takes `Command(userId, outputStream)`; JPQL fixed from `p.user.id` to `p.userId` to match plain `@Column userId` on entity.
+- TASK-10.12 — Chunked resumable multipart upload: `MultipartMinioClient extends MinioAsyncClient` exposes protected S3Base multipart methods; `MinioConfig` registers `MultipartMinioClient` bean; `MediaStoragePort` adds `initiateMultipartUpload`, `generatePresignedPartUrl`, `completeMultipartUpload`, `abortMultipartUpload`, `listUploadedParts`; `MinioStorageAdapter` implements all five; `V6__upload_sessions.sql` migration; `UploadSessionJpaEntity` + `UploadSessionJpaRepository`; `MediaController` adds `POST /uploads` (initiate, 2 GB cap, 5–10 MB part validation), `GET /uploads/{uploadId}/parts` (resume), `POST /uploads/{uploadId}/complete`; DTOs: `InitiateUploadRequest`, `CompleteUploadRequest`, `InitiateUploadResponse`, `UploadPartsResponse`.
