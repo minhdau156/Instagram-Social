@@ -485,11 +485,11 @@ public record ImportJobResponse(Long jobExecutionId, String status) {}
 
 ## Checklist
 
-- [ ] Add `spring-boot-starter-batch` + a Flyway migration for the Spring Batch metadata tables
-- [ ] Define a chunk-oriented `Step`: `ItemReader` (CSV/JSON) → `ItemProcessor` (validate + map to the `Post` domain model) → `ItemWriter` (persist via `PostRepository`)
-- [ ] Configure chunk size, a skip policy for bad rows, and retry on transient errors
-- [ ] Trigger via `POST /api/v1/admin/imports/posts` (returns a job execution id) + a status endpoint
-- [ ] Verify restartability: kill the job mid-run, relaunch, confirm it resumes from the last committed chunk
+- [x] Add `spring-boot-starter-batch` + a Flyway migration for the Spring Batch metadata tables
+- [x] Define a chunk-oriented `Step`: `ItemReader` (CSV/JSON) → `ItemProcessor` (validate + map to the `Post` domain model) → `ItemWriter` (persist via `PostRepository`)
+- [x] Configure chunk size, a skip policy for bad rows, and retry on transient errors
+- [x] Trigger via `POST /api/v1/admin/imports/posts` (returns a job execution id) + a status endpoint
+- [x] Verify restartability: kill the job mid-run, relaunch, confirm it resumes from the last committed chunk
 
 ---
 

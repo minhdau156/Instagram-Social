@@ -35,6 +35,12 @@ spring:
     hibernate:
       ddl-auto: none          # Flyway manages DDL — Hibernate only validates
 
+  batch:
+    jdbc:
+      initialize-schema: never   # Flyway creates the BATCH_* tables
+    job:
+      enabled: false             # do not run jobs on startup — run on demand via API
+
   flyway:
     enabled: true
     locations: classpath:db/migration
