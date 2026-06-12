@@ -1,8 +1,12 @@
 package com.instagram.infrastructure.security;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -11,27 +15,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class JwtTokenProviderTest {
 
-    // A valid Base64-encoded 256-bit (32-byte) secret – safe for HS256
-    private static final String SECRET =
-            "dGVzdC1zZWNyZXQta2V5LXRoYXQtaXMtMzItYnl0ZXM="; // "test-secret-key-that-is-32-bytes"
+    private static String privateKeyB64;
+    private static String publicKeyB64;
 
     private JwtTokenProvider tokenProvider;
 
+    @BeforeAll
+    static void generateKeyPair() throws Exception {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(2048);
+        KeyPair kp = kpg.generateKeyPair();
+        privateKeyB64 = Base64.getEncoder().encodeToString(kp.getPrivate().getEncoded());
+        publicKeyB64  = Base64.getEncoder().encodeToString(kp.getPublic().getEncoded());
+    }
+
     @BeforeEach
     void setUp() {
-        tokenProvider = new JwtTokenProvider();
-        ReflectionTestUtils.setField(tokenProvider, "secretKey", SECRET);
-        ReflectionTestUtils.setField(tokenProvider, "accessTokenExpiryMs", 900_000L);   // 15 min
-        ReflectionTestUtils.setField(tokenProvider, "refreshTokenExpiryMs", 604_800_000L); // 7 days
-        tokenProvider.init(); // @PostConstruct — builds signingKey from secretKey
+        tokenProvider = buildProvider(900_000L, 604_800_000L);
+    }
+
+    private static JwtTokenProvider buildProvider(long accessMs, long refreshMs) {
+        JwtTokenProvider p = new JwtTokenProvider();
+        ReflectionTestUtils.setField(p, "rsaPrivateKeyBase64",  privateKeyB64);
+        ReflectionTestUtils.setField(p, "rsaPublicKeyBase64",   publicKeyB64);
+        ReflectionTestUtils.setField(p, "accessTokenExpiryMs",  accessMs);
+        ReflectionTestUtils.setField(p, "refreshTokenExpiryMs", refreshMs);
+        p.init();
+        return p;
     }
 
     @Test
     void generateAccessToken_returnsValidToken() {
-        UUID userId = UUID.randomUUID();
-
-        String token = tokenProvider.generateAccessToken(userId, "ROLE_USER");
-
+        String token = tokenProvider.generateAccessToken(UUID.randomUUID(), "ROLE_USER");
         assertThat(token).isNotBlank();
     }
 
@@ -47,11 +62,9 @@ class JwtTokenProviderTest {
 
     @Test
     void validateAccessToken_returnsEmpty_forTamperedToken() {
-        UUID userId = UUID.randomUUID();
-        String token = tokenProvider.generateAccessToken(userId, "ROLE_USER");
-        String tampered = token + "X"; // corrupt the signature
+        String token = tokenProvider.generateAccessToken(UUID.randomUUID(), "ROLE_USER");
 
-        Optional<UUID> result = tokenProvider.validateAccessToken(tampered);
+        Optional<UUID> result = tokenProvider.validateAccessToken(token + "X");
 
         assertThat(result).isEmpty();
     }
@@ -63,13 +76,7 @@ class JwtTokenProviderTest {
 
     @Test
     void validateAccessToken_returnsEmpty_forExpiredToken() {
-        // Create a provider with a 0 ms expiry to produce an instantly-expired token
-        JwtTokenProvider expiredProvider = new JwtTokenProvider();
-        ReflectionTestUtils.setField(expiredProvider, "secretKey", SECRET);
-        ReflectionTestUtils.setField(expiredProvider, "accessTokenExpiryMs", 0L);
-        ReflectionTestUtils.setField(expiredProvider, "refreshTokenExpiryMs", 0L);
-        expiredProvider.init();
-
+        JwtTokenProvider expiredProvider = buildProvider(0L, 0L);
         String expiredToken = expiredProvider.generateAccessToken(UUID.randomUUID(), "ROLE_USER");
 
         assertThat(tokenProvider.validateAccessToken(expiredToken)).isEmpty();
@@ -77,10 +84,7 @@ class JwtTokenProviderTest {
 
     @Test
     void generateRefreshToken_returnsValidToken() {
-        UUID userId = UUID.randomUUID();
-
-        String token = tokenProvider.generateRefreshToken(userId);
-
+        String token = tokenProvider.generateRefreshToken(UUID.randomUUID());
         assertThat(token).isNotBlank();
     }
 
