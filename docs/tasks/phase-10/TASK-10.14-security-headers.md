@@ -157,11 +157,11 @@ Do not enable HSTS before TLS is in place — it will lock the browser out of th
 
 ## Checklist
 
-- [ ] Add the three headers in `SecurityConfig` (alongside the HSTS header from TASK-10.20)
-  - [ ] `contentTypeOptions(Customizer.withDefaults())` — produces `X-Content-Type-Options: nosniff`
-  - [ ] `frameOptions(frame -> frame.deny())` — produces `X-Frame-Options: DENY`
-  - [ ] `contentSecurityPolicy(csp -> csp.policyDirectives("..."))` — produces `Content-Security-Policy`
-- [ ] Confirm each header is present on a page response in DevTools → Network → Headers
+- [x] Add the three headers in `SecurityConfig` (alongside the HSTS header from TASK-10.20)
+  - [x] `contentTypeOptions(Customizer.withDefaults())` — produces `X-Content-Type-Options: nosniff`
+  - [x] `frameOptions(frame -> frame.deny())` — produces `X-Frame-Options: DENY`
+  - [x] `contentSecurityPolicy(csp -> csp.policyDirectives("..."))` — produces `Content-Security-Policy`
+- [x] Confirm each header is present on a page response in DevTools → Network → Headers
 
 ---
 
