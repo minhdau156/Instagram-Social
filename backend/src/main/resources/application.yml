@@ -91,7 +91,7 @@ springdoc:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:mwPSXOqeKWG5HhqMKV6DHbzFDWkVKOjvw5rBiT4T8+Q}         # set via env var in prod
+    secret: ${JWT_SECRET}         # set via env var in prod
     access-token-expiry-ms: 900000        # 15 minutes
     refresh-token-expiry-ms: 604800000    # 7 days
   frontend-url: ${FRONTEND_URL:http://localhost:5173}

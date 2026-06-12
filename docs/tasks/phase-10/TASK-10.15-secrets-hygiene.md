@@ -223,16 +223,16 @@ Rename-Item backend/.env.bak backend/.env
 
 ## Checklist
 
-- [ ] Search the repo for hard-coded secrets (DB password, JWT key)
-  - [ ] Grep `application.yml`, `application-local.yml`, `application-prod.yml` for literal credential values
-  - [ ] Run `git ls-files | Select-String "\.env"` to ensure no `.env` file is tracked
-- [ ] Move any found secrets to environment variables
-  - [ ] Replace `${JWT_SECRET:mwPSXOqeKWG5HhqMKV6DHbzFDWkVKOjvw5rBiT4T8+Q}` with `${JWT_SECRET}` in `application.yml`
-  - [ ] Create `backend/.env` with real local values (not committed)
-  - [ ] Confirm `.env` is listed in `.gitignore`
-- [ ] Add a `.env.example` with placeholder values and document it in `README.md`
-  - [ ] `.env.example` committed at repo root with dummy values for every required variable
-  - [ ] `README.md` has a "First-time local setup" step that references `.env.example`
+- [x] Search the repo for hard-coded secrets (DB password, JWT key)
+  - [x] Grep `application.yml`, `application-local.yml`, `application-prod.yml` for literal credential values
+  - [x] Run `git ls-files | Select-String "\.env"` to ensure no `.env` file is tracked
+- [x] Move any found secrets to environment variables
+  - [x] Replace `${JWT_SECRET:mwPSXOqeKWG5HhqMKV6DHbzFDWkVKOjvw5rBiT4T8+Q}` with `${JWT_SECRET}` in `application.yml`
+  - [x] Create `backend/.env` with real local values (not committed)
+  - [x] Confirm `.env` is listed in `.gitignore`
+- [x] Add a `.env.example` with placeholder values and document it in `README.md`
+  - [x] `.env.example` committed at repo root with dummy values for every required variable
+  - [x] `README.md` has a "First-time local setup" step that references `.env.example`
 
 ---
 
