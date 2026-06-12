@@ -306,19 +306,19 @@ Paste the token into [jwt.io](https://jwt.io) and confirm:
 
 ## Checklist
 
-- [ ] Verify access token expiry = 15 min, refresh token expiry = 7 days in `JwtTokenProvider`
-  - [ ] `access-token-expiry-ms: 900000` in `application.yml`
-  - [ ] `refresh-token-expiry-ms: 604800000` in `application.yml`
-- [ ] Use RS256 (asymmetric) key pair instead of HS256 if not already done; store private key in env var
-  - [ ] RSA-2048 key pair generated
-  - [ ] `JWT_RSA_PRIVATE_KEY` and `JWT_RSA_PUBLIC_KEY` in `.env` (not committed)
-  - [ ] `.env.example` updated with placeholder lines for both keys
-  - [ ] `JwtTokenProvider` reads `rsa-private-key` / `rsa-public-key` from `application.yml`
-  - [ ] `@PostConstruct` loads `PrivateKey` and `PublicKey` via `KeyFactory`
-  - [ ] `generateAccessToken` and `generateRefreshToken` use `Jwts.SIG.RS256`
-  - [ ] `validateAccessToken` and `validateRefreshToken` use `publicKey` for verification
-  - [ ] Token decoded at jwt.io shows `"alg": "RS256"`
-- [ ] Implement refresh token rotation — invalidate old token on each `/auth/refresh` call
+- [x] Verify access token expiry = 15 min, refresh token expiry = 7 days in `JwtTokenProvider`
+  - [x] `access-token-expiry-ms: 900000` in `application.yml`
+  - [x] `refresh-token-expiry-ms: 604800000` in `application.yml`
+- [x] Use RS256 (asymmetric) key pair instead of HS256 if not already done; store private key in env var
+  - [x] RSA-2048 key pair generated
+  - [x] `JWT_RSA_PRIVATE_KEY` and `JWT_RSA_PUBLIC_KEY` in `.env` (not committed)
+  - [x] `.env.example` updated with placeholder lines for both keys
+  - [x] `JwtTokenProvider` reads `rsa-private-key` / `rsa-public-key` from `application.yml`
+  - [x] `@PostConstruct` loads `PrivateKey` and `PublicKey` via `KeyFactory`
+  - [x] `generateAccessToken` and `generateRefreshToken` use `Jwts.SIG.RS256`
+  - [x] `validateAccessToken` and `validateRefreshToken` use `publicKey` for verification
+  - [x] Token decoded at jwt.io shows `"alg": "RS256"`
+- [ ] Implement refresh token rotation — invalidate old token on each `/auth/refresh` call (deferred — stateless for now)
   - [ ] `RefreshTokenUseCase` implementation deletes the old token before issuing a new one
   - [ ] A second call with the same refresh token returns `401` (token already consumed)
 

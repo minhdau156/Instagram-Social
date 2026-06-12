@@ -1,13 +1,24 @@
-# Current Feature
+# Current Feature: TASK-10.16 — JWT Hardening
 
 ## Status
 Not Started
 
 ## Goals
-<!-- -->
+- Verify access token expiry = 15 min (`access-token-expiry-ms: 900000`) and refresh token expiry = 7 days (`refresh-token-expiry-ms: 604800000`) in `application.yml` and `JwtTokenProvider`
+- Generate RSA-2048 key pair and store as `JWT_RSA_PRIVATE_KEY` / `JWT_RSA_PUBLIC_KEY` env vars (never committed)
+- Update `.env.example` with placeholder lines for both RSA key vars
+- Remove `app.jwt.secret` from `application.yml`; add `rsa-private-key` and `rsa-public-key` references
+- Rewrite `JwtTokenProvider` to use RS256 asymmetric signing: load `PrivateKey`/`PublicKey` via `KeyFactory` in `@PostConstruct`, sign with `Jwts.SIG.RS256`, verify with `publicKey`
+- Verify refresh token rotation is implemented: `RefreshTokenUseCase` deletes old token before issuing new one; a second call with the same refresh token returns 401
 
 ## Notes
-<!-- -->
+- `jjwt-api`, `jjwt-impl`, `jjwt-jackson` (0.12.6) already in `pom.xml` — RS256 supported
+- Use `io.jsonwebtoken.io.Decoders.BASE64` (standard Base64, not URL-safe) to decode key bytes
+- HS256 → RS256 is a breaking change: all existing tokens are invalidated on first deploy
+- Do NOT use PEM file paths in `application.yml` — always env-var Base64
+- Key pair generation: PowerShell `System.Security.Cryptography.RSA::Create(2048)` or `openssl genpkey`
+- `spring-dotenv` loads `backend/.env` from working directory — ensure both new keys are present there
+- Files to modify: `JwtTokenProvider.java`, `application.yml`, `application-local.yml`, `.env.example`; possibly `UserService.java` if rotation not yet in place
 
 ## History
 - TASK-10.5 — CDN-backed media URLs: `MinioStorageAdapter` injects `cdnBaseUrl` from `app.minio.cdn-base-url`; `uploadFile` returns CDN-rooted URL; `getPublicUrl(key)` added to adapter and `MediaStoragePort`; `generatePresignedPutUrl` unchanged (targets MinIO directly); `application.yml` adds `cdn-base-url` property (env-var driven, defaults to MinIO endpoint); `application-local.yml` fixes path to `app.minio.cdn-base-url: http://localhost:9000`; `docs/infra/cdn-setup.md` created with local dev, CloudFront/S3, and nginx/MinIO reference configs.
