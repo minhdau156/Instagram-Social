@@ -1,24 +1,13 @@
-# Current Feature: TASK-10.16 — JWT Hardening
+# Current Feature
 
 ## Status
 Not Started
 
 ## Goals
-- Verify access token expiry = 15 min (`access-token-expiry-ms: 900000`) and refresh token expiry = 7 days (`refresh-token-expiry-ms: 604800000`) in `application.yml` and `JwtTokenProvider`
-- Generate RSA-2048 key pair and store as `JWT_RSA_PRIVATE_KEY` / `JWT_RSA_PUBLIC_KEY` env vars (never committed)
-- Update `.env.example` with placeholder lines for both RSA key vars
-- Remove `app.jwt.secret` from `application.yml`; add `rsa-private-key` and `rsa-public-key` references
-- Rewrite `JwtTokenProvider` to use RS256 asymmetric signing: load `PrivateKey`/`PublicKey` via `KeyFactory` in `@PostConstruct`, sign with `Jwts.SIG.RS256`, verify with `publicKey`
-- Verify refresh token rotation is implemented: `RefreshTokenUseCase` deletes old token before issuing new one; a second call with the same refresh token returns 401
+<!-- -->
 
 ## Notes
-- `jjwt-api`, `jjwt-impl`, `jjwt-jackson` (0.12.6) already in `pom.xml` — RS256 supported
-- Use `io.jsonwebtoken.io.Decoders.BASE64` (standard Base64, not URL-safe) to decode key bytes
-- HS256 → RS256 is a breaking change: all existing tokens are invalidated on first deploy
-- Do NOT use PEM file paths in `application.yml` — always env-var Base64
-- Key pair generation: PowerShell `System.Security.Cryptography.RSA::Create(2048)` or `openssl genpkey`
-- `spring-dotenv` loads `backend/.env` from working directory — ensure both new keys are present there
-- Files to modify: `JwtTokenProvider.java`, `application.yml`, `application-local.yml`, `.env.example`; possibly `UserService.java` if rotation not yet in place
+<!-- -->
 
 ## History
 - TASK-10.5 — CDN-backed media URLs: `MinioStorageAdapter` injects `cdnBaseUrl` from `app.minio.cdn-base-url`; `uploadFile` returns CDN-rooted URL; `getPublicUrl(key)` added to adapter and `MediaStoragePort`; `generatePresignedPutUrl` unchanged (targets MinIO directly); `application.yml` adds `cdn-base-url` property (env-var driven, defaults to MinIO endpoint); `application-local.yml` fixes path to `app.minio.cdn-base-url: http://localhost:9000`; `docs/infra/cdn-setup.md` created with local dev, CloudFront/S3, and nginx/MinIO reference configs.
@@ -69,3 +58,4 @@ Not Started
 - TASK-10.13 — Spring Batch bulk post import: `spring-boot-starter-batch` added; `V7__spring_batch_schema.sql` (6 BATCH_* tables + 3 sequences); `BatchConfig` wires `importPostsJob` → `importPostsStep` (chunk 50, skipLimit 100) with `@StepScope` `FlatFileItemReader` and `PostImportItemProcessor` reading `userId`/`filePath` from `JobParameters`; `PostImportItemWriter` persists via `PostRepository`; `AdminImportController` — `POST /api/v1/admin/imports/posts` (202 + executionId) + `GET /api/v1/admin/imports/posts/{executionId}` (via `JobExplorer`); `spring.batch.job.enabled: false` prevents auto-run on startup.
 - TASK-10.14 — Baseline security headers: `SecurityConfig.filterChain` gains `.headers(...)` block with `contentTypeOptions(Customizer.withDefaults())` → `X-Content-Type-Options: nosniff`; `frameOptions(frame -> frame.deny())` → `X-Frame-Options: DENY`; `contentSecurityPolicy(...)` → CSP with `default-src 'self'`, `script-src 'self' 'unsafe-inline'` (dev, for Swagger), `frame-ancestors 'none'`, `object-src 'none'`; `import org.springframework.security.config.Customizer` added. HSTS deferred to TASK-10.20.
 - TASK-10.15 — Secrets hygiene: JWT secret fallback removed from `application.yml` (`${JWT_SECRET}`, no default — fast-fail on missing); `.gitignore` gains `!.env.example` negation to allow committing the template; `.env.example` added at repo root with placeholder values for all required vars (JWT, OAuth2, MinIO, DB, FRONTEND_URL); `README.md` gains "First-time local setup" step referencing `.env.example`.
+- TASK-10.16 — JWT hardening: `JwtTokenProvider` rewritten to sign/verify with RS256 using RSA-2048 key pair loaded via `KeyFactory` in `@PostConstruct`; `.trim()` added to handle CRLF in `.env` on Windows; `app.jwt.secret` removed from `application.yml`, replaced with `rsa-private-key`/`rsa-public-key` referencing `JWT_RSA_PRIVATE_KEY`/`JWT_RSA_PUBLIC_KEY` env vars; `.env.example` updated with RSA key placeholders; refresh token rotation deferred (stateless).
