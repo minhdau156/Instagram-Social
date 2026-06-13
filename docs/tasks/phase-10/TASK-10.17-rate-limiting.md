@@ -238,18 +238,18 @@ $resp.Headers["Retry-After"]
 
 ## Checklist
 
-- [ ] Add `bucket4j-spring-boot-starter` dependency to `pom.xml`
-  - [ ] Also add `caffeine` and `spring-boot-starter-cache` if not already present
-  - [ ] `mvn dependency:resolve` completes without error
-- [ ] Configure rate limits per IP:
-  - [ ] `/api/v1/auth/register` → 5 req / 10 min
-  - [ ] `/api/v1/auth/login` → 10 req / 1 min
-  - [ ] All other endpoints → 200 req / 1 min
-  - [ ] Filters ordered most-specific first in `application.yml`
-- [ ] Return `429 Too Many Requests` with `Retry-After` header on limit exceeded
-  - [ ] `http-status-code: 429` in Bucket4j config
-  - [ ] `Retry-After` header added by `retryAfterFilter` bean
-  - [ ] Response body follows the project's `ApiResponse` error format
+- [x] Add `bucket4j-spring-boot-starter` dependency to `pom.xml`
+  - [x] Also add `caffeine` and `spring-boot-starter-cache` if not already present
+  - [x] `mvn dependency:resolve` completes without error
+- [x] Configure rate limits per IP:
+  - [x] `/api/v1/auth/register` → 5 req / 10 min
+  - [x] `/api/v1/auth/login` → 10 req / 1 min
+  - [x] All other endpoints → 200 req / 1 min
+  - [x] Filters ordered most-specific first in `application.yml`
+- [x] Return `429 Too Many Requests` with `Retry-After` header on limit exceeded
+  - [x] `http-status-code: 429` in Bucket4j config
+  - [x] `Retry-After` header added by `retryAfterFilter` bean
+  - [x] Response body follows the project's `ApiResponse` error format
 
 ---
 

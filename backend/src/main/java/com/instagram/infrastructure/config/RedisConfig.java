@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -32,12 +33,11 @@ public class RedisConfig {
                 mapper.registerModule(new JavaTimeModule());
                 mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
                 mapper.activateDefaultTyping(
-                        BasicPolymorphicTypeValidator.builder()
-                                .allowIfSubType(Object.class)
-                                .build(),
-                        ObjectMapper.DefaultTyping.EVERYTHING,
-                        JsonTypeInfo.As.PROPERTY
-                );
+                                BasicPolymorphicTypeValidator.builder()
+                                                .allowIfSubType(Object.class)
+                                                .build(),
+                                ObjectMapper.DefaultTyping.EVERYTHING,
+                                JsonTypeInfo.As.PROPERTY);
                 return new GenericJackson2JsonRedisSerializer(mapper);
         }
 
@@ -53,7 +53,8 @@ public class RedisConfig {
                 return template;
         }
 
-        @Bean
+        @Bean(name = "redisCacheManager")
+        @Primary
         public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
                 GenericJackson2JsonRedisSerializer jsonSerializer = jsonSerializer();
 
