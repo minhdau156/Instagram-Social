@@ -3,11 +3,12 @@ package com.instagram.adapter.in.web;
 import com.instagram.adapter.in.web.dto.request.CreatePostRequest;
 import com.instagram.adapter.in.web.dto.request.UpdatePostRequest;
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
-import com.instagram.adapter.in.web.dto.response.PagedResponse;
 import com.instagram.adapter.in.web.dto.response.PostResponse;
 import com.instagram.domain.model.Post;
 import com.instagram.domain.model.PostMedia;
 import com.instagram.domain.port.in.*;
+import com.instagram.infrastructure.security.HtmlSanitizer;
+
 import io.swagger.v3.oas.annotations.Operation;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -16,10 +17,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
-import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,6 +38,7 @@ public class PostController {
 	private final UpdatePostUseCase updatePostUseCase;
 	private final DeletePostUseCase deletePostUseCase;
 	private final GetUserPostsUseCase getUserPostsUseCase;
+	private final HtmlSanitizer htmlSanitizer;
 
 	@PostMapping
 	@Operation(summary = "Create a new post with at least one media item")
@@ -53,7 +53,19 @@ public class PostController {
 
 		UUID effectiveUserId = UUID.fromString(userDetails.getUsername());
 
-		Post createdPost = createPostUseCase.createPost(request.toCommand(effectiveUserId));
+		List<CreatePostUseCase.MediaItem> items = request.mediaItems().stream()
+				.map(m -> new CreatePostUseCase.MediaItem(
+						m.mediaKey(), m.mediaType(), m.width(), m.height(),
+						m.duration(), m.fileSizeBytes(), m.sortOrder()))
+				.toList();
+
+		CreatePostUseCase.Command command = new CreatePostUseCase.Command(
+				effectiveUserId,
+				htmlSanitizer.sanitize(request.caption()),
+				htmlSanitizer.sanitize(request.location()),
+				items);
+
+		Post createdPost = createPostUseCase.createPost(command);
 
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(ApiResponse.ok(PostResponse.from(createdPost, null)));
@@ -90,7 +102,9 @@ public class PostController {
 
 		UUID userId = UUID.fromString(userDetails.getUsername());
 		Post post = updatePostUseCase.updatePost(
-				new UpdatePostUseCase.Command(id, userId, req.caption(), req.location()));
+				new UpdatePostUseCase.Command(id, userId,
+						htmlSanitizer.sanitize(req.caption()),
+						htmlSanitizer.sanitize(req.location())));
 		return ResponseEntity.ok(ApiResponse.ok(PostResponse.from(post, null)));
 	}
 

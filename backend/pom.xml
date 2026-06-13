@@ -184,9 +184,16 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
         <dependency>
-    <groupId>com.github.ben-manes.caffeine</groupId>
-    <artifactId>jcache</artifactId>
-</dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>jcache</artifactId>
+        </dependency>
+        
+        <!-- HTML sanitisation — strip disallowed tags from user-generated text -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.17.2</version>
+        </dependency>
 
     </dependencies>
 

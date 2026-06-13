@@ -31,6 +31,7 @@ import com.instagram.domain.port.in.messaging.LeaveConversationUseCase;
 import com.instagram.domain.port.in.messaging.MarkReadUseCase;
 import com.instagram.domain.port.in.messaging.SendMessageUseCase;
 import com.instagram.domain.port.in.user.GetUserUseCase;
+import com.instagram.infrastructure.security.HtmlSanitizer;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -50,6 +51,7 @@ public class MessageController {
         private final AddGroupMemberUseCase addGroupMemberUseCase;
         private final LeaveConversationUseCase leaveConversationUseCase;
         private final SimpMessagingTemplate messagingTemplate;
+        private final HtmlSanitizer htmlSanitizer;
 
         public MessageController(
                         GetConversationsUseCase getConversationsUseCase,
@@ -60,7 +62,8 @@ public class MessageController {
                         AddGroupMemberUseCase addGroupMemberUseCase,
                         LeaveConversationUseCase leaveConversationUseCase,
                         GetUserUseCase getUserUseCase,
-                        SimpMessagingTemplate messagingTemplate) {
+                        SimpMessagingTemplate messagingTemplate,
+                        HtmlSanitizer htmlSanitizer) {
                 this.getConversationsUseCase = getConversationsUseCase;
                 this.createConversationUseCase = createConversationUseCase;
                 this.getMessagesUseCase = getMessagesUseCase;
@@ -70,6 +73,7 @@ public class MessageController {
                 this.leaveConversationUseCase = leaveConversationUseCase;
                 this.getUserUseCase = getUserUseCase;
                 this.messagingTemplate = messagingTemplate;
+                this.htmlSanitizer = htmlSanitizer;
         }
 
         private UUID currentUserId() {
@@ -142,7 +146,8 @@ public class MessageController {
                         @Valid @RequestBody SendMessageRequest request) {
                 UUID userId = currentUserId();
                 SendMessageUseCase.MessageView view = sendMessageUseCase.sendMessage(
-                                new SendMessageUseCase.Command(id, userId, request.content(), request.messageType(),
+                                new SendMessageUseCase.Command(id, userId, htmlSanitizer.sanitize(request.content()),
+                                                request.messageType(),
                                                 request.mediaUrl(),
                                                 request.sharedPostId()));
                 MessageResponse response = MessageResponse.from(view.message(), view.senderUsername(),

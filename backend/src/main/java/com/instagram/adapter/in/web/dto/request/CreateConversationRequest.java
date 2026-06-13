@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.UUID;
 
 public record CreateConversationRequest(
-        @NotEmpty @Size(min = 1, max = 20) List<UUID> participantIds,
+		@NotEmpty @Size(min = 1, max = 20) List<UUID> participantIds,
 
-        @Size(max = 100) String name, // optional for group chats
+		@Size(max = 150) String name, // optional for group chats
 
-        @NotNull boolean isGroup) {
+		@NotNull boolean isGroup) {
 
 }

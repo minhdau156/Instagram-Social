@@ -30,6 +30,7 @@ import com.instagram.domain.port.in.comment.EditCommentUseCase;
 import com.instagram.domain.port.in.comment.GetCommentsUseCase;
 import com.instagram.domain.port.in.comment.GetRepliesUseCase;
 import com.instagram.domain.port.in.user.GetUserUseCase;
+import com.instagram.infrastructure.security.HtmlSanitizer;
 import com.instagram.infrastructure.util.CursorEncoder;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -47,6 +48,7 @@ public class CommentController {
     private final DeleteCommentUseCase deleteCommentUseCase;
     private final GetCommentsUseCase getCommentsUseCase;
     private final GetRepliesUseCase getRepliesUseCase;
+    private final HtmlSanitizer htmlSanitizer;
 
     @Nullable
     private UUID currentUserIdOrNull() {
@@ -73,7 +75,8 @@ public class CommentController {
             @PathVariable UUID id,
             @Valid @RequestBody AddCommentRequest request) {
         Comment comment = addCommentUseCase
-                .addComment(new AddCommentUseCase.Command(id, currentUserId(), request.content(), request.parentId()));
+                .addComment(new AddCommentUseCase.Command(id, currentUserId(),
+                        htmlSanitizer.sanitize(request.content()), request.parentId()));
 
         User user = getUserUseCase.getUser(new GetUserUseCase.Query(currentUserId()));
 

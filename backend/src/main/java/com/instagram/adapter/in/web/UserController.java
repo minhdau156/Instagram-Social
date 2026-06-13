@@ -36,6 +36,7 @@ import com.instagram.domain.port.in.search.SearchUsersUseCase;
 import com.instagram.domain.port.in.user.GetUserUseCase;
 
 import com.instagram.domain.port.out.MediaStoragePort;
+import com.instagram.infrastructure.security.HtmlSanitizer;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -70,6 +71,7 @@ public class UserController {
     private final GetUserRolesUseCase getUserRolesUseCase;
     private final GetUserPermissionsUseCase getUserPermissionsUseCase;
     private final ExportUserDataUseCase exportUserDataUseCase;
+    private final HtmlSanitizer htmlSanitizer;
 
     @Operation(summary = "Get Current User Profile", description = "Retrieves the profile of the currently authenticated user")
     @ApiResponses({
@@ -96,7 +98,8 @@ public class UserController {
                 ? (req.isPrivate() ? PrivacyLevel.PRIVATE : PrivacyLevel.PUBLIC)
                 : null;
         User user = updateProfileUseCase.updateProfile(new UpdateProfileUseCase.Command(
-                currentUserId().toString(), req.fullName(), req.bio(), null, null, privacyLevel));
+                currentUserId().toString(), htmlSanitizer.sanitize(req.fullName()), htmlSanitizer.sanitize(req.bio()),
+                null, null, privacyLevel));
         return ResponseEntity.ok(ApiResponse.ok(UserResponse.from(user)));
     }
 
@@ -187,9 +190,8 @@ public class UserController {
     public ResponseEntity<StreamingResponseBody> exportMyData(
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
-        StreamingResponseBody body = outputStream ->
-                exportUserDataUseCase.exportPostsToCsv(
-                        new ExportUserDataUseCase.Command(userId, outputStream));
+        StreamingResponseBody body = outputStream -> exportUserDataUseCase.exportPostsToCsv(
+                new ExportUserDataUseCase.Command(userId, outputStream));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"posts-export.csv\"")
                 .contentType(MediaType.parseMediaType("text/csv"))

@@ -300,18 +300,18 @@ Apply the same pattern in:
 
 ## Checklist
 
-- [ ] Audit all request DTOs — ensure every field has `@NotNull`/`@NotBlank`/`@Size`/`@Pattern` where appropriate
-  - [ ] `CreatePostRequest` — `@Size(max=2200)` on `caption`, `@Size(max=255)` on `location`
-  - [ ] `RegisterRequest` — `@NotBlank @Email @Size(max=255)` on `email`; `@NotBlank @Pattern(...)` on `username`; `@Size(min=8,max=100)` on `password`; `@NotBlank @Size(max=100)` on `fullName`
-  - [ ] `UpdateProfileRequest` — `@Size(max=500)` on `bio`; `@Size(max=100)` on `fullName`
-  - [ ] `SendMessageRequest` — `@NotBlank @Size(max=2000)` on `content`
-  - [ ] Other DTOs covered (inspect each file in `adapter/in/web/dto/request/`)
-- [ ] Add `@ControllerAdvice` handler for `HttpMessageNotReadableException` (malformed JSON) → `400`
-  - [ ] Confirmed present in `GlobalExceptionHandler` (no new code needed)
-- [ ] Strip HTML from all user-generated text fields using OWASP AntiSamy
-  - [ ] `antisamy` dependency added to `pom.xml`
-  - [ ] `HtmlSanitizer.java` created in `infrastructure/security/`
-  - [ ] `HtmlSanitizer.sanitize()` called in `PostController`, `CommentController`, `UserController`, `MessageController` before use-case delegation
+- [x] Audit all request DTOs — ensure every field has `@NotNull`/`@NotBlank`/`@Size`/`@Pattern` where appropriate
+  - [x] `CreatePostRequest` — `@Size(max=2200)` on `caption`, `@Size(max=255)` on `location`
+  - [x] `RegisterRequest` — `@NotBlank @Email @Size(max=255)` on `email`; `@NotBlank @Pattern(...)` on `username`; `@Size(min=8,max=100)` on `password`; `@NotBlank @Size(max=150)` on `fullName` (schema is VARCHAR(150), not 100)
+  - [x] `UpdateProfileRequest` — `@Size(max=500)` on `bio`; `@Size(max=150)` on `fullName` (matches schema VARCHAR(150))
+  - [x] `SendMessageRequest` — `@Size(max=2000)` on `content` (`@NotBlank` intentionally omitted — media messages may have null content)
+  - [x] Other DTOs covered (`AddCommentRequest`, `LoginRequest`, `UpdatePostRequest`, `CreateConversationRequest` all annotated)
+- [x] Add `@ControllerAdvice` handler for `HttpMessageNotReadableException` (malformed JSON) → `400`
+  - [x] Confirmed present in `GlobalExceptionHandler` (no new code needed)
+- [x] Strip HTML from all user-generated text fields using OWASP AntiSamy
+  - [x] `jsoup:1.17.2` added to `pom.xml` (replaces AntiSamy — no policy file required; `Safelist.none()` = text-only)
+  - [x] `HtmlSanitizer.java` created in `infrastructure/security/`
+  - [x] `HtmlSanitizer.sanitize()` called in `PostController` (createPost + updatePost), `CommentController`, `UserController`, `MessageController` before use-case delegation
 
 ---
 
