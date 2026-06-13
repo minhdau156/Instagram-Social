@@ -36,12 +36,11 @@ import com.instagram.domain.port.in.comment.EditCommentUseCase;
 import com.instagram.domain.port.in.comment.GetCommentsUseCase;
 import com.instagram.domain.port.in.comment.GetRepliesUseCase;
 import com.instagram.domain.port.in.user.GetUserUseCase;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import com.instagram.infrastructure.security.SecurityConfig;
+import com.instagram.infrastructure.security.HtmlSanitizer;
 import com.instagram.infrastructure.security.JwtTokenProvider;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import com.instagram.infrastructure.security.OAuth2SuccessHandler;
+import com.instagram.infrastructure.security.SecurityConfig;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 @WebMvcTest(CommentController.class)
 @Import(SecurityConfig.class)
@@ -61,6 +60,9 @@ class CommentControllerTest {
 
         @MockBean
         private OAuth2SuccessHandler oAuth2SuccessHandler;
+
+        @MockBean
+        private HtmlSanitizer htmlSanitizer;
 
         @MockBean
         private GetUserUseCase getUserUseCase;
