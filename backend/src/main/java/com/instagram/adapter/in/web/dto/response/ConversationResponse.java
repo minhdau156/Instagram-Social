@@ -11,7 +11,7 @@ public record ConversationResponse(
 
     public static ConversationResponse from(Conversation conversation, MessageResponse lastMessage,
             long unreadCount, String eachOtherName) {
-        return new ConversationResponse(conversation.getId(), conversation.getName(), conversation.isGroup(),
+        return new ConversationResponse(conversation.getId(), conversation.getName(), conversation.getIsGroup(),
                 lastMessage, unreadCount, eachOtherName, conversation.getCreatedAt());
     }
 }

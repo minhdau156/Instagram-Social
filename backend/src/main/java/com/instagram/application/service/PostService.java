@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.concurrent.CompletableFuture;
 
 import com.instagram.domain.exception.PostNotFoundException;
+import com.instagram.domain.exception.UnauthorizedPostAccessException;
 import com.instagram.domain.model.Hashtag;
 import com.instagram.domain.model.MediaType;
 import com.instagram.domain.model.Post;
@@ -143,6 +144,10 @@ public class PostService implements
         Post existing = postRepository.findById(command.id())
                 .orElseThrow(() -> new PostNotFoundException(command.id()));
 
+        if (!existing.getUserId().equals(command.requesterId())) {
+            throw new UnauthorizedPostAccessException(existing.getId(), command.requesterId());
+        }
+
         Post updated = existing.withUpdateCaptionAndLocation(command.caption(), command.location());
         Post saved = postRepository.save(updated);
 
@@ -160,6 +165,10 @@ public class PostService implements
     public void deletePost(DeletePostUseCase.Command command) {
         Post existing = postRepository.findById(command.id())
                 .orElseThrow(() -> new PostNotFoundException(command.id()));
+
+        if (!existing.getUserId().equals(command.requesterId())) {
+            throw new UnauthorizedPostAccessException(existing.getId(), command.requesterId());
+        }
 
         Post softDeleted = existing.withSoftDelete();
         postRepository.save(softDeleted);

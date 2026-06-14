@@ -116,7 +116,7 @@ public class UserService
                 .or(() -> userRepository.findByUsername(command.identifier()))
                 .orElseThrow(InvalidCredentialsException::new);
 
-        if (!user.isActive()) {
+        if (!user.withActive()) {
             throw new InvalidCredentialsException();
         }
 
@@ -140,7 +140,7 @@ public class UserService
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> UserNotFoundException.withId(userId));
 
-        String accessToken = tokenPort.generateAccessToken(userId, user.getRole().name());
+        String accessToken = tokenPort.generateAccessToken(userId, null);
         String refreshToken = tokenPort.generateRefreshToken(userId);
 
         return new AuthResult(accessToken, refreshToken, ACCESS_TOKEN_EXPIRES_IN);

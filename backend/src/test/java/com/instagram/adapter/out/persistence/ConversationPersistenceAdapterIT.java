@@ -72,7 +72,7 @@ public class ConversationPersistenceAdapterIT {
         // then
 
         assertEquals(conversation.getName(), savedConversation.getName());
-        assertEquals(conversation.isGroup(), savedConversation.isGroup());
+        assertEquals(conversation.getIsGroup(), savedConversation.getIsGroup());
         assertEquals(conversation.getPictureUrl(), savedConversation.getPictureUrl());
         assertEquals(conversation.getCreatedBy(), savedConversation.getCreatedBy());
         assertEquals(conversation.getCreatedAt(), savedConversation.getCreatedAt());
@@ -91,7 +91,7 @@ public class ConversationPersistenceAdapterIT {
         // then
         assertEquals(savedConversation.getId(), foundConversation.get().getId());
         assertEquals(savedConversation.getName(), foundConversation.get().getName());
-        assertEquals(savedConversation.isGroup(), foundConversation.get().isGroup());
+        assertEquals(savedConversation.getIsGroup(), foundConversation.get().getIsGroup());
         assertEquals(savedConversation.getPictureUrl(), foundConversation.get().getPictureUrl());
         assertEquals(savedConversation.getCreatedBy(), foundConversation.get().getCreatedBy());
         assertEquals(savedConversation.getCreatedAt(), foundConversation.get().getCreatedAt());
@@ -130,7 +130,7 @@ public class ConversationPersistenceAdapterIT {
         // then
         assertEquals(savedConversation.getId(), foundConversation.get(0).getId());
         assertEquals(savedConversation.getName(), foundConversation.get(0).getName());
-        assertEquals(savedConversation.isGroup(), foundConversation.get(0).isGroup());
+        assertEquals(savedConversation.getIsGroup(), foundConversation.get(0).getIsGroup());
         assertEquals(savedConversation.getPictureUrl(), foundConversation.get(0).getPictureUrl());
         assertEquals(savedConversation.getCreatedBy(), foundConversation.get(0).getCreatedBy());
         assertEquals(savedConversation.getCreatedAt(), foundConversation.get(0).getCreatedAt());

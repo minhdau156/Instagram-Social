@@ -17,9 +17,6 @@ export function FollowButton({ username, status }: FollowButtonProps) {
     const [hovered, setHovered] = useState(false);
 
 
-
-
-
     return (
         <>
             {

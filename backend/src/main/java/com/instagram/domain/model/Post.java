@@ -3,6 +3,8 @@ package com.instagram.domain.model;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Core domain entity representing a user post.
  *
@@ -98,10 +100,12 @@ public class Post {
 
     // ── Domain Behaviour ─────────────────────────────────────────────────── //
 
+    @JsonIgnore
     public boolean isDeleted() {
         return deletedAt != null;
     }
 
+    @JsonIgnore
     public boolean isPublished() {
         return PostStatus.PUBLISHED == status;
     }

@@ -3,10 +3,12 @@ import { api } from './client';
 
 const BASE = '/api/v1';
 
-export async function getComments(postId: string, page = 0, size = 20): Promise<CommentPage> {
-    const { data } = await api.get(`${BASE}/posts/${postId}/comments`, {
-        params: { page, size },
-    });
+type CursorPage<T> = { items: T[]; nextCursor: string | null; hasMore: boolean };
+
+export async function getComments(postId: string, cursor: string | null = null, size = 20): Promise<CursorPage<Comment>> {
+    const params: Record<string, unknown> = { size };
+    if (cursor) params.cursor = cursor;
+    const { data } = await api.get(`${BASE}/posts/${postId}/comments`, { params });
     return data.data;
 }
 

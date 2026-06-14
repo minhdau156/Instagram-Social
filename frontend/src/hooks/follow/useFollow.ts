@@ -27,25 +27,26 @@ export const useFollow = (username: string) => {
             }
 
             // Optimistically update the user's status in ALL follower and following lists
-            const updateList = (oldData: InfiniteData<UserSummary[]> | undefined) => {
+            const updateList = (oldData: any | undefined) => {
                 if (!oldData) return oldData;
+
+                const items = oldData.items || [];
                 return {
                     ...oldData,
-                    pages: oldData.pages.map((page) =>
-                        page.map((user) => {
-                            if (user.username === username) {
-                                return {
-                                    ...user,
-                                    followStatus: user.isPrivate ? FollowStatus.PENDING : FollowStatus.ACCEPTED,
-                                };
-                            }
-                            return user;
-                        })
+                    items: items.map((user: UserSummary) => {
+                        if (user.username === username) {
+                            return {
+                                ...user,
+                                followStatus: user.isPrivate ? FollowStatus.PENDING : FollowStatus.ACCEPTED,
+                            };
+                        }
+                        return user;
+                    }
                     ),
                 };
             };
-            queryClient.setQueriesData<InfiniteData<UserSummary[]>>({ queryKey: ['followers'] }, updateList);
-            queryClient.setQueriesData<InfiniteData<UserSummary[]>>({ queryKey: ['following'] }, updateList);
+            queryClient.setQueriesData({ queryKey: ['followers'] }, updateList);
+            queryClient.setQueriesData({ queryKey: ['following'] }, updateList);
 
             return { snapshot };
         },
@@ -77,25 +78,27 @@ export const useFollow = (username: string) => {
             }
 
             // Optimistically update the user's status in ALL follower and following lists
-            const updateList = (oldData: InfiniteData<UserSummary[]> | undefined) => {
+            const updateList = (oldData: any | undefined) => {
                 if (!oldData) return oldData;
+
+                const items = oldData.items || [];
+
                 return {
                     ...oldData,
-                    pages: oldData.pages.map((page) =>
-                        page.map((user) => {
-                            if (user.username === username) {
-                                return {
-                                    ...user,
-                                    followStatus: null,
-                                };
-                            }
-                            return user;
-                        })
+                    items: items.map((user: UserSummary) => {
+                        if (user.username === username) {
+                            return {
+                                ...user,
+                                followStatus: user.isPrivate ? FollowStatus.PENDING : FollowStatus.ACCEPTED,
+                            };
+                        }
+                        return user;
+                    }
                     ),
                 };
             };
-            queryClient.setQueriesData<InfiniteData<UserSummary[]>>({ queryKey: ['followers'] }, updateList);
-            queryClient.setQueriesData<InfiniteData<UserSummary[]>>({ queryKey: ['following'] }, updateList);
+            queryClient.setQueriesData({ queryKey: ['followers'] }, updateList);
+            queryClient.setQueriesData({ queryKey: ['following'] }, updateList);
 
             return { snapshot };
         },

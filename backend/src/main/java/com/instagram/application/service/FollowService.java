@@ -63,7 +63,8 @@ public class FollowService implements FollowUserUseCase,
                         @CacheEvict(value = "userStats", key = "'userStats:' + @followService.getFollowingId(#command.targetUsername)"),
                         @CacheEvict(value = "exploreFeed", key = "'exploreFeed:' + #command.followerId + ':page1'"),
                         @CacheEvict(value = "followings", key = "'followings:' + #command.followerId + ':page1'"),
-                        @CacheEvict(value = "followers", key = "'followers:' + @followService.getUserId(#command.targetUsername) + ':page1'")
+                        @CacheEvict(value = "followers", key = "'followers:' + @followService.getUserId(#command.targetUsername) + ':page1'"),
+                        @CacheEvict(value = "profile", allEntries = true)
         })
         public Follow follow(FollowUserUseCase.Command command) {
                 User targetUser = userRepository.findByUsername(command.targetUsername())
@@ -113,7 +114,9 @@ public class FollowService implements FollowUserUseCase,
                         @CacheEvict(value = "userStats", key = "'userStats:' + @followService.getFollowingId(#command.targetUsername)"),
                         @CacheEvict(value = "exploreFeed", key = "'exploreFeed:' + #command.followerId + ':page1'"),
                         @CacheEvict(value = "followings", key = "'followings:' + #command.followerId + ':page1'"),
-                        @CacheEvict(value = "followers", key = "'followers:' + @followService.getUserId(#command.targetUsername) + ':page1'")
+                        @CacheEvict(value = "followers", key = "'followers:' + @followService.getUserId(#command.targetUsername) + ':page1'"),
+                        @CacheEvict(value = "profile", allEntries = true)
+
         })
         public void unfollow(UnfollowUserUseCase.Command command) {
                 User targetUser = userRepository.findByUsername(command.targetUsername())
@@ -131,10 +134,10 @@ public class FollowService implements FollowUserUseCase,
 
         @Override
         @Caching(evict = {
-                        @CacheEvict(value = "followers",     key = "'followers:' + #command.followingId + ':page1'"),
-                        @CacheEvict(value = "followings",    key = "'followings:' + #command.followRequestId + ':page1'"),
-                        @CacheEvict(value = "userStats",     key = "'userStats:' + #command.followingId"),
-                        @CacheEvict(value = "userStats",     key = "'userStats:' + #command.followRequestId"),
+                        @CacheEvict(value = "followers", key = "'followers:' + #command.followingId + ':page1'"),
+                        @CacheEvict(value = "followings", key = "'followings:' + #command.followRequestId + ':page1'"),
+                        @CacheEvict(value = "userStats", key = "'userStats:' + #command.followingId"),
+                        @CacheEvict(value = "userStats", key = "'userStats:' + #command.followRequestId"),
                         @CacheEvict(value = "followRequests", key = "'followRequests:' + #command.followingId")
         })
         public Follow approve(ApproveFollowRequestUseCase.Command command) {
@@ -203,7 +206,8 @@ public class FollowService implements FollowUserUseCase,
                 UUID targetUserId = targetUser.get().getId();
 
                 // 1 query: all accepted followers of the target user (keyset)
-                List<Follow> follows = followRepository.findFollowersByUserIdKeyset(targetUserId, cursorTs, cursorId, query.size());
+                List<Follow> follows = followRepository.findFollowersByUserIdKeyset(targetUserId, cursorTs, cursorId,
+                                query.size());
                 if (follows.isEmpty())
                         return new GetFollowersUseCase.FollowersPage(List.of(), null);
 
@@ -235,7 +239,8 @@ public class FollowService implements FollowUserUseCase,
 
                 // cursor from the last follow: (created_at, follower_id)
                 String nextCursor = follows.size() < query.size() ? null
-                                : CursorEncoder.encode(follows.getLast().getCreatedAt(), follows.getLast().getFollowerId());
+                                : CursorEncoder.encode(follows.getLast().getCreatedAt(),
+                                                follows.getLast().getFollowerId());
 
                 return new GetFollowersUseCase.FollowersPage(items, nextCursor);
         }
@@ -256,7 +261,8 @@ public class FollowService implements FollowUserUseCase,
                 UUID targetUserId = targetUser.get().getId();
 
                 // 1 query: all accepted follows made by the target user (keyset)
-                List<Follow> follows = followRepository.findFollowingByUserIdKeyset(targetUserId, cursorTs, cursorId, query.size());
+                List<Follow> follows = followRepository.findFollowingByUserIdKeyset(targetUserId, cursorTs, cursorId,
+                                query.size());
                 if (follows.isEmpty())
                         return new GetFollowingUseCase.FollowingPage(List.of(), null);
 
@@ -281,7 +287,8 @@ public class FollowService implements FollowUserUseCase,
 
                 // cursor from the last follow: (created_at, following_id)
                 String nextCursor = follows.size() < query.size() ? null
-                                : CursorEncoder.encode(follows.getLast().getCreatedAt(), follows.getLast().getFollowingId());
+                                : CursorEncoder.encode(follows.getLast().getCreatedAt(),
+                                                follows.getLast().getFollowingId());
 
                 return new GetFollowingUseCase.FollowingPage(items, nextCursor);
         }

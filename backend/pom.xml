@@ -187,7 +187,7 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>jcache</artifactId>
         </dependency>
-        
+
         <!-- HTML sanitisation — strip disallowed tags from user-generated text -->
         <dependency>
             <groupId>org.jsoup</groupId>

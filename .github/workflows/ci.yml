@@ -49,6 +49,7 @@ jobs:
       - name: Build and verify backend
         working-directory: ./backend
         run: mvn verify
+      
 
   frontend-ci:
     runs-on: ubuntu-latest

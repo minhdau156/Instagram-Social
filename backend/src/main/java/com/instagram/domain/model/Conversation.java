@@ -20,7 +20,7 @@ public class Conversation {
         return name;
     }
 
-    public boolean isGroup() {
+    public boolean getIsGroup() {
         return isGroup;
     }
 

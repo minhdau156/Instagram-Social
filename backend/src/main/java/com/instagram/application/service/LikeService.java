@@ -6,6 +6,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -73,6 +75,7 @@ public class LikeService implements LikePostUseCase,
 
     @Override
     @Transactional
+    @Caching(evict = { @CacheEvict(value = "feed", allEntries = true) })
     public void like(LikePostUseCase.Command command) {
         if (likeRepository.hasLikedPost(command.postId(), command.userId())) {
             throw new AlreadyLikedException("post", command.postId());
@@ -96,6 +99,7 @@ public class LikeService implements LikePostUseCase,
 
     @Override
     @Transactional
+    @Caching(evict = { @CacheEvict(value = "feed", allEntries = true) })
     public void unlike(UnlikePostUseCase.Command command) {
         if (!likeRepository.hasLikedPost(command.postId(), command.userId())) {
             throw new NotLikedException("post", command.postId());
@@ -105,6 +109,10 @@ public class LikeService implements LikePostUseCase,
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "comments", allEntries = true),
+
+    })
     public void likeComment(LikeCommentUseCase.Command command) {
         if (likeRepository.hasLikedComment(command.commentId(), command.userId())) {
             throw new AlreadyLikedException("comment", command.commentId());
@@ -125,6 +133,10 @@ public class LikeService implements LikePostUseCase,
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "comments", allEntries = true),
+
+    })
     public void unlikeComment(UnlikeCommentUseCase.Command command) {
         if (!likeRepository.hasLikedComment(command.commentId(), command.userId())) {
             throw new NotLikedException("comment", command.commentId());

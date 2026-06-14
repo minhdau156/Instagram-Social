@@ -191,7 +191,7 @@ public class MessagingService implements
                                 sender != null ? sender.getProfilePictureUrl() : null);
                     }
                     String eachOtherName = null;
-                    if (!c.isGroup()) {
+                    if (!c.getIsGroup()) {
                         UUID otherId = conversationToOtherMember.get(c.getId()).stream()
                                 .filter(id -> !id.equals(query.userId()))
                                 .findFirst().get();

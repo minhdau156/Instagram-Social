@@ -1,9 +1,11 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { notificationsApi } from "../../api/notificationsApi";
 import { useAuth } from "../useAuth";
+import { useUnreadNotifications } from "./useUnreadNotifications";
 
 export const useNotifications = () => {
     const { isAuthenticated } = useAuth();
+    const { setUnreadCountNotification } = useUnreadNotifications();
     const queryClient = useQueryClient();
     const { data, isError, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
         queryKey: ['notifications'],
@@ -18,8 +20,10 @@ export const useNotifications = () => {
 
     const markRead = useMutation({
         mutationFn: ({ id }: { id: string }) => notificationsApi.markRead(id),
+
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
+            setUnreadCountNotification(prevCount => prevCount - 1);
         },
     })
 
@@ -43,6 +47,7 @@ export const useNotifications = () => {
             queryClient.setQueryData(['notifications'], context?.previous);
         },
         onSuccess: () => {
+            setUnreadCountNotification(0);
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
         },
     })

@@ -34,5 +34,5 @@ export const useUnreadNotifications = () => {
 
     const resetCount = () => setUnreadCountNotification(0);
 
-    return { unreadCountNotification, resetCount };
+    return { unreadCountNotification, resetCount, setUnreadCountNotification };
 }

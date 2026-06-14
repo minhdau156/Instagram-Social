@@ -9,6 +9,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import SettingsIcon from '@mui/icons-material/Settings';
+import AddIcon from '@mui/icons-material/Add';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { WebSocketProvider, useWebSocketContext } from './context/WebSocketContext';
@@ -18,6 +19,7 @@ import { useUnreadNotifications } from './hooks/notification/useUnreadNotificati
 import { UnreadBadge } from './components/notifications/UnreadBadge';
 import { NotificationDropdown } from './components/notifications/NotificationDropdown';
 import { SearchBar } from './components/search/SearchBar';
+import { CreatePostModal } from './components/posts/CreatePostModal';
 
 export default function AppShell() {
   return (
@@ -34,6 +36,7 @@ function AppShellContent() {
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [openCreateModal, setOpenCreateModal] = useState(false);
   const { unreadCountNotification } = useUnreadNotifications();
   const navigate = useNavigate();
 
@@ -122,7 +125,9 @@ function AppShellContent() {
 
               <UnreadBadge
                 unreadCount={unreadCountNotification}
-                onClick={(e) => setAnchorEl(e.currentTarget)}
+                onClick={(e) => {
+                  setAnchorEl(e.currentTarget);
+                }}
               />
               <IconButton
                 color="inherit"
@@ -130,6 +135,11 @@ function AppShellContent() {
                 onClick={(e) => setSettingsAnchorEl(e.currentTarget)}
               >
                 <SettingsIcon />
+              </IconButton>
+              <IconButton color="inherit"
+                aria-label="Create Post"
+                onClick={() => setOpenCreateModal(true)}>
+                <AddIcon />
               </IconButton>
             </Box>
           )}
@@ -145,6 +155,10 @@ function AppShellContent() {
         anchorEl={anchorEl}
         onClose={() => setAnchorEl(null)}
       />
+
+      <CreatePostModal
+        open={openCreateModal}
+        onClose={() => setOpenCreateModal(false)} />
 
       {/* Settings menu — only for settings-related links */}
       <Menu

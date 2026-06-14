@@ -61,7 +61,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             return userRepository.save(newUser); // returns persisted User with generated ID
         });
 
-        String accessToken = tokenPort.generateAccessToken(resolvedUser.getId(), "ROLE_USER");
+        String accessToken = tokenPort.generateAccessToken(resolvedUser.getId(), null);
         String refreshToken = tokenPort.generateRefreshToken(resolvedUser.getId());
 
         String redirectUrl = frontendUrl

@@ -14,33 +14,33 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface NotificationJpaRepository extends JpaRepository<NotificationJpaEntity, UUID> {
-    Page<NotificationJpaEntity> findByRecipientIdOrderByCreatedAtDesc(UUID recipientId, Pageable pageable);
+  Page<NotificationJpaEntity> findByRecipientIdOrderByCreatedAtDesc(UUID recipientId, Pageable pageable);
 
-    @Transactional
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE NotificationJpaEntity n SET n.isRead = true WHERE n.id = :id")
-    void markAsRead(@Param("id") UUID id);
+  @Transactional
+  @Modifying(clearAutomatically = true)
+  @Query("UPDATE NotificationJpaEntity n SET n.isRead = true WHERE n.id = :id")
+  void markAsRead(@Param("id") UUID id);
 
-    @Transactional
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE NotificationJpaEntity n SET n.isRead = true WHERE n.recipientId = :recipientId")
-    void markAllAsRead(@Param("recipientId") UUID recipientId);
+  @Transactional
+  @Modifying(clearAutomatically = true)
+  @Query("UPDATE NotificationJpaEntity n SET n.isRead = true WHERE n.recipientId = :recipientId")
+  void markAllAsRead(@Param("recipientId") UUID recipientId);
 
-    long countByRecipientIdAndIsReadFalse(UUID recipientId);
+  long countByRecipientIdAndIsReadFalse(UUID recipientId);
 
-    @Query(value = """
-            SELECT n.* FROM notifications n
-            WHERE n.recipient_id = :recipientId
-              AND (
-                  :cursorTs IS NULL
-                  OR (n.created_at, n.id) < (:cursorTs::timestamptz, :cursorId::uuid)
-              )
-            ORDER BY n.created_at DESC, n.id DESC
-            LIMIT :size
-            """, nativeQuery = true)
-    List<NotificationJpaEntity> findByRecipientIdKeysetBefore(
-            @Param("recipientId") UUID recipientId,
-            @Param("cursorTs") String cursorTs,
-            @Param("cursorId") UUID cursorId,
-            @Param("size") int size);
+  @Query(value = """
+      SELECT n.* FROM notifications n
+      WHERE n.recipient_id = :recipientId
+        AND (
+            :cursorTs IS NULL
+            OR (n.created_at, n.id) < (CAST(:cursorTs AS timestamptz), CAST(:cursorId AS uuid))
+        )
+      ORDER BY n.created_at DESC, n.id DESC
+      LIMIT :size
+      """, nativeQuery = true)
+  List<NotificationJpaEntity> findByRecipientIdKeysetBefore(
+      @Param("recipientId") UUID recipientId,
+      @Param("cursorTs") String cursorTs,
+      @Param("cursorId") UUID cursorId,
+      @Param("size") int size);
 }

@@ -24,7 +24,7 @@ public interface MessageJpaRepository extends JpaRepository<MessageJpaEntity, UU
         Optional<MessageJpaEntity> findTopByConversationIdOrderByCreatedAtDesc(UUID conversationId);
 
         @Query(value = "SELECT DISTINCT ON (m.conversation_id) * " +
-                        "FROM message_jpa_entity m " +
+                        "FROM messages m " +
                         "WHERE m.conversation_id IN (:conversationIds) " +
                         "ORDER BY m.conversation_id, m.created_at DESC, m.id DESC", nativeQuery = true)
         List<MessageJpaEntity> findLatestByConversationIdsIn(@Param("conversationIds") List<UUID> conversationIds);

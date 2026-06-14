@@ -5,9 +5,9 @@ export function useComments(postId: string) {
     return useInfiniteQuery({
         // ['comments', postId] — all root-level comments for a single post
         queryKey: ['comments', postId],
-        queryFn: ({ pageParam = 0 }) => getComments(postId, pageParam, 20),
+        queryFn: ({ pageParam }) => getComments(postId, pageParam as string | null),
         getNextPageParam: (lastPage) =>
-            lastPage.last ? undefined : lastPage.page + 1,
-        initialPageParam: 0,
+            lastPage.nextCursor ?? undefined,
+        initialPageParam: null as string | null,
     });
 }

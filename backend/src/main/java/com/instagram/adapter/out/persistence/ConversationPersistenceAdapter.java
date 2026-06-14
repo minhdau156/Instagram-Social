@@ -90,7 +90,7 @@ public class ConversationPersistenceAdapter implements ConversationRepository {
         ConversationJpaEntity entity = ConversationJpaEntity.builder()
                 .id(conversation.getId())
                 .name(conversation.getName())
-                .isGroup(conversation.isGroup())
+                .isGroup(conversation.getIsGroup())
                 .avatarUrl(conversation.getPictureUrl())
                 .createdById(conversation.getCreatedBy())
                 .createdAt(conversation.getCreatedAt())

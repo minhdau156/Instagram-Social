@@ -20,7 +20,7 @@ export default function HomePage() {
 
     return (
         <Container maxWidth="lg">
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 4 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '3fr 1fr' }, gap: 4 }}>
                 <Box >
                     {isError && <Alert severity="error" onClick={() => refetch()}>
                         Failed to load feed. Click to retry.

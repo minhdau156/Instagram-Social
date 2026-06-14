@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class User {
     private UUID id;
     private String username;
@@ -18,6 +20,8 @@ public class User {
     private String websiteUrl;
     private UserStatus status; // nullable
     private PrivacyLevel privacyLevel;
+
+    @JsonProperty("verified")
     private boolean isVerified;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
@@ -73,6 +77,7 @@ public class User {
         return privacyLevel;
     }
 
+    @JsonProperty("verified")
     public boolean isVerified() {
         return isVerified;
     }
@@ -261,7 +266,7 @@ public class User {
         return this.copy().profilePictureUrl(profilePictureUrl).updatedAt(OffsetDateTime.now()).build();
     }
 
-    public boolean isActive() {
+    public boolean withActive() {
         return this.status == UserStatus.ACTIVE;
     }
 
