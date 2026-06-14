@@ -139,12 +139,13 @@ public class PostServiceTest {
     void updatePost_shouldUpdatePost_whenPostExists() {
         // GIVEN
         UUID postId = UUID.randomUUID();
+        UUID ownerId = UUID.randomUUID();
         Post post = Post.builder()
                 .id(postId)
-                .userId(UUID.randomUUID())
+                .userId(ownerId)
                 .caption("Test #post")
                 .build();
-        var command = new UpdatePostUseCase.Command(postId, UUID.randomUUID(), "Updated #caption", null);
+        var command = new UpdatePostUseCase.Command(postId, ownerId, "Updated #caption", null);
 
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
         when(postRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -176,13 +177,14 @@ public class PostServiceTest {
     void deletePost_shouldDeletePost_whenPostExists() {
         // GIVEN
         UUID postId = UUID.randomUUID();
+        UUID ownerId = UUID.randomUUID();
         Post post = Post.builder()
                 .id(postId)
-                .userId(UUID.randomUUID())
+                .userId(ownerId)
                 .caption("Test post")
                 .status(PostStatus.PUBLISHED)
                 .build();
-        var command = new DeletePostUseCase.Command(postId, UUID.randomUUID());
+        var command = new DeletePostUseCase.Command(postId, ownerId);
 
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
         when(postRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
