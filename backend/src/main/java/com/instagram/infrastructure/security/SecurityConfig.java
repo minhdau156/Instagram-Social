@@ -48,15 +48,25 @@ public class SecurityConfig {
                                                 .contentSecurityPolicy(csp -> csp
                                                                 .policyDirectives(
                                                                                 "default-src 'self'; " +
-                                                                                "script-src 'self' 'unsafe-inline'; " +
-                                                                                "frame-ancestors 'none'; " +
-                                                                                "object-src 'none'")))
+                                                                                                "script-src 'self' 'unsafe-inline'; "
+                                                                                                +
+                                                                                                "frame-ancestors 'none'; "
+                                                                                                +
+                                                                                                "object-src 'none'"))
+                                                .httpStrictTransportSecurity(hsts -> hsts
+                                                                .maxAgeInSeconds(31536000) // 1 year — standard
+                                                                                           // recommendation
+                                                                .includeSubDomains(true)
+                                                                .preload(false) // submit to the browser preload list
+                                                                                // only after stable
+                                                ))
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                                 .csrf(csrf -> csrf.disable())
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .exceptionHandling(exceptions -> exceptions
-                                                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                                                .authenticationEntryPoint(
+                                                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                                                 .accessDeniedHandler(new RestAccessDeniedHandler(objectMapper)))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/api/v1/auth/**").permitAll()
@@ -67,7 +77,8 @@ public class SecurityConfig {
                                                 .requestMatchers("/oauth2/**").permitAll()
                                                 .requestMatchers("/login/oauth2/**").permitAll()
                                                 .requestMatchers("/ws/**").permitAll()
-                                                .requestMatchers("/api/v1/admin/**").hasAnyRole("MODERATOR", "ADMIN", "SUPER_ADMIN")
+                                                .requestMatchers("/api/v1/admin/**")
+                                                .hasAnyRole("MODERATOR", "ADMIN", "SUPER_ADMIN")
                                                 .anyRequest().authenticated())
                                 .oauth2Login(oauth2 -> oauth2
                                                 .successHandler(oAuth2SuccessHandler));

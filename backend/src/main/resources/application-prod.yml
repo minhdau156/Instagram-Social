@@ -1,3 +1,9 @@
+server:
+  # Tell Spring Boot to trust X-Forwarded-Proto / X-Forwarded-For
+  # injected by nginx or AWS ALB.
+  # Required when TLS is terminated at the proxy, not the app server.
+  forward-headers-strategy: FRAMEWORK
+
 spring:
   datasource:
     url: ${DATABASE_URL}

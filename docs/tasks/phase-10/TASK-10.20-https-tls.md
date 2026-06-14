@@ -252,14 +252,14 @@ With `forward-headers-strategy: FRAMEWORK` active in the local profile (it is cu
 
 ## Checklist
 
-- [ ] Document TLS termination in `docs/infra/tls-setup.md` (nginx / AWS ALB config)
-  - [ ] Both nginx and ALB options documented with copy-pasteable config
-  - [ ] Auto-renewal and certificate management covered
-- [ ] Add `server.forward-headers-strategy=FRAMEWORK` in `application-prod.yml` for `X-Forwarded-Proto` handling
-- [ ] Set `Strict-Transport-Security` header in `SecurityConfig`
-  - [ ] `maxAgeInSeconds(31536000)` — 1 year
-  - [ ] `includeSubDomains(true)`
-  - [ ] `preload(false)` — defer preload list submission
+- [x] Document TLS termination in `docs/infra/tls-setup.md` (nginx / AWS ALB config)
+  - [x] Both nginx and ALB options documented with copy-pasteable config
+  - [x] Auto-renewal and certificate management covered
+- [x] Add `server.forward-headers-strategy=FRAMEWORK` in `application-prod.yml` for `X-Forwarded-Proto` handling
+- [x] Set `Strict-Transport-Security` header in `SecurityConfig`
+  - [x] `maxAgeInSeconds(31536000)` — 1 year
+  - [x] `includeSubDomains(true)`
+  - [x] `preload(false)` — defer preload list submission
 
 ---
 
