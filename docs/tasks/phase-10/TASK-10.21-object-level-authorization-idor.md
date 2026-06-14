@@ -210,21 +210,21 @@ Add equivalent tests for comment delete, profile update (should be impossible by
 
 ## Checklist
 
-- [ ] Inventory every endpoint that mutates a user-owned resource (posts, comments, messages, profile, saved posts, follow requests)
-  - [ ] Create a written list in a code comment or PR description so the audit is documented
-- [ ] Verify each one checks `resource.ownerId == currentUserId()` (or admin) before acting — add the check where missing
-  - [ ] `PostService` — `updatePost` and `deletePost` have ownership checks
-  - [ ] `CommentService` — `updateComment` and `deleteComment` have ownership checks
-  - [ ] `MessageService` (if delete is implemented) — ownership check on sender
-  - [ ] `FollowService` — follow request approval/denial checks target user
-- [ ] Return `403 Forbidden` (not `404`) for owned-resource access violations, via a named domain exception
-  - [ ] All `Unauthorized*AccessException` classes mapped to `403` in `GlobalExceptionHandler`
-- [ ] Add an authorization test per resource asserting the cross-user `403`
-  - [ ] `PostControllerIT` — `deletePost` cross-user test
-  - [ ] `CommentControllerIT` — `deleteComment` cross-user test
-  - [ ] (Any additional resources found in the inventory)
-- [ ] Confirm admin/moderation endpoints require `ROLE_ADMIN` (cross-check the Phase 9 moderation work)
-  - [ ] `SecurityConfig` has `.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")`
+- [x] Inventory every endpoint that mutates a user-owned resource (posts, comments, messages, profile, saved posts, follow requests)
+  - [x] Create a written list in a code comment or PR description so the audit is documented
+- [x] Verify each one checks `resource.ownerId == currentUserId()` (or admin) before acting — add the check where missing
+  - [x] `PostService` — `updatePost` and `deletePost` have ownership checks
+  - [x] `CommentService` — `updateComment` and `deleteComment` have ownership checks
+  - [x] `MessageService` (if delete is implemented) — ownership check on sender
+  - [x] `FollowService` — follow request approval/denial checks target user
+- [x] Return `403 Forbidden` (not `404`) for owned-resource access violations, via a named domain exception
+  - [x] All `Unauthorized*AccessException` classes mapped to `403` in `GlobalExceptionHandler`
+- [x] Add an authorization test per resource asserting the cross-user `403`
+  - [x] `PostControllerIT` — `deletePost` cross-user test
+  - [x] `CommentControllerIT` — `deleteComment` cross-user test
+  - [x] (Any additional resources found in the inventory)
+- [x] Confirm admin/moderation endpoints require `ROLE_ADMIN` (cross-check the Phase 9 moderation work)
+  - [x] `SecurityConfig` has `.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")`
 
 ---
 

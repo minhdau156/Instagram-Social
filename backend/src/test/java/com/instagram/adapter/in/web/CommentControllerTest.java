@@ -217,6 +217,20 @@ class CommentControllerTest {
 
         @Test
         @WithMockUser(username = "123e4567-e89b-12d3-a456-426614174000")
+        void deleteComment_nonOwner_returns403Forbidden() throws Exception {
+                UUID commentId = UUID.randomUUID();
+
+                doThrow(new UnauthorizedCommentAccessException(commentId, UUID.randomUUID()))
+                                .when(deleteCommentUseCase).deleteComment(any(DeleteCommentUseCase.Command.class));
+
+                mockMvc.perform(delete("/api/v1/comments/{id}", commentId)
+                                .with(csrf()))
+                                .andExpect(status().isForbidden())
+                                .andExpect(jsonPath("$.error").isNotEmpty());
+        }
+
+        @Test
+        @WithMockUser(username = "123e4567-e89b-12d3-a456-426614174000")
         void getReplies_withValidCommentId_returns200OK() throws Exception {
                 UUID commentId = UUID.randomUUID();
                 UUID userId = UUID.randomUUID();
