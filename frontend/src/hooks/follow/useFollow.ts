@@ -1,4 +1,4 @@
-import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { followUser, unfollowUser } from "../../api/followApi";
 import type { UserProfile } from "../../types/user";
 import { followKeys } from "./queryKeys";

@@ -27,7 +27,7 @@ export function CommentSection({ postId, autoFocus }: CommentSectionProps) {
     }, [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage]);
 
 
-    const comments = data?.pages.flatMap((comment) => comment.content) || [];
+    const comments = data?.pages.flatMap((comment) => comment.items) || [];
     const isEmpty = !isLoading && comments.length === 0;
     return (
         <>
