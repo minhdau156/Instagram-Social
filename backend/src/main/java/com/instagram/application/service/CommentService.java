@@ -99,7 +99,7 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
                 .orElseThrow(() -> new CommentNotFoundException(command.commentId()));
 
         if (!comment.getUserId().equals(command.userId())) {
-            throw new UnauthorizedCommentAccessException(comment.getId(), comment.getUserId());
+            throw new UnauthorizedCommentAccessException(comment.getId(), command.userId());
         }
         Comment deleteComment = comment.withSoftDelete();
         this.commentRepository.save(deleteComment);
@@ -120,7 +120,7 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
                 .orElseThrow(() -> new CommentNotFoundException(command.commentId()));
 
         if (!comment.getUserId().equals(command.userId())) {
-            throw new UnauthorizedCommentAccessException(comment.getId(), comment.getUserId());
+            throw new UnauthorizedCommentAccessException(comment.getId(), command.userId());
         }
         Comment editComment = comment.withEdit(command.newContent());
         this.commentRepository.save(editComment);

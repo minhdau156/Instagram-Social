@@ -79,6 +79,8 @@ public class SecurityConfig {
                                                 .requestMatchers("/ws/**").permitAll()
                                                 .requestMatchers("/api/v1/admin/**")
                                                 .hasAnyRole("MODERATOR", "ADMIN", "SUPER_ADMIN")
+                                                .requestMatchers("/api/v1/moderation/**")
+                                                .hasAnyRole("MODERATOR", "ADMIN", "SUPER_ADMIN")
                                                 .anyRequest().authenticated())
                                 .oauth2Login(oauth2 -> oauth2
                                                 .successHandler(oAuth2SuccessHandler));
