@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -182,8 +183,9 @@ public class PostService implements
 
     @Override
     public GenerateUploadUrlUseCase.UploadUrl generateUploadUrl(GenerateUploadUrlUseCase.Command command) {
-        String mediaKey = "users/" + command.userId() + "/posts/" + UUID.randomUUID() + "-" + command.filename();
-        String presignedUrl = mediaStoragePort.generatePresignedPutUrl(mediaKey, Duration.ofMinutes(15));
+        String extension = extractSafeExtension(command.filename());
+        String mediaKey = "media/" + command.userId() + "/" + UUID.randomUUID() + extension;
+        String presignedUrl = mediaStoragePort.generatePresignedPutUrl(mediaKey, Duration.ofMinutes(5));
         return new GenerateUploadUrlUseCase.UploadUrl(presignedUrl, mediaKey);
     }
 
@@ -228,5 +230,13 @@ public class PostService implements
             log.error("Thumbnail generation failed for post={}", postId, e);
         }
         return CompletableFuture.completedFuture(null);
+    }
+
+    private String extractSafeExtension(String filename) {
+        if (filename == null || !filename.contains("."))
+            return "";
+        String ext = filename.substring(filename.lastIndexOf('.')).toLowerCase();
+        // Only pass through known safe extensions — ignore anything else
+        return Set.of(".jpg", ".jpeg", ".png", ".webp", ".mp4").contains(ext) ? ext : "";
     }
 }

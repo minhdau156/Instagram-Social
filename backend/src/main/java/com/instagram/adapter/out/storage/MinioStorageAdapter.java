@@ -134,4 +134,5 @@ public class MinioStorageAdapter implements MediaStoragePort {
             throw new MediaUploadException("Failed to list uploaded parts: " + e.getMessage());
         }
     }
+
 }

@@ -315,22 +315,22 @@ If your MinIO SDK version supports `PostPolicy`, use it; otherwise generate a sh
 
 ## Checklist
 
-- [ ] Validate the real content type by magic bytes (not the `Content-Type` header or extension) — allowlist `image/jpeg`, `image/png`, `image/webp`, `video/mp4`
-  - [ ] Apache Tika dependency added to `pom.xml`
-  - [ ] `MediaValidator.validateAndSanitize()` detects MIME type from file bytes
-  - [ ] Files with disallowed detected types throw `InvalidMediaException` → `400`
-- [ ] Enforce a max file size and (for images) max dimensions
-  - [ ] Image max: 10 MB; video max: 100 MB
-  - [ ] Image dimension max: 8192 × 8192 pixels
-  - [ ] Both checks in `MediaValidator`
-- [ ] Strip EXIF/metadata (including GPS) from images on ingest
-  - [ ] `metadata-extractor` dependency added to `pom.xml`
-  - [ ] JPEG images re-encoded via `ImageIO` to strip EXIF
-  - [ ] GPS presence logged as `WARN` before stripping
-- [ ] Scope presigned PUT URLs tightly: short expiry, exact key, content-type and content-length conditions
-  - [ ] Presigned URL expiry set to 5 minutes
-- [ ] Generate stored object keys server-side (never trust a client-supplied path) to prevent overwrite/traversal
-  - [ ] Key format: `media/{userId}/{uuid}{.ext}` where `ext` is from a safe allowlist
+- [x] Validate the real content type by magic bytes (not the `Content-Type` header or extension) — allowlist `image/jpeg`, `image/png`, `image/webp`, `video/mp4`
+  - [x] Apache Tika dependency added to `pom.xml`
+  - [x] `MediaValidator.validateAndSanitize()` detects MIME type from file bytes
+  - [x] Files with disallowed detected types throw `InvalidMediaException` → `400`
+- [x] Enforce a max file size and (for images) max dimensions
+  - [x] Image max: 10 MB; video max: 100 MB
+  - [x] Image dimension max: 8192 × 8192 pixels
+  - [x] Both checks in `MediaValidator`
+- [x] Strip EXIF/metadata (including GPS) from images on ingest
+  - [x] `metadata-extractor` dependency added to `pom.xml`
+  - [x] JPEG images re-encoded via `ImageIO` to strip EXIF
+  - [x] GPS presence logged as `WARN` before stripping
+- [x] Scope presigned PUT URLs tightly: short expiry, exact key, content-type and content-length conditions
+  - [x] Presigned URL expiry set to 5 minutes
+- [x] Generate stored object keys server-side (never trust a client-supplied path) to prevent overwrite/traversal
+  - [x] Key format: `media/{userId}/{uuid}{.ext}` where `ext` is from a safe allowlist
 
 ---
 

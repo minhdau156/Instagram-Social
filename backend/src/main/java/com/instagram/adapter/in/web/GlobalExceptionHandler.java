@@ -16,6 +16,7 @@ import com.instagram.domain.exception.CommentNotFoundException;
 import com.instagram.domain.exception.ConversationNotFoundException;
 import com.instagram.domain.exception.FollowRequestNotFoundException;
 import com.instagram.domain.exception.InvalidCredentialsException;
+import com.instagram.domain.exception.InvalidMediaException;
 import com.instagram.domain.exception.MediaUploadException;
 import com.instagram.domain.exception.MessageNotFoundException;
 import com.instagram.domain.exception.NotBlockedException;
@@ -305,6 +306,12 @@ public class GlobalExceptionHandler {
         log.error("Unhandled exception: ", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("An unexpected error occurred"));
+    }
+
+    @ExceptionHandler(InvalidMediaException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidMedia(InvalidMediaException ex) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(ex.getMessage()));
     }
 
 }
