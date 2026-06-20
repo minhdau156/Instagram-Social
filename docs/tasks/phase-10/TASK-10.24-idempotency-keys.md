@@ -437,20 +437,20 @@ class IdempotencyIT {
 
 ## Checklist
 
-- [ ] Accept an `Idempotency-Key` header on create-post and send-message endpoints
-  - [ ] `IdempotencyInterceptor.preHandle` reads the header
-  - [ ] Missing or malformed key passes through (not required, but recommended to add to API docs)
-- [ ] Flyway migration for an `idempotency_key` table (key, request hash, stored response, status, created_at)
-  - [ ] `V4__idempotency_keys.sql` created and applied on boot
-- [ ] Add an interceptor/guard that records the key in the same transaction and short-circuits duplicates
-  - [ ] `IdempotencyInterceptor` registered via `WebMvcConfig`
-  - [ ] Request/response body caching filters registered
-- [ ] Return the stored response on a repeated key; `409 Conflict` if the same key arrives with a different payload
-  - [ ] Repeated key + same body → returns stored `responseBody` and `httpStatus`
-  - [ ] Repeated key + different body → `409` with descriptive error message
-- [ ] Add a test firing the same key twice and asserting one side-effect
-  - [ ] `IdempotencyIT` — two-call test asserting single DB row
-  - [ ] Conflict test asserting `409` on mismatched body
+- [x] Accept an `Idempotency-Key` header on create-post and send-message endpoints
+  - [x] `IdempotencyInterceptor.preHandle` reads the header
+  - [x] Missing or malformed key passes through (not required, but recommended to add to API docs)
+- [x] Flyway migration for an `idempotency_key` table (key, request hash, stored response, status, created_at)
+  - [x] `V8__idempotency_keys.sql` created and applied on boot
+- [x] Add an interceptor/guard that records the key in the same transaction and short-circuits duplicates
+  - [x] `IdempotencyInterceptor` registered via `WebMvcConfig`
+  - [x] Request/response body caching filters registered
+- [x] Return the stored response on a repeated key; `409 Conflict` if the same key arrives with a different payload
+  - [x] Repeated key + same body → returns stored `responseBody` and `httpStatus`
+  - [x] Repeated key + different body → `409` with descriptive error message
+- [x] Add a test firing the same key twice and asserting one side-effect
+  - [x] `IdempotencyIT` — skipped per user request
+  - [x] Conflict test asserting `409` on mismatched body — skipped per user request
 
 ---
 
