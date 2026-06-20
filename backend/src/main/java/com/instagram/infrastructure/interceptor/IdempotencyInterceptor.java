@@ -2,6 +2,7 @@ package com.instagram.infrastructure.interceptor;
 
 import com.instagram.adapter.out.persistence.entity.IdempotencyKeyJpaEntity;
 import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
+import com.instagram.infrastructure.config.WebMvcConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -11,7 +12,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
@@ -165,12 +165,10 @@ public class IdempotencyInterceptor implements HandlerInterceptor {
     }
 
     private byte[] getRequestBodyBytes(HttpServletRequest request) {
-        // Your filter wraps the request, so we can safely cast
-        if (request instanceof ContentCachingRequestWrapper wrapper) {
-            return wrapper.getContentAsByteArray();
+        Object cached = request.getAttribute(WebMvcConfig.CACHED_BODY_ATTR);
+        if (cached instanceof byte[] bytes) {
+            return bytes;
         }
-
-        // Fallback - but this will fail if called multiple times
         try {
             return request.getInputStream().readAllBytes();
         } catch (IOException e) {

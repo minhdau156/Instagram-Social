@@ -29,6 +29,7 @@ import com.instagram.domain.model.PostStatus;
 import com.instagram.domain.port.in.feed.GetExploreFeedUseCase;
 import com.instagram.domain.port.in.feed.GetHomeFeedUseCase;
 import com.instagram.domain.port.out.FeedRepository;
+import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.infrastructure.security.JwtTokenProvider;
 import com.instagram.infrastructure.security.OAuth2SuccessHandler;
 import com.instagram.infrastructure.security.SecurityConfig;
@@ -48,6 +49,9 @@ class FeedControllerTest {
 
         @MockBean
         private OAuth2SuccessHandler oAuth2SuccessHandler;
+
+        @MockBean
+        private IdempotencyKeyJpaRepository idempotencyKeyJpaRepository;
 
         @MockBean
         private GetHomeFeedUseCase getHomeFeedUseCase;

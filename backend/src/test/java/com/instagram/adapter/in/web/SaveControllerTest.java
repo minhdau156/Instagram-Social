@@ -29,6 +29,7 @@ import com.instagram.domain.model.SavedPost;
 import com.instagram.domain.port.in.save.GetSavedPostsUseCase;
 import com.instagram.domain.port.in.save.SavePostUseCase;
 import com.instagram.domain.port.in.save.UnsavePostUseCase;
+import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.infrastructure.security.JwtTokenProvider;
 import com.instagram.infrastructure.security.OAuth2SuccessHandler;
 import com.instagram.infrastructure.security.SecurityConfig;
@@ -48,6 +49,9 @@ class SaveControllerTest {
 
         @MockBean
         private OAuth2SuccessHandler oAuth2SuccessHandler;
+
+        @MockBean
+        private IdempotencyKeyJpaRepository idempotencyKeyJpaRepository;
 
         @MockBean
         private SavePostUseCase savePostUseCase;

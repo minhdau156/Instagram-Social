@@ -36,6 +36,7 @@ import com.instagram.domain.port.in.comment.EditCommentUseCase;
 import com.instagram.domain.port.in.comment.GetCommentsUseCase;
 import com.instagram.domain.port.in.comment.GetRepliesUseCase;
 import com.instagram.domain.port.in.user.GetUserUseCase;
+import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.infrastructure.security.HtmlSanitizer;
 import com.instagram.infrastructure.security.JwtTokenProvider;
 import com.instagram.infrastructure.security.OAuth2SuccessHandler;
@@ -60,6 +61,9 @@ class CommentControllerTest {
 
         @MockBean
         private OAuth2SuccessHandler oAuth2SuccessHandler;
+
+        @MockBean
+        private IdempotencyKeyJpaRepository idempotencyKeyJpaRepository;
 
         @MockBean
         private HtmlSanitizer htmlSanitizer;

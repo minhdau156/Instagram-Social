@@ -33,6 +33,7 @@ import com.instagram.domain.port.in.rbac.GetUserRolesUseCase;
 import com.instagram.domain.port.in.rbac.ListRolesUseCase;
 import com.instagram.domain.port.in.rbac.RevokeRoleFromUserUseCase;
 import com.instagram.domain.port.in.rbac.UpdateRolePermissionsUseCase;
+import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.infrastructure.security.JwtTokenProvider;
 import com.instagram.infrastructure.security.OAuth2SuccessHandler;
 import com.instagram.infrastructure.security.SecurityConfig;
@@ -52,6 +53,9 @@ public class RoleAdminControllerTest {
     private UserDetailsService userDetailsService;
     @MockBean
     private OAuth2SuccessHandler oAuth2SuccessHandler;
+
+    @MockBean
+    private IdempotencyKeyJpaRepository idempotencyKeyJpaRepository;
 
     @MockBean
     private ListRolesUseCase listRolesUseCase;

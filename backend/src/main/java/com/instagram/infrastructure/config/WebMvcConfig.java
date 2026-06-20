@@ -2,21 +2,26 @@ package com.instagram.infrastructure.config;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import com.instagram.infrastructure.interceptor.IdempotencyInterceptor;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
+
+    public static final String CACHED_BODY_ATTR = "_cachedRequestBody";
 
     private final IdempotencyInterceptor idempotencyInterceptor;
 
@@ -63,12 +68,37 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     private static class RequestCachingFilter implements Filter {
         @Override
-        public void doFilter(ServletRequest request, ServletResponse response,
+        public void doFilter(ServletRequest req, ServletResponse response,
                 FilterChain chain) throws IOException, ServletException {
-            ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(
-                    (HttpServletRequest) request);
-            wrappedRequest.getInputStream().readAllBytes(); // eagerly populate cache
-            chain.doFilter(wrappedRequest, response);
+            HttpServletRequest request = (HttpServletRequest) req;
+            byte[] body = request.getInputStream().readAllBytes();
+            request.setAttribute(WebMvcConfig.CACHED_BODY_ATTR, body);
+            chain.doFilter(new ReReadableRequest(request, body), response);
+        }
+
+        private static class ReReadableRequest extends HttpServletRequestWrapper {
+            private final byte[] body;
+
+            ReReadableRequest(HttpServletRequest request, byte[] body) {
+                super(request);
+                this.body = body;
+            }
+
+            @Override
+            public ServletInputStream getInputStream() {
+                ByteArrayInputStream bais = new ByteArrayInputStream(body);
+                return new ServletInputStream() {
+                    @Override public int read() { return bais.read(); }
+                    @Override public boolean isFinished() { return bais.available() == 0; }
+                    @Override public boolean isReady() { return true; }
+                    @Override public void setReadListener(ReadListener l) {}
+                };
+            }
+
+            @Override
+            public BufferedReader getReader() {
+                return new BufferedReader(new InputStreamReader(getInputStream()));
+            }
         }
     }
 
