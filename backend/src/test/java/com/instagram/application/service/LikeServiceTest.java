@@ -23,6 +23,7 @@ import com.instagram.domain.port.out.LikeRepository;
 import com.instagram.domain.port.out.PostRepository;
 import com.instagram.domain.port.out.UserInterestPort;
 import com.instagram.domain.port.out.UserRepository;
+import io.micrometer.core.instrument.Counter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,6 +70,9 @@ class LikeServiceTest {
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
+
+    @Mock
+    private Counter likesAddedCounter;
 
     @InjectMocks
     private LikeService likeService;

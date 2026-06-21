@@ -86,12 +86,11 @@ public class LikeService implements LikePostUseCase,
         if (likeRepository.hasLikedPost(command.postId(), command.userId())) {
             throw new AlreadyLikedException("post", command.postId());
         }
-        likesAddedCounter.increment();
-        likeRepository.likePost(command.postId(), command.userId());
-        userInterestPort.recordLike(command.userId(), command.postId());
-
         Post post = postRepository.findById(command.postId())
                 .orElseThrow(() -> new PostNotFoundException(command.postId()));
+        likeRepository.likePost(command.postId(), command.userId());
+        userInterestPort.recordLike(command.userId(), command.postId());
+        likesAddedCounter.increment();
         if (!post.getUserId().equals(command.userId())) {
             eventPublisher.publishEvent(new NotificationEvent(
                     this,
