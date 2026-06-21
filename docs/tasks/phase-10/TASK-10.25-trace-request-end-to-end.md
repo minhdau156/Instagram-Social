@@ -191,9 +191,9 @@ Notice the problem you are about to solve in TASK-10.26: if two requests arrive 
 
 ## Checklist
 
-- [ ] Trigger one `POST /api/v1/posts` request against the running local backend
-- [ ] Grep the logs for its thread name and identify all lines that belong to that single request
-- [ ] Confirm the lines appear in controller → service → adapter order
+- [x] Trigger one `POST /api/v1/posts` request against the running local backend
+- [x] Grep the logs for its thread name and identify all lines that belong to that single request
+- [x] Confirm the lines appear in controller → service → adapter order
 
 ---
 
