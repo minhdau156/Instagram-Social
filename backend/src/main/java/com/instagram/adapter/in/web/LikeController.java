@@ -26,7 +26,9 @@ import com.instagram.domain.port.in.like.UnlikePostUseCase;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Likes", description = "Operations related to likes")
@@ -60,12 +62,14 @@ public class LikeController {
     @PostMapping("/api/v1/posts/{id}/like")
     public ResponseEntity<ApiResponse<Void>> likePost(@PathVariable UUID id) {
         likePostUseCase.like(new LikePostUseCase.Command(id, currentUserId()));
+        log.info("Post liked id={}", id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @DeleteMapping("/api/v1/posts/{id}/like")
     public ResponseEntity<ApiResponse<Void>> unlikePost(@PathVariable UUID id) {
         unlikePostUseCase.unlike(new UnlikePostUseCase.Command(id, currentUserId()));
+        log.info("Post unliked id={}", id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -74,6 +78,7 @@ public class LikeController {
             @PathVariable UUID id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        log.debug("getPostLikers postId={} page={} size={}", id, page, size);
         Page<UserSummary> likers = getPostLikersUseCase.getPostLikers(new GetPostLikersUseCase.Query(
                 id, currentUserId(), page, size));
         return ResponseEntity.ok(ApiResponse.ok(likers.map(UserSummaryResponse::from)));
@@ -82,12 +87,14 @@ public class LikeController {
     @PostMapping("/api/v1/comments/{id}/like")
     public ResponseEntity<ApiResponse<Void>> likeComment(@PathVariable UUID id) {
         likeCommentUseCase.likeComment(new LikeCommentUseCase.Command(id, currentUserId()));
+        log.info("Comment liked id={}", id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @DeleteMapping("/api/v1/comments/{id}/like")
     public ResponseEntity<ApiResponse<Void>> unlikeComment(@PathVariable UUID id) {
         unlikeCommentUseCase.unlikeComment(new UnlikeCommentUseCase.Command(id, currentUserId()));
+        log.info("Comment unliked id={}", id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

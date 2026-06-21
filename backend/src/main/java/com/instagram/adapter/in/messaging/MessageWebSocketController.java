@@ -11,6 +11,9 @@ import com.instagram.adapter.in.web.dto.response.MessageResponse;
 import com.instagram.domain.exception.NotConversationMemberException;
 import com.instagram.domain.port.in.messaging.SendMessageUseCase;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Controller
 public class MessageWebSocketController {
     private final SendMessageUseCase sendMessageUseCase;
@@ -30,6 +33,7 @@ public class MessageWebSocketController {
                 payload.messageType(), payload.mediaUrl(), payload.sharedPostId());
         try {
             SendMessageUseCase.MessageView view = sendMessageUseCase.sendMessage(command);
+            log.debug("WebSocket message sent conversationId={}", payload.conversationId());
             MessageResponse response = MessageResponse.from(view.message(), view.senderUsername(), view.senderAvatarUrl());
             simpMessagingTemplate.convertAndSend("/topic/conversations/" + payload.conversationId(), response);
         } catch (NotConversationMemberException e) {
@@ -39,6 +43,7 @@ public class MessageWebSocketController {
 
     @MessageMapping("/chat.typing")
     public void handleTyping(TypingPayload payload, Principal principal) {
+        log.debug("Typing indicator conversationId={} isTyping={}", payload.conversationId(), payload.isTyping());
         UUID userId = UUID.fromString(principal.getName());
         UUID conversationId = payload.conversationId();
         simpMessagingTemplate.convertAndSend("/topic/conversations/" + conversationId + "/typing",

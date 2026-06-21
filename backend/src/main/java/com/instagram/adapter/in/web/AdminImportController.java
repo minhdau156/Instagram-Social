@@ -47,6 +47,7 @@ public class AdminImportController {
                 .addString("userId", userId.toString())
                 .addString("filePath", request.filePath())
                 .toJobParameters();
+        log.info("Import job triggered userId={} filePath={}", userId, request.filePath());
 
         try {
             JobExecution execution = jobLauncher.run(importPostsJob, params);
@@ -64,6 +65,7 @@ public class AdminImportController {
     @GetMapping("/posts/{executionId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<?>> getStatus(@PathVariable Long executionId) {
+        log.debug("getStatus executionId={}", executionId);
         JobExecution execution = jobExplorer.getJobExecution(executionId);
         if (execution == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

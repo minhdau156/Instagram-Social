@@ -56,7 +56,9 @@ import com.instagram.domain.model.UserProfile;
 import com.instagram.domain.model.PrivacyLevel;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -81,6 +83,7 @@ public class UserController {
     })
     @GetMapping("/profile/get")
     public ResponseEntity<ApiResponse<UserProfileResponse>> getMyProfile() {
+        log.debug("getMyProfile");
         UserProfile profile = getUserProfileUseCase
                 .getUserProfile(new GetUserProfileUseCase.Query(null, currentUserId()));
         return ResponseEntity.ok(ApiResponse.ok(UserProfileResponse.from(profile)));
@@ -100,6 +103,7 @@ public class UserController {
         User user = updateProfileUseCase.updateProfile(new UpdateProfileUseCase.Command(
                 currentUserId().toString(), htmlSanitizer.sanitize(req.fullName()), htmlSanitizer.sanitize(req.bio()),
                 null, null, privacyLevel));
+        log.info("Profile updated");
         return ResponseEntity.ok(ApiResponse.ok(UserResponse.from(user)));
     }
 
@@ -128,6 +132,7 @@ public class UserController {
             ext = ".webp";
 
         String key = "avatars/" + currentUserId() + "/" + UUID.randomUUID() + ext;
+        log.info("Avatar upload initiated contentType={}", contentType);
 
         try {
             String avatarUrl = mediaStoragePort.uploadFile(key, file.getBytes(), contentType);
@@ -147,6 +152,7 @@ public class UserController {
     })
     @GetMapping("/{username}/bio")
     public ResponseEntity<ApiResponse<UserProfileResponse>> getProfile(@PathVariable String username) {
+        log.debug("getProfile username={}", username);
         UserProfile profile = getUserProfileUseCase
                 .getUserProfile(new GetUserProfileUseCase.Query(username, currentUserId()));
         return ResponseEntity.ok(ApiResponse.ok(UserProfileResponse.from(profile)));
@@ -154,6 +160,7 @@ public class UserController {
 
     @GetMapping("/get/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable UUID id) {
+        log.debug("getUserById id={}", id);
         User user = getUserUseCase.getUser(new GetUserUseCase.Query(id));
         return ResponseEntity.ok(ApiResponse.ok(UserResponse.from(user)));
     }
@@ -164,6 +171,7 @@ public class UserController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int limit) {
         UUID userId = currentUserId();
+        log.debug("searchUsers q={} page={} limit={}", q, page, limit);
         List<UserResponse> results = searchUsersUseCase
                 .searchUsers(new SearchUsersUseCase.Query(q, userId, page, limit))
                 .stream()
@@ -174,6 +182,7 @@ public class UserController {
 
     @GetMapping("/me/permissions")
     public ResponseEntity<ApiResponse<UserGrantsResponse>> getMyGrants() {
+        log.debug("getMyGrants");
         UUID userId = currentUserId();
         Set<RoleName> roles = getUserRolesUseCase.getUserRoles(new GetUserRolesUseCase.Query(userId))
                 .stream()
@@ -190,6 +199,7 @@ public class UserController {
     public ResponseEntity<StreamingResponseBody> exportMyData(
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
+        log.info("User data export started userId={}", userId);
         StreamingResponseBody body = outputStream -> exportUserDataUseCase.exportPostsToCsv(
                 new ExportUserDataUseCase.Command(userId, outputStream));
         return ResponseEntity.ok()

@@ -293,10 +293,10 @@ All three lines share the same `rid` value. That is the proof that MDC is workin
 
 ## Checklist
 
-- [ ] Follow the `logging-patterns` skill instructions
-- [ ] Create `MdcLoggingFilter.java` — sets `requestId`, `userId`, `method`, `path` in MDC for every request
-- [ ] Update `logback-spring.xml` to output JSON format in non-local profiles
-- [ ] Replace any remaining `System.out.println` with SLF4J calls
+- [x] Follow the `logging-patterns` skill instructions
+- [x] Create `MdcLoggingFilter.java` — sets `requestId`, `userId`, `method`, `path` in MDC for every request
+- [x] Update `logback-spring.xml` to output JSON format in non-local profiles
+- [x] Replace any remaining `System.out.println` with SLF4J calls
 
 ---
 

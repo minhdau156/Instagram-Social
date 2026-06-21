@@ -25,7 +25,9 @@ import com.instagram.domain.port.in.save.UnsavePostUseCase;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Saves")
@@ -57,12 +59,14 @@ public class SaveController {
     @PostMapping("/api/v1/posts/{id}/save")
     public ResponseEntity<ApiResponse<Void>> savePost(@PathVariable UUID id) {
         savePostUseCase.save(new SavePostUseCase.Command(id, currentUserId()));
+        log.info("Post saved id={}", id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @DeleteMapping("/api/v1/posts/{id}/save")
     public ResponseEntity<ApiResponse<Void>> unsavePost(@PathVariable UUID id) {
         unsavePostUseCase.unsave(new UnsavePostUseCase.Command(id, currentUserId()));
+        log.info("Post unsaved id={}", id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -71,6 +75,7 @@ public class SaveController {
     public ResponseEntity<ApiResponse<Page<SavedPostResponse>>> getSavedPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        log.debug("getSavedPosts page={} size={}", page, size);
         Page<SavedPost> savedPosts = getSavedPostsUseCase.getSavedPosts(
                 new GetSavedPostsUseCase.Query(currentUserId(), page, size));
         return ResponseEntity.ok(ApiResponse.ok(savedPosts.map(SavedPostResponse::from)));

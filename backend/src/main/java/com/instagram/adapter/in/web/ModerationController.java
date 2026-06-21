@@ -38,7 +38,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 @Tag(name = "Moderation", description = "Endpoints for moderation")
@@ -82,6 +84,7 @@ public class ModerationController {
                 request.entityId(),
                 request.reason().name(),
                 request.details()));
+        log.info("Content reported userId={} entityType={} entityId={}", userId, request.entityType(), request.entityId());
 
         User reporter = this.getUserUseCase.getUser(new GetUserUseCase.Query(userId));
 
@@ -93,6 +96,7 @@ public class ModerationController {
         this.blockUserUseCase.blockUser(new BlockUserUseCase.Command(
                 currentUserId(),
                 username));
+        log.info("User blocked username={}", username);
         return ResponseEntity.noContent().build();
     }
 
@@ -101,6 +105,7 @@ public class ModerationController {
         this.unblockUserUseCase.unblockUser(new UnblockUserUseCase.Command(
                 currentUserId(),
                 username));
+        log.info("User unblocked username={}", username);
         return ResponseEntity.noContent().build();
     }
 
@@ -108,6 +113,7 @@ public class ModerationController {
     public ResponseEntity<ApiResponse<List<BlockedUserResponse>>> getBlockedUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        log.debug("getBlockedUsers page={} size={}", page, size);
         List<UserBlock> blockedUsers = this.getBlockedUsersUseCase.getBlockedUsers(
                 new GetBlockedUsersUseCase.Query(
                         currentUserId(),

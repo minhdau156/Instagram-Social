@@ -16,7 +16,9 @@ import com.instagram.domain.port.in.share.SharePostUseCase;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Shares")
@@ -48,6 +50,7 @@ public class ShareController {
     public ShareResponse sharePost(@PathVariable UUID id, @RequestBody ShareRequest request) {
         PostShare share = sharePostUseCase
                 .share(new SharePostUseCase.Command(id, currentUserId(), request.recipientId(), request.shareType()));
+        log.info("Post shared postId={}", id);
         return ShareResponse.from(share);
     }
 }

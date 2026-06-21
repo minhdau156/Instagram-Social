@@ -38,7 +38,9 @@ import com.instagram.domain.port.in.user.GetUserUseCase;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 @Tag(name = "Notifications", description = "Notification endpoints")
@@ -92,6 +94,7 @@ public class NotificationController {
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "20") int size) {
 
+        log.debug("getNotifications cursor={} size={}", cursor, size);
         List<Notification> notifications = getNotificationsUseCase
                 .getNotifications(new GetNotificationsUseCase.Query(currentUserId(), cursor, size));
 
@@ -117,18 +120,21 @@ public class NotificationController {
 
     @PutMapping("/notifications/read-all")
     public ResponseEntity<Void> markAllNotificationsRead() {
+        log.info("All notifications marked read");
         markAllNotificationsReadUseCase.markAllRead(new MarkAllNotificationsReadUseCase.Command(currentUserId()));
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/notifications/{id}/read")
     public ResponseEntity<Void> markNotificationRead(@PathVariable("id") UUID notificationId) {
+        log.info("Notification marked read id={}", notificationId);
         markNotificationReadUseCase.markRead(new MarkNotificationReadUseCase.Command(notificationId, currentUserId()));
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/notifications/settings")
     public ResponseEntity<ApiResponse<NotificationSettings>> getNotificationSettings() {
+        log.debug("getNotificationSettings");
         UUID userId = currentUserId();
         NotificationSettings settings = getNotificationSettingsUseCase
                 .getSettings(new GetNotificationSettingsUseCase.Query(userId));
@@ -139,6 +145,7 @@ public class NotificationController {
     public ResponseEntity<ApiResponse<NotificationSettings>> updateNotificationSettings(
             @Valid @RequestBody NotificationSettingsRequest request) {
         UUID userId = currentUserId();
+        log.info("Notification settings updated userId={}", userId);
         NotificationSettings updatedSettings = updateNotificationSettingsUseCase
                 .updateSettings(new UpdateNotificationSettingsUseCase.Command(
                         userId,
@@ -152,6 +159,7 @@ public class NotificationController {
 
     @PostMapping("/device-tokens")
     public ResponseEntity<Void> registerDeviceToken(@Valid @RequestBody RegisterDeviceTokenRequest request) {
+        log.info("Device token registered platform={}", request.platform());
         DeviceTokenJpaEntity entity = DeviceTokenJpaEntity.builder()
                 .userId(currentUserId())
                 .token(request.token())

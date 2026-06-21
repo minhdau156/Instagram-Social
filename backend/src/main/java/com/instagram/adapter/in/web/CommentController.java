@@ -37,7 +37,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Comments", description = "Comments API")
@@ -81,6 +83,7 @@ public class CommentController {
         User user = getUserUseCase.getUser(new GetUserUseCase.Query(currentUserId()));
 
         CommentResponse commentResponse = CommentResponse.from(comment, user);
+        log.info("Comment added postId={}", id);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(commentResponse));
     }
@@ -95,6 +98,7 @@ public class CommentController {
         User user = getUserUseCase.getUser(new GetUserUseCase.Query(currentUserId()));
 
         CommentResponse commentResponse = CommentResponse.from(comment, user);
+        log.info("Comment edited id={}", id);
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok(commentResponse));
     }
@@ -103,6 +107,7 @@ public class CommentController {
     public ResponseEntity<ApiResponse<Void>> deleteComment(
             @PathVariable UUID id) {
         deleteCommentUseCase.deleteComment(new DeleteCommentUseCase.Command(id, currentUserId()));
+        log.info("Comment deleted id={}", id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -112,6 +117,7 @@ public class CommentController {
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "20") int size) {
 
+        log.debug("getComments postId={} size={}", id, size);
         List<Comment> comments = getCommentsUseCase
                 .getComments(new GetCommentsUseCase.Query(id, currentUserId(), cursor, size));
 
@@ -135,6 +141,7 @@ public class CommentController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
+        log.debug("getReplies commentId={} page={} size={}", id, page, size);
         Page<Comment> comments = getRepliesUseCase
                 .getReplies(new GetRepliesUseCase.Query(id, currentUserId(), page, size));
 

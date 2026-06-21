@@ -49,40 +49,53 @@ import org.springframework.web.bind.annotation.RequestMapping;
  *
  * <h2>Upload architecture — why MediaValidator is not called here</h2>
  *
- * All upload flows in this controller are <em>presigned-URL based</em>: the server
- * generates a time-limited, signed URL and returns it to the client; the client then
- * uploads the file bytes <em>directly to MinIO</em>, never sending the binary payload
+ * All upload flows in this controller are <em>presigned-URL based</em>: the
+ * server
+ * generates a time-limited, signed URL and returns it to the client; the client
+ * then
+ * uploads the file bytes <em>directly to MinIO</em>, never sending the binary
+ * payload
  * through this server.
  *
  * <ul>
- *   <li>{@code POST /upload-url} — issues a presigned PUT URL; body contains only
- *       {@code filename} + {@code contentType} (no file bytes).</li>
- *   <li>{@code POST /uploads} — initiates a multipart session; body contains session
- *       metadata (part count, size, content-type) but no file bytes.</li>
- *   <li>{@code POST /uploads/{id}/complete} — assembles already-uploaded parts; no
- *       file bytes.</li>
+ * <li>{@code POST /upload-url} — issues a presigned PUT URL; body contains only
+ * {@code filename} + {@code contentType} (no file bytes).</li>
+ * <li>{@code POST /uploads} — initiates a multipart session; body contains
+ * session
+ * metadata (part count, size, content-type) but no file bytes.</li>
+ * <li>{@code POST /uploads/{id}/complete} — assembles already-uploaded parts;
+ * no
+ * file bytes.</li>
  * </ul>
  *
  * Because no endpoint in this controller receives a {@code MultipartFile},
- * {@link MediaValidator#validateAndSanitize} cannot be invoked at the HTTP layer.
- * The validator is wired in and ready for a future <em>direct-upload</em> endpoint
- * ({@code POST /upload} accepting {@code multipart/form-data}), which would send
+ * {@link MediaValidator#validateAndSanitize} cannot be invoked at the HTTP
+ * layer.
+ * The validator is wired in and ready for a future <em>direct-upload</em>
+ * endpoint
+ * ({@code POST /upload} accepting {@code multipart/form-data}), which would
+ * send
  * file bytes to the server, validate them, and then call
- * {@link MediaStoragePort#uploadFile} — bypassing the presigned-URL step entirely.
+ * {@link MediaStoragePort#uploadFile} — bypassing the presigned-URL step
+ * entirely.
  *
  * <h2>What IS enforced in the current presigned-URL flow</h2>
  * <ul>
- *   <li>Server-side object key generation (UUID + safe extension allowlist) prevents
- *       path traversal and key overwrite attacks — {@link PostService#generateUploadUrl}.</li>
- *   <li>Short presigned-URL expiry (5 minutes) limits the replay window.</li>
- *   <li>MinIO bucket policy restricts writes to authenticated paths only.</li>
+ * <li>Server-side object key generation (UUID + safe extension allowlist)
+ * prevents
+ * path traversal and key overwrite attacks —
+ * {@link PostService#generateUploadUrl}.</li>
+ * <li>Short presigned-URL expiry (5 minutes) limits the replay window.</li>
+ * <li>MinIO bucket policy restricts writes to authenticated paths only.</li>
  * </ul>
  *
  * <h2>Remaining gap</h2>
  * Magic-byte MIME validation, file-size enforcement, dimension checks, and EXIF
- * stripping are <em>not</em> applied to files uploaded via presigned URLs — MinIO
+ * stripping are <em>not</em> applied to files uploaded via presigned URLs —
+ * MinIO
  * stores whatever the client PUTs. Closing this gap requires either adding a
- * direct-upload endpoint or a post-upload scan job that downloads, validates, and
+ * direct-upload endpoint or a post-upload scan job that downloads, validates,
+ * and
  * quarantines non-conforming objects.
  */
 @RestController
@@ -137,6 +150,7 @@ public class MediaController {
                 UUID userId = UUID.fromString(userDetails.getUsername());
                 GenerateUploadUrlUseCase.UploadUrl result = generateUploadUrlUseCase.generateUploadUrl(
                                 new GenerateUploadUrlUseCase.Command(userId, req.filename(), req.contentType()));
+                log.info("Upload URL generated userId={} filename={}", userId, req.filename());
                 return ResponseEntity.ok(ApiResponse.ok(UploadUrlResponse.from(result)));
         }
 
@@ -213,6 +227,7 @@ public class MediaController {
 
                 String key = "uploads/" + userId + "/" + UUID.randomUUID() + extractSafeExtension(request.filename());
                 String uploadId = mediaStoragePort.initiateMultipartUpload(key, request.contentType());
+                log.info("Multipart upload initiated userId={} key={}", userId, key);
 
                 UploadSessionJpaEntity session = UploadSessionJpaEntity.builder()
                                 .uploadId(uploadId)
@@ -240,6 +255,7 @@ public class MediaController {
                         @PathVariable String uploadId) {
 
                 UUID userId = currentUserId();
+                log.debug("listUploadedParts uploadId={}", uploadId);
 
                 UploadSessionJpaEntity session = uploadSessionRepository.findByUploadId(uploadId)
                                 .filter(s -> s.getUserId().equals(userId))
@@ -273,6 +289,7 @@ public class MediaController {
 
                 String publicUrl = mediaStoragePort.completeMultipartUpload(
                                 session.getObjectKey(), uploadId, partETags);
+                log.info("Multipart upload completed uploadId={}", uploadId);
 
                 session.setStatus("COMPLETED");
                 uploadSessionRepository.save(session);
@@ -281,7 +298,8 @@ public class MediaController {
         }
 
         private String extractSafeExtension(String filename) {
-                if (filename == null || !filename.contains(".")) return "";
+                if (filename == null || !filename.contains("."))
+                        return "";
                 String ext = filename.substring(filename.lastIndexOf('.')).toLowerCase();
                 return java.util.Set.of(".jpg", ".jpeg", ".png", ".webp", ".mp4").contains(ext) ? ext : "";
         }

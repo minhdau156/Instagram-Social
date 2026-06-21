@@ -21,7 +21,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -38,6 +40,7 @@ public class FeedController {
             @RequestParam(defaultValue = "20") int limit) {
 
         UUID userId = currentUserId();
+        log.debug("getHomeFeed userId={} cursor={} limit={}", userId, cursor, limit);
         UUID cursorId = cursor != null ? UUID.fromString(cursor) : null;
 
         GetHomeFeedUseCase.FeedPage page = getHomeFeedUseCase.getHomeFeed(
@@ -52,6 +55,7 @@ public class FeedController {
             @RequestParam(defaultValue = "20") int limit) {
 
         UUID userId = currentUserId();
+        log.debug("getExploreFeed userId={} cursor={} limit={}", userId, cursor, limit);
         UUID cursorId = cursor != null ? UUID.fromString(cursor) : null;
 
         GetExploreFeedUseCase.FeedPage page = getExploreFeedUseCase.getExploreFeed(
@@ -64,6 +68,7 @@ public class FeedController {
     public ResponseEntity<ApiResponse<List<TrendingHashtagResponse>>> getTrendingHashtags(
             @RequestParam(defaultValue = "10") int limit) {
 
+        log.debug("getTrendingHashtags limit={}", limit);
         List<TrendingHashtagResponse> hashtags = feedRepository
                 .getTrendingHashtags(Math.min(limit, 30))
                 .stream()

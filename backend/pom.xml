@@ -209,6 +209,13 @@
             <version>2.19.0</version>
         </dependency>
 
+        <!-- Structured (JSON) logging for non-local profiles -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>7.4</version>
+        </dependency>
+
     </dependencies>
 
     <build>

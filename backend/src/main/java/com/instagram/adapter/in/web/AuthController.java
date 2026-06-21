@@ -32,7 +32,9 @@ import com.instagram.adapter.in.web.dto.response.UserResponse;
 import com.instagram.domain.model.AuthResult;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -56,6 +58,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<UserResponse>> register(@Valid @RequestBody RegisterRequest req) {
         User user = registerUserUseCase.register(new RegisterUserUseCase.Command(
                 req.username(), req.email(), req.password(), req.fullName()));
+        log.info("User registered username={}", req.username());
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(UserResponse.from(user)));
     }
 
@@ -68,6 +71,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest req) {
         AuthResult authResult = loginUseCase.login(new LoginUseCase.Command(req.identifier(), req.password()));
+        log.info("User login identifier={}", req.identifier());
         return ResponseEntity.ok(ApiResponse.ok(AuthResponse.from(authResult)));
     }
 
@@ -81,6 +85,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponse>> refresh(@Valid @RequestBody RefreshRequest req) {
         AuthResult authResult = refreshTokenUseCase
                 .refreshToken(new RefreshTokenUseCase.Command(req.refreshToken()));
+        log.debug("Token refresh requested");
         return ResponseEntity.ok(ApiResponse.ok(AuthResponse.from(authResult)));
     }
 
@@ -92,6 +97,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody RefreshRequest req) {
         logoutUseCase.logout(new LogoutUseCase.Command(req.refreshToken()));
+        log.info("User logout");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -104,6 +110,7 @@ public class AuthController {
     @PostMapping("/password-reset/request")
     public ResponseEntity<ApiResponse<Void>> requestPasswordReset(@Valid @RequestBody PasswordResetRequest req) {
         requestPasswordResetUseCase.requestPasswordReset(new RequestPasswordResetUseCase.Command(req.email()));
+        log.info("Password reset requested email={}", req.email());
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 
@@ -116,6 +123,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> confirmPasswordReset(@Valid @RequestBody PasswordResetConfirmRequest req) {
         confirmPasswordResetUseCase
                 .confirmPasswordReset(new ConfirmPasswordResetUseCase.Command(req.token(), req.newPassword()));
+        log.info("Password reset confirmed");
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 

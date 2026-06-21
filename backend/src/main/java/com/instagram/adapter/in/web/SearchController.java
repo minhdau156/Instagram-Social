@@ -37,7 +37,9 @@ import com.instagram.domain.port.in.user.GetUserStatsUseCase;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 @Tag(name = "Search", description = "Search operations")
@@ -96,6 +98,7 @@ public class SearchController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         UUID currentUserId = currentUserId();
+        log.debug("search q={} type={} page={} size={}", q, type, page, size);
         return switch (type) {
             case "users" -> {
                 List<User> users = searchUsersUseCase
@@ -141,6 +144,7 @@ public class SearchController {
     @GetMapping("/search/history")
     public ResponseEntity<ApiResponse<List<SearchHistoryResponse>>> getSearchHistory() {
         UUID currentUserId = currentUserId();
+        log.debug("getSearchHistory userId={}", currentUserId);
         List<SearchHistory> searchHistories = getSearchHistoryUseCase.getSearchHistory(
                 new GetSearchHistoryUseCase.Query(currentUserId, 10));
         List<SearchHistoryResponse> searchHistoryResponses = searchHistories.stream()
@@ -152,6 +156,7 @@ public class SearchController {
     @DeleteMapping("/search/history")
     public ResponseEntity<ApiResponse<Void>> clearSearchHistory() {
         UUID currentUserId = currentUserId();
+        log.info("Search history cleared userId={}", currentUserId);
         clearSearchHistoryUseCase.clearSearchHistory(new ClearSearchHistoryUseCase.Command(currentUserId));
         return ResponseEntity.noContent().build();
     }
@@ -162,6 +167,7 @@ public class SearchController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         UUID currentUserId = currentUserId();
+        log.debug("getPostsByHashtag name={} page={} size={}", name, page, size);
         List<Post> posts = getPostsByHashtagUseCase.getPostsByHashtag(
                 new GetPostsByHashtagUseCase.Query(name, currentUserId, page, size));
         Map<UUID, User> users = findAllUserUseCase.findAllByIds(posts.stream().map(Post::getUserId).toList())

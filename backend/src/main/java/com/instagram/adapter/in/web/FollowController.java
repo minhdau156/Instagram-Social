@@ -23,7 +23,9 @@ import com.instagram.domain.port.in.follow.*;
 
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class FollowController {
@@ -58,12 +60,14 @@ public class FollowController {
     @PostMapping("/api/v1/users/{username}/follow")
     public ResponseEntity<ApiResponse<FollowResponse>> followUser(@PathVariable String username) {
         Follow follow = followUserUseCase.follow(new FollowUserUseCase.Command(currentUserId(), username));
+        log.info("User followed username={}", username);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(FollowResponse.from(follow)));
     }
 
     @DeleteMapping("/api/v1/users/{username}/follow")
     public ResponseEntity<ApiResponse<Void>> unfollowUser(@PathVariable String username) {
         unfollowUserUseCase.unfollow(new UnfollowUserUseCase.Command(currentUserId(), username));
+        log.info("User unfollowed username={}", username);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -72,6 +76,7 @@ public class FollowController {
             @PathVariable String username,
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "20") int size) {
+        log.debug("getFollowers username={} size={}", username, size);
         GetFollowersUseCase.FollowersPage result = getFollowersUseCase.getFollowers(
                 new GetFollowersUseCase.Query(username, currentUserId(), cursor, size));
         List<UserSummaryResponse> items = result.items().stream()
@@ -85,6 +90,7 @@ public class FollowController {
             @PathVariable String username,
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "20") int size) {
+        log.debug("getFollowing username={} size={}", username, size);
         GetFollowingUseCase.FollowingPage result = getFollowingUseCase.getFollowing(
                 new GetFollowingUseCase.Query(username, currentUserId(), cursor, size));
         List<UserSummaryResponse> items = result.items().stream()
@@ -95,6 +101,7 @@ public class FollowController {
 
     @GetMapping("/api/v1/follow-requests")
     public ResponseEntity<ApiResponse<List<UserSummaryResponse>>> getFollowRequests() {
+        log.debug("getFollowRequests");
         List<UserSummary> requests = getFollowRequestsUseCase.getFollowRequests(new GetFollowRequestsUseCase.Query(
                 currentUserId()));
         return ResponseEntity.ok(ApiResponse.ok(requests.stream()
@@ -106,12 +113,14 @@ public class FollowController {
     public ResponseEntity<ApiResponse<FollowResponse>> approveFollowRequest(@PathVariable UUID id) {
         Follow follow = approveFollowRequestUseCase
                 .approve(new ApproveFollowRequestUseCase.Command(currentUserId(), id));
+        log.info("Follow request approved id={}", id);
         return ResponseEntity.ok(ApiResponse.ok(FollowResponse.from(follow)));
     }
 
     @DeleteMapping("/api/v1/follow-requests/{id}/decline")
     public ResponseEntity<ApiResponse<Void>> declineFollowRequest(@PathVariable UUID id) {
         declineFollowRequestUseCase.decline(new DeclineFollowRequestUseCase.Command(currentUserId(), id));
+        log.info("Follow request declined id={}", id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

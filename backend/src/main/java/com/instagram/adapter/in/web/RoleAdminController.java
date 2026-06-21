@@ -17,6 +17,7 @@ import com.instagram.domain.port.in.rbac.UpdateRolePermissionsUseCase;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/admin")
 @AllArgsConstructor
@@ -59,6 +61,7 @@ public class RoleAdminController {
 
     @GetMapping("/roles")
     public ResponseEntity<ApiResponse<List<RoleResponse>>> listRoles() {
+        log.debug("listRoles");
         List<RoleResponse> roles = listRolesUseCase.listRoles(new ListRolesUseCase.Query())
                 .stream()
                 .map(RoleResponse::from)
@@ -69,6 +72,7 @@ public class RoleAdminController {
     @GetMapping("/permissions")
     @PreAuthorize("hasAuthority('ROLE_VIEW')")
     public ResponseEntity<ApiResponse<List<PermissionResponse>>> listPermissions() {
+        log.debug("listPermissions");
         List<PermissionResponse> permissions = Arrays.stream(PermissionName.values())
                 .map(PermissionResponse::fromName)
                 .toList();
@@ -81,6 +85,7 @@ public class RoleAdminController {
             @Valid @RequestBody UpdateRolePermissionsRequest request) {
         updateRolePermissionsUseCase.updateRolePermissions(
                 new UpdateRolePermissionsUseCase.Command(currentUserId(), roleName, request.permissions()));
+        log.info("Role permissions updated roleName={}", roleName);
         Role updated = listRolesUseCase.listRoles(new ListRolesUseCase.Query())
                 .stream()
                 .filter(r -> r.getName() == roleName)
@@ -91,6 +96,7 @@ public class RoleAdminController {
 
     @GetMapping("/users/{id}/roles")
     public ResponseEntity<ApiResponse<UserRolesResponse>> getUserRoles(@PathVariable UUID id) {
+        log.debug("getUserRoles userId={}", id);
         Set<Role> roles = getUserRolesUseCase.getUserRoles(new GetUserRolesUseCase.Query(id));
         return ResponseEntity.ok(ApiResponse.ok(UserRolesResponse.from(id, roles)));
     }
@@ -101,6 +107,7 @@ public class RoleAdminController {
             @Valid @RequestBody AssignRoleRequest request) {
         Set<Role> roles = assignRoleToUserUseCase.assignRoleToUser(
                 new AssignRoleToUserUseCase.Command(currentUserId(), id, request.roleName()));
+        log.info("Role assigned targetUserId={} roleName={}", id, request.roleName());
         return ResponseEntity.ok(ApiResponse.ok(UserRolesResponse.from(id, roles)));
     }
 
@@ -110,6 +117,7 @@ public class RoleAdminController {
             @PathVariable RoleName roleName) {
         revokeRoleFromUserUseCase.revokeRoleFromUser(
                 new RevokeRoleFromUserUseCase.Command(currentUserId(), id, roleName));
+        log.info("Role revoked targetUserId={} roleName={}", id, roleName);
         return ResponseEntity.noContent().build();
     }
 }

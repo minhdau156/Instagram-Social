@@ -35,8 +35,10 @@ import com.instagram.infrastructure.security.HtmlSanitizer;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
+@Slf4j
 @Tag(name = "Messaging", description = "Conversation and message management")
 @RequestMapping("/api/v1/conversations")
 @RestController
@@ -90,6 +92,7 @@ public class MessageController {
                         @RequestParam(defaultValue = "0") int page,
                         @RequestParam(defaultValue = "20") int size) {
                 UUID userId = currentUserId();
+                log.debug("getConversations userId={} page={} size={}", userId, page, size);
                 List<GetConversationsUseCase.ConversationView> views = getConversationsUseCase.getConversations(
                                 new GetConversationsUseCase.Query(userId, page, size));
 
@@ -111,6 +114,7 @@ public class MessageController {
         public ResponseEntity<ApiResponse<ConversationResponse>> createConversation(
                         @Valid @RequestBody CreateConversationRequest request) {
                 UUID creatorId = currentUserId();
+                log.info("Conversation created creatorId={} isGroup={}", creatorId, request.isGroup());
                 var conversation = createConversationUseCase.createConversation(
                                 new CreateConversationUseCase.Command(creatorId, request.participantIds(),
                                                 request.name(), request.isGroup()));
@@ -131,6 +135,7 @@ public class MessageController {
                         @RequestParam(defaultValue = "30") int limit) {
                 int effectiveLimit = Math.min(limit, 50);
                 UUID userId = currentUserId();
+                log.debug("getMessages conversationId={} limit={}", id, effectiveLimit);
                 UUID cursorId = cursor != null ? UUID.fromString(cursor) : null;
                 List<GetMessagesUseCase.MessageView> views = getMessagesUseCase.getMessages(
                                 new GetMessagesUseCase.Query(id, userId, cursorId, effectiveLimit));
@@ -145,6 +150,7 @@ public class MessageController {
                         @PathVariable UUID id,
                         @Valid @RequestBody SendMessageRequest request) {
                 UUID userId = currentUserId();
+                log.info("Message sent conversationId={} userId={}", id, userId);
                 SendMessageUseCase.MessageView view = sendMessageUseCase.sendMessage(
                                 new SendMessageUseCase.Command(id, userId, htmlSanitizer.sanitize(request.content()),
                                                 request.messageType(),
@@ -159,6 +165,7 @@ public class MessageController {
         @PutMapping("/{id}/read")
         public ResponseEntity<ApiResponse<Void>> markRead(@PathVariable("id") UUID conversationId,
                         @Valid @RequestBody MarkReadRequest request) {
+                log.info("markRead conversationId={}", conversationId);
                 markReadUseCase.markRead(
                                 new MarkReadUseCase.Command(conversationId, currentUserId(), request.messageId()));
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.ok(null));
@@ -170,6 +177,7 @@ public class MessageController {
                         @Valid @RequestBody AddGroupMemberRequest request) {
                 addGroupMemberUseCase.addGroupMember(
                                 new AddGroupMemberUseCase.Command(id, currentUserId(), request.memberIds()));
+                log.info("Group member added conversationId={}", id);
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.ok(null));
         }
 
@@ -177,6 +185,7 @@ public class MessageController {
         public ResponseEntity<ApiResponse<Void>> leaveConversation(@PathVariable UUID id) {
                 leaveConversationUseCase.leaveConversation(
                                 new LeaveConversationUseCase.Command(id, currentUserId()));
+                log.info("User left conversation id={}", id);
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.ok(null));
         }
 

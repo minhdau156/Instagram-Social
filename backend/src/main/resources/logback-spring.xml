@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <!-- ============================================================
+       LOCAL profile — human-readable coloured console output.
+       MDC fields are appended at the end of each line.
+       ============================================================ -->
+  <springProfile name="local">
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder>
+        <pattern>
+          %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [rid=%X{requestId} uid=%X{userId}] - %msg%n
+        </pattern>
+      </encoder>
+    </appender>
+
+    <root level="INFO">
+      <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <!-- Fine-grained levels for local development -->
+    <logger name="com.instagram" level="DEBUG"/>
+    <logger name="org.hibernate.SQL" level="DEBUG"/>
+    <logger name="org.springframework.web" level="INFO"/>
+    <logger name="org.springframework.security" level="INFO"/>
+  </springProfile>
+
+  <!-- ============================================================
+       All non-local profiles (prod, staging, test) — JSON output.
+       logstash-logback-encoder serialises every MDC field as a
+       top-level JSON key automatically.
+       ============================================================ -->
+  <springProfile name="!local">
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+        <!-- Include the Spring application name as a static field -->
+        <customFields>{"app":"instagram"}</customFields>
+        <!-- MDC fields (requestId, userId, method, path) are included automatically -->
+      </encoder>
+    </appender>
+
+    <root level="INFO">
+      <appender-ref ref="JSON_CONSOLE"/>
+    </root>
+
+    <logger name="com.instagram" level="INFO"/>
+    <logger name="org.hibernate.SQL" level="WARN"/>
+  </springProfile>
+
+</configuration>

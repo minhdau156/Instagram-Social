@@ -79,6 +79,8 @@ public class PostService implements
     })
 
     public Post createPost(CreatePostUseCase.Command command) {
+        log.debug("createPost userId={} caption_length={}", command.userId(),
+                command.caption() == null ? 0 : command.caption().length());
         Post post = Post.builder()
                 .id(UUID.randomUUID())
                 .userId(command.userId())
@@ -122,6 +124,7 @@ public class PostService implements
 
     @Override
     public Post getPost(GetPostUseCase.Query query) {
+        log.debug("getPost id={} requestedBy={}", query.id(), query.currentUserId());
         boolean likedByCurrentUser = likeRepository.hasLikedPost(query.id(), query.currentUserId());
         boolean savedByCurrentUser = savedPostRepository.existsByPostIdAndUserId(query.id(), query.currentUserId());
 
@@ -142,6 +145,7 @@ public class PostService implements
 
     @Override
     public Post updatePost(UpdatePostUseCase.Command command) {
+        log.debug("updatePost id={} userId={}", command.id(), command.requesterId());
         Post existing = postRepository.findById(command.id())
                 .orElseThrow(() -> new PostNotFoundException(command.id()));
 
@@ -164,6 +168,7 @@ public class PostService implements
             @CacheEvict(value = "userPosts", key = "'userPosts:' + #command.userId + ':page1'")
     })
     public void deletePost(DeletePostUseCase.Command command) {
+        log.debug("deletePost id={} userId={}", command.id(), command.requesterId());
         Post existing = postRepository.findById(command.id())
                 .orElseThrow(() -> new PostNotFoundException(command.id()));
 
@@ -178,6 +183,7 @@ public class PostService implements
     @Override
     @Cacheable(value = "userPosts", key = "'userPosts:' + #query.targetUserId + ':page1'", condition = "#query.page == 0")
     public Page<Post> getUserPosts(GetUserPostsUseCase.Query query) {
+        log.debug("getUserPosts targetUserId={} page={} size={}", query.targetUserId(), query.page(), query.size());
         return postRepository.findByUserId(query.targetUserId(), PageRequest.of(query.page(), query.size()));
     }
 

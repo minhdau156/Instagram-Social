@@ -41,7 +41,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/admin")
 @AllArgsConstructor
@@ -81,6 +83,7 @@ public class AdminController {
             @RequestParam(required = false) ReportStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        log.debug("getReports status={} page={} size={}", status, page, size);
         List<Report> reports = adminGetReportsUseCase.getReports(new AdminGetReportsUseCase.Query(status, page, size));
         if (CollectionUtils.isEmpty(reports)) {
             return ResponseEntity.ok(ApiResponse.ok(Collections.emptyList()));
@@ -102,6 +105,7 @@ public class AdminController {
             @Valid @RequestBody ReviewReportRequest request) {
         Report report = reviewReportUseCase
                 .reviewReport(new ReviewReportUseCase.Command(currentUserId(), id, request.action()));
+        log.info("Report reviewed id={} action={}", id, request.action());
         User reporter = getUserUseCase.getUser(new GetUserUseCase.Query(report.getReporterId()));
         return ResponseEntity.ok(ApiResponse.ok(ReportResponse.from(report, reporter)));
     }
@@ -111,12 +115,14 @@ public class AdminController {
             @Valid @RequestBody SuspendUserRequest request) {
         User user = suspendUserUseCase
                 .suspendUser(new SuspendUserUseCase.Command(currentUserId(), id, request.reason()));
+        log.info("User suspended userId={} reason={}", id, request.reason());
         return ResponseEntity.ok(ApiResponse.ok(UserResponse.from(user)));
     }
 
     @PutMapping("/users/{id}/unsuspend")
     public ResponseEntity<ApiResponse<UserResponse>> unsuspendUser(@PathVariable UUID id) {
         User user = unsuspendUserUseCase.unsuspendUser(new UnsuspendUserUseCase.Command(currentUserId(), id));
+        log.info("User unsuspended userId={}", id);
         return ResponseEntity.ok(ApiResponse.ok(UserResponse.from(user)));
     }
 
@@ -126,6 +132,7 @@ public class AdminController {
             @RequestParam(required = false) String username,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        log.debug("searchUsers username={} page={} size={}", username, page, size);
         List<User> users = searchUsersUseCase
                 .searchUsers(new SearchUsersUseCase.Query(username, currentUserId(), page, size));
         if (CollectionUtils.isEmpty(users)) {

@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/posts")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "Posts", description = "CRUD operations for posts")
 public class PostController {
 
@@ -66,6 +68,7 @@ public class PostController {
 				items);
 
 		Post createdPost = createPostUseCase.createPost(command);
+		log.info("Post created id={} userId={}", createdPost.getId(), effectiveUserId);
 
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(ApiResponse.ok(PostResponse.from(createdPost, null)));
@@ -81,6 +84,7 @@ public class PostController {
 			@AuthenticationPrincipal UserDetails userDetails) {
 
 		UUID currentUserId = userDetails != null ? UUID.fromString(userDetails.getUsername()) : null;
+		log.debug("getPost id={} requestedBy={}", id, currentUserId);
 		Post post = getPostUseCase.getPost(new GetPostUseCase.Query(id, currentUserId));
 		List<PostMedia> postMedias = getPostUseCase.getPostMedia(id);
 
@@ -105,6 +109,7 @@ public class PostController {
 				new UpdatePostUseCase.Command(id, userId,
 						htmlSanitizer.sanitize(req.caption()),
 						htmlSanitizer.sanitize(req.location())));
+		log.info("Post updated id={} userId={}", id, userId);
 		return ResponseEntity.ok(ApiResponse.ok(PostResponse.from(post, null)));
 	}
 
@@ -121,6 +126,7 @@ public class PostController {
 
 		UUID userId = UUID.fromString(userDetails.getUsername());
 		deletePostUseCase.deletePost(new DeletePostUseCase.Command(id, userId));
+		log.info("Post deleted id={} userId={}", id, userId);
 		return ResponseEntity.noContent().build();
 	}
 
@@ -134,6 +140,7 @@ public class PostController {
 			@AuthenticationPrincipal UserDetails userDetails) {
 
 		UUID currentUserId = userDetails != null ? UUID.fromString(userDetails.getUsername()) : null;
+		log.debug("getUserPosts targetUserId={} page={} size={} requestedBy={}", userId, page, size, currentUserId);
 		Page<Post> posts = getUserPostsUseCase.getUserPosts(
 				new GetUserPostsUseCase.Query(userId, currentUserId, page, size));
 		return ResponseEntity.ok(ApiResponse.ok(posts.map(post -> PostResponse.from(post, null))));
