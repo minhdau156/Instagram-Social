@@ -43,6 +43,8 @@ import com.instagram.domain.port.out.TokenPort;
 import com.instagram.domain.port.out.UserRepository;
 import com.instagram.domain.port.out.UserStatsRepository;
 
+import io.micrometer.core.instrument.Counter;
+
 @Service
 public class UserService
         implements GetUserUseCase, RegisterUserUseCase, LoginUseCase, RefreshTokenUseCase, LogoutUseCase,
@@ -64,10 +66,12 @@ public class UserService
     private final UserStatsRepository userStatsRepository;
     private final FollowRepository followRepository;
     private final AssignDefaultRoleUseCase assignDefaultRoleUseCase;
+    private final Counter usersRegisteredCounter;
 
     public UserService(UserRepository userRepository, PasswordHashPort passwordHashPort,
             TokenPort tokenPort, EmailPort emailPort, UserStatsRepository userStatsRepository,
-            FollowRepository followRepository, AssignDefaultRoleUseCase assignDefaultRoleUseCase) {
+            FollowRepository followRepository, AssignDefaultRoleUseCase assignDefaultRoleUseCase,
+            Counter usersRegisteredCounter) {
         this.userRepository = userRepository;
         this.passwordHashPort = passwordHashPort;
         this.tokenPort = tokenPort;
@@ -75,6 +79,7 @@ public class UserService
         this.userStatsRepository = userStatsRepository;
         this.followRepository = followRepository;
         this.assignDefaultRoleUseCase = assignDefaultRoleUseCase;
+        this.usersRegisteredCounter = usersRegisteredCounter;
     }
 
     // ── RegisterUserUseCase ──────────────────────────────────────────────────
@@ -89,6 +94,8 @@ public class UserService
         }
 
         String hashedPassword = passwordHashPort.hash(command.password());
+
+        usersRegisteredCounter.increment();
 
         User user = User.builder()
                 .id(UUID.randomUUID())

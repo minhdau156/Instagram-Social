@@ -77,6 +77,8 @@ public class SecurityConfig {
                                                 .requestMatchers("/oauth2/**").permitAll()
                                                 .requestMatchers("/login/oauth2/**").permitAll()
                                                 .requestMatchers("/ws/**").permitAll()
+                                                .requestMatchers("/actuator/health").permitAll()
+                                                .requestMatchers("/actuator/**").permitAll()
                                                 .requestMatchers("/api/v1/admin/**")
                                                 .hasAnyRole("MODERATOR", "ADMIN", "SUPER_ADMIN")
                                                 .requestMatchers("/api/v1/moderation/**")

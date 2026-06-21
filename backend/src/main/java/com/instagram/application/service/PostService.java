@@ -38,6 +38,8 @@ import com.instagram.domain.port.out.PostMediaRepository;
 import com.instagram.domain.port.out.PostRepository;
 import com.instagram.domain.port.out.SavedPostRepository;
 
+import io.micrometer.core.instrument.Counter;
+
 @Service
 @Slf4j
 public class PostService implements
@@ -56,11 +58,12 @@ public class PostService implements
     private final LikeRepository likeRepository;
     private final SavedPostRepository savedPostRepository;
     private final PostHashtagRepository postHashtagRepository;
+    private final Counter postsCreatedCounter;
 
     public PostService(PostRepository postRepository, PostMediaRepository postMediaRepository,
             HashtagRepository hashtagRepository, MediaStoragePort mediaStoragePort,
             LikeRepository likeRepository, SavedPostRepository savedPostRepository,
-            PostHashtagRepository postHashtagRepository) {
+            PostHashtagRepository postHashtagRepository, Counter postsCreatedCounter) {
         this.postRepository = postRepository;
         this.postMediaRepository = postMediaRepository;
         this.hashtagRepository = hashtagRepository;
@@ -68,6 +71,7 @@ public class PostService implements
         this.likeRepository = likeRepository;
         this.savedPostRepository = savedPostRepository;
         this.postHashtagRepository = postHashtagRepository;
+        this.postsCreatedCounter = postsCreatedCounter;
     }
 
     @Override
@@ -79,6 +83,7 @@ public class PostService implements
     })
 
     public Post createPost(CreatePostUseCase.Command command) {
+
         log.debug("createPost userId={} caption_length={}", command.userId(),
                 command.caption() == null ? 0 : command.caption().length());
         Post post = Post.builder()
@@ -99,6 +104,7 @@ public class PostService implements
                 .build();
 
         Post saved = postRepository.save(post);
+        postsCreatedCounter.increment();
 
         if (command.mediaItems() != null) {
             List<PostMedia> mediaList = command.mediaItems().stream().map(m -> PostMedia.builder()

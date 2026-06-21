@@ -34,6 +34,9 @@ import com.instagram.domain.port.out.CommentRepository;
 import com.instagram.domain.port.out.FollowRepository;
 import com.instagram.domain.port.out.LikeRepository;
 import com.instagram.domain.port.out.UserRepository;
+
+import io.micrometer.core.instrument.Counter;
+
 import com.instagram.domain.port.out.PostRepository;
 import com.instagram.domain.port.out.UserInterestPort;
 
@@ -56,6 +59,7 @@ public class LikeService implements LikePostUseCase,
     private final ApplicationEventPublisher eventPublisher;
 
     private final UserInterestPort userInterestPort;
+    private final Counter likesAddedCounter;
 
     public LikeService(LikeRepository likeRepository,
             PostRepository postRepository,
@@ -63,7 +67,8 @@ public class LikeService implements LikePostUseCase,
             UserRepository userRepository,
             FollowRepository followRepository,
             UserInterestPort userInterestPort,
-            ApplicationEventPublisher eventPublisher) {
+            ApplicationEventPublisher eventPublisher,
+            Counter likesAddedCounter) {
         this.likeRepository = likeRepository;
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
@@ -71,6 +76,7 @@ public class LikeService implements LikePostUseCase,
         this.followRepository = followRepository;
         this.userInterestPort = userInterestPort;
         this.eventPublisher = eventPublisher;
+        this.likesAddedCounter = likesAddedCounter;
     }
 
     @Override
@@ -80,6 +86,7 @@ public class LikeService implements LikePostUseCase,
         if (likeRepository.hasLikedPost(command.postId(), command.userId())) {
             throw new AlreadyLikedException("post", command.postId());
         }
+        likesAddedCounter.increment();
         likeRepository.likePost(command.postId(), command.userId());
         userInterestPort.recordLike(command.userId(), command.postId());
 

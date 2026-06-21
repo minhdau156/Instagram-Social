@@ -12,6 +12,19 @@ server:
       - application/javascript
       - text/css
 
+management:
+  endpoints:
+    web:
+      exposure:
+        # Expose these endpoints over HTTP. Keep the list explicit — never use '*' in prod.
+        include: health, info, metrics, prometheus
+  endpoint:
+    health:
+      show-details: when-authorized   # Only admins see full health details
+  metrics:
+    tags:
+      application: ${spring.application.name}  # Adds app="instagram" label to every metric
+
 spring:
   profiles:
     active: local

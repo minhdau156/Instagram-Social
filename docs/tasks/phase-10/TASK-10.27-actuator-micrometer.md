@@ -308,10 +308,10 @@ posts_created_total{application="instagram",feature="posts"} 1.0
 
 ## Checklist
 
-- [ ] Add `spring-boot-starter-actuator` + `micrometer-registry-prometheus` to `pom.xml`
-- [ ] Expose `health`, `info`, `metrics`, `prometheus` endpoints
-- [ ] Add custom `MeterRegistry` counter for post creations, likes, registrations
-- [ ] Secure Actuator endpoints (allow only `ROLE_ADMIN` except `/actuator/health`)
+- [x] Add `spring-boot-starter-actuator` + `micrometer-registry-prometheus` to `pom.xml`
+- [x] Expose `health`, `info`, `metrics`, `prometheus` endpoints
+- [x] Add custom `MeterRegistry` counter for post creations, likes, registrations
+- [x] Secure Actuator endpoints (allow only `ROLE_ADMIN` except `/actuator/health`)
 
 ---
 
