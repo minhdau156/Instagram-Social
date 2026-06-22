@@ -208,9 +208,9 @@ Click **Run Query** (the blue button). After sending one or more requests, you s
 
 ## Checklist
 
-- [ ] Add `io.micrometer:micrometer-tracing-bridge-otel` + `opentelemetry-exporter-zipkin` to `pom.xml`
-- [ ] Configure `application.yml` → `management.tracing.sampling.probability=1.0` for dev
-- [ ] Run Zipkin locally via Docker Compose (`openzipkin/zipkin` image)
+- [x] Add `io.micrometer:micrometer-tracing-bridge-otel` + `opentelemetry-exporter-zipkin` to `pom.xml`
+- [x] Configure `application.yml` → `management.tracing.sampling.probability=1.0` for dev
+- [x] Run Zipkin locally via Docker Compose (`openzipkin/zipkin` image)
 
 ---
 

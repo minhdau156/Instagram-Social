@@ -44,6 +44,17 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  
+  zipkin:
+    image: openzipkin/zipkin:3
+    restart: always
+    ports:
+      - "9411:9411"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:9411/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
