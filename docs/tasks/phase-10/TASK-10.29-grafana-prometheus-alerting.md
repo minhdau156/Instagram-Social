@@ -1,49 +1,75 @@
-# TASK-10.29 — Grafana dashboards & Prometheus alerting
+# TASK-10.29 — Full Observability Stack: Prometheus + Grafana + Loki + Tempo
 
 ## Overview
 
-TASK-10.27 made the backend emit metrics to `/actuator/prometheus`. This task wires up the full observability stack: Prometheus scrapes that endpoint on a schedule, Grafana queries Prometheus and renders the data as live panels, and Alertmanager sends a notification when something goes wrong. After this task you will have a dashboard showing request rate, 5xx error rate, p95 latency, JVM heap, and HikariCP connection activity — and an alert that moves to `firing` state when the 5xx error rate crosses its threshold.
+Wire up the complete LGTM (Loki + Grafana + Tempo + Prometheus) observability stack using Docker Compose with volume-mounted config files. This task also migrates the backend away from Zipkin (set up in TASK-10.28) to Tempo, which receives traces via OTLP — the same protocol used by the OTel exporter already on the classpath. Logs are pushed directly from the Spring Boot logback pipeline to Loki using the `loki-logback-appender` library, so no Promtail sidecar is needed. After this task you have: live dashboards in Grafana showing request rate, error rate, and latency; logs searchable by `requestId` or `traceId`; traces with a waterfall view in Grafana (via Tempo); and full correlation — click a log line to jump to its trace, or a metric exemplar to jump to the span that caused the spike.
 
 ---
 
 ## Level
 
-Core · Builds on [TASK-10.27 — Actuator & Micrometer](TASK-10.27-actuator-micrometer.md) · Pairs with [TASK-10.31 — SLIs, SLOs & error-budget burn-rate alerts](TASK-10.31-sli-slo-error-budget.md)
+Core · Builds on [TASK-10.27 — Actuator & Micrometer](TASK-10.27-actuator-micrometer.md) · Builds on [TASK-10.28 — Distributed tracing](TASK-10.28-distributed-tracing.md) · Supersedes [TASK-10.30 — Loki log aggregation](TASK-10.30-loki-log-aggregation.md) (Loki is now handled here)
 
 ---
 
 ## Why
 
-TASK-10.27 made Prometheus collect metrics, but nothing graphs them and nobody gets told when they go bad. A dashboard turns scattered counters into an at-a-glance picture of whether the system is healthy right now — you can see in one view that the p95 latency spiked at 14:30 and that it coincided with a pool saturation event. Alert rules turn "the graph looks wrong" into an actual notification: instead of someone noticing the graph, the system tells you. Multi-window burn-rate alerts (formalized in TASK-10.31) give you early warning while there is still time to act, rather than alerting only after the SLO is already broken.
+Zipkin is a fine standalone trace viewer, but it is a dead end: it cannot correlate traces with logs or metrics. Tempo is Grafana-native — the same Grafana instance can query Prometheus metrics, Loki log lines, and Tempo spans and link them together. When a Grafana alert fires on a metric threshold, you can click through to the Loki logs that match the time window, then click a `traceId` link in a log line to open the Tempo waterfall for that exact request. No context-switching between four different UIs. Pushing logs from logback directly (Loki4j) instead of via Promtail removes the sidecar complexity and works identically whether the backend runs with `mvn spring-boot:run` or inside Docker.
 
 ---
 
 ## Prerequisites
 
-- [TASK-10.27](TASK-10.27-actuator-micrometer.md) is complete — `/actuator/prometheus` is reachable and returns metric data.
-- Docker Compose is running. You are comfortable adding new services to `docker-compose.yml`.
-- The backend is accessible from within the Docker network (the Prometheus container must be able to reach the backend's `/actuator/prometheus` endpoint).
+- [TASK-10.27](TASK-10.27-actuator-micrometer.md) is complete — `/actuator/prometheus` returns metrics.
+- [TASK-10.28](TASK-10.28-distributed-tracing.md) is complete — `micrometer-tracing-bridge-otel` is in `pom.xml` and `traceId`/`spanId` appear in logs.
+- Docker Compose is running and you are comfortable editing it.
 
-**Concepts to skim:**
+**Stack summary after this task:**
 
-- **Prometheus scrape**: Prometheus periodically pulls (scrapes) the `/actuator/prometheus` endpoint. Each scrape adds a new data point. The scrape interval controls resolution (15 s is standard for dev).
-- **PromQL**: Prometheus Query Language. Used in Grafana panels and alert rules. Key functions: `rate()` (per-second rate over a window), `histogram_quantile()` (compute a percentile from a histogram), `increase()` (total increase over a window).
-- **Grafana provisioning**: instead of clicking through the Grafana UI, you can place JSON files in `docs/infra/grafana/` and configure Grafana to load them at startup. This makes the dashboard reproducible and version-controlled.
-- **Alertmanager**: a separate Prometheus component that receives firing alerts and routes them to notification channels (Slack, email, PagerDuty). Grafana can also send its own alerts without Alertmanager.
-- **`http_server_requests_seconds`**: the Spring Boot Actuator metric that counts and times every HTTP request. It is a Micrometer Timer, which Prometheus stores as a histogram (`_bucket`, `_sum`, `_count`). All latency panels in this task derive from it.
+| Tool | Role | Port |
+|---|---|---|
+| **Prometheus** | Metric storage & alert evaluation | 9090 |
+| **Alertmanager** | Alert routing & silencing | 9093 |
+| **Loki** | Log aggregation & search | 3100 |
+| **Tempo** | Distributed trace backend (OTLP) | 3200 / 4317 / 4318 |
+| **Grafana** | Unified dashboard & explore UI | 3000 |
+
+---
+
+## What Changes From Your Current State
+
+You already completed TASK-10.27 and TASK-10.28, so the following is already in place:
+- `micrometer-tracing-bridge-otel`, `opentelemetry-exporter-zipkin`, `zipkin-reporter-brave` in `pom.xml`
+- `spring.zipkin.tracing.endpoint` in `application.yml` and `application-local.yml`
+- Zipkin service in `docker-compose.yml`
+
+This task **replaces** all of that:
+
+| Current | Replace with |
+|---|---|
+| `opentelemetry-exporter-zipkin` | `opentelemetry-exporter-otlp` |
+| `zipkin-reporter-brave` | *(remove — not needed for OTLP)* |
+| `spring.zipkin.tracing.endpoint` | `management.otlp.tracing.endpoint` |
+| `zipkin` Docker service | `tempo` Docker service |
 
 ---
 
 ## Files to Create / Modify
 
 ```
-docker-compose.yml                                              (modify)
+backend/pom.xml                                                 (modify — swap exporters, add loki4j)
+backend/src/main/resources/application.yml                      (modify — swap Zipkin → OTLP endpoint)
+backend/src/main/resources/application-local.yml                (modify — swap Zipkin → OTLP endpoint)
+backend/src/main/resources/logback-spring.xml                   (modify — add Loki4j appender)
+docker-compose.yml                                              (modify — replace Zipkin, add full stack)
 prometheus/prometheus.yml                                       (new)
 prometheus/alerts.yml                                           (new)
 alertmanager/alertmanager.yml                                   (new)
-docs/infra/grafana/dashboards/instagram-overview.json           (new)
-docs/infra/grafana/provisioning/datasources/prometheus.yml      (new)
+tempo/tempo.yml                                                 (new)
+loki/loki-config.yml                                            (new)
+docs/infra/grafana/provisioning/datasources/datasources.yml     (new — all three sources)
 docs/infra/grafana/provisioning/dashboards/dashboard.yml        (new)
+docs/infra/grafana/dashboards/instagram-overview.json           (new)
 docs/infra/observability-setup.md                               (new)
 ```
 
@@ -51,71 +77,297 @@ docs/infra/observability-setup.md                               (new)
 
 ## Step-by-Step
 
-### 1. Add Prometheus, Grafana, and Alertmanager to docker-compose.yml
+### 1. Update pom.xml — swap Zipkin exporter for OTLP, add Loki4j
 
-Open `docker-compose.yml` in the repository root and add three new services after the existing `zipkin` service:
+Open `backend/pom.xml`. Remove these two dependencies:
 
-```yaml
-  prometheus:
-    image: prom/prometheus:v2.52.0
-    restart: always
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.retention.time=7d'
-      - '--web.enable-lifecycle'
-    depends_on:
-      - zipkin
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:9090/-/ready || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  alertmanager:
-    image: prom/alertmanager:v0.27.0
-    restart: always
-    ports:
-      - "9093:9093"
-    volumes:
-      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
-
-  grafana:
-    image: grafana/grafana:10.4.3
-    restart: always
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin      # Change in production
-      - GF_USERS_ALLOW_SIGN_UP=false
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./docs/infra/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./docs/infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
-    depends_on:
-      - prometheus
+```xml
+<!-- REMOVE these two -->
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-exporter-zipkin</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.zipkin.reporter2</groupId>
+    <artifactId>zipkin-reporter-brave</artifactId>
+</dependency>
 ```
 
-Add the new named volumes at the bottom of `docker-compose.yml`:
+Add in their place:
 
+```xml
+<!-- OTLP exporter — sends spans to Tempo via HTTP OTLP (port 4318) -->
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-exporter-otlp</artifactId>
+</dependency>
+
+<!-- Loki4j — pushes logback log lines directly to Loki, no Promtail needed -->
+<dependency>
+    <groupId>com.github.loki4j</groupId>
+    <artifactId>loki-logback-appender</artifactId>
+    <version>1.5.2</version>
+</dependency>
+```
+
+> `opentelemetry-exporter-otlp` is managed by the Spring Boot BOM — no version needed. `loki-logback-appender` is not in the BOM, so pin `1.5.2`.
+
+---
+
+### 2. Update application.yml — swap Zipkin endpoint for OTLP
+
+Open `backend/src/main/resources/application.yml`.
+
+**Remove:**
 ```yaml
-volumes:
-  postgres_data:
-  minio_data:
-  prometheus_data:    # <-- add
-  grafana_data:       # <-- add
+spring:
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411/api/v2/spans}
+```
+
+**Add** (at the same `management:` block level as `management.tracing`):
+```yaml
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: ${OTEL_ENDPOINT:http://localhost:4318}/v1/traces
+```
+
+The `management.otlp.tracing.endpoint` property is picked up by Spring Boot's `OtlpAutoConfiguration` and wires the `OtlpHttpSpanExporter` automatically when `opentelemetry-exporter-otlp` is on the classpath.
+
+---
+
+### 3. Update application-local.yml — same swap
+
+Open `backend/src/main/resources/application-local.yml`.
+
+**Remove:**
+```yaml
+spring:
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+```
+
+**Add:**
+```yaml
+management:
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
 ```
 
 ---
 
-### 2. Create prometheus/prometheus.yml
+### 4. Add Loki4j appender to logback-spring.xml
 
-Create the directory and file:
+Open `backend/src/main/resources/logback-spring.xml` and add a `LOKI` appender to **both** the `local` and `!local` profile sections.
+
+The Loki4j appender pushes log lines to Loki in batches. The label pattern must use **low-cardinality fields only** (app, level, env) — never `requestId` or `traceId` as labels.
+
+**Inside the `<springProfile name="local">` section**, add the appender and reference it from the root:
+
+```xml
+<springProfile name="local">
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>
+        %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [rid=%X{requestId} uid=%X{userId} trace=%X{traceId} span=%X{spanId}] - %msg%n
+      </pattern>
+    </encoder>
+  </appender>
+
+  <!-- Push logs to Loki directly from logback — no Promtail needed -->
+  <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+    <http>
+      <url>${LOKI_URL:-http://localhost:3100}/loki/api/v1/push</url>
+    </http>
+    <format>
+      <label>
+        <!-- Low-cardinality labels only. requestId/traceId go in the message, not here. -->
+        <pattern>app=instagram,env=local,level=%level</pattern>
+        <readMarkers>false</readMarkers>
+      </label>
+      <message class="com.github.loki4j.logback.JsonLayout"/>
+      <sortByTime>false</sortByTime>
+    </format>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="LOKI"/>
+  </root>
+
+  <logger name="com.instagram" level="DEBUG"/>
+  <logger name="org.hibernate.SQL" level="DEBUG"/>
+  <logger name="org.springframework.web" level="INFO"/>
+  <logger name="org.springframework.security" level="INFO"/>
+</springProfile>
+```
+
+**Inside the `<springProfile name="!local">` section**, add the same LOKI appender (the JSON console appender stays):
+
+```xml
+<springProfile name="!local">
+  <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+      <customFields>{"app":"instagram"}</customFields>
+    </encoder>
+  </appender>
+
+  <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+    <http>
+      <url>${LOKI_URL:-http://localhost:3100}/loki/api/v1/push</url>
+    </http>
+    <format>
+      <label>
+        <pattern>app=instagram,env=prod,level=%level</pattern>
+        <readMarkers>false</readMarkers>
+      </label>
+      <message class="com.github.loki4j.logback.JsonLayout"/>
+      <sortByTime>false</sortByTime>
+    </format>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="JSON_CONSOLE"/>
+    <appender-ref ref="LOKI"/>
+  </root>
+
+  <logger name="com.instagram" level="INFO"/>
+  <logger name="org.hibernate.SQL" level="WARN"/>
+</springProfile>
+```
+
+> **`JsonLayout`** serialises the log event as JSON including all MDC fields (`requestId`, `userId`, `traceId`, `spanId`) as top-level keys. This makes LogQL pipeline filters like `| json | traceId="abc123"` work without any custom field extraction.
+
+---
+
+### 5. Create tempo/tempo.yml
+
+Create the directory and config file:
+
+```powershell
+New-Item -ItemType Directory -Force -Path tempo
+```
+
+Create `tempo/tempo.yml`:
+
+```yaml
+stream_over_http_enabled: true
+
+server:
+  http_listen_port: 3200
+  log_level: info
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+ingester:
+  max_block_duration: 5m
+
+compactor:
+  compaction:
+    block_retention: 1h       # Keep traces for 1 hour in local dev (short = small disk)
+
+metrics_generator:
+  registry:
+    external_labels:
+      source: tempo
+      cluster: docker-compose
+  storage:
+    path: /var/tempo/generator/wal
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write   # Push span-derived metrics to Prometheus
+        send_exemplars: true
+
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/blocks
+
+overrides:
+  defaults:
+    metrics_generator:
+      processors: [service-graphs, span-metrics]   # Generates RED metrics from spans
+```
+
+> **`metrics_generator`** derives request rate, error rate, and duration (RED) metrics from the incoming spans and pushes them to Prometheus via remote-write. This means you can graph `traces_spanmetrics_calls_total` in Grafana without any code change.
+
+---
+
+### 6. Create loki/loki-config.yml
+
+Create the directory and config file:
+
+```powershell
+New-Item -ItemType Directory -Force -Path loki
+```
+
+Create `loki/loki-config.yml`:
+
+```yaml
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+  log_level: info
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+query_range:
+  results_cache:
+    cache:
+      embedded_cache:
+        enabled: true
+        max_size_mb: 100
+
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+ruler:
+  alertmanager_url: http://alertmanager:9093
+
+limits_config:
+  reject_old_samples: true
+  reject_old_samples_max_age: 168h
+  allow_structured_metadata: true
+```
+
+---
+
+### 7. Create prometheus/prometheus.yml
 
 ```powershell
 New-Item -ItemType Directory -Force -Path prometheus
@@ -125,8 +377,8 @@ Create `prometheus/prometheus.yml`:
 
 ```yaml
 global:
-  scrape_interval: 15s       # How often Prometheus scrapes each target
-  evaluation_interval: 15s   # How often alert rules are evaluated
+  scrape_interval: 15s
+  evaluation_interval: 15s
 
 alerting:
   alertmanagers:
@@ -138,43 +390,37 @@ rule_files:
   - /etc/prometheus/alerts.yml
 
 scrape_configs:
+  # Scrape the Spring Boot backend
   - job_name: 'instagram-backend'
     metrics_path: /actuator/prometheus
     static_configs:
-      # 'host.docker.internal' resolves to the host machine from inside Docker
-      # on Linux, replace with the actual host IP (e.g. 172.17.0.1)
+      # host.docker.internal resolves to the host machine from inside Docker Desktop (Windows/Mac)
+      # On Linux native Docker: replace with actual host IP or add extra_hosts to docker-compose.yml
       - targets: ['host.docker.internal:8080']
-    # If the Actuator endpoint requires authentication (TASK-10.27), add:
-    # basic_auth:
-    #   username: prometheus
-    #   password: <password>
-    # For local dev you may temporarily open /actuator/prometheus to all:
-    # .requestMatchers("/actuator/prometheus").permitAll()
+
+  # Scrape Tempo's own metrics (useful for monitoring the tracing pipeline)
+  - job_name: 'tempo'
+    static_configs:
+      - targets: ['tempo:3200']
 ```
 
-> **Windows / Docker Desktop note:** `host.docker.internal` resolves correctly on Docker Desktop for Windows and Mac. On Linux, add `extra_hosts: ["host.docker.internal:host-gateway"]` to the `prometheus` service in `docker-compose.yml`.
-
-**Temporary permission for local Prometheus scraping:**
-
-The Actuator security added in TASK-10.27 requires `ROLE_ADMIN` for `/actuator/prometheus`. For local dev, add one more permitted matcher in `SecurityConfig.java` while Prometheus scraping is set up:
-
-```java
-.requestMatchers("/actuator/prometheus").permitAll()   // TODO: restrict with basic_auth in prod
-```
+> **Temporary permission note:** The Actuator security from TASK-10.27 requires `ROLE_ADMIN` for `/actuator/prometheus`. For local Prometheus scraping to work without auth, add this matcher in `SecurityConfig.java`:
+> ```java
+> .requestMatchers("/actuator/prometheus").permitAll()   // TODO: restrict with basic_auth in prod
+> ```
 
 ---
 
-### 3. Create prometheus/alerts.yml
+### 8. Create prometheus/alerts.yml
 
-Create `prometheus/alerts.yml` with three alert rules:
+Create `prometheus/alerts.yml`:
 
 ```yaml
 groups:
   - name: instagram-alerts
-    interval: 30s   # Evaluate this group every 30 s (overrides global)
+    interval: 30s
     rules:
 
-      # --- 1. High 5xx error rate ---
       - alert: High5xxErrorRate
         expr: |
           (
@@ -188,10 +434,9 @@ groups:
         annotations:
           summary: "High 5xx error rate (>5%) for {{ $labels.job }}"
           description: >
-            {{ $labels.job }} has a 5xx error rate of {{ humanizePercentage $value }}
-            over the last 5 minutes. Investigate recent deployments or database errors.
+            {{ $labels.job }} 5xx error rate is {{ humanizePercentage $value }}
+            over the last 5 minutes.
 
-      # --- 2. High p99 latency ---
       - alert: HighP99Latency
         expr: |
           histogram_quantile(0.99,
@@ -204,10 +449,8 @@ groups:
           summary: "p99 latency > 2 s on {{ $labels.uri }}"
           description: >
             The 99th-percentile response time for {{ $labels.uri }} is
-            {{ humanizeDuration $value }}. Check for slow database queries or
-            missing cache hits (TASK-10.3).
+            {{ humanizeDuration $value }}.
 
-      # --- 3. Instance down ---
       - alert: InstanceDown
         expr: up{job="instagram-backend"} == 0
         for: 1m
@@ -215,20 +458,18 @@ groups:
           severity: critical
         annotations:
           summary: "Backend instance is down"
-          description: "The instagram-backend target has been unreachable for more than 1 minute."
+          description: "instagram-backend has been unreachable for more than 1 minute."
 ```
 
 ---
 
-### 4. Create alertmanager/alertmanager.yml
-
-Create the directory and file:
+### 9. Create alertmanager/alertmanager.yml
 
 ```powershell
 New-Item -ItemType Directory -Force -Path alertmanager
 ```
 
-Create `alertmanager/alertmanager.yml` with a placeholder receiver. Replace the Slack webhook URL with a real one to enable actual notifications:
+Create `alertmanager/alertmanager.yml`:
 
 ```yaml
 global:
@@ -243,10 +484,7 @@ route:
 
 receivers:
   - name: 'slack-placeholder'
-    # To enable Slack notifications:
-    # 1. Create an incoming webhook at https://api.slack.com/messaging/webhooks
-    # 2. Replace the URL below with your webhook URL
-    # 3. Set SLACK_WEBHOOK_URL as an env var and reference it here
+    # Replace the URL below with a real Slack incoming webhook to enable notifications.
     slack_configs:
       - api_url: 'https://hooks.slack.com/services/PLACEHOLDER/PLACEHOLDER/PLACEHOLDER'
         channel: '#alerts'
@@ -264,9 +502,7 @@ inhibit_rules:
 
 ---
 
-### 5. Create Grafana provisioning files
-
-Create the directory structure:
+### 10. Create Grafana provisioning files
 
 ```powershell
 New-Item -ItemType Directory -Force -Path "docs/infra/grafana/provisioning/datasources"
@@ -274,7 +510,7 @@ New-Item -ItemType Directory -Force -Path "docs/infra/grafana/provisioning/dashb
 New-Item -ItemType Directory -Force -Path "docs/infra/grafana/dashboards"
 ```
 
-**`docs/infra/grafana/provisioning/datasources/prometheus.yml`** — auto-provisions the Prometheus datasource:
+**`docs/infra/grafana/provisioning/datasources/datasources.yml`** — provisions all three datasources with cross-linking:
 
 ```yaml
 apiVersion: 1
@@ -282,14 +518,54 @@ apiVersion: 1
 datasources:
   - name: Prometheus
     type: prometheus
+    uid: prometheus
     url: http://prometheus:9090
     access: proxy
     isDefault: true
     jsonData:
       timeInterval: '15s'
+      exemplarTraceIdDestinations:
+        - name: traceID
+          datasourceUid: tempo    # Click a metric exemplar → jump to Tempo trace
+
+  - name: Loki
+    type: loki
+    uid: loki
+    url: http://loki:3100
+    access: proxy
+    jsonData:
+      maxLines: 1000
+      derivedFields:
+        - datasourceName: Tempo
+          datasourceUid: tempo
+          matcherRegex: '"traceId":"([a-f0-9]+)"'   # Extract traceId from JSON log line
+          name: TraceID
+          url: '$${__value.raw}'   # Click traceId in a log line → open Tempo trace
+
+  - name: Tempo
+    type: tempo
+    uid: tempo
+    url: http://tempo:3200
+    access: proxy
+    jsonData:
+      tracesToLogsV2:
+        datasourceUid: loki     # Click a span in Tempo → open matching Loki logs
+        spanStartTimeShift: '-1h'
+        spanEndTimeShift: '1h'
+        tags:
+          - key: 'service.name'
+            value: 'app'
+      tracesToMetrics:
+        datasourceUid: prometheus
+      serviceMap:
+        datasourceUid: prometheus
+      search:
+        hide: false
+      nodeGraph:
+        enabled: true
 ```
 
-**`docs/infra/grafana/provisioning/dashboards/dashboard.yml`** — tells Grafana where to find dashboard JSON files:
+**`docs/infra/grafana/provisioning/dashboards/dashboard.yml`**:
 
 ```yaml
 apiVersion: 1
@@ -306,9 +582,9 @@ providers:
 
 ---
 
-### 6. Create the Grafana dashboard JSON
+### 11. Create the Grafana dashboard JSON
 
-Create `docs/infra/grafana/dashboards/instagram-overview.json`. This is a minimal but complete dashboard JSON that Grafana will import automatically on startup. The PromQL queries reference the `http_server_requests_seconds` metric auto-instrumented by Spring Boot Actuator.
+Create `docs/infra/grafana/dashboards/instagram-overview.json`:
 
 ```json
 {
@@ -328,6 +604,7 @@ Create `docs/infra/grafana/dashboards/instagram-overview.json`. This is a minima
       "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "sum(rate(http_server_requests_seconds_count{application=\"instagram\"}[1m])) by (uri)",
           "legendFormat": "{{uri}}",
           "refId": "A"
@@ -341,6 +618,7 @@ Create `docs/infra/grafana/dashboards/instagram-overview.json`. This is a minima
       "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "sum(rate(http_server_requests_seconds_count{application=\"instagram\",status=~\"5..\"}[1m]))",
           "legendFormat": "5xx errors/s",
           "refId": "A"
@@ -354,11 +632,13 @@ Create `docs/infra/grafana/dashboards/instagram-overview.json`. This is a minima
       "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"instagram\"}[5m])) by (le))",
           "legendFormat": "p95",
           "refId": "A"
         },
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{application=\"instagram\"}[5m])) by (le))",
           "legendFormat": "p99",
           "refId": "B"
@@ -372,6 +652,7 @@ Create `docs/infra/grafana/dashboards/instagram-overview.json`. This is a minima
       "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "jvm_memory_used_bytes{application=\"instagram\",area=\"heap\"}",
           "legendFormat": "{{id}}",
           "refId": "A"
@@ -385,13 +666,35 @@ Create `docs/infra/grafana/dashboards/instagram-overview.json`. This is a minima
       "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "hikaricp_connections_active{application=\"instagram\"}",
           "legendFormat": "Active",
           "refId": "A"
         },
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "hikaricp_connections_pending{application=\"instagram\"}",
           "legendFormat": "Pending",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Posts Created / Likes Added",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "increase(posts_created_total{application=\"instagram\"}[5m])",
+          "legendFormat": "posts created (5m)",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "increase(likes_added_total{application=\"instagram\"}[5m])",
+          "legendFormat": "likes added (5m)",
           "refId": "B"
         }
       ]
@@ -402,95 +705,145 @@ Create `docs/infra/grafana/dashboards/instagram-overview.json`. This is a minima
 
 ---
 
-### 7. Start the full stack
+### 12. Replace Zipkin with the full stack in docker-compose.yml
 
-```powershell
-docker compose up -d prometheus alertmanager grafana
+Open `docker-compose.yml`. Remove the `zipkin` service block entirely. Add the following five services in its place (after the existing `redis` service):
+
+```yaml
+  loki:
+    image: grafana/loki:3.0.0
+    restart: always
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3100/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  tempo:
+    image: grafana/tempo:2.4.1
+    restart: always
+    ports:
+      - "3200:3200"   # Tempo HTTP API
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP — backend sends spans here
+    volumes:
+      - ./tempo/tempo.yml:/etc/tempo/tempo.yml:ro
+      - tempo_data:/var/tempo
+    command: -config.file=/etc/tempo/tempo.yml
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3200/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=7d'
+      - '--web.enable-lifecycle'
+      - '--enable-feature=exemplar-storage'
+      - '--enable-feature=remote-write-receiver'
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:9090/-/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    restart: always
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:9093/-/healthy || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  grafana:
+    image: grafana/grafana:10.4.3
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docs/infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docs/infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 ```
 
-Wait 30 seconds for Prometheus to complete its first scrape. Then open:
+Update the `volumes:` block at the bottom of `docker-compose.yml`:
 
-| Service | URL | Credentials |
-|---|---|---|
-| Prometheus | `http://localhost:9090` | none (no auth by default) |
-| Alertmanager | `http://localhost:9093` | none |
-| Grafana | `http://localhost:3000` | admin / admin |
+```yaml
+volumes:
+  postgres_data:
+  minio_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  tempo_data:
+```
 
 ---
 
-### 8. Verify the dashboard in Grafana
+### 13. Start the stack and verify
 
-1. Open `http://localhost:3000` and log in with `admin` / `admin`.
-2. Navigate to **Dashboards** → **Browse** → you should see **Instagram — Service Overview**.
-3. Click the dashboard. Panels should show data if the backend is running and Prometheus has scraped it.
-4. Send a few requests to the backend to generate traffic and watch the Request Rate panel update.
-
----
-
-### 9. Trigger the High5xxErrorRate alert (optional verification)
-
-To verify alerting works, temporarily force a 5xx response rate above 5% by sending many requests to a non-existent endpoint:
+Bring up the new stack:
 
 ```powershell
-# Send 100 requests that will return 404 (which is not a 5xx) — adjust to trigger 5xx if needed
-1..100 | ForEach-Object {
-    try { Invoke-RestMethod -Uri "http://localhost:8080/api/v1/nonexistent" -Headers @{ Authorization = "Bearer $token" } } catch {}
-}
+docker compose up -d loki tempo prometheus alertmanager grafana
 ```
 
-Wait 2–3 minutes. Check the Prometheus Alerts page at `http://localhost:9090/alerts` — the alert should move from `inactive` to `firing` if the 5xx rate threshold is exceeded. In production, Alertmanager would route this to the Slack webhook.
-
----
-
-### 10. Document how to open and use the dashboard
-
-Create `docs/infra/observability-setup.md`:
-
-```markdown
-# Observability Stack Setup
-
-## Services
-
-| Service | URL | Purpose |
-|---|---|---|
-| Prometheus | http://localhost:9090 | Metric storage and alerting |
-| Alertmanager | http://localhost:9093 | Alert routing and silencing |
-| Grafana | http://localhost:3000 | Dashboards (admin/admin locally) |
-| Zipkin | http://localhost:9411 | Distributed traces |
-
-## Start the stack
+Restart the backend to pick up the new OTLP exporter and Loki4j appender:
 
 ```powershell
-docker compose up -d prometheus alertmanager grafana zipkin
+cd backend
+mvn spring-boot:run
 ```
 
-## Open the dashboard
-
-Navigate to http://localhost:3000 → Dashboards → Instagram — Service Overview.
-
-## Dashboard panels
-
-- **Request Rate**: requests/second per URI, 1-minute rate
-- **5xx Error Rate**: server errors per second
-- **p95/p99 Latency**: derived from `http_server_requests_seconds` histogram
-- **JVM Heap Used**: per memory pool
-- **HikariCP Active Connections**: active and pending pool connections
-
-## Alerting
-
-Alert rules live in `prometheus/alerts.yml`. To silence an alert during maintenance,
-use the Alertmanager UI at http://localhost:9093.
-```
+Send a few requests to generate signal, then verify each component.
 
 ---
 
 ## Checklist
 
-- [ ] Add `prometheus`, `grafana`, and `alertmanager` services to `docker-compose.yml`; point Prometheus at `/actuator/prometheus`
-- [ ] Provision a Grafana dashboard (JSON under `docs/infra/grafana/`) with panels: request rate, 5xx error rate, p95/p99 latency (from `http_server_requests`), JVM heap, HikariCP active connections
-- [ ] Define Prometheus alert rules in `prometheus/alerts.yml`: high 5xx rate, high p99 latency, `instance down`
-- [ ] Wire Alertmanager (or Grafana alerting) to a notification channel (Slack webhook / email) — placeholder receiver config is fine
-- [ ] Document how to open Grafana and import/verify the dashboard in `docs/infra/`
+- [ ] `pom.xml` — removed `opentelemetry-exporter-zipkin` + `zipkin-reporter-brave`; added `opentelemetry-exporter-otlp` + `loki-logback-appender:1.5.2`
+- [ ] `application.yml` — replaced `spring.zipkin.tracing.endpoint` with `management.otlp.tracing.endpoint`
+- [ ] `application-local.yml` — same swap, pointing to `http://localhost:4318/v1/traces`
+- [ ] `logback-spring.xml` — Loki4j appender added to both `local` and `!local` profiles
+- [ ] `docker-compose.yml` — Zipkin removed; Loki, Tempo, Prometheus, Alertmanager, Grafana added with volume-mounted configs
+- [ ] Config files created: `tempo/tempo.yml`, `loki/loki-config.yml`, `prometheus/prometheus.yml`, `prometheus/alerts.yml`, `alertmanager/alertmanager.yml`
+- [ ] Grafana provisioning: `datasources.yml` (all 3 sources with cross-links), `dashboard.yml`, `instagram-overview.json`
 
 ---
 
@@ -498,66 +851,88 @@ use the Alertmanager UI at http://localhost:9093.
 
 **1. Prometheus scrapes the backend:**
 
-Open `http://localhost:9090/targets`. The `instagram-backend` target should show `State: UP` and a recent `Last Scrape` time.
+Open `http://localhost:9090/targets`. The `instagram-backend` target must show `State: UP`.
 
-**2. Grafana dashboard renders panels:**
+**2. Traces appear in Grafana → Explore → Tempo:**
 
-Open `http://localhost:3000`, log in, open the **Instagram — Service Overview** dashboard. All five panels should render with data (non-empty graphs). If panels show "No data", check that Prometheus is scraping successfully and that the backend has been running for at least one scrape interval (15 s).
+Open `http://localhost:3000` → Explore → select **Tempo** datasource → click **Search** tab → set Service Name to `instagram`. Traces should appear after you send a request to the backend.
 
-**3. Alert rules are loaded in Prometheus:**
+**3. `traceId` in backend log matches trace in Tempo:**
 
-Open `http://localhost:9090/alerts`. You should see `High5xxErrorRate`, `HighP99Latency`, and `InstanceDown` listed as `inactive` (no threshold exceeded yet).
+Copy a `trace=` hex value from the backend console. In Grafana → Explore → Tempo, paste the value in the **TraceID** field. The matching trace waterfall must appear.
 
-**4. Alertmanager is reachable:**
+**4. Logs appear in Grafana → Explore → Loki:**
 
-```powershell
-Invoke-RestMethod -Uri "http://localhost:9093/-/healthy"
+Select **Loki** datasource in Explore. Run:
+```logql
+{app="instagram"} | json
 ```
+Log lines from the backend should appear. Run:
+```logql
+{app="instagram"} | json | traceId="<paste-traceId>"
+```
+Only lines from that request should appear.
 
-Expected: `OK`
+**5. Click a log line's TraceID link:**
+
+Expand a log line in Loki Explore. A **TraceID** derived field should appear as a clickable link. Click it — it must open the Tempo trace for that request.
+
+**6. Dashboard renders:**
+
+Open `http://localhost:3000` → Dashboards → **Instagram — Service Overview**. All six panels must show data (non-empty graphs) after you send a few requests.
+
+**7. Alert rules loaded in Prometheus:**
+
+Open `http://localhost:9090/alerts`. `High5xxErrorRate`, `HighP99Latency`, and `InstanceDown` must be listed as `inactive`.
 
 ---
 
 ## Notes / Gotchas
 
-**"Prometheus cannot reach the backend — target shows 'connection refused'."**
-On Docker Desktop for Windows/Mac, use `host.docker.internal:8080` as the target. On Linux (native Docker), add `extra_hosts: ["host.docker.internal:host-gateway"]` to the `prometheus` service or use the host's actual LAN IP address.
+**"Tempo returns 404 for traces — nothing appears in Grafana."**
+The backend must be pointing at `http://localhost:4318/v1/traces` (OTLP HTTP, not Zipkin format). Check the backend console for a log line like `Exporting span ...` or an OTel error. Also confirm Tempo is healthy: `Invoke-RestMethod -Uri "http://localhost:3200/ready"` should return `ready`.
 
-**"Grafana shows 'Datasource not found' on the dashboard."**
-The provisioning YAML must use `name: Prometheus` (exactly, case-sensitive) and the datasource provisioning file must be mounted at `/etc/grafana/provisioning/datasources/`. Check that the Docker volume mount path is correct in `docker-compose.yml`.
+**"Loki4j appender throws `Connection refused` on startup."**
+Loki4j queues and retries — a short connection failure on startup is harmless. The backend will start normally and resume pushing logs once Loki is up. If logs never arrive, verify `LOKI_URL` resolves correctly and that port 3100 is reachable from the host.
 
-**"The `http_server_requests_seconds` metric does not appear."**
-This metric is auto-registered by Spring Boot Actuator when `micrometer-registry-prometheus` is on the classpath (added in TASK-10.27). If it is missing, confirm that at least one HTTP request has been made to the backend since startup — the metric is registered lazily on first use.
+**"The `traceId` link in Loki does not open Tempo."**
+The `matcherRegex` in `datasources.yml` is `"traceId":"([a-f0-9]+)"`. This must match the exact JSON key name in the log line. If you changed the MDC key name in `logback-spring.xml`, update the regex to match. Also confirm the Grafana datasource UID `tempo` matches the `uid: tempo` set in the provisioning file.
 
-**"Alert stays in 'pending' but never fires."**
-The `for: 2m` clause means the condition must be true for 2 continuous minutes before the alert fires. Wait the full duration, or temporarily lower `for: 10s` in `alerts.yml` and reload Prometheus (`curl -X POST http://localhost:9090/-/reload`).
+**"Prometheus shows `connection refused` for `host.docker.internal:8080`."**
+On Linux native Docker (not Docker Desktop), `host.docker.internal` does not resolve automatically. Add to the `prometheus` service in `docker-compose.yml`:
+```yaml
+extra_hosts:
+  - "host.docker.internal:host-gateway"
+```
 
-**"I want to use Grafana's built-in alerting instead of Alertmanager."**
-Grafana 10+ can send alerts directly to Slack/email/PagerDuty without Alertmanager. Configure a **Contact Point** in Grafana → Alerting → Contact Points and attach it to an **Alert Rule** derived from a dashboard panel. This is simpler for small teams; Alertmanager is more powerful for complex routing and silencing.
+**"Tempo metrics_generator remote_write fails."**
+This is non-critical on first startup — Tempo retries. It requires Prometheus to have `--enable-feature=remote-write-receiver` in its command args, which is already included in step 12. If you see repeated errors, confirm the flag is present by checking `docker compose logs prometheus`.
 
-**References:**
-- [Prometheus configuration docs](https://prometheus.io/docs/prometheus/latest/configuration/configuration/)
-- [Prometheus alerting rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
-- [Grafana provisioning docs](https://grafana.com/docs/grafana/latest/administration/provisioning/)
-- [Alertmanager configuration](https://prometheus.io/docs/alerting/latest/configuration/)
+**"I still have `spring.zipkin.tracing.endpoint` in my config."**
+Spring Boot will try to auto-configure a Zipkin exporter if the property exists but the exporter is not on the classpath. This produces a warning but no failure. Remove the property to keep the config clean.
+
+---
+
+## References
+
+- [Micrometer Tracing OTLP](https://docs.micrometer.io/tracing/reference/reporters/otlp.html)
+- [Grafana Tempo documentation](https://grafana.com/docs/tempo/latest/)
+- [Grafana Loki documentation](https://grafana.com/docs/loki/latest/)
+- [Loki4j logback appender](https://loki4j.github.io/loki-logback-appender/)
+- [Grafana datasource provisioning](https://grafana.com/docs/grafana/latest/administration/provisioning/)
+- [Prometheus configuration](https://prometheus.io/docs/prometheus/latest/configuration/configuration/)
 
 **Cross-task references:**
-- [TASK-10.27](TASK-10.27-actuator-micrometer.md) — the Prometheus scrape endpoint and custom counters built here
-- [TASK-10.30](TASK-10.30-loki-log-aggregation.md) — adds Loki as a second Grafana datasource alongside Prometheus
-- [TASK-10.31](TASK-10.31-sli-slo-error-budget.md) — adds recording rules and burn-rate alerts on top of the Prometheus setup
+- [TASK-10.27](TASK-10.27-actuator-micrometer.md) — Actuator and custom counters (posts, likes, users)
+- [TASK-10.28](TASK-10.28-distributed-tracing.md) — Micrometer OTel bridge that produces the traces Tempo stores
+- [TASK-10.31](TASK-10.31-sli-slo-error-budget.md) — SLI/SLO recording rules built on top of Prometheus
 
 ---
 
 ## Learning Resources
 
-> New to these concepts? Each link below teaches one idea used in this task. Skim the *Concepts* first, then keep the *Official docs* open while you work.
-
 ### Concepts to learn
-- **Prometheus data model & scraping** — pull-based metric collection — https://prometheus.io/docs/introduction/overview/
-- **PromQL basics** — querying time-series — https://prometheus.io/docs/prometheus/latest/querying/basics/
-- **Alerting rules** — express thresholds that fire alerts — https://prometheus.io/docs/alerting/latest/configuration/
-- **Building Grafana dashboards** — panels, variables, data sources — https://grafana.com/docs/grafana/latest/dashboards/
-
-### Official docs (code reference)
-- **Prometheus documentation** — https://prometheus.io/docs/
-- **Grafana documentation** — https://grafana.com/docs/grafana/latest/
+- **OpenTelemetry OTLP** — the wire protocol for traces, metrics, and logs — https://opentelemetry.io/docs/specs/otlp/
+- **Grafana LGTM stack** — how Loki, Grafana, Tempo, and Mimir/Prometheus fit together — https://grafana.com/go/webinar/getting-started-with-grafana-lgtm-stack/
+- **Loki label cardinality** — why you must not put `requestId` in labels — https://grafana.com/docs/loki/latest/get-started/labels/cardinality/
+- **Tempo TraceQL** — querying traces by attribute — https://grafana.com/docs/tempo/latest/traceql/
