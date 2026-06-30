@@ -837,13 +837,13 @@ Send a few requests to generate signal, then verify each component.
 
 ## Checklist
 
-- [ ] `pom.xml` — removed `opentelemetry-exporter-zipkin` + `zipkin-reporter-brave`; added `opentelemetry-exporter-otlp` + `loki-logback-appender:1.5.2`
-- [ ] `application.yml` — replaced `spring.zipkin.tracing.endpoint` with `management.otlp.tracing.endpoint`
-- [ ] `application-local.yml` — same swap, pointing to `http://localhost:4318/v1/traces`
-- [ ] `logback-spring.xml` — Loki4j appender added to both `local` and `!local` profiles
-- [ ] `docker-compose.yml` — Zipkin removed; Loki, Tempo, Prometheus, Alertmanager, Grafana added with volume-mounted configs
-- [ ] Config files created: `tempo/tempo.yml`, `loki/loki-config.yml`, `prometheus/prometheus.yml`, `prometheus/alerts.yml`, `alertmanager/alertmanager.yml`
-- [ ] Grafana provisioning: `datasources.yml` (all 3 sources with cross-links), `dashboard.yml`, `instagram-overview.json`
+- [x] `pom.xml` — removed `opentelemetry-exporter-zipkin` + `zipkin-reporter-brave`; added `opentelemetry-exporter-otlp` + `loki-logback-appender:1.5.2`
+- [x] `application.yml` — replaced `spring.zipkin.tracing.endpoint` with `management.otlp.tracing.endpoint`
+- [x] `application-local.yml` — same swap, pointing to `http://localhost:4318/v1/traces`
+- [x] `logback-spring.xml` — Loki4j appender added to both `local` and `!local` profiles
+- [x] `docker-compose.yml` — Zipkin removed; Loki, Tempo, Prometheus, Alertmanager, Grafana added with volume-mounted configs
+- [x] Config files created: `tempo/tempo.yml`, `loki/loki-config.yml`, `prometheus/prometheus.yml`, `prometheus/alerts.yml`, `alertmanager/alertmanager.yml`
+- [x] Grafana provisioning: `datasources.yml` (all 3 sources with cross-links), `dashboard.yml`, `instagram-overview.json`
 
 ---
 
