@@ -234,23 +234,24 @@
             <artifactId>micrometer-tracing-bridge-otel</artifactId>
         </dependency>
 
-        <!-- OpenTelemetry exporter — sends spans to Zipkin in the Zipkin format -->
+        <!-- OTLP exporter — sends spans to Tempo via HTTP OTLP (port 4318) -->
         <dependency>
             <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-exporter-zipkin</artifactId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
         </dependency>
 
-        <!-- Required by the OTel exporter for the Zipkin HTTP sender -->
-        <dependency>
-            <groupId>io.zipkin.reporter2</groupId>
-            <artifactId>zipkin-reporter-brave</artifactId>
-        </dependency>
-
-        <!-- JDBC/Hibernate span instrumentation — wraps DataSource to emit a child span per query -->
+        <!-- JDBC tracing — wraps DataSource so every SQL query becomes a child span -->
         <dependency>
             <groupId>net.ttddyy.observation</groupId>
             <artifactId>datasource-micrometer-spring-boot</artifactId>
             <version>1.0.5</version>
+        </dependency>
+
+        <!-- Loki4j — pushes logback log lines directly to Loki, no Promtail needed -->
+        <dependency>
+            <groupId>com.github.loki4j</groupId>
+            <artifactId>loki-logback-appender</artifactId>
+            <version>1.5.2</version>
         </dependency>
 
     </dependencies>

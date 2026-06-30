@@ -14,8 +14,25 @@
       </encoder>
     </appender>
 
+    <!-- Push logs to Loki directly from logback — no Promtail needed -->
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+      <http>
+        <url>${LOKI_URL:-http://localhost:3100}/loki/api/v1/push</url>
+      </http>
+      <format>
+        <label>
+          <!-- Low-cardinality labels only. requestId/traceId go in the message, not here. -->
+          <pattern>app=instagram,env=local,level=%level</pattern>
+          <readMarkers>false</readMarkers>
+        </label>
+        <message class="com.github.loki4j.logback.JsonLayout"/>
+        <sortByTime>false</sortByTime>
+      </format>
+    </appender>
+
     <root level="INFO">
       <appender-ref ref="CONSOLE"/>
+      <appender-ref ref="LOKI"/>
     </root>
 
     <!-- Fine-grained levels for local development -->
@@ -39,8 +56,23 @@
       </encoder>
     </appender>
 
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+      <http>
+        <url>${LOKI_URL:-http://localhost:3100}/loki/api/v1/push</url>
+      </http>
+      <format>
+        <label>
+          <pattern>app=instagram,env=prod,level=%level</pattern>
+          <readMarkers>false</readMarkers>
+        </label>
+        <message class="com.github.loki4j.logback.JsonLayout"/>
+        <sortByTime>false</sortByTime>
+      </format>
+    </appender>
+
     <root level="INFO">
       <appender-ref ref="JSON_CONSOLE"/>
+      <appender-ref ref="LOKI"/>
     </root>
 
     <logger name="com.instagram" level="INFO"/>

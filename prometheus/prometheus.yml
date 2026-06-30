@@ -1,0 +1,26 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+scrape_configs:
+  # Scrape the Spring Boot backend
+  - job_name: "instagram-backend"
+    metrics_path: /actuator/prometheus
+    static_configs:
+      # host.docker.internal resolves to the host machine from inside Docker Desktop (Windows/Mac)
+      # On Linux native Docker: replace with actual host IP or add extra_hosts to docker-compose.yml
+      - targets: ["host.docker.internal:8080"]
+
+  # Scrape Tempo's own metrics (useful for monitoring the tracing pipeline)
+  - job_name: "tempo"
+    static_configs:
+      - targets: ["tempo:3200"]
