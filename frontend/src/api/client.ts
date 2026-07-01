@@ -8,6 +8,7 @@ import { navigationRef } from '../lib/navigationRef';
 // to every request (e.g., http://localhost:8080/api/v1/posts).
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
+  timeout: 10000,
 });
 
 // ============================================================================

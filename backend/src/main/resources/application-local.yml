@@ -51,3 +51,7 @@ management:
   otlp:
     tracing:
       endpoint: http://localhost:4318/v1/traces
+
+sentry:
+  dsn:
+  traces-sample-rate: 0.0

@@ -125,6 +125,14 @@ app:
     bucket: ${MINIO_BUCKET:instagram-media}
     cdn-base-url: ${CDN_BASE_URL:${MINIO_ENDPOINT:http://localhost:9000}}
 
+sentry:
+  dsn: ${SENTRY_DSN:}                # Empty by default — disables Sentry if not set
+  traces-sample-rate: 0.1
+  environment: ${SPRING_PROFILES_ACTIVE:local}
+  release: ${APP_VERSION:local}
+  tags:
+    service: instagram-backend
+
 bucket4j:
   enabled: true
   cache-to-use: jcache

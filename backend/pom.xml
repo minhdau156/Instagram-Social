@@ -216,6 +216,13 @@
             <version>7.4</version>
         </dependency>
 
+        <!-- Sentry — captures unhandled exceptions and sends them to Sentry -->
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-spring-boot-starter-jakarta</artifactId>
+            <version>7.9.0</version>
+        </dependency>
+
         <!-- Actuator: /actuator/health, /actuator/metrics, /actuator/prometheus -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
