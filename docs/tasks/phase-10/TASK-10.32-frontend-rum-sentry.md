@@ -334,11 +334,11 @@ Do not add user email addresses or message content to custom Sentry contexts.
 
 ## Checklist
 
-- [ ] Add error tracking — `@sentry/react` in the frontend, `sentry-spring-boot-starter` in the backend; DSNs via env vars (`VITE_SENTRY_DSN`, `SENTRY_DSN`)
-- [ ] Initialize Sentry in the React app and integrate it with the existing `ErrorBoundary`; upload source maps from the frontend build (TASK-10.45 / CI)
-- [ ] Report Core Web Vitals (LCP, INP, CLS) via the `web-vitals` package
-- [ ] Propagate `traceId` (TASK-10.28) from frontend → backend so a failed request links the browser event to the server span
-- [ ] Scrub PII (tokens, emails, message bodies) in `beforeSend`; document per-environment sampling rates
+- [x] Add error tracking — `@sentry/react` in the frontend, `sentry-spring-boot-starter` in the backend; DSNs via env vars (`VITE_SENTRY_DSN`, `SENTRY_DSN`)
+- [x] Initialize Sentry in the React app and integrate it with the existing `ErrorBoundary`; upload source maps from the frontend build (TASK-10.45 / CI)
+- [x] Report Core Web Vitals (LCP, INP, CLS) via the `web-vitals` package
+- [x] Propagate `traceId` (TASK-10.28) from frontend → backend so a failed request links the browser event to the server span
+- [x] Scrub PII (tokens, emails, message bodies) in `beforeSend`; document per-environment sampling rates
 
 ---
 
