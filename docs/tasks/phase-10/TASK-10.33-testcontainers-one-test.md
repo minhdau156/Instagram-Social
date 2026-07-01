@@ -239,15 +239,15 @@ You will see a line like `Pulling image 'postgres:15-alpine'` on the first run a
 
 ## Checklist
 
-- [ ] Add the Testcontainers + Postgres dependencies (test scope)
+- [x] Add the Testcontainers + Postgres dependencies (test scope)
   - In this project they are already present — confirm by checking `backend/pom.xml` for `org.testcontainers:postgresql` and `org.testcontainers:junit-jupiter`
-- [ ] Convert `SearchJpaAdapterIT` to use a `@Container PostgreSQLContainer`
-  - [ ] Add `@Testcontainers` class annotation
-  - [ ] Declare `static final PostgreSQLContainer<?> POSTGRES` with `@Container`
-  - [ ] Replace `@TestPropertySource` with a `@DynamicPropertySource` static method
-- [ ] Confirm the test passes against real Postgres, not H2
-  - [ ] `mvn test -Dtest=SearchJpaAdapterIT` exits with `BUILD SUCCESS`
-  - [ ] Full-text search tests (`searchPosts_ftsStemming`, `searchPosts_ftsMultiWord`, `searchPosts_ftsRelevanceOrdering`) pass — these require real Postgres and would fail or be meaningless on H2
+- [x] Convert `SearchJpaAdapterIT` to use a `@Container PostgreSQLContainer`
+  - [x] Add `@Testcontainers` class annotation
+  - [x] Declare `static final PostgreSQLContainer<?> POSTGRES` with `@Container`
+  - [x] Replace `@TestPropertySource` with a `@DynamicPropertySource` static method
+- [x] Confirm the test passes against real Postgres, not H2
+  - [x] `mvn test -Dtest=SearchJpaAdapterIT` exits with `BUILD SUCCESS`
+  - [x] Full-text search tests (`searchPosts_ftsStemming`, `searchPosts_ftsMultiWord`, `searchPosts_ftsRelevanceOrdering`) pass — these require real Postgres and would fail or be meaningless on H2
 
 ---
 

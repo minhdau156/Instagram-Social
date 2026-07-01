@@ -1,8 +1,4 @@
-ALTER TABLE users
-    DROP COLUMN role;
-
-
-    -- Create roles table
+-- Create roles table
 CREATE TABLE roles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(50) NOT NULL UNIQUE,
