@@ -18,7 +18,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import com.instagram.adapter.out.persistence.entity.HashtagJpaEntity;
 import com.instagram.adapter.out.persistence.entity.PostJpaEntity;
@@ -28,24 +29,39 @@ import com.instagram.domain.model.Hashtag;
 import com.instagram.domain.model.Post;
 import com.instagram.domain.model.PostStatus;
 import com.instagram.domain.model.PrivacyLevel;
+
 import com.instagram.domain.model.SearchHistory;
 import com.instagram.domain.model.User;
 import com.instagram.domain.model.UserStatus;
 import com.instagram.infrastructure.config.JpaConfig;
 import com.instagram.infrastructure.util.BlockFilter;
 
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
 @DataJpaTest
+@Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(JpaConfig.class)
-@TestPropertySource(properties = {
-        "spring.flyway.enabled=true",
-        "spring.jpa.hibernate.ddl-auto=none",
-        "spring.datasource.url=jdbc:postgresql://localhost:5432/instagram_test",
-        "spring.datasource.username=instagram",
-        "spring.datasource.password=changeme",
-        "spring.datasource.driver-class-name=org.postgresql.Driver"
-})
 class SearchJpaAdapterIT {
+
+    @Container
+    static final PostgreSQLContainer<?> POSTGRES =
+            new PostgreSQLContainer<>("postgres:15-alpine")
+                    .withDatabaseName("instagram_test")
+                    .withUsername("instagram")
+                    .withPassword("changeme");
+
+    @DynamicPropertySource
+    static void postgresProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRES::getUsername);
+        registry.add("spring.datasource.password", POSTGRES::getPassword);
+        registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
+        registry.add("spring.flyway.enabled", () -> "true");
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
+    }
 
     @Autowired
     private TestEntityManager tem;
