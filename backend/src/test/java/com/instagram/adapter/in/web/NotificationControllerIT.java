@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.instagram.adapter.in.web.dto.request.NotificationSettingsRequest;
 import com.instagram.adapter.in.web.dto.request.RegisterDeviceTokenRequest;
 import com.instagram.adapter.out.persistence.repository.DeviceTokenJpaRepository;
+import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.domain.port.in.user.GetUserUseCase;
 import com.instagram.infrastructure.security.JwtTokenProvider;
 import com.instagram.infrastructure.security.OAuth2SuccessHandler;
@@ -52,6 +53,8 @@ public class NotificationControllerIT {
     private UserDetailsService userDetailsService;
     @MockBean
     private OAuth2SuccessHandler oAuth2SuccessHandler;
+    @MockBean
+    private IdempotencyKeyJpaRepository idempotencyKeyJpaRepository;
     @MockBean
     private GetNotificationsUseCase getNotificationsUseCase;
     @MockBean

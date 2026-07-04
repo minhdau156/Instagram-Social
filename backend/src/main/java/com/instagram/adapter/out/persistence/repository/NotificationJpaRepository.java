@@ -33,7 +33,7 @@ public interface NotificationJpaRepository extends JpaRepository<NotificationJpa
       WHERE n.recipient_id = :recipientId
         AND (
             :cursorTs IS NULL
-            OR (n.created_at, n.id) < (CAST(:cursorTs AS timestamptz), CAST(:cursorId AS uuid))
+            OR (n.created_at, n.id) < (CAST(:cursorTs AS TIMESTAMP WITH TIME ZONE), CAST(:cursorId AS uuid))
         )
       ORDER BY n.created_at DESC, n.id DESC
       LIMIT :size

@@ -25,9 +25,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.domain.exception.NotConversationMemberException;
 import com.instagram.domain.model.Conversation;
 import com.instagram.domain.model.Message;
+import com.instagram.domain.model.User;
 import com.instagram.domain.port.in.messaging.AddGroupMemberUseCase;
 import com.instagram.domain.port.in.messaging.CreateConversationUseCase;
 import com.instagram.domain.port.in.messaging.GetConversationsUseCase;
@@ -35,6 +37,8 @@ import com.instagram.domain.port.in.messaging.GetMessagesUseCase;
 import com.instagram.domain.port.in.messaging.LeaveConversationUseCase;
 import com.instagram.domain.port.in.messaging.MarkReadUseCase;
 import com.instagram.domain.port.in.messaging.SendMessageUseCase;
+import com.instagram.domain.port.in.user.GetUserUseCase;
+import com.instagram.infrastructure.security.HtmlSanitizer;
 import com.instagram.infrastructure.security.JwtTokenProvider;
 import com.instagram.infrastructure.security.OAuth2SuccessHandler;
 import com.instagram.infrastructure.security.SecurityConfig;
@@ -56,6 +60,9 @@ class MessageControllerIT {
         private OAuth2SuccessHandler oAuth2SuccessHandler;
 
         @MockBean
+        private IdempotencyKeyJpaRepository idempotencyKeyJpaRepository;
+
+        @MockBean
         private GetConversationsUseCase getConversationsUseCase;
         @MockBean
         private CreateConversationUseCase createConversationUseCase;
@@ -71,6 +78,12 @@ class MessageControllerIT {
         private AddGroupMemberUseCase addGroupMemberUseCase;
         @MockBean
         private LeaveConversationUseCase leaveConversationUseCase;
+
+        @MockBean
+        private GetUserUseCase getUserUseCase;
+
+        @MockBean 
+        private HtmlSanitizer htmlSanitizer;
 
         // ── helpers ──────────────────────────────────────────────────────────────
 
@@ -120,7 +133,7 @@ class MessageControllerIT {
         void createConversation_returns201WithConversation() throws Exception {
                 Conversation conversation = buildConversation();
                 when(createConversationUseCase.createConversation(any())).thenReturn(conversation);
-
+                when(getUserUseCase.getUser(any())).thenReturn(User.builder().id(UUID.randomUUID()).username("testuser").build());
                 String body = """
                                 {
                                   "participantIds": ["%s"],

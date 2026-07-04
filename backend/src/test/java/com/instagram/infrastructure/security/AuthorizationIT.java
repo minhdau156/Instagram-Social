@@ -30,6 +30,7 @@ import com.instagram.adapter.in.web.RoleAdminController;
 import com.instagram.adapter.in.web.dto.request.AssignRoleRequest;
 import com.instagram.adapter.in.web.dto.request.ReviewReportRequest;
 import com.instagram.adapter.in.web.dto.request.SuspendUserRequest;
+import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.application.service.AdminService;
 import com.instagram.application.service.RbacService;
 import com.instagram.domain.model.PermissionName;
@@ -65,6 +66,8 @@ public class AuthorizationIT {
     private UserDetailsService userDetailsService;
     @MockBean
     private OAuth2SuccessHandler oAuth2SuccessHandler;
+    @MockBean
+    private IdempotencyKeyJpaRepository idempotencyKeyJpaRepository;
 
     // Domain ports used by AdminService and RbacService
     @MockBean

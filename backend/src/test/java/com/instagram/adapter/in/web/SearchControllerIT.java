@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.domain.model.Hashtag;
 import com.instagram.domain.model.Post;
 import com.instagram.domain.model.PostStatus;
@@ -57,6 +58,8 @@ class SearchControllerIT {
     private UserDetailsService userDetailsService;
     @MockBean
     private OAuth2SuccessHandler oAuth2SuccessHandler;
+    @MockBean
+    private IdempotencyKeyJpaRepository idempotencyKeyJpaRepository;
 
     // ── Search use case mocks ────────────────────────────────────────────── //
     @MockBean

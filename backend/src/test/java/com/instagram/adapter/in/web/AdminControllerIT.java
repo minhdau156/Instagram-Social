@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.instagram.adapter.in.web.dto.request.ReviewReportRequest;
 import com.instagram.adapter.in.web.dto.request.SuspendUserRequest;
+import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.domain.model.Report;
 import com.instagram.domain.model.ReportEntityType;
 import com.instagram.domain.model.ReportStatus;
@@ -71,6 +72,11 @@ public class AdminControllerIT {
     @MockBean
     private SearchUsersUseCase searchUsersUseCase;
 
+    
+
+    @MockBean
+    private IdempotencyKeyJpaRepository idempotencyKeyJpaRepository;
+    
     private final String CURRENT_USER_ID = "550e8400-e29b-41d4-a716-446655440000";
     private final String REPORTER_ID = "550e8400-e29b-41d4-a716-446655440001";
     private final String TARGET_ID = "550e8400-e29b-41d4-a716-446655440002";
@@ -191,7 +197,7 @@ public class AdminControllerIT {
     }
 
     @Test
-    @WithMockUser(username = CURRENT_USER_ID, roles = "ADMIN")
+    @WithMockUser(username = CURRENT_USER_ID, authorities = {"ROLE_ADMIN", "USER_VIEW"})
     void searchUsers_whenValid_returnUserList() throws Exception {
         List<User> users = List.of(buildUser(UUID.fromString(TARGET_ID), "target_user", UserStatus.ACTIVE));
         when(searchUsersUseCase.searchUsers(any(SearchUsersUseCase.Query.class)))

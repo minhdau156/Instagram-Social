@@ -48,7 +48,7 @@ public interface CommentJpaRepository extends JpaRepository<CommentJpaEntity, UU
         AND c.parent_id IS NULL
         AND (
             :cursorTs IS NULL
-            OR (c.created_at, c.id) > (CAST(:cursorTs AS timestamptz), CAST(:cursorId AS uuid))
+            OR (c.created_at, c.id) > (CAST(:cursorTs AS TIMESTAMP WITH TIME ZONE), CAST(:cursorId AS uuid))
         )
       ORDER BY c.created_at ASC, c.id ASC
       LIMIT :size

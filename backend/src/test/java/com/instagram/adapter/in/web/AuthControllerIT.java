@@ -14,13 +14,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.domain.exception.InvalidCredentialsException;
 import com.instagram.domain.exception.UserAlreadyExistsException;
 import com.instagram.domain.model.AuthResult;
@@ -35,11 +38,12 @@ import com.instagram.domain.port.in.RefreshTokenUseCase;
 import com.instagram.domain.port.in.RegisterUserUseCase;
 import com.instagram.domain.port.in.RequestPasswordResetUseCase;
 import com.instagram.domain.port.in.UpdateProfileUseCase;
+import com.instagram.infrastructure.security.SecurityConfig;
+import com.instagram.infrastructure.security.JwtTokenProvider;
+import com.instagram.infrastructure.security.OAuth2SuccessHandler;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureTestDatabase
-@AutoConfigureMockMvc
-@TestPropertySource(properties = { "spring.flyway.enabled=false", "spring.jpa.hibernate.ddl-auto=create-drop" })
+@WebMvcTest(AuthController.class)
+@Import(SecurityConfig.class)
 public class AuthControllerIT {
 	@MockBean
 	private RegisterUserUseCase registerUserUseCase;
@@ -68,8 +72,22 @@ public class AuthControllerIT {
 	@Autowired
 	private ObjectMapper objectMapper;
 
+
 	@Autowired
 	private MockMvc mockMvc;
+
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
+
+    @MockBean
+    private OAuth2SuccessHandler oAuth2SuccessHandler;
+
+
+    @MockBean
+    private IdempotencyKeyJpaRepository idempotencyKeyJpaRepository;
+
+
+
 
 	@Test
 	void register_returns201_onSuccess() throws Exception {
@@ -79,6 +97,7 @@ public class AuthControllerIT {
 				"minh@gmail.com",
 				"password",
 				"TestUser");
+
 
 		User user = User.builder()
 				.id(UUID.randomUUID())

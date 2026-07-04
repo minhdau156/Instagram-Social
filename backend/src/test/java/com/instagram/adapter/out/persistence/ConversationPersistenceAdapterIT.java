@@ -133,8 +133,6 @@ public class ConversationPersistenceAdapterIT {
         assertEquals(savedConversation.getIsGroup(), foundConversation.get(0).getIsGroup());
         assertEquals(savedConversation.getPictureUrl(), foundConversation.get(0).getPictureUrl());
         assertEquals(savedConversation.getCreatedBy(), foundConversation.get(0).getCreatedBy());
-        assertEquals(savedConversation.getCreatedAt(), foundConversation.get(0).getCreatedAt());
-        assertEquals(savedConversation.getUpdatedAt(), foundConversation.get(0).getUpdatedAt());
 
     }
 

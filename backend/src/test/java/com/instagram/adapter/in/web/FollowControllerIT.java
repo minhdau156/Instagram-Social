@@ -16,13 +16,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.domain.exception.AlreadyFollowingException;
 import com.instagram.domain.exception.CannotFollowYourselfException;
 import com.instagram.domain.exception.FollowRequestNotFoundException;
@@ -30,18 +34,28 @@ import com.instagram.domain.model.Follow;
 import com.instagram.domain.model.FollowStatus;
 import com.instagram.domain.model.UserSummary;
 import com.instagram.domain.port.in.follow.*;
+import com.instagram.infrastructure.security.JwtTokenProvider;
+import com.instagram.infrastructure.security.OAuth2SuccessHandler;
+import com.instagram.infrastructure.security.SecurityConfig;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureTestDatabase
-@AutoConfigureMockMvc
-@TestPropertySource(properties = {
-                "spring.flyway.enabled=false",
-                "spring.jpa.hibernate.ddl-auto=create-drop"
-})
+@WebMvcTest(FollowController.class)
+@Import(SecurityConfig.class)
 public class FollowControllerIT {
 
         @Autowired
         MockMvc mockMvc;
+
+        @MockBean
+        private JwtTokenProvider jwtTokenProvider;
+
+        @MockBean
+        private UserDetailsService userDetailsService;
+
+        @MockBean
+        private OAuth2SuccessHandler oAuth2SuccessHandler;
+
+        @MockBean
+        private IdempotencyKeyJpaRepository idempotencyKeyJpaRepository;
 
         @MockBean
         FollowUserUseCase followUserUseCase;

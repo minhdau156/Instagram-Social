@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.instagram.adapter.in.web.dto.request.ReportRequest;
+import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.application.service.AdminService;
 import com.instagram.application.service.ModerationService;
 import com.instagram.domain.model.Report;
@@ -51,6 +52,8 @@ public class ModerationControllerIT {
         private UserDetailsService userDetailsService;
         @MockBean
         private OAuth2SuccessHandler oAuth2SuccessHandler;
+        @MockBean
+        private IdempotencyKeyJpaRepository idempotencyKeyJpaRepository;
 
         @MockBean
         private ReportContentUseCase reportContentUseCase;

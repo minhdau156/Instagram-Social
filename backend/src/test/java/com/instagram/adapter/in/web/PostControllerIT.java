@@ -23,11 +23,13 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.instagram.adapter.in.web.dto.request.CreatePostRequest;
 import com.instagram.adapter.in.web.dto.request.MediaItemRequest;
 import com.instagram.adapter.in.web.dto.request.UpdatePostRequest;
+import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.domain.exception.UnauthorizedPostAccessException;
 import com.instagram.domain.model.Post;
 import com.instagram.domain.port.in.CreatePostUseCase;
@@ -81,6 +83,9 @@ public class PostControllerIT {
     @MockBean
     GenerateUploadUrlUseCase generateUploadUrlUseCase;
 
+    @MockBean
+    private IdempotencyKeyJpaRepository idempotencyKeyJpaRepository;
+
     @Test
     @WithMockUser(username = "123e4567-e89b-12d3-a456-426614174000")
     void createPost_returns201_onSuccess() throws Exception {
@@ -101,6 +106,7 @@ public class PostControllerIT {
         mockMvc.perform(post("/api/v1/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.caption").value("test caption"));
     }

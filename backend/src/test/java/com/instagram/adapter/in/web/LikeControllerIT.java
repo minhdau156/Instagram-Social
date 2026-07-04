@@ -1,5 +1,6 @@
 package com.instagram.adapter.in.web;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -13,29 +14,40 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.domain.exception.AlreadyLikedException;
 import com.instagram.domain.exception.NotLikedException;
 import com.instagram.domain.port.in.like.*;
+import com.instagram.infrastructure.security.JwtTokenProvider;
+import com.instagram.infrastructure.security.OAuth2SuccessHandler;
+import com.instagram.infrastructure.security.SecurityConfig;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureTestDatabase
-@AutoConfigureMockMvc
-@TestPropertySource(properties = {
-        "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
-})
+@WebMvcTest(LikeController.class)
+@Import(SecurityConfig.class)
 public class LikeControllerIT {
     @Autowired
     MockMvc mockMvc;
+
+    @MockBean
+    JwtTokenProvider jwtTokenProvider;
+        
+    @MockBean
+    private UserDetailsService userDetailsService;
+
+    @MockBean
+    private OAuth2SuccessHandler oAuth2SuccessHandler;
+
+    @MockBean
+    private IdempotencyKeyJpaRepository idempotencyKeyJpaRepository;
 
     @MockBean
     private LikePostUseCase likePostUseCase;
@@ -114,6 +126,9 @@ public class LikeControllerIT {
     void getPostLikers_returns200_onSuccess() throws Exception {
         // Arrange
         var postId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+
+        when(getPostLikersUseCase.getPostLikers(any()))
+    .thenReturn(new PageImpl<>(Collections.emptyList()));
 
         // Act & Assert
         mockMvc.perform(get("/api/v1/posts/{id}/likers", postId)
