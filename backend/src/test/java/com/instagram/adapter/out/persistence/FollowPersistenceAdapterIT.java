@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,6 +25,7 @@ import com.instagram.domain.model.FollowStatus;
 import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.UserStatus;
 import com.instagram.infrastructure.config.JpaConfig;
+import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @Import({ JpaConfig.class, FollowPersistenceAdapter.class }) // ← adapter gets the shared transaction-bound EM
@@ -65,6 +67,15 @@ public class FollowPersistenceAdapterIT {
                 .followerId(followerId)
                 .followingId(followingId)
                 .status(FollowStatus.PENDING)
+                .createdAt(Instant.now())
+                .build();
+    }
+
+    private Follow buildFollow(FollowStatus status, UUID followerId, UUID followingId) {
+        return Follow.builder()
+                .followerId(followerId)
+                .followingId(followingId)
+                .status(status)
                 .createdAt(Instant.now())
                 .build();
     }
@@ -203,5 +214,39 @@ public class FollowPersistenceAdapterIT {
 
         // Pending follows must not appear in the followers list
         assertTrue(followers.isEmpty());
+    }
+
+    @Test
+    @Transactional
+    void findFollowersByUserIdKeyset_whenSuccess_returnsListOfFollow() {
+        adapter.save(acceptedFollow);
+        tem.flush();
+        tem.clear();
+
+        List<Follow> result = adapter.findFollowersByUserIdKeyset(followingId, null, null, 10);
+        assertEquals(1, result.size());
+
+    }
+
+
+    @Test
+    void findFollowingByUserIdKeyset_whenSuccess_returnsListOfFollow() {
+        adapter.save(acceptedFollow);
+        tem.flush();
+        tem.clear();
+
+        List<Follow> result = adapter.findFollowingByUserIdKeyset(followerId, null, null, 10);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void findFollowStatusByFollowerIdAndFollowingIds_whenSuccess_returnMap() {
+        adapter.save(acceptedFollow);
+        tem.flush();
+        tem.clear();
+
+        Map<UUID, FollowStatus> result = adapter.findFollowStatusByFollowerIdAndFollowingIds(followerId, List.of(followingId));
+
+        assertTrue(result.containsKey(followingId));
     }
 }

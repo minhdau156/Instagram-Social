@@ -82,9 +82,7 @@ public class CommentService implements AddCommentUseCase, EditCommentUseCase,
                 commentIds);
         return comments.map(comment -> {
             boolean isLikedByCurrentUser = likedCommentIds.contains(comment.getId());
-            return comment.builder()
-                    .isLikedByCurrentUser(isLikedByCurrentUser)
-                    .build();
+            return comment.withIsLikedByCurrentUser(isLikedByCurrentUser);
         });
     }
 

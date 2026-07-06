@@ -9,6 +9,9 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.instagram.domain.model.*;
+import com.instagram.domain.port.in.*;
+import com.instagram.domain.port.out.*;
 import io.micrometer.core.instrument.Counter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,20 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.instagram.domain.exception.InvalidCredentialsException;
 import com.instagram.domain.exception.UserAlreadyExistsException;
 import com.instagram.domain.exception.UserNotFoundException;
-import com.instagram.domain.model.AuthResult;
-import com.instagram.domain.model.PrivacyLevel;
-import com.instagram.domain.model.User;
-import com.instagram.domain.model.UserRole;
-import com.instagram.domain.model.UserStatus;
-import com.instagram.domain.port.in.LoginUseCase;
-import com.instagram.domain.port.in.RegisterUserUseCase;
-import com.instagram.domain.port.in.UpdateProfileUseCase;
 import com.instagram.domain.port.in.rbac.AssignDefaultRoleUseCase;
-import com.instagram.domain.port.out.EmailPort;
-import com.instagram.domain.port.out.PasswordHashPort;
-import com.instagram.domain.port.out.TokenPort;
-import com.instagram.domain.port.out.UserRepository;
-import com.instagram.domain.port.out.UserStatsRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -45,6 +35,8 @@ public class UserServiceTest {
     private TokenPort tokenPort;
     @Mock
     private UserStatsRepository userStatsRepository;
+    @Mock
+    private FollowRepository followRepository;
     @Mock
     private EmailPort emailPort;
     @Mock
@@ -260,5 +252,117 @@ public class UserServiceTest {
         assertThrows(UserNotFoundException.class, () -> userService.updateProfile(command));
 
     }
+
+    @Test
+    void refreshToken_whenSuccess_returnAuthToken() {
+        UUID userId = UUID.randomUUID();
+        var user = User.builder()
+                .id(userId)
+                .username("testuser")
+                .email("[EMAIL_ADDRESS]")
+                .passwordHash("hashedPassword")
+                .fullName("newname")
+                .bio("newbio")
+                .websiteUrl("newwebsite")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .role(UserRole.USER)
+                .build();
+        when(tokenPort.validateRefreshToken(any())).thenReturn(Optional.of(userId));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(tokenPort.generateAccessToken(userId, null)).thenReturn("accessToken");
+        when(tokenPort.generateRefreshToken(userId)).thenReturn("refreshToken");
+
+        RefreshTokenUseCase.Command command = new RefreshTokenUseCase.Command("token");
+
+        AuthResult result = userService.refreshToken(command);
+
+        verify(tokenPort).validateRefreshToken(any());
+        verify(tokenPort).generateRefreshToken(any());
+    }
+
+    @Test
+    void refreshToken_throwException_whenRefreshTokenInvalid() {
+        when(tokenPort.validateRefreshToken(any())).thenReturn(Optional.empty());
+
+        assertThrows(InvalidCredentialsException.class, () -> userService.refreshToken(new RefreshTokenUseCase.Command("token")));
+    }
+
+    @Test
+    void refreshToken_throwException_whenUserNotFound() {
+        when(tokenPort.validateRefreshToken(any())).thenReturn(Optional.of(UUID.randomUUID()));
+        when(userRepository.findById(any())).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.refreshToken(new RefreshTokenUseCase.Command("token")));
+    }
+
+
+    @Test
+    void getUserProfile_isOwn_returnOwnProfile() {
+        UUID userId = UUID.randomUUID();
+        var user = User.builder()
+                .id(userId)
+                .username("testuser")
+                .email("[EMAIL_ADDRESS]")
+                .passwordHash("hashedPassword")
+                .fullName("newname")
+                .bio("newbio")
+                .websiteUrl("newwebsite")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .role(UserRole.USER)
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userStatsRepository.findByUserId(userId)).thenReturn(Optional.empty());
+
+        GetUserProfileUseCase.Query query = new GetUserProfileUseCase.Query(null, userId);
+
+        UserProfile result = userService.getUserProfile(query);
+
+        assertEquals(0, result.stats().postCount());
+
+    }
+
+    @Test
+    void getUserProfile_isOwnWhenUserNotFound_throwException() {
+        when(userRepository.findById(any())).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.getUserProfile(new GetUserProfileUseCase.Query(null, UUID.randomUUID())));
+    }
+
+    @Test
+    void getUserProfile_viewOtherProfile_returnOtherProfile() {
+        UUID userId = UUID.randomUUID();
+        var user = User.builder()
+                .id(userId)
+                .username("testuser")
+                .email("[EMAIL_ADDRESS]")
+                .passwordHash("hashedPassword")
+                .fullName("newname")
+                .bio("newbio")
+                .websiteUrl("newwebsite")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .role(UserRole.USER)
+                .build();
+        when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
+        when(userStatsRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        when(followRepository.findByFollowerIdAndFollowingId(any(), any())).thenReturn(Optional.empty());
+
+        UserProfile userProfile = userService.getUserProfile(new GetUserProfileUseCase.Query("minh", userId));
+
+        assertEquals(null, userProfile.followStatus());
+    }
+
+    @Test
+    void getUserProfile_otherProfileNotFound_throwException() {
+        when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.getUserProfile(new GetUserProfileUseCase.Query("minh", UUID.randomUUID())));
+    }
+
 
 }

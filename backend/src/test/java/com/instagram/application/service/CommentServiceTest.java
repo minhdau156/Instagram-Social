@@ -2,8 +2,7 @@ package com.instagram.application.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -11,14 +10,19 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
+import com.instagram.domain.port.in.comment.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import com.instagram.domain.event.NotificationEvent;
 import com.instagram.domain.exception.CommentNotFoundException;
@@ -26,9 +30,6 @@ import com.instagram.domain.exception.UnauthorizedCommentAccessException;
 import com.instagram.domain.model.Comment;
 import com.instagram.domain.model.Post;
 import com.instagram.domain.model.User;
-import com.instagram.domain.port.in.comment.AddCommentUseCase;
-import com.instagram.domain.port.in.comment.DeleteCommentUseCase;
-import com.instagram.domain.port.in.comment.EditCommentUseCase;
 import com.instagram.domain.port.out.CommentRepository;
 import com.instagram.domain.port.out.LikeRepository;
 import com.instagram.domain.port.out.PostRepository;
@@ -196,6 +197,47 @@ public class CommentServiceTest {
         assertThrows(UnauthorizedCommentAccessException.class, () -> {
             commentService.deleteComment(new DeleteCommentUseCase.Command(commentId, userId));
         });
+    }
+
+    @Test
+    void getReplies_whenSuccess_returnListOfReplies() {
+        Comment comment = Comment.of(postId, userId, content, parentId);
+        when(commentRepository.findByParentId(any(), any())).thenReturn(new PageImpl<>(List.of(comment)));
+        when(userRepository.findById(any())).thenReturn(Optional.of(User.builder().id(userId).username("Minh").build()));
+        when(likeRepository.findLikedCommentIdsByUserIdAndCommentIds(any(), any())).thenReturn(Set.of(UUID.randomUUID()));
+
+        GetRepliesUseCase.Query query = new GetRepliesUseCase.Query(UUID.randomUUID(), userId, 0, 20);
+        
+        Page<Comment> replies = commentService.getReplies(query);
+
+        assertEquals(1, replies.getTotalElements());
+
+    }
+
+    @Test
+    void getComments_whenSuccess_returnListOfComments() {
+        Comment comment = Comment.of(postId, userId, content, parentId);
+        when(commentRepository.findByPostId(any(), any(), any(), anyInt())).thenReturn(List.of(comment));
+        when(userRepository.findById(any())).thenReturn(Optional.of(User.builder().id(userId).username("Minh").build()));
+        when(likeRepository.findLikedCommentIdsByUserIdAndCommentIds(any(), any())).thenReturn(Set.of(UUID.randomUUID()));
+
+        GetCommentsUseCase.Query query = new GetCommentsUseCase.Query(postId, userId, null, 10);
+
+        List<Comment> comments = commentService.getComments(query);
+
+        assertEquals(1, comments.size());
+    }
+
+    @Test
+    void getPostId_whenSuccess_returnPostId() {
+        Comment comment = Comment.of(postId, userId, content, parentId);
+
+        when(commentRepository.findById(any())).thenReturn(Optional.of(comment));
+
+        UUID postId = commentService.getPostId(commentId);
+
+        assertEquals(comment.getPostId(), postId);
+
     }
 
 }

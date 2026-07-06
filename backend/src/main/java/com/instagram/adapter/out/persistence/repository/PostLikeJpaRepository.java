@@ -21,7 +21,7 @@ public interface PostLikeJpaRepository extends JpaRepository<PostLikeJpaEntity, 
 
     Page<PostLikeJpaEntity> findByIdPostIdOrderByCreatedAtDesc(UUID postId, Pageable pageable);
 
-    @Query(value = "SELECT post_id FROM post_likes " +
-            "WHERE user_id = :userId AND post_id IN :postIds", nativeQuery = true)
+    @Query("SELECT pl.id.postId FROM PostLikeJpaEntity pl " +
+            "WHERE pl.id.userId = :userId AND pl.id.postId IN :postIds")
     Set<UUID> findByUserIdAndPostIdIn(@Param("userId") UUID userId, @Param("postIds") List<UUID> postIds);
 }

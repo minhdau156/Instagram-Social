@@ -5,10 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
+import com.instagram.domain.model.Permission;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,4 +134,44 @@ public class RbacPersistenceAdapterIT {
 
         assertEquals(2, rbacPersistenceAdapter.countUsersWithRole(RoleName.MODERATOR));
     }
+
+    @Test
+    void findByName_whenSuccess_returnsPermission() {
+        Permission result = rbacPersistenceAdapter.findByName(PermissionName.REPORT_VIEW).get();
+        assertNotNull(result);
+    }
+
+    @Test
+    void findRoleByIds_whenSuccess_returnsRoles() {
+        Collection<UUID> ids = Arrays.asList(reportReviewPerm.getId(), reportViewPerm.getId());
+
+        Set<Permission> result = rbacPersistenceAdapter.findByIds(ids);
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void findRoleById_whenSuccess_returnsRole() {
+        UUID roleId = moderatorRole.getId();
+
+        Role role = rbacPersistenceAdapter.findById(roleId).get();
+
+        assertNotNull(role);
+    }
+
+    @Test
+    void findRoleByName_whenSuccess_returnsRole() {
+        Role role = rbacPersistenceAdapter.findByName(RoleName.MODERATOR).get();
+
+        assertNotNull(role);
+    }
+
+    @Test
+    void findAllPermission_whenSuccess_returnsPermissions() {
+        List<Permission> result = rbacPersistenceAdapter.findAllPermissions();
+
+        assertEquals(2, result.size());
+    }
+
+
 }

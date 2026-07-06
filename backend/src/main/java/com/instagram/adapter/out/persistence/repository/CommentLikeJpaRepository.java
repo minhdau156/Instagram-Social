@@ -17,7 +17,8 @@ public interface CommentLikeJpaRepository extends JpaRepository<CommentLikeJpaEn
 
     void deleteByIdCommentIdAndIdUserId(UUID commentId, UUID userId);
 
-    @Query(value = "SELECT cl.comment_id from comment_likes cl where cl.user_id = :userId and cl.comment_id in :commentIds", nativeQuery = true)
+    @Query("SELECT cl.id.commentId FROM CommentLikeJpaEntity cl " +
+    " WHERE cl.id.userId = :userId AND cl.id.commentId IN :commentIds")
     Set<UUID> findByUserIdAndCommentIdIn(@Param("userId") UUID userId, @Param("commentIds") List<UUID> commentIds);
 
 }

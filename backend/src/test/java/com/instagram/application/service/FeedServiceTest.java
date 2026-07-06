@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+import com.instagram.domain.model.PostMedia;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,8 +50,11 @@ class FeedServiceTest {
     void getHomeFeed_returnsPostsFromRepository() {
         Post post1 = buildPost();
         Post post2 = buildPost();
-        when(feedRepository.getHomeFeed(userId, null, 20)).thenReturn(List.of(post1, post2));
 
+        PostMedia postMedia = buildPostMedia();
+        PostMedia postMedia2 = buildPostMedia();
+        when(feedRepository.getHomeFeed(userId, null, 20)).thenReturn(List.of(post1, post2));
+        when(postMediaRepository.findByPostIds(anyCollection())).thenReturn(List.of(postMedia, postMedia2));
         GetHomeFeedUseCase.FeedPage result = feedService.getHomeFeed(
                 new GetHomeFeedUseCase.Query(userId, null, 20));
 
@@ -72,8 +76,10 @@ class FeedServiceTest {
     @Test
     void getExploreFeed_delegatesToRepository() {
         Post post = buildPost();
+        PostMedia postMedia = buildPostMedia();
+        PostMedia postMedia2 = buildPostMedia();
         when(feedRepository.getExploreFeed(userId, null, 20)).thenReturn(List.of(post));
-
+        when(postMediaRepository.findByPostIds(anyCollection())).thenReturn(List.of(postMedia, postMedia2));
         GetExploreFeedUseCase.FeedPage result = feedService.getExploreFeed(
                 new GetExploreFeedUseCase.Query(userId, null, 20));
 
@@ -89,5 +95,12 @@ class FeedServiceTest {
         return IntStream.range(0, count)
                 .mapToObj(i -> buildPost())
                 .toList();
+    }
+
+    private PostMedia buildPostMedia() {
+        return PostMedia.builder()
+                .id(UUID.randomUUID())
+                .mediaUrl("image.jpg")
+                .build();
     }
 }

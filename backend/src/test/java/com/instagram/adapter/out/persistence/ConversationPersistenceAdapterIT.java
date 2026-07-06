@@ -47,6 +47,7 @@ public class ConversationPersistenceAdapterIT {
         conversationPersistenceAdapter = new ConversationPersistenceAdapter(conversationJpaRepository,
                 conversationMemberJpaRepository);
         conversation = Conversation.builder()
+                .id(UUID.randomUUID())
                 .name("Conversation 1")
                 .isGroup(false)
                 .pictureUrl("https://example.com/image.jpg")
@@ -200,6 +201,17 @@ public class ConversationPersistenceAdapterIT {
         assertEquals(savedConversation.getId(), foundMember.get().getConversationId());
         assertEquals(member.getUserId(), foundMember.get().getUserId());
         assertEquals(member.getRole(), foundMember.get().getRole());
+    }
+
+    @Test
+    void findMemberIds_isSuccess_shouldReturnMemberIds() {
+        conversationPersistenceAdapter.save(conversation);
+        UUID user1Id = UUID.randomUUID();
+        conversationPersistenceAdapter.addMember(conversation.getId(), user1Id, ConversationMember.Role.MEMBER);
+
+        List<UUID> result = conversationPersistenceAdapter.findMemberIds(conversation.getId());
+
+        assertTrue(result.contains(user1Id));
     }
 
 }

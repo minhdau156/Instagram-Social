@@ -43,8 +43,9 @@ public interface FollowJpaRepository extends JpaRepository<FollowJpaEntity, Foll
                         SELECT f.* FROM follows f
                         WHERE f.following_id = :followingId
                           AND f.is_approved = TRUE
-                          AND (:cursorTs IS NULL
-                               OR (f.created_at, f.follower_id) < (CAST(:cursorTs AS timestamptz), CAST(:cursorId AS uuid))
+                          AND (
+                                (:cursorTs IS NULL OR :cursorId IS NULL)
+                               OR (f.created_at, f.follower_id) < (CAST(:cursorTs AS timestamp with time zone), CAST(:cursorId AS uuid))
                                )
                         ORDER BY f.created_at DESC, f.follower_id DESC
                         LIMIT :size
@@ -59,8 +60,9 @@ public interface FollowJpaRepository extends JpaRepository<FollowJpaEntity, Foll
                         SELECT f.* FROM follows f
                         WHERE f.follower_id = :followerId
                           AND f.is_approved = TRUE
-                          AND (:cursorTs IS NULL
-                               OR (f.created_at, f.following_id) < (CAST(:cursorTs AS timestamptz), CAST(:cursorId AS uuid))
+                          AND (
+                                (:cursorTs IS NULL OR :cursorId IS NULL)
+                               OR (f.created_at, f.following_id) < (CAST(:cursorTs AS timestamp with time zone), CAST(:cursorId AS uuid))
                                )
                         ORDER BY f.created_at DESC, f.following_id DESC
                         LIMIT :size

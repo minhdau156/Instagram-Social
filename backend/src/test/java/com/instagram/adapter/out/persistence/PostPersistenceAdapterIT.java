@@ -1,10 +1,8 @@
 package com.instagram.adapter.out.persistence;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import java.util.UUID;
 
+import com.instagram.domain.model.PostStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +19,8 @@ import com.instagram.domain.model.Post;
 import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.UserStatus;
 import com.instagram.infrastructure.config.JpaConfig;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @Import(JpaConfig.class)
@@ -107,5 +107,7 @@ public class PostPersistenceAdapterIT {
         assertEquals(savedPost.getId(), foundPost.getId());
         assertEquals(savedPost.getCaption(), foundPost.getCaption());
     }
+
+
 
 }

@@ -1,17 +1,9 @@
 package com.instagram.adapter.in.web;
 
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
-import com.instagram.domain.exception.AlreadyFollowingException;
-import com.instagram.domain.exception.AlreadyLikedException;
-import com.instagram.domain.exception.CannotFollowYourselfException;
-import com.instagram.domain.exception.FollowRequestNotFoundException;
-import com.instagram.domain.exception.InvalidCredentialsException;
-import com.instagram.domain.exception.NotLikedException;
-import com.instagram.domain.exception.PasswordResetTokenExpiredException;
+import com.instagram.domain.exception.*;
 
-import com.instagram.domain.exception.UserAlreadyExistsException;
-import com.instagram.domain.exception.UserNotFoundException;
-
+import com.instagram.domain.model.RoleName;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
@@ -189,5 +181,173 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response.getBody());
         assertEquals("User has not liked comment '123e4567-e89b-12d3-a456-426614174000'",
                 response.getBody().error());
+    }
+
+    @Test
+    void handlePostNotFound_returns404() {
+        PostNotFoundException ex = new PostNotFoundException(UUID.randomUUID());
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handlePostNotFound(ex);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleMediaUpload_returns500() {
+        MediaUploadException ex = new MediaUploadException("Can not upload media");
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleMediaUpload(ex);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleCommentNotFound_returns404() {
+        CommentNotFoundException ex = new CommentNotFoundException(UUID.randomUUID());
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleCommentNotFound(ex);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleNotSaved_returns409() {
+        NotSavedException ex = new NotSavedException(UUID.randomUUID(), UUID.randomUUID());
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleNotSaved(ex);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleConversationNotFound_returns404() {
+        ConversationNotFoundException ex = new ConversationNotFoundException(UUID.randomUUID());
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleConversationNotFound(ex);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleMessageNotFound_returns404() {
+        MessageNotFoundException ex = new MessageNotFoundException(UUID.randomUUID());
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleMessageNotFound(ex);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleNotificationNotFound_returns404() {
+        NotificationNotFoundException ex = new NotificationNotFoundException(UUID.randomUUID());
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleNotificationNotFound(ex);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleUnauthorizedNotificationAccess_returns403() {
+        UnauthorizedNotificationAccessException ex = new UnauthorizedNotificationAccessException(UUID.randomUUID(), UUID.randomUUID());
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleUnauthorizedNotificationAccess(ex);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleAlreadyBlocked_returns409() {
+        AlreadyBlockedException ex = new AlreadyBlockedException(UUID.randomUUID(), UUID.randomUUID());
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleAlreadyBlocked(ex);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleNotBlocked_returns404() {
+        NotBlockedException ex = new NotBlockedException(UUID.randomUUID(), UUID.randomUUID());
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleNotBlocked(ex);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleSelfBlock_returns404() {
+        SelfBlockException ex = new SelfBlockException(UUID.randomUUID());
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleSelfBlock(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleUnauthorizedModerationAccess_returns403() {
+        UnauthorizedModerationAccessException ex = new UnauthorizedModerationAccessException(UUID.randomUUID(), "moderation");
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleUnauthorizedModerationAccess(ex);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleReportNotFound_returns404() {
+        ReportNotFoundException ex = new ReportNotFoundException(UUID.randomUUID());
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleReportNotFound(ex);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleAlreadyReported_returns409() {
+        AlreadyReportedException ex = new AlreadyReportedException(UUID.randomUUID(), UUID.randomUUID());
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleAlreadyReported(ex);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleRoleNotFound_returns404() {
+        RoleNotFoundException ex = new RoleNotFoundException(RoleName.ADMIN);
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleRoleNotFound(ex);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+
+    }
+
+    @Test
+    void handleRoleAlreadyAssigned_returns409() {
+        RoleAlreadyAssignedException ex = new RoleAlreadyAssignedException(UUID.randomUUID(), RoleName.USER);
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleRoleAlreadyAssigned(ex);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleRoleNotAssigned_returns404() {
+        RoleNotAssignedException ex = new RoleNotAssignedException(UUID.randomUUID(), RoleName.USER);
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleRoleNotAssigned(ex);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    void handleProtectedRole_returns409() {
+        ProtectedRoleException ex = new ProtectedRoleException(RoleName.USER);
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleProtectedRole(ex);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void handleInvalidMedia_returns400() {
+        InvalidMediaException ex = new InvalidMediaException("Invalid Media");
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleInvalidMedia(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 }

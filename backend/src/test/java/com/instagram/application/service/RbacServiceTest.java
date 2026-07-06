@@ -6,14 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
+import com.instagram.domain.exception.*;
+import com.instagram.domain.model.Permission;
+import com.instagram.domain.port.in.rbac.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,17 +21,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.instagram.domain.exception.InsufficientPrivilegeException;
-import com.instagram.domain.exception.ProtectedRoleException;
-import com.instagram.domain.exception.RoleAlreadyAssignedException;
 import com.instagram.domain.model.PermissionName;
 import com.instagram.domain.model.Role;
 import com.instagram.domain.model.RoleName;
-import com.instagram.domain.port.in.rbac.AssignDefaultRoleUseCase;
-import com.instagram.domain.port.in.rbac.AssignRoleToUserUseCase;
-import com.instagram.domain.port.in.rbac.GetUserPermissionsUseCase;
-import com.instagram.domain.port.in.rbac.RevokeRoleFromUserUseCase;
-import com.instagram.domain.port.in.rbac.UpdateRolePermissionsUseCase;
 import com.instagram.domain.port.out.AuditLogRepository;
 import com.instagram.domain.port.out.PermissionRepository;
 import com.instagram.domain.port.out.RoleRepository;
@@ -64,6 +55,13 @@ public class RbacServiceTest {
                 .id(UUID.randomUUID())
                 .name(name)
                 .system(true)
+                .build();
+    }
+
+    private Permission buildPermission(PermissionName name) {
+        return Permission.builder()
+                .id(UUID.randomUUID())
+                .name(name)
                 .build();
     }
 
@@ -107,6 +105,57 @@ public class RbacServiceTest {
     }
 
     @Test
+    void revokeRoleFromUser_isSuperAdmin_revokeRoke() {
+        Role superAdminRole = buildRole(RoleName.SUPER_ADMIN);
+        Role adminRole = buildRole(RoleName.ADMIN);
+        when(roleRepository.findByName(RoleName.ADMIN)).thenReturn(Optional.of(adminRole));
+        when(roleRepository.findRolesByUserId(actorId)).thenReturn(Set.of(superAdminRole));
+        when(roleRepository.userHasRole(targetId, RoleName.ADMIN)).thenReturn(true);
+//        when(roleRepository.countUsersWithRole(RoleName.SUPER_ADMIN)).thenReturn(2L);
+
+        doNothing().when(roleRepository).revokeRoleFromUser(any(), any());
+        doNothing().when(auditLogRepository).log(any(), any(), any(), any(), any(), any());
+
+        RevokeRoleFromUserUseCase.Command command = new RevokeRoleFromUserUseCase.Command(actorId, targetId, RoleName.ADMIN);
+
+        rbacService.revokeRoleFromUser(command);
+
+
+    }
+
+    @Test
+    void revokeRoleFromUser_whenRoleIsNotExist_throwException() {
+        when(roleRepository.findByName(any())).thenReturn(Optional.empty());
+
+        assertThrows(RoleNotFoundException.class, () ->
+                rbacService.revokeRoleFromUser(new RevokeRoleFromUserUseCase.Command(actorId, targetId, RoleName.ADMIN)));
+    }
+
+    @Test
+    void revokeRoleFromUser_actorIsNotSuperAdmin_throwException() {
+        Role moderateRole = buildRole(RoleName.MODERATOR);
+        Role adminRole = buildRole(RoleName.ADMIN);
+        when(roleRepository.findByName(any())).thenReturn(Optional.of(adminRole));
+        when(roleRepository.findRolesByUserId(any())).thenReturn(Set.of(moderateRole));
+
+        assertThrows(InsufficientPrivilegeException.class, () ->
+                rbacService.revokeRoleFromUser(new RevokeRoleFromUserUseCase.Command(actorId, targetId, RoleName.ADMIN)));
+    }
+
+    @Test
+    void revokeRoleFromUser_whenUserDoNotHaveRole_throwException() {
+        Role superAdminRole = buildRole(RoleName.SUPER_ADMIN);
+        Role adminRole = buildRole(RoleName.ADMIN);
+
+        when(roleRepository.findByName(any())).thenReturn(Optional.of(adminRole));
+        when(roleRepository.findRolesByUserId(any())).thenReturn(Set.of(superAdminRole));
+        when(roleRepository.userHasRole(any(), any())).thenReturn(false);
+
+        assertThrows(RoleNotAssignedException.class, () ->
+                rbacService.revokeRoleFromUser(new RevokeRoleFromUserUseCase.Command(actorId, targetId, RoleName.ADMIN)));
+    }
+
+    @Test
     void revokeRoleFromUser_whenLastSuperAdmin_throwsInsufficientPrivilege() {
         Role superAdminRole = buildRole(RoleName.SUPER_ADMIN);
         when(roleRepository.findByName(RoleName.SUPER_ADMIN)).thenReturn(Optional.of(superAdminRole));
@@ -117,6 +166,27 @@ public class RbacServiceTest {
         assertThrows(InsufficientPrivilegeException.class, () ->
                 rbacService.revokeRoleFromUser(
                         new RevokeRoleFromUserUseCase.Command(actorId, targetId, RoleName.SUPER_ADMIN)));
+    }
+
+    @Test
+    void listRoles_whenSuccess_shouldReturnListOfRoles() {
+        Role userRole = buildRole(RoleName.USER);
+        Role moderateRole = buildRole(RoleName.MODERATOR);
+        Role superAdminRole = buildRole(RoleName.SUPER_ADMIN);
+        Role adminRole = buildRole(RoleName.ADMIN);
+
+        List<Role> roles = new ArrayList<>();
+        roles.add(userRole);
+        roles.add(moderateRole);
+        roles.add(superAdminRole);
+        roles.add(adminRole);
+
+        when(roleRepository.findAllRoles()).thenReturn(roles);
+
+        ListRolesUseCase.Query query = new ListRolesUseCase.Query();
+        List<Role> result = rbacService.listRoles(query);
+
+        assertEquals(4, result.size());
     }
 
     @Test
@@ -158,5 +228,84 @@ public class RbacServiceTest {
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getUserPermissions_whenSuccess_returnSetOfPermissionsName() {
+        PermissionName permissionName = PermissionName.REPORT_VIEW;
+        PermissionName permissionName2 = PermissionName.ROLE_VIEW;
+
+        Set<PermissionName> permissions = Set.of(permissionName, permissionName2);
+
+        when(roleRepository.findPermissionNamesByUserId(any())).thenReturn(permissions);
+
+        Set<PermissionName> result = rbacService.getUserPermissions(new GetUserPermissionsUseCase.Query(targetId));
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void getUserRoles_whenSuccess_returnSetOfUserRoles() {
+        Role userRole = buildRole(RoleName.USER);
+
+        when(roleRepository.findRolesByUserId(any())).thenReturn(Set.of(userRole));
+
+        Set<Role> role = rbacService.getUserRoles(new GetUserRolesUseCase.Query(targetId));
+
+        assertNotNull(role);
+        assertEquals(1, role.size());
+    }
+
+    @Test
+    void updateRolePermissions_whenSuccess_theUpdateRolePermissions() {
+        Role superAdminRole = buildRole(RoleName.SUPER_ADMIN);
+        Permission permission = buildPermission(PermissionName.REPORT_VIEW);
+        Role adminRole = buildRole(RoleName.ADMIN);
+
+        when(roleRepository.findRolesByUserId(any())).thenReturn(Set.of(superAdminRole));
+        when(permissionRepository.findByName(any())).thenReturn(Optional.of(permission));
+        when(roleRepository.findByName(any())).thenReturn(Optional.of(adminRole));
+
+        doNothing().when(roleRepository).replaceRolePermissions(any(), any());
+        doNothing().when(auditLogRepository).log(any(), any(), any(), any(), any(), any());
+
+        Set<PermissionName> permissionNames = new HashSet<>();
+        permissionNames.add(PermissionName.REPORT_VIEW);
+
+        UpdateRolePermissionsUseCase.Command command = new UpdateRolePermissionsUseCase.Command(actorId, RoleName.ADMIN, permissionNames);
+        rbacService.updateRolePermissions(command);
+
+    }
+
+    @Test
+    void updateRolePermissions_whenPermissionNotFound_throwException() {
+        Role superAdminRole = buildRole(RoleName.SUPER_ADMIN);
+
+        when(roleRepository.findRolesByUserId(any())).thenReturn(Set.of(superAdminRole));
+        when(permissionRepository.findByName(any())).thenReturn(Optional.empty());
+
+        Set<PermissionName> permissionNames = new HashSet<>();
+        permissionNames.add(PermissionName.REPORT_VIEW);
+
+        UpdateRolePermissionsUseCase.Command command = new UpdateRolePermissionsUseCase.Command(actorId, RoleName.ADMIN, permissionNames);
+
+        assertThrows(IllegalArgumentException.class, () -> rbacService.updateRolePermissions(command));
+    }
+
+    @Test
+    void updateRolePermissions_whenRoleNotFound_throwException() {
+        Role superAdminRole = buildRole(RoleName.SUPER_ADMIN);
+        Permission permission = buildPermission(PermissionName.REPORT_VIEW);
+
+        when(roleRepository.findRolesByUserId(any())).thenReturn(Set.of(superAdminRole));
+        when(permissionRepository.findByName(any())).thenReturn(Optional.of(permission));
+        when(roleRepository.findByName(any())).thenReturn(Optional.empty());
+
+        Set<PermissionName> permissionNames = new HashSet<>();
+        permissionNames.add(PermissionName.REPORT_VIEW);
+
+        UpdateRolePermissionsUseCase.Command command = new UpdateRolePermissionsUseCase.Command(actorId, RoleName.ADMIN, permissionNames);
+
+        assertThrows(RoleNotFoundException.class, () -> rbacService.updateRolePermissions(command));
     }
 }

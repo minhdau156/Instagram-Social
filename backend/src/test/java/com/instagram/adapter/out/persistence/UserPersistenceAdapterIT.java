@@ -3,6 +3,9 @@ package com.instagram.adapter.out.persistence;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
@@ -19,6 +22,7 @@ import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.User;
 import com.instagram.domain.model.UserRole;
 import com.instagram.domain.model.UserStatus;
+import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @Import(JpaConfig.class)
@@ -230,5 +234,149 @@ public class UserPersistenceAdapterIT {
         assertEquals("NewWebsite", updatingUser.getWebsiteUrl());
         assertEquals(savedUser.getStatus(), updatingUser.getStatus());
         assertEquals(savedUser.getPrivacyLevel(), updatingUser.getPrivacyLevel());
+    }
+
+    @Test
+    @Transactional
+    void findAllByIds_whenSuccess_shouldReturnListUsers() {
+        var user = User.builder()
+                .id(UUID.randomUUID())
+                .username("testuser")
+                .email("[EMAIL_ADDRESS]")
+                .passwordHash("hashedPassword")
+                .fullName("TestUser")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .role(UserRole.USER)
+                .build();
+
+        var user2 = User.builder()
+                .id(UUID.randomUUID())
+                .username("testuser2")
+                .email("[EMAIL_ADDRESS2]")
+                .passwordHash("hashedPassword2")
+                .fullName("TestUser2")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .role(UserRole.USER)
+                .build();
+        User save1 = userPersistenceAdapter.save(user);
+        User save2 = userPersistenceAdapter.save(user2);
+
+        UUID userId1 = save1.getId();
+        UUID userId2 = save2.getId();
+
+        Collection<UUID> userIds = Arrays.asList(userId1, userId2);
+
+        List<User> result = userPersistenceAdapter.findAllByIds(userIds);
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    @Transactional
+    void findAll_whenSuccess_shouldReturnAllUsers() {
+        var user = User.builder()
+                .id(UUID.randomUUID())
+                .username("testuser")
+                .email("[EMAIL_ADDRESS]")
+                .passwordHash("hashedPassword")
+                .fullName("TestUser")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .role(UserRole.USER)
+                .build();
+
+        var user2 = User.builder()
+                .id(UUID.randomUUID())
+                .username("testuser2")
+                .email("[EMAIL_ADDRESS2]")
+                .passwordHash("hashedPassword2")
+                .fullName("TestUser2")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .role(UserRole.USER)
+                .build();
+        userPersistenceAdapter.save(user);
+        userPersistenceAdapter.save(user2);
+
+        List<User> result = userPersistenceAdapter.findAll(0, 10);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    @Transactional
+    public void searchByUsername_whenSuccess_returnListOfUser() {
+        var user = User.builder()
+                .id(UUID.randomUUID())
+                .username("testuser")
+                .email("[EMAIL_ADDRESS]")
+                .passwordHash("hashedPassword")
+                .fullName("TestUser")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .role(UserRole.USER)
+                .build();
+
+        var user2 = User.builder()
+                .id(UUID.randomUUID())
+                .username("testuser2")
+                .email("[EMAIL_ADDRESS2]")
+                .passwordHash("hashedPassword2")
+                .fullName("TestUser2")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .role(UserRole.USER)
+                .build();
+
+        userPersistenceAdapter.save(user);
+        userPersistenceAdapter.save(user2);
+
+        List<User> result = userPersistenceAdapter.searchByUsername("test", 10);
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    @Transactional
+    public void findByUsernames_whenSuccess_returnListOfUser() {
+        var user = User.builder()
+                .id(UUID.randomUUID())
+                .username("testuser")
+                .email("[EMAIL_ADDRESS]")
+                .passwordHash("hashedPassword")
+                .fullName("TestUser")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .role(UserRole.USER)
+                .build();
+
+        var user2 = User.builder()
+                .id(UUID.randomUUID())
+                .username("testuser2")
+                .email("[EMAIL_ADDRESS2]")
+                .passwordHash("hashedPassword2")
+                .fullName("TestUser2")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .role(UserRole.USER)
+                .build();
+
+        userPersistenceAdapter.save(user);
+        userPersistenceAdapter.save(user2);
+
+        List<String> usernames = List.of("testuser", "testuser2");
+
+        List<User> result = userPersistenceAdapter.findByUsernames(usernames);
+
+        assertEquals(2, result.size());
     }
 }
