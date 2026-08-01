@@ -100,18 +100,6 @@ services:
       timeout: 5s
       retries: 5
 
-  alertmanager:
-    image: prom/alertmanager:v0.27.0
-    restart: always
-    ports:
-      - "9093:9093"
-    volumes:
-      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:9093/-/healthy || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   grafana:
     image: grafana/grafana:10.4.3

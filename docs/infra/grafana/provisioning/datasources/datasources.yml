@@ -20,7 +20,7 @@ datasources:
     access: proxy
     jsonData:
       maxLines: 1000
-      derivedFields:
+      derivedFields:  # extract new fields from your logs and create a link from the value of the field.
         - datasourceName: Tempo
           datasourceUid: tempo
           matcherRegex: '"traceId":"([a-f0-9]+)"' # Extract traceId from JSON log line

@@ -23,7 +23,7 @@ compactor:
 metrics_generator:
   registry:
     external_labels:
-      source: tempo
+      source: tempo # labels that will be added to all generated metrics
       cluster: docker-compose
   storage:
     path: /var/tempo/generator/wal

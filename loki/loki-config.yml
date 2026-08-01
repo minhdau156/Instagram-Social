@@ -10,8 +10,8 @@ common:
   path_prefix: /loki
   storage:
     filesystem:
-      chunks_directory: /loki/chunks
-      rules_directory: /loki/rules
+      chunks_directory: /loki/chunks  #storage for chunk file
+      rules_directory: /loki/rules    #storage for rule file
   replication_factor: 1
   ring:
     kvstore:
@@ -27,15 +27,13 @@ query_range:
 schema_config:
   configs:
     - from: 2024-01-01
-      store: tsdb
-      object_store: filesystem
+      store: tsdb  # for index storage
+      object_store: filesystem  # for chunk storage
       schema: v13
       index:
         prefix: index_
         period: 24h
 
-ruler:
-  alertmanager_url: http://alertmanager:9093
 
 limits_config:
   reject_old_samples: true
