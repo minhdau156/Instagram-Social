@@ -1,30 +1,16 @@
-# Current Feature: TASK-10.36 — Frontend component tests
+# Current Feature
 
 ## Status
 Not Started
 
 ## Goals
-- Add `vitest`, `@vitest/coverage-v8`, `jsdom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom`, `msw` as devDependencies; add `"test": "vitest run"` (+ `test:watch`, `test:coverage`) to `package.json`
-- Configure Vitest in `vite.config.ts` (`environment: 'jsdom'`, `globals: true`, `setupFiles`, `css: false`)
-- Create `frontend/src/test/setup.ts` (jest-dom + MSW server lifecycle) and MSW mocks: `frontend/src/test/mocks/handlers.ts` + `server.ts`
-- `LoginPage.test.tsx` — form validation, valid submit calls API, invalid credentials show error
-- `PostCard.test.tsx` — renders caption/media, like count, comment count
-- `LikeButton.test.tsx` — unfilled/filled heart states, optimistic like/unlike toggle, disabled prop
-- `ProtectedRoute.test.tsx` — authenticated passthrough, unauthenticated redirect to `/login`, loading state
-- `useWebSocket.test.ts` — `isConnected` starts false, exposes `sendMessage`/`sendTyping`, `typingUserIds` starts empty
-- `npm test` (vitest run) passes with all test files green
-- Remove `|| true` from the `frontend-ci` job's "Run unit tests" step in `.github/workflows/ci.yml` so failures actually fail CI
+<!-- -->
 
 ## Notes
-- Pairs with TASK-10.37 (E2E Playwright) and TASK-10.35 (backend coverage gate)
-- MSW v2 API: `http.get/post` + `HttpResponse.json(...)`, NOT the v1 `rest`/`ctx` syntax
-- `ProtectedRoute` and other components call `useAuth()` — mock via `vi.mock('../../hooks/useAuth', ...)` in tests
-- `useWebSocket` creates a STOMP `Client` on mount — must mock `@stomp/stompjs` and `sockjs-client` or tests hang/throw on real WebSocket connection attempts
-- Exact label text/error messages in `LoginPage.test.tsx` depend on the real component markup — adjust `getByLabelText` queries to match
-- Working tree already has an uncommitted `frontend/package.json` / `package-lock.json` diff adding `@testing-library/jest-dom`, `@testing-library/react`, `@testing-library/user-event`, `@vitest/coverage-v8`, `jsdom`, `msw`, `vitest` — step 1 (dependency install) appears already done locally, uncommitted; no test files or vite.config.ts test block exist yet
-- Spec file: `docs/tasks/phase-10/TASK-10.36-frontend-component-tests.md`
+<!-- -->
 
 ## History
+- TASK-10.36 — Frontend component tests: `vitest`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom`, `msw`, `jsdom`, `@vitest/coverage-v8` added as devDependencies; Vitest configured via standalone `vitest.config.ts` (happy-dom, globals, `./src/test/setup.ts`, css enabled) rather than a block in `vite.config.ts`; `src/test/setup.ts` imports `@testing-library/jest-dom/vitest`. Delivered scope pivoted from the original plan (`LoginPage`/`LikeButton`/`ProtectedRoute`/`useWebSocket`, MSW network mocking) to `PostCard.test.tsx`, `PostDetailModel.test.tsx` (covers `PostDetailModal`), `PostGrid.test.tsx`, and a sanity test — hooks/child components mocked directly via `vi.mock` instead of MSW handlers. CI's `frontend-ci` job already runs `npm run test` without `|| true`. User confirmed all tests pass both locally and in GitHub Actions CI.
 - TASK-10.33 — Swap `SearchJpaAdapterIT` to Testcontainers: `@Testcontainers` + `@Container static PostgreSQLContainer<?>` (`postgres:15-alpine`) replaces hard-coded `@TestPropertySource` localhost connection; `@DynamicPropertySource` wires datasource url/username/password/driver + flyway/ddl-auto props; `testcontainers.version` bumped 1.19.8 → 1.21.4 in pom.xml (old version couldn't negotiate with newer Docker Desktop daemons); `V4__add_rbac_tables.sql` fixed — removed a `DROP COLUMN role` that no earlier migration ever created, only masked before by developers' stale local test DBs. 22/22 tests green including FTS tests.
 - TASK-10.29 — LGTM observability stack: replaced Zipkin with Tempo (OTLP); added Loki via loki-logback-appender; added Prometheus + Alertmanager with three alert rules; added Grafana with auto-provisioned datasources and Instagram overview dashboard; full cross-signal correlation wired (metric exemplar → trace, log line → trace, trace → logs).
 - TASK-10.28 — Distributed tracing: `micrometer-tracing-bridge-otel` + `opentelemetry-exporter-zipkin` + `zipkin-reporter-brave` + `datasource-micrometer-spring-boot` added to pom.xml; `management.tracing.sampling.probability=1.0` in application.yml + application-local.yml; `spring.zipkin.tracing.endpoint` env-var driven; `logback-spring.xml` local pattern gains `trace=%X{traceId} span=%X{spanId}`; `openzipkin/zipkin:3` added to docker-compose.yml on port 9411; JDBC child spans enabled via datasource proxy.

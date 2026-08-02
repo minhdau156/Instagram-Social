@@ -465,32 +465,18 @@ Remove the `|| true` so a test failure actually fails CI:
 
 ## Checklist
 
-- [ ] Add `vitest` + `@testing-library/react` + `msw` (mock service worker) to `package.json`
-  - [ ] `npm install` completes without errors
-  - [ ] `"test": "vitest run"` script added to `package.json`
-- [ ] Write tests for: `LoginPage` — form validation, submit calls API, error state
-  - [ ] Empty form submission shows validation error
-  - [ ] Valid credentials call the login API without rendering an error
-  - [ ] Invalid credentials (MSW returns 401) show an error message
-- [ ] Write tests for: `PostCard` — renders media, like/save toggles, comment count
-  - [ ] Post card renders caption and image
-  - [ ] Like count is displayed
-  - [ ] Comment count is displayed
-- [ ] Write tests for: `LikeButton` — optimistic update
-  - [ ] Unfilled heart shown when `liked=false`
-  - [ ] Filled heart shown when `liked=true`
-  - [ ] Clicking while liked triggers unlike (no error rendered)
-  - [ ] `disabled` prop prevents interaction
-- [ ] Write tests for: `ProtectedRoute` — redirects unauthenticated users
-  - [ ] Authenticated user sees child route content
-  - [ ] Unauthenticated user is redirected to `/login`
-  - [ ] Loading state shows spinner, not redirect
-- [ ] Write tests for: `useWebSocket` hook — subscription + message handling
-  - [ ] `isConnected` starts as `false`
-  - [ ] `sendMessage` and `sendTyping` functions are exposed
-  - [ ] `typingUserIds` starts as empty array
-- [ ] `npm test` exits with all tests passing
-- [ ] CI `frontend-ci` job runs `npm test` without `|| true`
+> **Scope note (as actually delivered):** the implementer set up Vitest/RTL/MSW via a standalone `vitest.config.ts` (happy-dom, not jsdom) rather than a `test` block inside `vite.config.ts`, and wrote component tests for `PostCard`, `PostDetailModal`, and `PostGrid` (plus a sanity test) instead of the originally planned `LoginPage` / `LikeButton` / `ProtectedRoute` / `useWebSocket` suite. No MSW handlers were added — the delivered tests mock hooks/child components directly instead of hitting the network layer. Confirmed green locally and in GitHub Actions CI (`frontend-ci` job) per the user.
+
+- [x] Add `vitest` + `@testing-library/react` + `msw` (mock service worker) to `package.json`
+  - [x] `npm install` completes without errors
+  - [x] `test` script added to `package.json` (`"test": "vitest"`, run non-interactively in CI)
+- [ ] ~~Write tests for: `LoginPage` — form validation, submit calls API, error state~~ (not built — scope pivoted to Post components)
+- [x] Write tests for: `PostCard` — renders caption, like/comment counts displayed (via `PostCard.test.tsx` + `PostGrid.test.tsx`)
+- [ ] ~~Write tests for: `LikeButton` — optimistic update~~ (not built — `LikeButton` is mocked out in `PostCard.test.tsx` instead)
+- [ ] ~~Write tests for: `ProtectedRoute` — redirects unauthenticated users~~ (not built)
+- [ ] ~~Write tests for: `useWebSocket` hook — subscription + message handling~~ (not built)
+- [x] `npm test` exits with all tests passing (confirmed by user, verified green in CI)
+- [x] CI `frontend-ci` job runs `npm run test` without `|| true` (already the case in `.github/workflows/ci.yml`)
 
 ---
 
