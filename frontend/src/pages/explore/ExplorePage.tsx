@@ -6,14 +6,13 @@ import { Alert, Box, Button, Chip, Container, ImageList, ImageListItem, Skeleton
 import { useQuery } from "@tanstack/react-query";
 import { InfiniteScroll } from "../../components/common/InfiniteScroll";
 import { useState } from "react";
-import { Post } from "../../types/post";
 import { PostDetailModal } from "../../components/posts/PostDetailModal";
 import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
 
 export default function ExplorePage() {
     const { profile } = useAuth();
 
-    const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+    const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
 
     const { data: hashtags = [] } = useQuery({
         queryKey: ['trendingHashtags'],
@@ -28,6 +27,7 @@ export default function ExplorePage() {
     }
 
     const posts = data?.posts ?? [];
+    const selectedPost = posts.find((post) => post.id === selectedPostId) ?? null;
 
     return (
         <Container maxWidth="md" sx={{ py: 3 }}>
@@ -96,7 +96,7 @@ export default function ExplorePage() {
                             <ImageListItem
                                 key={post.id}
                                 sx={{ cursor: 'pointer' }}
-                                onClick={() => setSelectedPost(post)}
+                                onClick={() => setSelectedPostId(post.id)}
                             >
                                 <img
                                     src={post.mediaItems[0]?.mediaUrl}
@@ -117,7 +117,7 @@ export default function ExplorePage() {
             {selectedPost && (
                 <PostDetailModal
                     post={selectedPost}
-                    onClose={() => setSelectedPost(null)}
+                    onClose={() => setSelectedPostId(null)}
                 />
             )}
         </Container>

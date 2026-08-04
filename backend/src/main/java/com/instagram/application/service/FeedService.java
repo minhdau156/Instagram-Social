@@ -72,6 +72,9 @@ public class FeedService
                                 ? null
                                 : posts.get(posts.size() - 1).getId();
 
+                Set<UUID> likedIds = likeRepository.findLikedPostIdsByUserIdAndPostIds(query.userId(), postIds);
+                posts.forEach(p -> p.setLikedByCurrentUser(likedIds.contains(p.getId())));
+
                 return new GetExploreFeedUseCase.FeedPage(posts, nextCursor, postMediasMap);
         }
 }
