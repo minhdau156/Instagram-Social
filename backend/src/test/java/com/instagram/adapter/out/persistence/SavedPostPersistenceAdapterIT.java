@@ -8,21 +8,24 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.TestPropertySource;
 
+import com.instagram.adapter.out.persistence.entity.PostJpaEntity;
 import com.instagram.adapter.out.persistence.entity.SavePostId;
 import com.instagram.adapter.out.persistence.entity.SavedPostJpaEntity;
+import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
+import com.instagram.adapter.out.persistence.repository.PostJpaRepository;
 import com.instagram.adapter.out.persistence.repository.SavedPostJpaRepository;
+import com.instagram.adapter.out.persistence.repository.UserJpaRepository;
+import com.instagram.domain.model.PostStatus;
+import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.SavedPost;
+import com.instagram.domain.model.UserStatus;
 
-@DataJpaTest
 @Import(SavedPostPersistenceAdapter.class)
-@TestPropertySource(properties = { "spring.flyway.enabled=false", "spring.jpa.hibernate.ddl-auto=create-drop" })
-class SavedPostPersistenceAdapterIT {
+class SavedPostPersistenceAdapterIT extends PostgresIntegrationTest {
 
     @Autowired
     private SavedPostPersistenceAdapter adapter;
@@ -30,15 +33,43 @@ class SavedPostPersistenceAdapterIT {
     @Autowired
     private SavedPostJpaRepository savedPostJpaRepository;
 
+    @Autowired
+    private UserJpaRepository userJpaRepository;
+
+    @Autowired
+    private PostJpaRepository postJpaRepository;
+
     @BeforeEach
     void setUp() {
         savedPostJpaRepository.deleteAll();
     }
 
+    // saved_posts.user_id / saved_posts.post_id are real FKs — every test that
+    // inserts a row needs an actually-persisted parent rather than a bare
+    // UUID.randomUUID().
+    private UUID persistUser() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        return userJpaRepository.save(UserJpaEntity.builder()
+                .username("saver_" + suffix)
+                .email("saver_" + suffix + "@example.com")
+                .fullName("Saver")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build()).getId();
+    }
+
+    private UUID persistPost(UUID userId) {
+        return postJpaRepository.save(PostJpaEntity.builder()
+                .userId(userId)
+                .status(PostStatus.PUBLISHED)
+                .build()).getId();
+    }
+
     @Test
     void save_persistsSavedPostRecord() {
-        UUID postId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
+        UUID postId = persistPost(userId);
 
         SavedPost result = adapter.save(SavedPost.of(postId, userId));
 
@@ -50,8 +81,8 @@ class SavedPostPersistenceAdapterIT {
 
     @Test
     void delete_removesSavedPostRecord() {
-        UUID postId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
+        UUID postId = persistPost(userId);
 
         adapter.save(SavedPost.of(postId, userId));
         assertThat(adapter.existsByPostIdAndUserId(postId, userId)).isTrue();
@@ -63,6 +94,7 @@ class SavedPostPersistenceAdapterIT {
 
     @Test
     void existsByPostIdAndUserId_returnsFalseWhenNotSaved() {
+        // Pure read with no row inserted — no FK to satisfy, bare UUIDs are fine.
         UUID postId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 
@@ -71,9 +103,9 @@ class SavedPostPersistenceAdapterIT {
 
     @Test
     void findByUserId_returnsSavedPostsOrderedBySavedAtDesc() throws InterruptedException {
-        UUID userId = UUID.randomUUID();
-        UUID postId1 = UUID.randomUUID();
-        UUID postId2 = UUID.randomUUID();
+        UUID userId = persistUser();
+        UUID postId1 = persistPost(userId);
+        UUID postId2 = persistPost(userId);
 
         // Insert first record
         SavedPostJpaEntity first = new SavedPostJpaEntity(

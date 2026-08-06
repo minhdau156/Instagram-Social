@@ -11,24 +11,21 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 
+import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
+import com.instagram.adapter.out.persistence.repository.UserJpaRepository;
 import com.instagram.adapter.out.persistence.repository.UserStatsJpaRepository;
+import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.UserStats;
-import com.instagram.infrastructure.config.JpaConfig;
+import com.instagram.domain.model.UserStatus;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@TestPropertySource(properties = {
-        "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
-})
-public class UserStatsPersistenceAdapterIT {
+public class UserStatsPersistenceAdapterIT extends PostgresIntegrationTest {
 
     @Autowired
     private UserStatsJpaRepository userStatsJpaRepository;
+
+    @Autowired
+    private UserJpaRepository userJpaRepository;
 
     private UserStatsPersistenceAdapter adapter;
 
@@ -37,10 +34,24 @@ public class UserStatsPersistenceAdapterIT {
         adapter = new UserStatsPersistenceAdapter(userStatsJpaRepository);
     }
 
+    // user_stats.user_id is a real FK to users.id — every row we create needs an
+    // actually-persisted parent user rather than a bare UUID.randomUUID().
+    private UUID persistUser() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        return userJpaRepository.save(UserJpaEntity.builder()
+                .username("stats_" + suffix)
+                .email("stats_" + suffix + "@example.com")
+                .fullName("Stats Test User")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build()).getId();
+    }
+
     @Test
     void findByUserId_whenExists_returnsStats() {
         // given
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
         adapter.create(new UserStats(userId, 2, 10, 5));
 
         // when
@@ -66,7 +77,7 @@ public class UserStatsPersistenceAdapterIT {
     @Test
     void create_persistsStatsWithCorrectFields() {
         // given
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
 
         // when
         adapter.create(new UserStats(userId, 3, 20, 15));
@@ -82,7 +93,7 @@ public class UserStatsPersistenceAdapterIT {
     @Test
     void incrementFollowerCount_whenStatsExist_incrementsCount() {
         // given
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
         adapter.create(new UserStats(userId, 0, 5, 0));
 
         // when
@@ -96,7 +107,7 @@ public class UserStatsPersistenceAdapterIT {
     @Test
     void incrementFollowerCount_whenStatsNotExist_createsAndIncrements() {
         // given
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
 
         // when
         adapter.incrementFollowerCount(userId);
@@ -109,7 +120,7 @@ public class UserStatsPersistenceAdapterIT {
     @Test
     void decrementFollowerCount_whenStatsExist_decrementsCount() {
         // given
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
         adapter.create(new UserStats(userId, 0, 3, 0));
 
         // when
@@ -123,7 +134,7 @@ public class UserStatsPersistenceAdapterIT {
     @Test
     void incrementFollowingCount_whenStatsExist_incrementsCount() {
         // given
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
         adapter.create(new UserStats(userId, 0, 0, 2));
 
         // when
@@ -137,7 +148,7 @@ public class UserStatsPersistenceAdapterIT {
     @Test
     void incrementFollowingCount_whenStatsNotExist_createsAndIncrements() {
         // given
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
 
         // when
         adapter.incrementFollowingCount(userId);
@@ -150,7 +161,7 @@ public class UserStatsPersistenceAdapterIT {
     @Test
     void decrementFollowingCount_whenStatsExist_decrementsCount() {
         // given
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
         adapter.create(new UserStats(userId, 0, 0, 4));
 
         // when
@@ -164,9 +175,9 @@ public class UserStatsPersistenceAdapterIT {
     @Test
     void findAllByIds_returnsOnlyMatchingStats() {
         // given
-        UUID userId1 = UUID.randomUUID();
-        UUID userId2 = UUID.randomUUID();
-        UUID userId3 = UUID.randomUUID();
+        UUID userId1 = persistUser();
+        UUID userId2 = persistUser();
+        UUID userId3 = persistUser();
         adapter.create(new UserStats(userId1, 1, 10, 5));
         adapter.create(new UserStats(userId2, 2, 20, 8));
         adapter.create(new UserStats(userId3, 3, 30, 12));

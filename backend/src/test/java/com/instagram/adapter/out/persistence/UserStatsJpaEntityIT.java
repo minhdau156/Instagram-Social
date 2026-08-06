@@ -6,24 +6,21 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 
+import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
 import com.instagram.adapter.out.persistence.entity.UserStatsJpaEntity;
-import com.instagram.infrastructure.config.JpaConfig;
+import com.instagram.adapter.out.persistence.repository.UserJpaRepository;
+import com.instagram.domain.model.PrivacyLevel;
+import com.instagram.domain.model.UserStatus;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@TestPropertySource(properties = {
-        "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
-})
-class UserStatsJpaEntityIT {
+class UserStatsJpaEntityIT extends PostgresIntegrationTest {
 
     @Autowired
     private TestEntityManager entityManager;
+
+    @Autowired
+    private UserJpaRepository userJpaRepository;
 
     private UserStatsJpaEntity buildStats(UUID userId, long postCount, long followerCount, long followingCount) {
         return UserStatsJpaEntity.builder()
@@ -34,9 +31,24 @@ class UserStatsJpaEntityIT {
                 .build();
     }
 
+    // user_stats.user_id is the primary key AND a real FK to users.id — every
+    // row we persist here needs an actually-persisted parent user rather than a
+    // bare UUID.randomUUID().
+    private UUID persistUser() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        return userJpaRepository.save(UserJpaEntity.builder()
+                .username("statsjpa_" + suffix)
+                .email("statsjpa_" + suffix + "@example.com")
+                .fullName("Stats Entity Test User")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build()).getId();
+    }
+
     @Test
     void shouldPersistAndRetrieveWithAllCounters() {
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
         UserStatsJpaEntity saved = entityManager.persistFlushFind(buildStats(userId, 5, 100, 50));
 
         assertThat(saved.getUserId()).isEqualTo(userId);
@@ -47,7 +59,7 @@ class UserStatsJpaEntityIT {
 
     @Test
     void shouldPersistZeroCounters() {
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
         UserStatsJpaEntity saved = entityManager.persistFlushFind(buildStats(userId, 0, 0, 0));
 
         assertThat(saved.getPostCount()).isZero();
@@ -57,7 +69,7 @@ class UserStatsJpaEntityIT {
 
     @Test
     void shouldUseUserIdAsPrimaryKey() {
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
         entityManager.persistAndFlush(buildStats(userId, 1, 2, 3));
         entityManager.clear();
 
@@ -69,8 +81,8 @@ class UserStatsJpaEntityIT {
 
     @Test
     void shouldStoreEachUsersSeparately() {
-        UUID userId1 = UUID.randomUUID();
-        UUID userId2 = UUID.randomUUID();
+        UUID userId1 = persistUser();
+        UUID userId2 = persistUser();
 
         entityManager.persistAndFlush(buildStats(userId1, 10, 200, 50));
         entityManager.persistAndFlush(buildStats(userId2, 3, 40, 80));

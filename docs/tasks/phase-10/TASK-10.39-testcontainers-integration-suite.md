@@ -287,32 +287,33 @@ This runs compile → unit tests → integration tests → JaCoCo report → cov
 
 ## Checklist
 
-- [ ] Add Testcontainers (`postgresql`, `junit-jupiter`) at test scope
-  - [ ] Confirm both artifacts are present in `backend/pom.xml` (they are already there)
-- [ ] Create a shared `@Container PostgreSQLContainer` base class (singleton/reused container) with Flyway migrations applied
-  - [ ] `PostgresIntegrationTest.java` created in `adapter/out/persistence/`
-  - [ ] Container declared in a `static {}` block so it starts once for all subclasses
-  - [ ] `@DynamicPropertySource` sets all four datasource properties and enables Flyway
-  - [ ] Class annotated with `@DataJpaTest`, `@Testcontainers`, `@AutoConfigureTestDatabase(replace=NONE)`, `@Import(JpaConfig.class)`
-- [ ] Migrate the `@DataJpaTest` ITs off H2 onto the container; enable `pg_trgm` / `citext` so FTS and case-insensitive tests are real
-  - [ ] `SearchJpaAdapterIT` extended from `PostgresIntegrationTest`; no inline container or `@TestPropertySource`
-  - [ ] `UserPersistenceAdapterIT` migrated
-  - [ ] `PostPersistenceAdapterIT` migrated
-  - [ ] `CommentPersistenceAdapterIT` migrated
-  - [ ] `LikePersistenceAdapterIT` migrated
-  - [ ] `SavedPostPersistenceAdapterIT` migrated
-  - [ ] `FollowPersistenceAdapterIT` migrated
-  - [ ] `ConversationPersistenceAdapterIT` migrated
-  - [ ] `NotificationPersistenceAdapterIT` migrated
-  - [ ] `FeedJpaQueryAdapterIT` migrated
-  - [ ] `UserJpaEntityIT` migrated
-- [ ] Ensure CI provides Docker for the Testcontainers run
-  - [ ] `ubuntu-latest` runner on GitHub Actions has Docker pre-installed — no extra setup needed
-  - [ ] `mvn verify` in the `backend-ci` CI job runs all migrated ITs successfully
-- [ ] Remove the H2 test dependency/config once nothing depends on it
-  - [ ] H2 artifact removed from `pom.xml`
-  - [ ] `mvn verify` still passes after removal
-  - [ ] No `h2` references remain in test sources
+- [x] Add Testcontainers (`postgresql`, `junit-jupiter`) at test scope
+  - [x] Confirm both artifacts are present in `backend/pom.xml` (they are already there)
+- [x] Create a shared `@Container PostgreSQLContainer` base class (singleton/reused container) with Flyway migrations applied
+  - [x] `PostgresIntegrationTest.java` created in `adapter/out/persistence/`
+  - [x] Container declared in a `static {}` block so it starts once for all subclasses
+  - [x] `@DynamicPropertySource` sets all four datasource properties and enables Flyway
+  - [x] Class annotated with `@DataJpaTest`, `@Testcontainers`, `@AutoConfigureTestDatabase(replace=NONE)`, `@Import(JpaConfig.class)`
+- [x] Migrate the `@DataJpaTest` ITs off H2 onto the container; enable `pg_trgm` / `citext` so FTS and case-insensitive tests are real
+  - [x] `SearchJpaAdapterIT` extended from `PostgresIntegrationTest`; no inline container or `@TestPropertySource`
+  - [x] `UserPersistenceAdapterIT` migrated
+  - [x] `PostPersistenceAdapterIT` migrated
+  - [x] `CommentPersistenceAdapterIT` migrated
+  - [x] `LikePersistenceAdapterIT` migrated
+  - [x] `SavedPostPersistenceAdapterIT` migrated
+  - [x] `FollowPersistenceAdapterIT` migrated
+  - [x] `ConversationPersistenceAdapterIT` migrated
+  - [x] `NotificationPersistenceAdapterIT` migrated
+  - [x] `FeedJpaQueryAdapterIT` migrated
+  - [x] `UserJpaEntityIT` migrated
+  - [x] (beyond spec) all other `*IT` classes in `adapter/out/persistence/` also migrated: `HashtagPersistenceAdapterIT`, `HashtagJpaEntityIT`, `SharePersistenceAdapterIT`, `PostMediaPersistenceAdapterIT`, `PostMediaJpaEntityIT`, `PostShareJpaEntityIT`, `MessageJpaEntityIT`, `MessagePersistenceAdapterIT`, `UserStatsPersistenceAdapterIT`, `UserStatsJpaEntityIT`, `RbacPersistenceAdapterIT`, `ModerationPersistenceAdapterIT`
+- [x] Ensure CI provides Docker for the Testcontainers run
+  - [x] `ubuntu-latest` runner on GitHub Actions has Docker pre-installed — no extra setup needed
+  - [x] `mvn verify` in the `backend-ci` CI job runs all migrated ITs successfully
+- [x] Remove the H2 test dependency/config once nothing depends on it
+  - [x] H2 artifact removed from `pom.xml`
+  - [x] `mvn verify` still passes after removal
+  - [x] No `h2` references remain in test sources
 
 ---
 

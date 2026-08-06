@@ -12,22 +12,18 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 
+import com.instagram.adapter.out.persistence.entity.ConversationJpaEntity;
+import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
+import com.instagram.adapter.out.persistence.repository.ConversationJpaRepository;
 import com.instagram.adapter.out.persistence.repository.MessageJpaRepository;
 import com.instagram.adapter.out.persistence.repository.MessageReadJpaRepository;
+import com.instagram.adapter.out.persistence.repository.UserJpaRepository;
 import com.instagram.domain.model.Message;
-import com.instagram.infrastructure.config.JpaConfig;
+import com.instagram.domain.model.PrivacyLevel;
+import com.instagram.domain.model.UserStatus;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@TestPropertySource(properties = {
-        "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
-})
-public class MessagePersistenceAdapterIT {
+public class MessagePersistenceAdapterIT extends PostgresIntegrationTest {
 
     @Autowired
     private MessageJpaRepository messageJpaRepository;
@@ -35,15 +31,43 @@ public class MessagePersistenceAdapterIT {
     @Autowired
     private MessageReadJpaRepository messageReadJpaRepository;
 
+    @Autowired
+    private ConversationJpaRepository conversationJpaRepository;
+
+    @Autowired
+    private UserJpaRepository userJpaRepository;
+
     private MessagePersistenceAdapter adapter;
     private UUID conversationId;
     private UUID senderId;
 
+    // messages.conversation_id / messages.sender_id are real FKs — every test
+    // needs an actually-persisted parent row rather than a bare
+    // UUID.randomUUID().
+    private UUID persistUser() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        return userJpaRepository.save(UserJpaEntity.builder()
+                .username("msg_user_" + suffix)
+                .email("msg_user_" + suffix + "@example.com")
+                .fullName("Message User")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build()).getId();
+    }
+
+    private UUID persistConversation(UUID creatorId) {
+        return conversationJpaRepository.save(ConversationJpaEntity.builder()
+                .isGroup(false)
+                .createdById(creatorId)
+                .build()).getId();
+    }
+
     @BeforeEach
     void setUp() {
         adapter = new MessagePersistenceAdapter(messageJpaRepository, messageReadJpaRepository);
-        conversationId = UUID.randomUUID();
-        senderId = UUID.randomUUID();
+        senderId = persistUser();
+        conversationId = persistConversation(senderId);
     }
 
     private Message buildMessage(UUID convId, UUID sender) {
@@ -190,7 +214,7 @@ public class MessagePersistenceAdapterIT {
     void getUnreadCount_countsOnlyMessagesSentByOthers() {
         // given
         UUID readerId = UUID.randomUUID();
-        UUID otherSender = UUID.randomUUID();
+        UUID otherSender = persistUser();
         adapter.save(Message.builder()
                 .conversationId(conversationId)
                 .senderId(otherSender)
@@ -226,7 +250,7 @@ public class MessagePersistenceAdapterIT {
     void getUnreadCount_withMultipleMessages_countsAll() {
         // given
         UUID readerId = UUID.randomUUID();
-        UUID otherSender = UUID.randomUUID();
+        UUID otherSender = persistUser();
         for (int i = 0; i < 3; i++) {
             adapter.save(Message.builder()
                     .conversationId(conversationId)

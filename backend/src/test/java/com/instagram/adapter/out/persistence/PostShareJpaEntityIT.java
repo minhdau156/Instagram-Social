@@ -6,21 +6,16 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 
+import com.instagram.adapter.out.persistence.entity.PostJpaEntity;
 import com.instagram.adapter.out.persistence.entity.PostShareJpaEntity;
-import com.instagram.infrastructure.config.JpaConfig;
+import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
+import com.instagram.domain.model.PostStatus;
+import com.instagram.domain.model.PrivacyLevel;
+import com.instagram.domain.model.UserStatus;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@TestPropertySource(properties = {
-        "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
-})
-class PostShareJpaEntityIT {
+class PostShareJpaEntityIT extends PostgresIntegrationTest {
 
     @Autowired
     private TestEntityManager entityManager;
@@ -34,11 +29,33 @@ class PostShareJpaEntityIT {
                 .build();
     }
 
+    // post_shares.post_id / shared_by_id / shared_to_id are real FKs under
+    // Postgres — every share needs actually-persisted parent rows rather
+    // than bare UUID.randomUUID() values.
+    private UUID persistUser() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        return entityManager.persistAndFlush(UserJpaEntity.builder()
+                .username("share_user_" + suffix)
+                .email("share_user_" + suffix + "@example.com")
+                .fullName("Share User")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build()).getId();
+    }
+
+    private UUID persistPost(UUID userId) {
+        return entityManager.persistAndFlush(PostJpaEntity.builder()
+                .userId(userId)
+                .status(PostStatus.PUBLISHED)
+                .build()).getId();
+    }
+
     @Test
     void shouldPersistDmShareWithRecipient() {
-        UUID postId = UUID.randomUUID();
-        UUID sharerId = UUID.randomUUID();
-        UUID recipientId = UUID.randomUUID();
+        UUID sharerId = persistUser();
+        UUID recipientId = persistUser();
+        UUID postId = persistPost(sharerId);
 
         PostShareJpaEntity saved = entityManager.persistFlushFind(buildShare(postId, sharerId, recipientId));
 
@@ -50,8 +67,8 @@ class PostShareJpaEntityIT {
 
     @Test
     void shouldPersistLinkShareWithNullRecipient() {
-        UUID postId = UUID.randomUUID();
-        UUID sharerId = UUID.randomUUID();
+        UUID sharerId = persistUser();
+        UUID postId = persistPost(sharerId);
 
         PostShareJpaEntity saved = entityManager.persistFlushFind(buildShare(postId, sharerId, null));
 
@@ -60,8 +77,11 @@ class PostShareJpaEntityIT {
 
     @Test
     void shouldAutoPopulateCreatedAt() {
+        UUID sharerId = persistUser();
+        UUID postId = persistPost(sharerId);
+
         PostShareJpaEntity saved = entityManager.persistFlushFind(
-                buildShare(UUID.randomUUID(), UUID.randomUUID(), null));
+                buildShare(postId, sharerId, null));
 
         assertThat(saved.getCreatedAt()).isNotNull();
     }
@@ -69,10 +89,12 @@ class PostShareJpaEntityIT {
     @Test
     void shouldUseProvidedIdAsPrimaryKey() {
         UUID id = UUID.randomUUID();
+        UUID sharerId = persistUser();
+        UUID postId = persistPost(sharerId);
         PostShareJpaEntity entity = PostShareJpaEntity.builder()
                 .id(id)
-                .postId(UUID.randomUUID())
-                .sharerId(UUID.randomUUID())
+                .postId(postId)
+                .sharerId(sharerId)
                 .build();
 
         entityManager.persistAndFlush(entity);
@@ -85,9 +107,14 @@ class PostShareJpaEntityIT {
 
     @Test
     void shouldPersistMultipleSharesForOnePost() {
-        UUID postId = UUID.randomUUID();
-        entityManager.persistAndFlush(buildShare(postId, UUID.randomUUID(), UUID.randomUUID()));
-        entityManager.persistAndFlush(buildShare(postId, UUID.randomUUID(), null));
+        UUID ownerId = persistUser();
+        UUID postId = persistPost(ownerId);
+        UUID sharer1 = persistUser();
+        UUID recipient1 = persistUser();
+        UUID sharer2 = persistUser();
+
+        entityManager.persistAndFlush(buildShare(postId, sharer1, recipient1));
+        entityManager.persistAndFlush(buildShare(postId, sharer2, null));
         entityManager.flush();
         entityManager.clear();
 

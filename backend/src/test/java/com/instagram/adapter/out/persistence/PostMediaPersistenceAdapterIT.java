@@ -10,31 +10,28 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 
 import com.instagram.adapter.out.persistence.entity.PostJpaEntity;
+import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
 import com.instagram.adapter.out.persistence.repository.PostJpaRepository;
 import com.instagram.adapter.out.persistence.repository.PostMediaJpaRepository;
+import com.instagram.adapter.out.persistence.repository.UserJpaRepository;
 import com.instagram.domain.model.MediaType;
 import com.instagram.domain.model.PostMedia;
 import com.instagram.domain.model.PostStatus;
-import com.instagram.infrastructure.config.JpaConfig;
+import com.instagram.domain.model.PrivacyLevel;
+import com.instagram.domain.model.UserStatus;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@TestPropertySource(properties = {
-        "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
-})
-public class PostMediaPersistenceAdapterIT {
+public class PostMediaPersistenceAdapterIT extends PostgresIntegrationTest {
 
     @Autowired
     private PostMediaJpaRepository postMediaJpaRepository;
 
     @Autowired
     private PostJpaRepository postJpaRepository;
+
+    @Autowired
+    private UserJpaRepository userJpaRepository;
 
     private PostMediaPersistenceAdapter adapter;
 
@@ -44,9 +41,23 @@ public class PostMediaPersistenceAdapterIT {
     void setUp() {
         adapter = new PostMediaPersistenceAdapter(postMediaJpaRepository);
         savedPost = postJpaRepository.save(PostJpaEntity.builder()
-                .userId(UUID.randomUUID())
+                .userId(persistUser())
                 .status(PostStatus.PUBLISHED)
                 .build());
+    }
+
+    // posts.user_id is a real FK under Postgres — every persisted post needs
+    // an actually-persisted parent user rather than a bare UUID.randomUUID().
+    private UUID persistUser() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        return userJpaRepository.save(UserJpaEntity.builder()
+                .username("media_user_" + suffix)
+                .email("media_user_" + suffix + "@example.com")
+                .fullName("Media User")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build()).getId();
     }
 
     private PostMedia buildMedia(UUID postId, String mediaUrl, String sortOrder) {
@@ -124,7 +135,7 @@ public class PostMediaPersistenceAdapterIT {
     void findByPostIds_returnsMediaForAllGivenPosts() {
         // given
         PostJpaEntity post2 = postJpaRepository.save(PostJpaEntity.builder()
-                .userId(UUID.randomUUID())
+                .userId(persistUser())
                 .status(PostStatus.PUBLISHED)
                 .build());
 

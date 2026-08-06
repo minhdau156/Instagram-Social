@@ -8,29 +8,29 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.instagram.adapter.out.persistence.entity.CommentJpaEntity;
 import com.instagram.adapter.out.persistence.entity.CommentLikeId;
 import com.instagram.adapter.out.persistence.entity.CommentLikeJpaEntity;
+import com.instagram.adapter.out.persistence.entity.PostJpaEntity;
 import com.instagram.adapter.out.persistence.entity.PostLikeId;
 import com.instagram.adapter.out.persistence.entity.PostLikeJpaEntity;
+import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.TestPropertySource;
 
 import com.instagram.adapter.out.persistence.repository.CommentJpaRepository;
 import com.instagram.adapter.out.persistence.repository.CommentLikeJpaRepository;
 import com.instagram.adapter.out.persistence.repository.PostJpaRepository;
 import com.instagram.adapter.out.persistence.repository.PostLikeJpaRepository;
-import com.instagram.infrastructure.config.JpaConfig;
+import com.instagram.adapter.out.persistence.repository.UserJpaRepository;
+import com.instagram.domain.model.PostStatus;
+import com.instagram.domain.model.PrivacyLevel;
+import com.instagram.domain.model.UserStatus;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@TestPropertySource(properties = { "spring.flyway.enabled=false", "spring.jpa.hibernate.ddl-auto=create-drop" })
-public class LikePersistenceAdapterIT {
+public class LikePersistenceAdapterIT extends PostgresIntegrationTest {
     @Autowired
     PostLikeJpaRepository postLikeJpaRepository;
 
@@ -43,6 +43,9 @@ public class LikePersistenceAdapterIT {
     @Autowired
     CommentJpaRepository commentJpaRepository;
 
+    @Autowired
+    UserJpaRepository userJpaRepository;
+
     LikePersistenceAdapter likePersistenceAdapter;
 
     @BeforeEach
@@ -51,18 +54,50 @@ public class LikePersistenceAdapterIT {
                 postLikeJpaRepository, postJpaRepository, commentLikeJpaRepository, commentJpaRepository);
     }
 
+    // post_likes.user_id/post_id and comment_likes.user_id/comment_id are real
+    // FKs — every test needs actually-persisted parent rows rather than bare
+    // UUID.randomUUID() values.
+    private UUID persistUser() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        return userJpaRepository.save(UserJpaEntity.builder()
+                .username("like_user_" + suffix)
+                .email("like_user_" + suffix + "@example.com")
+                .fullName("Like User")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build()).getId();
+    }
+
+    private UUID persistPost(UUID userId) {
+        return postJpaRepository.save(PostJpaEntity.builder()
+                .userId(userId)
+                .caption("Post for like test")
+                .status(PostStatus.PUBLISHED)
+                .build()).getId();
+    }
+
+    private UUID persistComment(UUID userId, UUID postId) {
+        return commentJpaRepository.save(CommentJpaEntity.builder()
+                .id(UUID.randomUUID())
+                .postId(postId)
+                .userId(userId)
+                .content("Comment for like test")
+                .build()).getId();
+    }
+
     @Test
     void likePost_persistsLikeRecord_shouldSuccess() {
-        UUID postId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
+        UUID postId = persistPost(persistUser());
         likePersistenceAdapter.likePost(postId, userId);
         assertTrue(postLikeJpaRepository.existsByIdPostIdAndIdUserId(postId, userId));
     }
 
     @Test
     void unlikePost_removesLikeRecord_shouldSuccess() {
-        UUID postId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
+        UUID postId = persistPost(persistUser());
         likePersistenceAdapter.likePost(postId, userId);
         likePersistenceAdapter.unlikePost(postId, userId);
         assertFalse(postLikeJpaRepository.existsByIdPostIdAndIdUserId(postId, userId));
@@ -70,9 +105,9 @@ public class LikePersistenceAdapterIT {
 
     @Test
     void findPostLikerIds_returnsUserIdsSortedByCreatedAt_shouldSuccess() {
-        UUID postId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        UUID userId2 = UUID.randomUUID();
+        UUID postId = persistPost(persistUser());
+        UUID userId = persistUser();
+        UUID userId2 = persistUser();
         likePersistenceAdapter.likePost(postId, userId);
         likePersistenceAdapter.likePost(postId, userId2);
         Page<UUID> likerIds = likePersistenceAdapter.findPostLikerIds(postId, Pageable.unpaged());
@@ -85,16 +120,20 @@ public class LikePersistenceAdapterIT {
 
     @Test
     void likeComment_persistsCommentLikeRecord_shouldSuccess() {
-        UUID commentId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
+        UUID authorId = persistUser();
+        UUID postId = persistPost(authorId);
+        UUID commentId = persistComment(authorId, postId);
+        UUID userId = persistUser();
         likePersistenceAdapter.likeComment(commentId, userId);
         assertTrue(commentLikeJpaRepository.existsByIdCommentIdAndIdUserId(commentId, userId));
     }
 
     @Test
     void unlikeComment_removesCommentLikeRecord_shouldSuccess() {
-        UUID commentId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
+        UUID authorId = persistUser();
+        UUID postId = persistPost(authorId);
+        UUID commentId = persistComment(authorId, postId);
+        UUID userId = persistUser();
         likePersistenceAdapter.likeComment(commentId, userId);
         likePersistenceAdapter.unlikeComment(commentId, userId);
         assertFalse(commentLikeJpaRepository.existsByIdCommentIdAndIdUserId(commentId, userId));
@@ -102,8 +141,8 @@ public class LikePersistenceAdapterIT {
 
     @Test
     void hasLikedPost_persistsLikeRecord_shouldReturnTrue() {
-        UUID postId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser();
+        UUID postId = persistPost(persistUser());
         PostLikeId id = new PostLikeId(postId, userId);
         PostLikeJpaEntity postLikeJpaEntity = new PostLikeJpaEntity(id);
         postLikeJpaRepository.save(postLikeJpaEntity);
@@ -115,8 +154,10 @@ public class LikePersistenceAdapterIT {
 
     @Test
     void hasLikedComment_persistsCommentRecord_shouldReturnTrue() {
-        UUID commentId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
+        UUID authorId = persistUser();
+        UUID postId = persistPost(authorId);
+        UUID commentId = persistComment(authorId, postId);
+        UUID userId = persistUser();
 
         CommentLikeId id = new CommentLikeId(commentId, userId);
         CommentLikeJpaEntity entity = new CommentLikeJpaEntity(id);
@@ -129,9 +170,10 @@ public class LikePersistenceAdapterIT {
 
     @Test
     void findLikedPostIdsByUserIdAndPostIds_whenPersistSomeRecord_shouldReturnSetOfUUID () {
-        UUID userId = UUID.randomUUID();
-        UUID postId1 = UUID.randomUUID();
-        UUID postId2 = UUID.randomUUID();
+        UUID userId = persistUser();
+        UUID postOwnerId = persistUser();
+        UUID postId1 = persistPost(postOwnerId);
+        UUID postId2 = persistPost(postOwnerId);
 
         PostLikeId id1 = new PostLikeId(postId1, userId);
         PostLikeId id2 = new PostLikeId(postId2, userId);
@@ -147,9 +189,11 @@ public class LikePersistenceAdapterIT {
 
     @Test
     void findLikedCommentIdsByUserIdAndCommentIds_whenPersistsSomneRecord_shouldReturnSetOfUUID () {
-        UUID userId = UUID.randomUUID();
-        UUID commentId = UUID.randomUUID();
-        UUID commentId2 = UUID.randomUUID();
+        UUID userId = persistUser();
+        UUID authorId = persistUser();
+        UUID postId = persistPost(authorId);
+        UUID commentId = persistComment(authorId, postId);
+        UUID commentId2 = persistComment(authorId, postId);
         CommentLikeId id1 = new CommentLikeId(commentId, userId);
         CommentLikeJpaEntity commentLikeJpaEntity1 = new CommentLikeJpaEntity(id1);
         CommentLikeId id2 = new CommentLikeId(commentId2, userId);
