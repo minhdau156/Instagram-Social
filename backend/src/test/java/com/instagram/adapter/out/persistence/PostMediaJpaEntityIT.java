@@ -8,24 +8,17 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 
 import com.instagram.adapter.out.persistence.entity.PostJpaEntity;
 import com.instagram.adapter.out.persistence.entity.PostMediaJpaEntity;
+import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
 import com.instagram.domain.model.MediaType;
 import com.instagram.domain.model.PostStatus;
-import com.instagram.infrastructure.config.JpaConfig;
+import com.instagram.domain.model.PrivacyLevel;
+import com.instagram.domain.model.UserStatus;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@TestPropertySource(properties = {
-        "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
-})
-class PostMediaJpaEntityIT {
+class PostMediaJpaEntityIT extends PostgresIntegrationTest {
 
     @Autowired
     private TestEntityManager entityManager;
@@ -35,9 +28,23 @@ class PostMediaJpaEntityIT {
     @BeforeEach
     void setUp() {
         savedPost = entityManager.persistAndFlush(PostJpaEntity.builder()
-                .userId(UUID.randomUUID())
+                .userId(persistUser())
                 .status(PostStatus.PUBLISHED)
                 .build());
+    }
+
+    // posts.user_id is a real FK under Postgres — every persisted post needs
+    // an actually-persisted parent user rather than a bare UUID.randomUUID().
+    private UUID persistUser() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        return entityManager.persistAndFlush(UserJpaEntity.builder()
+                .username("media_entity_user_" + suffix)
+                .email("media_entity_user_" + suffix + "@example.com")
+                .fullName("Media Entity User")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build()).getId();
     }
 
     private PostMediaJpaEntity minimalMedia(PostJpaEntity post, short sortOrder) {

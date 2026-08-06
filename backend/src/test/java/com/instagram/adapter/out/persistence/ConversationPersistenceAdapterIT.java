@@ -12,52 +12,65 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.TestPropertySource;
 
 import com.instagram.adapter.out.persistence.entity.ConversationMemberId;
 import com.instagram.adapter.out.persistence.entity.ConversationMemberJpaEntity;
+import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
 import com.instagram.adapter.out.persistence.repository.ConversationJpaRepository;
 import com.instagram.adapter.out.persistence.repository.ConversationMemberJpaRepository;
+import com.instagram.adapter.out.persistence.repository.UserJpaRepository;
 import com.instagram.domain.model.Conversation;
 import com.instagram.domain.model.ConversationMember;
-import com.instagram.infrastructure.config.JpaConfig;
+import com.instagram.domain.model.PrivacyLevel;
+import com.instagram.domain.model.UserStatus;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@TestPropertySource(properties = {
-        "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
-})
-public class ConversationPersistenceAdapterIT {
+public class ConversationPersistenceAdapterIT extends PostgresIntegrationTest {
     @Autowired
     private ConversationJpaRepository conversationJpaRepository;
     @Autowired
     private ConversationMemberJpaRepository conversationMemberJpaRepository;
+    @Autowired
+    private UserJpaRepository userJpaRepository;
 
     ConversationPersistenceAdapter conversationPersistenceAdapter;
 
     Conversation conversation;
     ConversationMember member;
 
+    // conversations.created_by_id and conversation_members.user_id are real FKs —
+    // every test needs an actually-persisted user rather than a bare
+    // UUID.randomUUID().
+    private UUID persistUser() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        return userJpaRepository.save(UserJpaEntity.builder()
+                .username("conv_user_" + suffix)
+                .email("conv_user_" + suffix + "@example.com")
+                .fullName("Conversation User")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build()).getId();
+    }
+
     @BeforeEach
     void setUp() {
         conversationPersistenceAdapter = new ConversationPersistenceAdapter(conversationJpaRepository,
                 conversationMemberJpaRepository);
+        UUID creatorId = persistUser();
+        UUID memberUserId = persistUser();
         conversation = Conversation.builder()
                 .id(UUID.randomUUID())
                 .name("Conversation 1")
                 .isGroup(false)
                 .pictureUrl("https://example.com/image.jpg")
-                .createdById(UUID.randomUUID())
+                .createdById(creatorId)
                 .createdAt(OffsetDateTime.now())
                 .updatedAt(OffsetDateTime.now())
                 .build();
         member = ConversationMember.builder()
                 .conversationId(conversation.getId())
-                .userId(UUID.randomUUID())
+                .userId(memberUserId)
                 .role(ConversationMember.Role.OWNER)
                 .joinedAt(OffsetDateTime.now())
                 .build();
@@ -173,8 +186,8 @@ public class ConversationPersistenceAdapterIT {
     @Test
     void findExisting1to1_isSuccess_shouldFind() {
         // given
-        UUID user1Id = UUID.randomUUID();
-        UUID user2Id = UUID.randomUUID();
+        UUID user1Id = persistUser();
+        UUID user2Id = persistUser();
         Conversation savedConversation = conversationPersistenceAdapter.save(conversation);
         conversationPersistenceAdapter.addMember(savedConversation.getId(), user1Id, ConversationMember.Role.OWNER);
         conversationPersistenceAdapter.addMember(savedConversation.getId(), user2Id, ConversationMember.Role.MEMBER);
@@ -205,11 +218,11 @@ public class ConversationPersistenceAdapterIT {
 
     @Test
     void findMemberIds_isSuccess_shouldReturnMemberIds() {
-        conversationPersistenceAdapter.save(conversation);
-        UUID user1Id = UUID.randomUUID();
-        conversationPersistenceAdapter.addMember(conversation.getId(), user1Id, ConversationMember.Role.MEMBER);
+        Conversation savedConversation = conversationPersistenceAdapter.save(conversation);
+        UUID user1Id = persistUser();
+        conversationPersistenceAdapter.addMember(savedConversation.getId(), user1Id, ConversationMember.Role.MEMBER);
 
-        List<UUID> result = conversationPersistenceAdapter.findMemberIds(conversation.getId());
+        List<UUID> result = conversationPersistenceAdapter.findMemberIds(savedConversation.getId());
 
         assertTrue(result.contains(user1Id));
     }

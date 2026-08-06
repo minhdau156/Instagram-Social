@@ -13,10 +13,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.TestPropertySource;
 
 import com.instagram.adapter.out.persistence.entity.ReportJpaEntity;
 import com.instagram.adapter.out.persistence.entity.UserBlockId;
@@ -31,12 +28,8 @@ import com.instagram.domain.model.ReportEntityType;
 import com.instagram.domain.model.ReportStatus;
 import com.instagram.domain.model.UserBlock;
 import com.instagram.domain.model.UserStatus;
-import com.instagram.infrastructure.config.JpaConfig;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@TestPropertySource(properties = { "spring.flyway.enabled=false", "spring.jpa.hibernate.ddl-auto=create-drop" })
-public class ModerationPersistenceAdapterIT {
+public class ModerationPersistenceAdapterIT extends PostgresIntegrationTest {
 
     @Autowired
     private UserBlockJpaRepository userBlockJpaRepository;
@@ -63,6 +56,21 @@ public class ModerationPersistenceAdapterIT {
                 .build();
     }
 
+    // reports.reporter_id / reviewed_by_id and user_blocks.blocker_id /
+    // blocked_id are real FKs to users.id — every row we persist here needs an
+    // actually-persisted parent user rather than a bare UUID.randomUUID().
+    private UUID persistUser() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        return userJpaRepository.save(UserJpaEntity.builder()
+                .username("mod_" + suffix)
+                .email("mod_" + suffix + "@example.com")
+                .fullName("Moderation Test User")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build()).getId();
+    }
+
     private Report buildReportDomain(UUID reporterId, String reason, ReportStatus status) {
         return Report.builder()
                 .id(UUID.randomUUID())
@@ -72,7 +80,7 @@ public class ModerationPersistenceAdapterIT {
                 .reason(reason)
                 .details("Spam post")
                 .status(status)
-                .reviewedById(UUID.randomUUID())
+                .reviewedById(persistUser())
                 .reviewedAt(OffsetDateTime.now())
                 .createdAt(OffsetDateTime.now())
                 .build();
@@ -112,7 +120,7 @@ public class ModerationPersistenceAdapterIT {
     @Test
     void findAllReports_whenStatusProvided_returnFilteredReports() {
         Report report1 = buildReportDomain(testUser.getId(), "Spam", ReportStatus.PENDING);
-        Report report2 = buildReportDomain(UUID.randomUUID(), "Spam", ReportStatus.PENDING);
+        Report report2 = buildReportDomain(persistUser(), "Spam", ReportStatus.PENDING);
         moderationPersistenceAdapter.saveReport(report1);
         moderationPersistenceAdapter.saveReport(report2);
         List<Report> foundReports = moderationPersistenceAdapter.findAllReports(ReportStatus.PENDING,
@@ -123,7 +131,7 @@ public class ModerationPersistenceAdapterIT {
 
     @Test
     void saveReport_whenResolved_returnResolvedReport() {
-        UUID adminId = UUID.randomUUID();
+        UUID adminId = persistUser();
         Report report = buildReportDomain(testUser.getId(), "Spam", ReportStatus.PENDING);
         Report saved = moderationPersistenceAdapter.saveReport(report);
 
@@ -137,8 +145,8 @@ public class ModerationPersistenceAdapterIT {
     @Test
     void findPendingReports_whenPendingReportsExist_returnOnlyPendingReports() {
         Report report1 = buildReportDomain(testUser.getId(), "Spam", ReportStatus.PENDING);
-        Report report2 = buildReportDomain(UUID.randomUUID(), "Spam", ReportStatus.PENDING);
-        Report report3 = buildReportDomain(UUID.randomUUID(), "Spam", ReportStatus.RESOLVED);
+        Report report2 = buildReportDomain(persistUser(), "Spam", ReportStatus.PENDING);
+        Report report3 = buildReportDomain(persistUser(), "Spam", ReportStatus.RESOLVED);
         moderationPersistenceAdapter.saveReport(report1);
         moderationPersistenceAdapter.saveReport(report2);
         moderationPersistenceAdapter.saveReport(report3);
@@ -150,8 +158,8 @@ public class ModerationPersistenceAdapterIT {
     @Test
     void countByStatus_whenReportsExist_returnCorrectCount() {
         Report report1 = buildReportDomain(testUser.getId(), "Spam", ReportStatus.PENDING);
-        Report report2 = buildReportDomain(UUID.randomUUID(), "Spam", ReportStatus.PENDING);
-        Report report3 = buildReportDomain(UUID.randomUUID(), "Spam", ReportStatus.RESOLVED);
+        Report report2 = buildReportDomain(persistUser(), "Spam", ReportStatus.PENDING);
+        Report report3 = buildReportDomain(persistUser(), "Spam", ReportStatus.RESOLVED);
         moderationPersistenceAdapter.saveReport(report1);
         moderationPersistenceAdapter.saveReport(report2);
         moderationPersistenceAdapter.saveReport(report3);
@@ -181,7 +189,7 @@ public class ModerationPersistenceAdapterIT {
 
     @Test
     void saveBlock_whenValid_returnSavedBlock() {
-        UserBlock userBlock = buildUserBlock(UUID.randomUUID(), UUID.randomUUID());
+        UserBlock userBlock = buildUserBlock(persistUser(), persistUser());
         UserBlock savedUserBlock = moderationPersistenceAdapter.saveBlock(userBlock);
         assertNotNull(savedUserBlock.getBlockerId());
         assertEquals(userBlock.getBlockerId(), savedUserBlock.getBlockerId());
@@ -189,14 +197,14 @@ public class ModerationPersistenceAdapterIT {
 
     @Test
     void deleteBlock_whenBlockExists_blockIsRemoved() {
-        UserBlock userBlock = buildUserBlock(UUID.randomUUID(), UUID.randomUUID());
+        UserBlock userBlock = buildUserBlock(persistUser(), persistUser());
         moderationPersistenceAdapter.saveBlock(userBlock);
         moderationPersistenceAdapter.deleteBlock(userBlock.getBlockerId(), userBlock.getBlockedId());
     }
 
     @Test
     void isBlocked_whenBlockExists_returnTrue() {
-        UserBlock userBlock = buildUserBlock(UUID.randomUUID(), UUID.randomUUID());
+        UserBlock userBlock = buildUserBlock(persistUser(), persistUser());
         moderationPersistenceAdapter.saveBlock(userBlock);
         boolean exists = moderationPersistenceAdapter.isBlocked(userBlock.getBlockerId(),
                 userBlock.getBlockedId());
@@ -205,7 +213,7 @@ public class ModerationPersistenceAdapterIT {
 
     @Test
     void isBlocked_whenBlockNotExists_returnFalse() {
-        UserBlock userBlock = buildUserBlock(UUID.randomUUID(), UUID.randomUUID());
+        UserBlock userBlock = buildUserBlock(persistUser(), persistUser());
         moderationPersistenceAdapter.saveBlock(userBlock);
         boolean exists = moderationPersistenceAdapter.isBlocked(UUID.randomUUID(),
                 userBlock.getBlockedId());
@@ -214,15 +222,15 @@ public class ModerationPersistenceAdapterIT {
 
     @Test
     void isBlocked_whenReversedDirection_returnFalse() {
-        UserBlock userBlock = buildUserBlock(UUID.randomUUID(), UUID.randomUUID());
+        UserBlock userBlock = buildUserBlock(persistUser(), persistUser());
         moderationPersistenceAdapter.saveBlock(userBlock);
         assertFalse(moderationPersistenceAdapter.isBlocked(userBlock.getBlockedId(), userBlock.getBlockerId()));
     }
 
     @Test
     void isEitherBlocked_whenBlockExists_returnTrue() {
-        UUID blockerId = UUID.randomUUID();
-        UUID blockedId = UUID.randomUUID();
+        UUID blockerId = persistUser();
+        UUID blockedId = persistUser();
         moderationPersistenceAdapter.saveBlock(buildUserBlock(blockerId, blockedId));
         assertTrue(moderationPersistenceAdapter.isEitherBlocked(blockerId, blockedId));
         assertTrue(moderationPersistenceAdapter.isEitherBlocked(blockedId, blockerId));
@@ -230,10 +238,10 @@ public class ModerationPersistenceAdapterIT {
 
     @Test
     void findBlocksByBlockerId_whenBlocksExist_returnUserBlocks() {
-        UUID blockerId = UUID.randomUUID();
+        UUID blockerId = persistUser();
 
-        UserBlock userBlock1 = buildUserBlock(blockerId, UUID.randomUUID());
-        UserBlock userBlock2 = buildUserBlock(blockerId, UUID.randomUUID());
+        UserBlock userBlock1 = buildUserBlock(blockerId, persistUser());
+        UserBlock userBlock2 = buildUserBlock(blockerId, persistUser());
 
         moderationPersistenceAdapter.saveBlock(userBlock1);
         moderationPersistenceAdapter.saveBlock(userBlock2);
@@ -256,10 +264,10 @@ public class ModerationPersistenceAdapterIT {
 
     @Test
     void findBlockedUserIdsByBlockerId_whenBlocksExist_returnBlockedUserIds() {
-        UUID blockerId = UUID.randomUUID();
+        UUID blockerId = persistUser();
 
-        UserBlock userBlock1 = buildUserBlock(blockerId, UUID.randomUUID());
-        UserBlock userBlock2 = buildUserBlock(blockerId, UUID.randomUUID());
+        UserBlock userBlock1 = buildUserBlock(blockerId, persistUser());
+        UserBlock userBlock2 = buildUserBlock(blockerId, persistUser());
 
         moderationPersistenceAdapter.saveBlock(userBlock1);
         moderationPersistenceAdapter.saveBlock(userBlock2);
@@ -278,10 +286,10 @@ public class ModerationPersistenceAdapterIT {
 
     @Test
     void findBlockerIdsByBlockedId_whenBlocksExist_returnBlockerIds() {
-        UUID blockedId = UUID.randomUUID();
+        UUID blockedId = persistUser();
 
-        UserBlock userBlock1 = buildUserBlock(UUID.randomUUID(), blockedId);
-        UserBlock userBlock2 = buildUserBlock(UUID.randomUUID(), blockedId);
+        UserBlock userBlock1 = buildUserBlock(persistUser(), blockedId);
+        UserBlock userBlock2 = buildUserBlock(persistUser(), blockedId);
 
         moderationPersistenceAdapter.saveBlock(userBlock1);
         moderationPersistenceAdapter.saveBlock(userBlock2);

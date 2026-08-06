@@ -10,28 +10,43 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 
+import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
 import com.instagram.adapter.out.persistence.repository.NotificationJpaRepository;
 import com.instagram.adapter.out.persistence.repository.NotificationSettingsJpaRepository;
+import com.instagram.adapter.out.persistence.repository.UserJpaRepository;
 import com.instagram.domain.model.Notification;
 import com.instagram.domain.model.NotificationSettings;
-import com.instagram.infrastructure.config.JpaConfig;
+import com.instagram.domain.model.PrivacyLevel;
+import com.instagram.domain.model.UserStatus;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@TestPropertySource(properties = { "spring.flyway.enabled=false", "spring.jpa.hibernate.ddl-auto=create-drop" })
-public class NotificationPersistenceAdapterIT {
+public class NotificationPersistenceAdapterIT extends PostgresIntegrationTest {
     @Autowired
     NotificationJpaRepository notificationJpaRepository;
     @Autowired
     NotificationSettingsJpaRepository notificationSettingsJpaRepository;
+    @Autowired
+    UserJpaRepository userJpaRepository;
 
     NotificationPersistenceAdapter notificationPersistenceAdapter;
     NotificationSettingsPersistenceAdapter notificationSettingsPersistenceAdapter;
-    UUID userId = UUID.randomUUID();
+    UUID userId;
+    UUID actorId;
+
+    // notifications.recipient_id / actor_id and notification_settings.user_id
+    // are real FKs to users.id — every test needs actually-persisted parent
+    // rows rather than bare UUID.randomUUID().
+    private UUID persistUser() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        return userJpaRepository.save(UserJpaEntity.builder()
+                .username("notif_" + suffix)
+                .email("notif_" + suffix + "@example.com")
+                .fullName("Notification Test User")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build()).getId();
+    }
 
     @BeforeEach
     void setUp() {
@@ -40,11 +55,14 @@ public class NotificationPersistenceAdapterIT {
         notificationSettingsPersistenceAdapter = new NotificationSettingsPersistenceAdapter(
                 notificationSettingsJpaRepository);
 
+        userId = persistUser();
+        actorId = persistUser();
+
         notification = Notification.builder()
                 .type(Notification.NotificationType.LIKE_POST)
                 .entityId(UUID.randomUUID())
                 .entityType(Notification.EntityType.POST)
-                .actorId(UUID.randomUUID())
+                .actorId(actorId)
                 .recipientId(userId)
                 .isRead(false)
                 .createdAt(OffsetDateTime.now())
@@ -112,7 +130,7 @@ public class NotificationPersistenceAdapterIT {
                 .type(Notification.NotificationType.LIKE_POST)
                 .entityId(UUID.randomUUID())
                 .entityType(Notification.EntityType.POST)
-                .actorId(UUID.randomUUID())
+                .actorId(actorId)
                 .recipientId(userId)
                 .isRead(false)
                 .createdAt(OffsetDateTime.now())
@@ -121,7 +139,7 @@ public class NotificationPersistenceAdapterIT {
                 .type(Notification.NotificationType.LIKE_POST)
                 .entityId(UUID.randomUUID())
                 .entityType(Notification.EntityType.POST)
-                .actorId(UUID.randomUUID())
+                .actorId(actorId)
                 .recipientId(userId)
                 .isRead(false)
                 .createdAt(OffsetDateTime.now())

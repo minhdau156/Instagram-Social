@@ -11,26 +11,23 @@ import com.instagram.domain.model.Permission;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 
 import com.instagram.adapter.out.persistence.entity.PermissionJpaEntity;
 import com.instagram.adapter.out.persistence.entity.RoleJpaEntity;
+import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
 import com.instagram.adapter.out.persistence.entity.UserRoleId;
 import com.instagram.adapter.out.persistence.entity.UserRoleJpaEntity;
 import com.instagram.adapter.out.persistence.repository.PermissionJpaRepository;
 import com.instagram.adapter.out.persistence.repository.RoleJpaRepository;
+import com.instagram.adapter.out.persistence.repository.UserJpaRepository;
 import com.instagram.adapter.out.persistence.repository.UserRoleJpaRepository;
 import com.instagram.domain.model.PermissionName;
+import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.Role;
 import com.instagram.domain.model.RoleName;
-import com.instagram.infrastructure.config.JpaConfig;
+import com.instagram.domain.model.UserStatus;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@TestPropertySource(properties = { "spring.flyway.enabled=false", "spring.jpa.hibernate.ddl-auto=create-drop" })
-public class RbacPersistenceAdapterIT {
+public class RbacPersistenceAdapterIT extends PostgresIntegrationTest {
 
     @Autowired
     private RoleJpaRepository roleJpaRepository;
@@ -38,9 +35,15 @@ public class RbacPersistenceAdapterIT {
     private PermissionJpaRepository permissionJpaRepository;
     @Autowired
     private UserRoleJpaRepository userRoleJpaRepository;
+    @Autowired
+    private UserJpaRepository userJpaRepository;
 
     RbacPersistenceAdapter rbacPersistenceAdapter;
 
+    // MODERATOR / REPORT_VIEW / REPORT_REVIEW come from the V4 Flyway seed data rather
+    // than being inserted here — roles.name and permissions.name are UNIQUE, and
+    // RoleName/PermissionName enums are a closed set, so tests must reuse the seeded
+    // rows instead of creating duplicates.
     PermissionJpaEntity reportViewPerm;
     PermissionJpaEntity reportReviewPerm;
     RoleJpaEntity moderatorRole;
@@ -50,23 +53,27 @@ public class RbacPersistenceAdapterIT {
         rbacPersistenceAdapter = new RbacPersistenceAdapter(
                 roleJpaRepository, permissionJpaRepository, userRoleJpaRepository);
 
-        reportViewPerm = permissionJpaRepository.save(
-                PermissionJpaEntity.builder().name("REPORT_VIEW").description("View reports").build());
-        reportReviewPerm = permissionJpaRepository.save(
-                PermissionJpaEntity.builder().name("REPORT_REVIEW").description("Review reports").build());
+        reportViewPerm = permissionJpaRepository.findByName("REPORT_VIEW").orElseThrow();
+        reportReviewPerm = permissionJpaRepository.findByName("REPORT_REVIEW").orElseThrow();
+        moderatorRole = roleJpaRepository.findByName("MODERATOR").orElseThrow();
+    }
 
-        moderatorRole = roleJpaRepository.save(
-                RoleJpaEntity.builder()
-                        .name("MODERATOR")
-                        .description("Moderator")
-                        .system(true)
-                        .permissions(Set.of(reportViewPerm, reportReviewPerm))
-                        .build());
+    // user_roles.user_id is a real FK to users(id) — every userId used below must be a
+    // persisted row, not a bare UUID.randomUUID().
+    private UUID persistUser(String username) {
+        return userJpaRepository.save(UserJpaEntity.builder()
+                .username(username)
+                .email(username + "@example.com")
+                .fullName(username)
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build()).getId();
     }
 
     @Test
     void findRolesByUserId_whenUserHasRole_returnsRolesWithPermissionsPopulated() {
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser("rbac_user1");
         userRoleJpaRepository.save(UserRoleJpaEntity.builder()
                 .id(new UserRoleId(userId, moderatorRole.getId()))
                 .build());
@@ -76,12 +83,15 @@ public class RbacPersistenceAdapterIT {
         assertEquals(1, roles.size());
         Role role = roles.iterator().next();
         assertEquals(RoleName.MODERATOR, role.getName());
-        assertEquals(2, role.getPermissions().size());
+        // Seeded MODERATOR role carries REPORT_VIEW, REPORT_REVIEW, CONTENT_MODERATE, USER_VIEW
+        assertEquals(4, role.getPermissions().size());
+        assertTrue(role.getPermissions().stream().anyMatch(p -> p.getName() == PermissionName.REPORT_VIEW));
+        assertTrue(role.getPermissions().stream().anyMatch(p -> p.getName() == PermissionName.REPORT_REVIEW));
     }
 
     @Test
     void findPermissionNamesByUserId_returnsFlattenedDeduplicatedSet() {
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser("rbac_user2");
         userRoleJpaRepository.save(UserRoleJpaEntity.builder()
                 .id(new UserRoleId(userId, moderatorRole.getId()))
                 .build());
@@ -89,14 +99,14 @@ public class RbacPersistenceAdapterIT {
         Set<PermissionName> permissions = rbacPersistenceAdapter.findPermissionNamesByUserId(userId);
 
         assertNotNull(permissions);
-        assertEquals(2, permissions.size());
+        assertEquals(4, permissions.size());
         assertTrue(permissions.contains(PermissionName.REPORT_VIEW));
         assertTrue(permissions.contains(PermissionName.REPORT_REVIEW));
     }
 
     @Test
     void assignRoleToUser_thenUserHasRole_isTrue_afterRevoke_isFalse() {
-        UUID userId = UUID.randomUUID();
+        UUID userId = persistUser("rbac_user3");
 
         rbacPersistenceAdapter.assignRoleToUser(userId, moderatorRole.getId(), null);
         assertTrue(rbacPersistenceAdapter.userHasRole(userId, RoleName.MODERATOR));
@@ -107,8 +117,7 @@ public class RbacPersistenceAdapterIT {
 
     @Test
     void replaceRolePermissions_replacesOldPermissionsWithNew() {
-        PermissionJpaEntity roleAssignPerm = permissionJpaRepository.save(
-                PermissionJpaEntity.builder().name("ROLE_ASSIGN").description("Assign roles").build());
+        PermissionJpaEntity roleAssignPerm = permissionJpaRepository.findByName("ROLE_ASSIGN").orElseThrow();
 
         rbacPersistenceAdapter.replaceRolePermissions(
                 moderatorRole.getId(), Set.of(roleAssignPerm.getId()));
@@ -124,8 +133,8 @@ public class RbacPersistenceAdapterIT {
 
     @Test
     void countUsersWithRole_reflectsAssignments() {
-        UUID user1 = UUID.randomUUID();
-        UUID user2 = UUID.randomUUID();
+        UUID user1 = persistUser("rbac_user4");
+        UUID user2 = persistUser("rbac_user5");
 
         assertEquals(0, rbacPersistenceAdapter.countUsersWithRole(RoleName.MODERATOR));
 
@@ -170,8 +179,8 @@ public class RbacPersistenceAdapterIT {
     void findAllPermission_whenSuccess_returnsPermissions() {
         List<Permission> result = rbacPersistenceAdapter.findAllPermissions();
 
-        assertEquals(2, result.size());
+        // Seed data provisions exactly 10 permissions (V4 migration)
+        assertEquals(10, result.size());
     }
-
 
 }

@@ -15,10 +15,7 @@ import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 
 import com.instagram.adapter.out.persistence.entity.FollowId;
 import com.instagram.adapter.out.persistence.entity.FollowJpaEntity;
@@ -29,16 +26,9 @@ import com.instagram.adapter.out.persistence.repository.PostJpaRepository;
 import com.instagram.domain.model.PostStatus;
 import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.UserStatus;
-import com.instagram.infrastructure.config.JpaConfig;
 import com.instagram.infrastructure.util.BlockFilter;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@TestPropertySource(properties = {
-        "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
-})
-class FeedJpaQueryAdapterIT {
+class FeedJpaQueryAdapterIT extends PostgresIntegrationTest {
 
     @Autowired
     private TestEntityManager tem;
@@ -137,6 +127,10 @@ class FeedJpaQueryAdapterIT {
     private UserJpaEntity buildUser(String username) {
         return UserJpaEntity.builder()
                 .username(username)
+                // users.chk_contact requires email OR phone_number to be non-null —
+                // not enforced by the H2/create-drop schema, but a real constraint
+                // in the Flyway-managed Postgres schema.
+                .email(username + "@example.com")
                 .fullName(username)
                 .status(UserStatus.ACTIVE)
                 .privacyLevel(PrivacyLevel.PUBLIC)

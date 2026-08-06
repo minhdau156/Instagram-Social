@@ -2,6 +2,7 @@ package com.instagram.adapter.out.persistence;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -12,11 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 
-import com.instagram.infrastructure.config.JpaConfig;
 import com.instagram.adapter.out.persistence.repository.UserJpaRepository;
 import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.User;
@@ -24,10 +21,7 @@ import com.instagram.domain.model.UserRole;
 import com.instagram.domain.model.UserStatus;
 import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@TestPropertySource(properties = { "spring.flyway.enabled=false", "spring.jpa.hibernate.ddl-auto=create-drop" })
-public class UserPersistenceAdapterIT {
+public class UserPersistenceAdapterIT extends PostgresIntegrationTest {
     @Autowired
     UserJpaRepository userJpaRepository;
 
@@ -304,8 +298,12 @@ public class UserPersistenceAdapterIT {
         userPersistenceAdapter.save(user);
         userPersistenceAdapter.save(user2);
 
+        // findAll is unfiltered, so it also returns the V2 Flyway seed user
+        // (demo_user) alongside the 2 created here — assert on presence rather
+        // than an exact count tied to seed data.
         List<User> result = userPersistenceAdapter.findAll(0, 10);
-        assertEquals(2, result.size());
+        assertTrue(result.stream().anyMatch(u -> u.getUsername().equals("testuser")));
+        assertTrue(result.stream().anyMatch(u -> u.getUsername().equals("testuser2")));
     }
 
     @Test

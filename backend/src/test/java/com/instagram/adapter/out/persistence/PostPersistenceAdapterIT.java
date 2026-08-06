@@ -7,10 +7,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.TestPropertySource;
 
 import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
 import com.instagram.adapter.out.persistence.repository.PostJpaRepository;
@@ -18,14 +15,10 @@ import com.instagram.adapter.out.persistence.repository.UserJpaRepository;
 import com.instagram.domain.model.Post;
 import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.UserStatus;
-import com.instagram.infrastructure.config.JpaConfig;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataJpaTest
-@Import(JpaConfig.class)
-@TestPropertySource(properties = { "spring.flyway.enabled=false", "spring.jpa.hibernate.ddl-auto=create-drop" })
-public class PostPersistenceAdapterIT {
+public class PostPersistenceAdapterIT extends PostgresIntegrationTest {
     @Autowired
     PostJpaRepository postJpaRepository;
 

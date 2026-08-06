@@ -1,13 +1,35 @@
-# Current Feature
+# Current Feature: TASK-10.39 — Testcontainers integration suite
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- -->
+- Create shared base class `backend/src/test/java/com/instagram/adapter/out/persistence/PostgresIntegrationTest.java`: singleton `static PostgreSQLContainer<?>` (`postgres:15-alpine`) started in a `static {}` block, annotated `@DataJpaTest` + `@Testcontainers` + `@AutoConfigureTestDatabase(replace = NONE)` + `@Import(JpaConfig.class)`, with `@DynamicPropertySource` wiring datasource url/username/password/driver + `spring.flyway.enabled=true` + `spring.jpa.hibernate.ddl-auto=none`.
+- Migrate every `*IT` class under `adapter/out/persistence/` to `extends PostgresIntegrationTest`, dropping per-class `@TestPropertySource`, inline `@Container` fields, and now-redundant class annotations:
+  - `SearchJpaAdapterIT` (simplify — already Testcontainers-based per TASK-10.33)
+  - `UserPersistenceAdapterIT`
+  - `PostPersistenceAdapterIT`
+  - `CommentPersistenceAdapterIT`
+  - `LikePersistenceAdapterIT`
+  - `SavedPostPersistenceAdapterIT`
+  - `FollowPersistenceAdapterIT`
+  - `ConversationPersistenceAdapterIT`
+  - `NotificationPersistenceAdapterIT`
+  - `FeedJpaQueryAdapterIT`
+  - `UserJpaEntityIT`
+- Confirm `org.testcontainers:postgresql` + `org.testcontainers:junit-jupiter` already present at test scope in `backend/pom.xml`.
+- Once every `*IT` passes against real Postgres, remove the H2 test dependency from `backend/pom.xml` and confirm no `h2` references remain in test sources.
+- Verify full suite: `mvn verify` green (compile → unit → integration → JaCoCo → coverage gate), including FTS-specific tests (`searchPosts_ftsStemming`, `searchPosts_ftsMultiWord`, `searchPosts_ftsRelevanceOrdering`).
+- Optionally simplify CI: the `backend-ci` job's `services.postgres` block becomes unused once Testcontainers starts its own container (safe to remove, not required).
 
 ## Notes
-<!-- -->
+- Pairs with TASK-10.33 (prototyped this on `SearchJpaAdapterIT` alone — testcontainers.version already bumped 1.19.8 → 1.21.4 in pom.xml) and TASK-10.35 (coverage gate).
+- Docker Desktop must be running locally (`docker info` must succeed) before running these tests.
+- Singleton container pattern means all subclasses share one Postgres instance — test isolation depends on every `@BeforeEach` truncating its own tables. Missing truncation in any migrated class risks cross-test pollution.
+- `withReuse(true)` needs `~/.testcontainers.properties` with `testcontainers.reuse.enable=true` to actually speed up local reruns; no effect in CI.
+- Watch for H2-vs-Postgres SQL divergence once real Postgres runs the suite: `ILIKE`, `citext`, `pg_trgm`, named constraints (e.g. `uq_users_username`) may surface previously-masked failures.
+- GitHub Actions `ubuntu-latest` has Docker pre-installed — no `.github/workflows/ci.yml` change needed for Testcontainers itself; only the now-redundant `services.postgres` block is optional cleanup.
+- Working tree already has small unrelated pending changes (uncommitted `backend/pom.xml` comment-out of an archunit dependency, an unused import removed from `frontend/src/pages/posts/PostPage.tsx`, and an untracked `backend/src/test/java/com/instagram/ArchitectureFitnessTest.java`) — these predate this feature and were left as-is when branching.
 
 ## History
 - TASK-10.36 — Frontend component tests: `vitest`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom`, `msw`, `jsdom`, `@vitest/coverage-v8` added as devDependencies; Vitest configured via standalone `vitest.config.ts` (happy-dom, globals, `./src/test/setup.ts`, css enabled) rather than a block in `vite.config.ts`; `src/test/setup.ts` imports `@testing-library/jest-dom/vitest`. Delivered scope pivoted from the original plan (`LoginPage`/`LikeButton`/`ProtectedRoute`/`useWebSocket`, MSW network mocking) to `PostCard.test.tsx`, `PostDetailModel.test.tsx` (covers `PostDetailModal`), `PostGrid.test.tsx`, and a sanity test — hooks/child components mocked directly via `vi.mock` instead of MSW handlers. CI's `frontend-ci` job already runs `npm run test` without `|| true`. User confirmed all tests pass both locally and in GitHub Actions CI.

@@ -8,22 +8,24 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.TestPropertySource;
 
 import com.instagram.adapter.out.persistence.entity.CommentJpaEntity;
+import com.instagram.adapter.out.persistence.entity.PostJpaEntity;
+import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
 import com.instagram.adapter.out.persistence.repository.CommentJpaRepository;
 import com.instagram.adapter.out.persistence.repository.PostJpaRepository;
+import com.instagram.adapter.out.persistence.repository.UserJpaRepository;
 import com.instagram.domain.model.Comment;
 import com.instagram.domain.model.CommentStatus;
+import com.instagram.domain.model.PostStatus;
+import com.instagram.domain.model.PrivacyLevel;
+import com.instagram.domain.model.UserStatus;
 
-@DataJpaTest
 @Import(CommentPersistenceAdapter.class)
-@TestPropertySource(properties = { "spring.flyway.enabled=false", "spring.jpa.hibernate.ddl-auto=create-drop" })
-class CommentPersistenceAdapterIT {
+class CommentPersistenceAdapterIT extends PostgresIntegrationTest {
 
         @Autowired
         private CommentPersistenceAdapter adapter;
@@ -34,15 +36,40 @@ class CommentPersistenceAdapterIT {
         @Autowired
         private PostJpaRepository postJpaRepository;
 
+        @Autowired
+        private UserJpaRepository userJpaRepository;
+
         @BeforeEach
         void setUp() {
                 commentJpaRepository.deleteAll();
         }
 
+        // comments.post_id / comments.user_id are real FKs — every test needs an
+        // actually-persisted parent row rather than a bare UUID.randomUUID().
+        private UUID persistUser() {
+                String suffix = UUID.randomUUID().toString().substring(0, 8);
+                return userJpaRepository.save(UserJpaEntity.builder()
+                                .username("commenter_" + suffix)
+                                .email("commenter_" + suffix + "@example.com")
+                                .fullName("Commenter")
+                                .status(UserStatus.ACTIVE)
+                                .privacyLevel(PrivacyLevel.PUBLIC)
+                                .isVerified(false)
+                                .build()).getId();
+        }
+
+        private UUID persistPost(UUID userId) {
+                return postJpaRepository.save(PostJpaEntity.builder()
+                                .userId(userId)
+                                .caption("Post for comment test")
+                                .status(PostStatus.PUBLISHED)
+                                .build()).getId();
+        }
+
         @Test
         void save_persistsComment_withCorrectFields() {
-                UUID postId = UUID.randomUUID();
-                UUID userId = UUID.randomUUID();
+                UUID userId = persistUser();
+                UUID postId = persistPost(userId);
 
                 Comment comment = Comment.builder()
                                 .id(UUID.randomUUID())
@@ -71,8 +98,8 @@ class CommentPersistenceAdapterIT {
 
         @Test
         void findByPostId_returnsOnlyTopLevelActiveComments() {
-                UUID postId = UUID.randomUUID();
-                UUID userId = UUID.randomUUID();
+                UUID userId = persistUser();
+                UUID postId = persistPost(userId);
 
                 Comment topLevelActive = adapter.save(Comment.builder()
                                 .id(UUID.randomUUID()).postId(postId).userId(userId).content("Top level")
@@ -94,8 +121,8 @@ class CommentPersistenceAdapterIT {
 
         @Test
         void findByParentId_returnsActiveRepliesOnly() {
-                UUID postId = UUID.randomUUID();
-                UUID userId = UUID.randomUUID();
+                UUID userId = persistUser();
+                UUID postId = persistPost(userId);
 
                 Comment topLevel = adapter.save(Comment.builder()
                                 .id(UUID.randomUUID()).postId(postId).userId(userId).content("Top level")
@@ -122,8 +149,8 @@ class CommentPersistenceAdapterIT {
 
         @Test
         void incrementReplyCount_updatesCounterCorrectly() {
-                UUID postId = UUID.randomUUID();
-                UUID userId = UUID.randomUUID();
+                UUID userId = persistUser();
+                UUID postId = persistPost(userId);
 
                 Comment comment = adapter.save(Comment.builder()
                                 .id(UUID.randomUUID()).postId(postId).userId(userId).content("Top level")
@@ -137,8 +164,8 @@ class CommentPersistenceAdapterIT {
 
         @Test
         void save_softDeleted_commentHasDeletedStatus() {
-                UUID postId = UUID.randomUUID();
-                UUID userId = UUID.randomUUID();
+                UUID userId = persistUser();
+                UUID postId = persistPost(userId);
 
                 Comment comment = adapter.save(Comment.builder()
                                 .id(UUID.randomUUID()).postId(postId).userId(userId).content("Top level")
