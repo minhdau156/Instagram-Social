@@ -1,37 +1,16 @@
-# Current Feature: TASK-10.39 — Testcontainers integration suite
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Create shared base class `backend/src/test/java/com/instagram/adapter/out/persistence/PostgresIntegrationTest.java`: singleton `static PostgreSQLContainer<?>` (`postgres:15-alpine`) started in a `static {}` block, annotated `@DataJpaTest` + `@Testcontainers` + `@AutoConfigureTestDatabase(replace = NONE)` + `@Import(JpaConfig.class)`, with `@DynamicPropertySource` wiring datasource url/username/password/driver + `spring.flyway.enabled=true` + `spring.jpa.hibernate.ddl-auto=none`.
-- Migrate every `*IT` class under `adapter/out/persistence/` to `extends PostgresIntegrationTest`, dropping per-class `@TestPropertySource`, inline `@Container` fields, and now-redundant class annotations:
-  - `SearchJpaAdapterIT` (simplify — already Testcontainers-based per TASK-10.33)
-  - `UserPersistenceAdapterIT`
-  - `PostPersistenceAdapterIT`
-  - `CommentPersistenceAdapterIT`
-  - `LikePersistenceAdapterIT`
-  - `SavedPostPersistenceAdapterIT`
-  - `FollowPersistenceAdapterIT`
-  - `ConversationPersistenceAdapterIT`
-  - `NotificationPersistenceAdapterIT`
-  - `FeedJpaQueryAdapterIT`
-  - `UserJpaEntityIT`
-- Confirm `org.testcontainers:postgresql` + `org.testcontainers:junit-jupiter` already present at test scope in `backend/pom.xml`.
-- Once every `*IT` passes against real Postgres, remove the H2 test dependency from `backend/pom.xml` and confirm no `h2` references remain in test sources.
-- Verify full suite: `mvn verify` green (compile → unit → integration → JaCoCo → coverage gate), including FTS-specific tests (`searchPosts_ftsStemming`, `searchPosts_ftsMultiWord`, `searchPosts_ftsRelevanceOrdering`).
-- Optionally simplify CI: the `backend-ci` job's `services.postgres` block becomes unused once Testcontainers starts its own container (safe to remove, not required).
+<!-- -->
 
 ## Notes
-- Pairs with TASK-10.33 (prototyped this on `SearchJpaAdapterIT` alone — testcontainers.version already bumped 1.19.8 → 1.21.4 in pom.xml) and TASK-10.35 (coverage gate).
-- Docker Desktop must be running locally (`docker info` must succeed) before running these tests.
-- Singleton container pattern means all subclasses share one Postgres instance — test isolation depends on every `@BeforeEach` truncating its own tables. Missing truncation in any migrated class risks cross-test pollution.
-- `withReuse(true)` needs `~/.testcontainers.properties` with `testcontainers.reuse.enable=true` to actually speed up local reruns; no effect in CI.
-- Watch for H2-vs-Postgres SQL divergence once real Postgres runs the suite: `ILIKE`, `citext`, `pg_trgm`, named constraints (e.g. `uq_users_username`) may surface previously-masked failures.
-- GitHub Actions `ubuntu-latest` has Docker pre-installed — no `.github/workflows/ci.yml` change needed for Testcontainers itself; only the now-redundant `services.postgres` block is optional cleanup.
-- Working tree already has small unrelated pending changes (uncommitted `backend/pom.xml` comment-out of an archunit dependency, an unused import removed from `frontend/src/pages/posts/PostPage.tsx`, and an untracked `backend/src/test/java/com/instagram/ArchitectureFitnessTest.java`) — these predate this feature and were left as-is when branching.
+<!-- -->
 
 ## History
+- TASK-10.39 — Testcontainers integration suite: shared `PostgresIntegrationTest` base class (singleton `static PostgreSQLContainer<?>` "postgres:15-alpine" started in a `static {}` block, `@DataJpaTest` + `@Testcontainers` + `@AutoConfigureTestDatabase(replace=NONE)` + `@Import(JpaConfig.class)`, `@DynamicPropertySource` wiring datasource + `spring.flyway.enabled=true` + `ddl-auto=none`) created in `adapter/out/persistence/`; all 23 `*IT` persistence classes migrated to extend it (superset of the spec's 11 — also covered `Hashtag*`, `Share*`, `PostMedia*`, `PostShare*`, `Message*`, `UserStats*`, `Rbac*`, `Moderation*`, which already existed but weren't listed); H2 test dependency removed from `pom.xml` entirely, no `h2` references remain in test sources. Migration surfaced real bugs previously masked by H2's schema-from-entities behavior: FK violations from tests using bare `UUID.randomUUID()` for columns that are plain `@Column` in JPA but real `FOREIGN KEY` in the Flyway schema (fixed by persisting real parent rows across ~15 files); a `users.chk_contact` CHECK constraint (email OR phone required) never enforced under H2 create-drop; a stale-conversation-id test bug (`ConversationJpaEntity` uses `@GeneratedValue(strategy=UUID)`, so the pre-save domain id differs from the persisted one) unmasked by FK enforcement; a `UserPersistenceAdapterIT` count assertion that didn't account for the V2 Flyway seed user; and `BaseJpaEntityTest` (a `*Test.java`, outside the `*IT` migration scope) which implicitly depended on H2 for Spring's default embedded-database auto-replacement — given its own standalone Testcontainers Postgres setup with `ddl-auto=create-drop` since it persists an ad-hoc entity Flyway doesn't know about. Full 23-class suite green (190 tests) against real Postgres with Docker.
 - TASK-10.36 — Frontend component tests: `vitest`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom`, `msw`, `jsdom`, `@vitest/coverage-v8` added as devDependencies; Vitest configured via standalone `vitest.config.ts` (happy-dom, globals, `./src/test/setup.ts`, css enabled) rather than a block in `vite.config.ts`; `src/test/setup.ts` imports `@testing-library/jest-dom/vitest`. Delivered scope pivoted from the original plan (`LoginPage`/`LikeButton`/`ProtectedRoute`/`useWebSocket`, MSW network mocking) to `PostCard.test.tsx`, `PostDetailModel.test.tsx` (covers `PostDetailModal`), `PostGrid.test.tsx`, and a sanity test — hooks/child components mocked directly via `vi.mock` instead of MSW handlers. CI's `frontend-ci` job already runs `npm run test` without `|| true`. User confirmed all tests pass both locally and in GitHub Actions CI.
 - TASK-10.33 — Swap `SearchJpaAdapterIT` to Testcontainers: `@Testcontainers` + `@Container static PostgreSQLContainer<?>` (`postgres:15-alpine`) replaces hard-coded `@TestPropertySource` localhost connection; `@DynamicPropertySource` wires datasource url/username/password/driver + flyway/ddl-auto props; `testcontainers.version` bumped 1.19.8 → 1.21.4 in pom.xml (old version couldn't negotiate with newer Docker Desktop daemons); `V4__add_rbac_tables.sql` fixed — removed a `DROP COLUMN role` that no earlier migration ever created, only masked before by developers' stale local test DBs. 22/22 tests green including FTS tests.
 - TASK-10.29 — LGTM observability stack: replaced Zipkin with Tempo (OTLP); added Loki via loki-logback-appender; added Prometheus + Alertmanager with three alert rules; added Grafana with auto-provisioned datasources and Instagram overview dashboard; full cross-signal correlation wired (metric exemplar → trace, log line → trace, trace → logs).
