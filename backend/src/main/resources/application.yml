@@ -152,7 +152,7 @@ bucket4j:
       url: /api/v1/auth/login
       rate-limits:
         - bandwidths:
-            - capacity: 10
+            - capacity: 10000
               time: 1
               unit: minutes
               refill-speed: interval

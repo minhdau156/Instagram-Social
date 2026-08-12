@@ -5,20 +5,21 @@ spring:
     password: ${POSTGRES_PASSWORD:changeme}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 5
-      minimum-idle: 2
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 20000
   data:
     redis:
       host: localhost
       port: 6379
   jpa:
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-        default_schema: public
-        generate_statistics: false
+        format_sql: false
+        # default_schema: public
+        # generate_statistics: false
   
   
 
