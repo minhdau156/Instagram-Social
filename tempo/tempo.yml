@@ -5,7 +5,8 @@ server:
   log_level: info
 
 distributor:
-  receivers:
+  
+  receivers: #where tempo can receive the trace
     otlp:
       protocols:
         grpc:
