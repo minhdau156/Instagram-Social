@@ -164,7 +164,6 @@ public class MessageController {
                 MessageResponse response = MessageResponse.from(view.message(), view.senderUsername(),
                                 view.senderAvatarUrl());
                 messagingTemplate.convertAndSend("/topic/conversations/" + id, response);
-                
                 return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
         }
 
@@ -172,14 +171,13 @@ public class MessageController {
         public ResponseEntity<ApiResponse<Void>> markRead(@PathVariable("id") UUID conversationId,
                         @Valid @RequestBody MarkReadRequest request) {
                 log.info("markRead conversationId={}", conversationId);
-                int unreadCount = getUnreadMessageUseCase.getUnreadMessage(conversationId, currentUserId());
+                UUID userId = currentUserId();
                 markReadUseCase.markRead(
-                                new MarkReadUseCase.Command(conversationId, currentUserId(), request.messageId()));
-                
+                                new MarkReadUseCase.Command(conversationId, userId, request.messageId()));
 
-                MarkReadResponse res = new MarkReadResponse(conversationId, 0);
-                
-                messagingTemplate.convertAndSend("/user/${userId}/topic/unread-count", res);
+                int unreadCount = getUnreadMessageUseCase.getUnreadMessage(conversationId, userId);
+                MarkReadResponse res = new MarkReadResponse(conversationId, unreadCount);
+                messagingTemplate.convertAndSendToUser(userId.toString(), "/topic/unread-count", res);
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.ok(null));
         }
 
