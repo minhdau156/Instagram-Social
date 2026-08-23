@@ -31,8 +31,8 @@ export default function AppShell() {
 
 function AppShellContent() {
   const { profile } = useAuth();
-  const { totalUnreadCount, isConnected } = useWebSocketContext();
-  const { conversations } = useConversations();
+  const { totalUnreadCount } = useWebSocketContext();
+  useConversations();
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<HTMLButtonElement | null>(null);
