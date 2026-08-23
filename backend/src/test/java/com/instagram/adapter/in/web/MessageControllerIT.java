@@ -34,6 +34,7 @@ import com.instagram.domain.port.in.messaging.AddGroupMemberUseCase;
 import com.instagram.domain.port.in.messaging.CreateConversationUseCase;
 import com.instagram.domain.port.in.messaging.GetConversationsUseCase;
 import com.instagram.domain.port.in.messaging.GetMessagesUseCase;
+import com.instagram.domain.port.in.messaging.GetUnreadMessageUseCase;
 import com.instagram.domain.port.in.messaging.LeaveConversationUseCase;
 import com.instagram.domain.port.in.messaging.MarkReadUseCase;
 import com.instagram.domain.port.in.messaging.SendMessageUseCase;
@@ -42,6 +43,7 @@ import com.instagram.infrastructure.security.HtmlSanitizer;
 import com.instagram.infrastructure.security.JwtTokenProvider;
 import com.instagram.infrastructure.security.OAuth2SuccessHandler;
 import com.instagram.infrastructure.security.SecurityConfig;
+
 
 @WebMvcTest(MessageController.class)
 @Import(SecurityConfig.class)
@@ -84,6 +86,9 @@ class MessageControllerIT {
 
         @MockBean 
         private HtmlSanitizer htmlSanitizer;
+
+        @MockBean
+        private GetUnreadMessageUseCase getUnreadMessageUseCase;
 
         // ── helpers ──────────────────────────────────────────────────────────────
 

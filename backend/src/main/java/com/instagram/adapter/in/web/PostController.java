@@ -3,10 +3,12 @@ package com.instagram.adapter.in.web;
 import com.instagram.adapter.in.web.dto.request.CreatePostRequest;
 import com.instagram.adapter.in.web.dto.request.UpdatePostRequest;
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
+import com.instagram.adapter.in.web.dto.response.PostPageResponse;
 import com.instagram.adapter.in.web.dto.response.PostResponse;
 import com.instagram.domain.model.Post;
 import com.instagram.domain.model.PostMedia;
 import com.instagram.domain.port.in.*;
+import com.instagram.domain.port.in.post.FindAllPostMediaUseCase;
 import com.instagram.infrastructure.security.HtmlSanitizer;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +19,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -26,7 +27,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -40,6 +43,7 @@ public class PostController {
 	private final UpdatePostUseCase updatePostUseCase;
 	private final DeletePostUseCase deletePostUseCase;
 	private final GetUserPostsUseCase getUserPostsUseCase;
+	private final FindAllPostMediaUseCase findAllPostMediaUseCase;
 	private final HtmlSanitizer htmlSanitizer;
 
 	@PostMapping
@@ -133,7 +137,7 @@ public class PostController {
 	@GetMapping("/users/{userId}/posts")
 	@Operation(summary = "List all published posts for a given user (paginated)")
 	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Page of posts")
-	public ResponseEntity<ApiResponse<Page<PostResponse>>> getUserPosts(
+	public ResponseEntity<ApiResponse<PostPageResponse>> getUserPosts(
 			@PathVariable UUID userId,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "12") int size,
@@ -141,8 +145,16 @@ public class PostController {
 
 		UUID currentUserId = userDetails != null ? UUID.fromString(userDetails.getUsername()) : null;
 		log.debug("getUserPosts targetUserId={} page={} size={} requestedBy={}", userId, page, size, currentUserId);
-		Page<Post> posts = getUserPostsUseCase.getUserPosts(
+		List<Post> posts = getUserPostsUseCase.getUserPosts(
 				new GetUserPostsUseCase.Query(userId, currentUserId, page, size));
-		return ResponseEntity.ok(ApiResponse.ok(posts.map(post -> PostResponse.from(post, null))));
+
+		List<UUID> postIds = posts.stream().map(Post::getId).toList();
+		Map<UUID, List<PostMedia>> mediaByPostId = findAllPostMediaUseCase.findAllByPostIds(postIds).stream()
+				.collect(Collectors.groupingBy(PostMedia::getPostId));
+
+		List<PostResponse> responses = posts.stream()
+				.map(post -> PostResponse.from(post, mediaByPostId.get(post.getId())))
+				.toList();
+		return ResponseEntity.ok(ApiResponse.ok(PostPageResponse.of(responses, page, size)));
 	}
 }

@@ -41,10 +41,8 @@ function AppShellContent() {
   const navigate = useNavigate();
 
 
-  const unreadCount =
-    isConnected && totalUnreadCount !== null
-      ? totalUnreadCount
-      : (conversations ?? []).reduce((sum, c) => sum + (c.unreadCount ?? 0), 0);
+  const unreadCount = totalUnreadCount;
+    
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>

@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -32,12 +31,14 @@ import com.instagram.adapter.in.web.dto.request.UpdatePostRequest;
 import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.domain.exception.UnauthorizedPostAccessException;
 import com.instagram.domain.model.Post;
+import com.instagram.domain.model.PostMedia;
 import com.instagram.domain.port.in.CreatePostUseCase;
 import com.instagram.domain.port.in.DeletePostUseCase;
 import com.instagram.domain.port.in.GenerateUploadUrlUseCase;
 import com.instagram.domain.port.in.GetPostUseCase;
 import com.instagram.domain.port.in.GetUserPostsUseCase;
 import com.instagram.domain.port.in.UpdatePostUseCase;
+import com.instagram.domain.port.in.post.FindAllPostMediaUseCase;
 import com.instagram.infrastructure.security.HtmlSanitizer;
 import com.instagram.infrastructure.security.JwtTokenProvider;
 import com.instagram.infrastructure.security.OAuth2SuccessHandler;
@@ -79,6 +80,9 @@ public class PostControllerIT {
 
     @MockBean
     GetUserPostsUseCase getUserPostsUseCase;
+
+    @MockBean
+    FindAllPostMediaUseCase findAllPostMediaUseCase;
 
     @MockBean
     GenerateUploadUrlUseCase generateUploadUrlUseCase;
@@ -155,12 +159,23 @@ public class PostControllerIT {
                 .updatedAt(java.time.OffsetDateTime.now())
                 .build();
 
+        var media = PostMedia.builder()
+                .id(UUID.randomUUID())
+                .postId(post.getId())
+                .mediaUrl("media/test.jpg")
+                .mediaType(com.instagram.domain.model.MediaType.IMAGE)
+                .sortOrder("0")
+                .build();
+
         when(getUserPostsUseCase.getUserPosts(any(GetUserPostsUseCase.Query.class)))
-                .thenReturn(new PageImpl<>(List.of(post)));
+                .thenReturn(List.of(post));
+        when(findAllPostMediaUseCase.findAllByPostIds(List.of(post.getId())))
+                .thenReturn(List.of(media));
 
         mockMvc.perform(get("/api/v1/posts/users/{userId}/posts", userId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content[0].id").value(post.getId().toString()));
+                .andExpect(jsonPath("$.data.content[0].id").value(post.getId().toString()))
+                .andExpect(jsonPath("$.data.content[0].mediaItems[0].mediaUrl").value("media/test.jpg"));
     }
 
     @Test

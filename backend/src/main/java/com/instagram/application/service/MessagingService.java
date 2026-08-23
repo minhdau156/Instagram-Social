@@ -29,6 +29,7 @@ import com.instagram.domain.port.in.messaging.AddGroupMemberUseCase;
 import com.instagram.domain.port.in.messaging.CreateConversationUseCase;
 import com.instagram.domain.port.in.messaging.GetConversationsUseCase;
 import com.instagram.domain.port.in.messaging.GetMessagesUseCase;
+import com.instagram.domain.port.in.messaging.GetUnreadMessageUseCase;
 import com.instagram.domain.port.in.messaging.LeaveConversationUseCase;
 import com.instagram.domain.port.in.messaging.MarkReadUseCase;
 import com.instagram.domain.port.in.messaging.SendMessageUseCase;
@@ -46,7 +47,8 @@ public class MessagingService implements
         SendMessageUseCase,
         MarkReadUseCase,
         AddGroupMemberUseCase,
-        LeaveConversationUseCase {
+        LeaveConversationUseCase, 
+        GetUnreadMessageUseCase {
 
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
@@ -96,7 +98,10 @@ public class MessagingService implements
     public void markRead(MarkReadUseCase.Command command) {
         messageRepository.markAsRead(command.conversationId(), command.messageId(), command.userId(),
                 OffsetDateTime.now());
+        
     }
+
+    
 
     @Override
     @Transactional
@@ -239,5 +244,12 @@ public class MessagingService implements
 
         return savedConversation;
     }
+
+    @Override
+    public int getUnreadMessage(UUID conversationId, UUID userId) {
+        return messageRepository.getUnreadCount(conversationId, userId);
+    }
+
+    
 
 }

@@ -22,11 +22,13 @@ import com.instagram.adapter.in.web.dto.request.MarkReadRequest;
 import com.instagram.adapter.in.web.dto.request.SendMessageRequest;
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
 import com.instagram.adapter.in.web.dto.response.ConversationResponse;
+import com.instagram.adapter.in.web.dto.response.MarkReadResponse;
 import com.instagram.adapter.in.web.dto.response.MessageResponse;
 import com.instagram.domain.port.in.messaging.AddGroupMemberUseCase;
 import com.instagram.domain.port.in.messaging.CreateConversationUseCase;
 import com.instagram.domain.port.in.messaging.GetConversationsUseCase;
 import com.instagram.domain.port.in.messaging.GetMessagesUseCase;
+import com.instagram.domain.port.in.messaging.GetUnreadMessageUseCase;
 import com.instagram.domain.port.in.messaging.LeaveConversationUseCase;
 import com.instagram.domain.port.in.messaging.MarkReadUseCase;
 import com.instagram.domain.port.in.messaging.SendMessageUseCase;
@@ -54,6 +56,7 @@ public class MessageController {
         private final LeaveConversationUseCase leaveConversationUseCase;
         private final SimpMessagingTemplate messagingTemplate;
         private final HtmlSanitizer htmlSanitizer;
+        private final GetUnreadMessageUseCase getUnreadMessageUseCase;
 
         public MessageController(
                         GetConversationsUseCase getConversationsUseCase,
@@ -65,7 +68,8 @@ public class MessageController {
                         LeaveConversationUseCase leaveConversationUseCase,
                         GetUserUseCase getUserUseCase,
                         SimpMessagingTemplate messagingTemplate,
-                        HtmlSanitizer htmlSanitizer) {
+                        HtmlSanitizer htmlSanitizer,
+                    GetUnreadMessageUseCase getUnreadMessageUseCase) {
                 this.getConversationsUseCase = getConversationsUseCase;
                 this.createConversationUseCase = createConversationUseCase;
                 this.getMessagesUseCase = getMessagesUseCase;
@@ -76,6 +80,7 @@ public class MessageController {
                 this.getUserUseCase = getUserUseCase;
                 this.messagingTemplate = messagingTemplate;
                 this.htmlSanitizer = htmlSanitizer;
+                this.getUnreadMessageUseCase = getUnreadMessageUseCase;
         }
 
         private UUID currentUserId() {
@@ -159,6 +164,7 @@ public class MessageController {
                 MessageResponse response = MessageResponse.from(view.message(), view.senderUsername(),
                                 view.senderAvatarUrl());
                 messagingTemplate.convertAndSend("/topic/conversations/" + id, response);
+                
                 return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
         }
 
@@ -166,8 +172,14 @@ public class MessageController {
         public ResponseEntity<ApiResponse<Void>> markRead(@PathVariable("id") UUID conversationId,
                         @Valid @RequestBody MarkReadRequest request) {
                 log.info("markRead conversationId={}", conversationId);
+                int unreadCount = getUnreadMessageUseCase.getUnreadMessage(conversationId, currentUserId());
                 markReadUseCase.markRead(
                                 new MarkReadUseCase.Command(conversationId, currentUserId(), request.messageId()));
+                
+
+                MarkReadResponse res = new MarkReadResponse(conversationId, 0);
+                
+                messagingTemplate.convertAndSend("/user/${userId}/topic/unread-count", res);
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.ok(null));
         }
 

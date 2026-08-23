@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -188,9 +187,10 @@ public class PostService implements
 
     @Override
     @Cacheable(value = "userPosts", key = "'userPosts:' + #query.targetUserId + ':page1'", condition = "#query.page == 0")
-    public Page<Post> getUserPosts(GetUserPostsUseCase.Query query) {
+    public List<Post> getUserPosts(GetUserPostsUseCase.Query query) {
         log.debug("getUserPosts targetUserId={} page={} size={}", query.targetUserId(), query.page(), query.size());
-        return postRepository.findByUserId(query.targetUserId(), PageRequest.of(query.page(), query.size()));
+
+        return postRepository.findByUserId(query.targetUserId(), PageRequest.of(query.page(), query.size())).getContent();
     }
 
     @Override

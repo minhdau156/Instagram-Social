@@ -13,7 +13,7 @@ export const ProfilePage = () => {
 
     const { profile, isLoading } = useAuth();
     const { data } = usePosts(profile?.user.id || '');
-    const posts = data?.pages.flatMap(page => page.content) || [];
+    const posts = data?.pages?.flatMap((page) => page.content) || [];
 
     const [open, setOpen] = useState(false);
     const { control, handleSubmit, formState: { errors } } = useForm({
