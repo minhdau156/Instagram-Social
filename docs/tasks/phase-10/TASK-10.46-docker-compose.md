@@ -51,7 +51,10 @@ MINIO_ROOT_PASSWORD=minioadmin
 # No auth required for local dev; set REDIS_PASSWORD in production.
 
 # ── Backend ───────────────────────────────────────────────────────────────────
-JWT_SECRET=change-this-to-a-long-random-string-in-production
+# Base64-encoded PKCS8 private key / X.509 public key (single line, no PEM headers).
+# Generate a real pair for local dev — do not reuse the example values.
+JWT_RSA_PRIVATE_KEY=change-this-to-a-base64-pkcs8-private-key
+JWT_RSA_PUBLIC_KEY=change-this-to-a-base64-x509-public-key
 SPRING_PROFILES_ACTIVE=local
 
 # ── Frontend ──────────────────────────────────────────────────────────────────
@@ -170,7 +173,8 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_RSA_PRIVATE_KEY: ${JWT_RSA_PRIVATE_KEY}
+      JWT_RSA_PUBLIC_KEY: ${JWT_RSA_PUBLIC_KEY}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
     depends_on:
       postgres:
@@ -354,6 +358,8 @@ Docker enforces this via healthchecks:
   ```
 
   Without this, the healthcheck command `curl -f http://localhost:8080/actuator/health` will fail with `sh: curl: not found` and the backend will be stuck in the `starting` state.
+
+- **`JWT_RSA_PRIVATE_KEY` / `JWT_RSA_PUBLIC_KEY` have no default value.** `application.yml` binds `app.jwt.rsa-private-key` and `app.jwt.rsa-public-key` straight from these two env vars with no fallback (the app signs/verifies JWTs with an RSA key pair, not a shared secret). If either is missing, Spring fails to resolve the placeholder and the backend container exits immediately on boot — `docker compose logs backend` will show `Could not resolve placeholder 'JWT_RSA_PRIVATE_KEY'`. Generate a real PKCS8/X.509 key pair for local dev and set both as single-line base64 values in `.env`; do not reuse the `.env.example` placeholders.
 
 - **Flyway runs on startup.** The first `docker compose up` will apply all Flyway migrations. If the migrations include DDL that takes time (e.g. creating GIN indexes on large tables), the backend healthcheck may time out. Increase `retries` or `start_period` in the backend healthcheck if this happens.
 
