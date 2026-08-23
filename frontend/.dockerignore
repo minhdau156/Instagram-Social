@@ -1,0 +1,24 @@
+# Dependencies — npm ci inside the image installs a clean copy
+node_modules/
+
+# Previous build output — the Dockerfile re-runs npm run build
+dist/
+
+# Git history
+.git/
+.gitignore
+
+# Documentation
+*.md
+
+# IDE metadata
+.idea/
+.vscode/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Environment files — secrets must come from Docker secrets or env vars at runtime
+.env
+.env.*

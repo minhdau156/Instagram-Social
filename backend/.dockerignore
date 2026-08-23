@@ -1,0 +1,29 @@
+# Maven build output — the Dockerfile re-runs mvn package inside the image
+target/
+
+# Git history — not needed in the image and may contain old secrets
+.git/
+.gitignore
+
+# Documentation — no runtime value
+*.md
+docs/
+
+# IDE metadata
+.idea/
+*.iml
+.vscode/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Test-only config that should never leak into a prod image
+src/test/
+
+# Environment files — secrets must come from Docker secrets or env vars at runtime
+.env
+.env.*
+
+# Local log files — noise, no runtime value
+*.log
