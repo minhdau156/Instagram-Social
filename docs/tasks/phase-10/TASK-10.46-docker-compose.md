@@ -2,7 +2,7 @@
 
 ## Overview
 
-Update `docker-compose.yml` (repo root) to include the full application stack: the Spring Boot backend, the React/nginx frontend, PostgreSQL, MinIO, Redis, and Zipkin. Each service gets a `healthcheck` block so Docker knows when it is actually ready to accept traffic, and `depends_on` with `condition: service_healthy` enforces startup ordering — the backend will not start until Postgres and Redis are healthy, and the frontend will not start until the backend is healthy. The goal is a single `docker compose up` command that reliably brings the whole system online.
+Update `docker-compose.yml` (repo root) to add the application services — the Spring Boot backend and the React/nginx frontend — alongside the infrastructure and observability services already there (PostgreSQL, MinIO, Redis, Loki, Tempo, Prometheus, Grafana). The backend exports traces to Tempo over OTLP-HTTP (`OTEL_ENDPOINT`), the same stack Grafana's Explore view already reads from — there is no separate Zipkin service. Each service gets a `healthcheck` block so Docker knows when it is actually ready to accept traffic, and `depends_on` with `condition: service_healthy` enforces startup ordering — the backend will not start until Postgres and Redis are healthy, and the frontend will not start until the backend is healthy. The goal is a single `docker compose up` command that reliably brings the whole system online.
 
 ## Level
 
@@ -10,7 +10,7 @@ Update `docker-compose.yml` (repo root) to include the full application stack: t
 
 ## Why
 
-The existing `docker-compose.yml` only starts the three infrastructure services (Postgres, MinIO, Redis) — the backend and frontend still run outside Docker via `mvn spring-boot:run` and `npm run dev`. This is convenient for development iteration but means the stack that developers run locally is different from the stack that ships to production. Adding the application services to Compose gives every teammate a single reproducible command to bring up the full system, and healthchecks make the startup deterministic: rather than hoping services are ready, Docker will wait for them to pass their health probe before starting their dependents.
+The existing `docker-compose.yml` starts Postgres, MinIO, Redis, and the Loki/Tempo/Prometheus/Grafana observability stack — the backend and frontend still run outside Docker via `mvn spring-boot:run` and `npm run dev`. This is convenient for development iteration but means the stack that developers run locally is different from the stack that ships to production. Adding the application services to Compose gives every teammate a single reproducible command to bring up the full system, and healthchecks make the startup deterministic: rather than hoping services are ready, Docker will wait for them to pass their health probe before starting their dependents.
 
 ## Prerequisites
 
@@ -26,7 +26,7 @@ The existing `docker-compose.yml` only starts the three infrastructure services 
 ## Files to Create / Modify
 
 ```
-docker-compose.yml         (modify — replace existing content)
+docker-compose.yml         (modify — add backend/frontend services alongside the existing infra/observability ones)
 README.md                  (modify — add startup order and port mapping table)
 .env.example               (new — document all required env vars)
 ```
@@ -60,10 +60,10 @@ SPRING_PROFILES_ACTIVE=local
 # Bucket the backend creates/uses in MinIO for uploaded media.
 MINIO_BUCKET=instagram-media
 
-# Browser-facing URLs. Point these at the dockerized frontend's host port (3000),
-# not the 5173 Vite dev-server port used when running `npm run dev` outside Docker.
-FRONTEND_URL=http://localhost:3000
-CORS_ALLOWED_ORIGINS=http://localhost:3000
+# Browser-facing URLs. The frontend's host port is 5173 (not nginx's usual 80/3000 —
+# 3000 is already taken by Grafana in this stack).
+FRONTEND_URL=http://localhost:5173
+CORS_ALLOWED_ORIGINS=http://localhost:5173
 
 # Google OAuth2 login (Spring Security oauth2Login). Get these from the Google
 # Cloud Console; register http://localhost:8080/login/oauth2/code/google as a
@@ -98,9 +98,9 @@ Make sure `.env` is in `.gitignore`:
 .env
 ```
 
-### 2. Replace `docker-compose.yml` with the full stack
+### 2. Add the application services to `docker-compose.yml`
 
-Open `docker-compose.yml` at the repo root and replace its contents:
+Open `docker-compose.yml` at the repo root. It should end up looking like this in full (infra/observability services unchanged, `backend`/`frontend` newly added):
 
 ```yaml
 # Full application stack — starts all services in dependency order.
@@ -160,13 +160,80 @@ services:
       retries: 5
       start_period: 10s
 
-  zipkin:
-    image: openzipkin/zipkin
+  loki:
+    image: grafana/loki:3.0.0
     restart: unless-stopped
     ports:
-      - "9411:9411"
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9411/health"]
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3100/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  tempo:
+    image: grafana/tempo:2.4.1
+    restart: unless-stopped
+    ports:
+      - "3200:3200"   # Tempo HTTP API
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP — backend sends spans here
+    volumes:
+      - ./tempo/tempo.yml:/etc/tempo/tempo.yml:ro
+      - tempo_data:/var/tempo
+    command: -config.file=/etc/tempo/tempo.yml
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3200/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=7d'
+      - '--web.enable-lifecycle'
+      - '--enable-feature=exemplar-storage'
+      - '--enable-feature=remote-write-receiver'
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:9090/-/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  grafana:
+    image: grafana/grafana:10.4.3
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docs/infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docs/infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -190,14 +257,15 @@ services:
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
-      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
+      # application.yml appends /v1/traces itself, so this must be the bare base URL.
+      OTEL_ENDPOINT: http://tempo:4318
       MINIO_BUCKET: ${MINIO_BUCKET:-instagram-media}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
       # app.cors.allowed-origins has no placeholder in the base (local-profile)
       # application.yml, so it must be set via its relaxed-binding env var name
       # (APP_CORS_ALLOWED_ORIGINS) rather than the raw CORS_ALLOWED_ORIGINS name
       # used in application-prod.yml. See Notes / Gotchas.
-      APP_CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+      APP_CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       JWT_SECRET: ${JWT_SECRET}
@@ -225,7 +293,7 @@ services:
     image: instagram-frontend:local
     restart: unless-stopped
     ports:
-      - "3000:80"
+      - "5173:80"
     depends_on:
       backend:
         condition: service_healthy
@@ -238,6 +306,10 @@ services:
 volumes:
   postgres_data:
   minio_data:
+  loki_data:
+  tempo_data:
+  prometheus_data:
+  grafana_data:
 ```
 
 ### 3. Add build arg support to the frontend Dockerfile
@@ -262,12 +334,10 @@ The `--build` flag forces a rebuild of the `backend` and `frontend` images even 
 Expected startup order (Docker enforces this via healthchecks):
 
 ```
-1. postgres   — starts first, no dependencies
-2. redis      — starts first, no dependencies
-3. minio      — starts first, no dependencies
-4. zipkin     — starts first, no dependencies
-5. backend    — waits for postgres healthy + redis healthy
-6. frontend   — waits for backend healthy
+1. postgres, redis, minio, loki, prometheus — start first, no dependencies
+2. tempo, grafana    — wait on their own dependencies (prometheus; prometheus+loki+tempo)
+3. backend           — waits for postgres healthy + redis healthy
+4. frontend          — waits for backend healthy
 ```
 
 ### 5. Confirm all services are healthy
@@ -285,7 +355,10 @@ NAME                    STATUS
 instagram-postgres-1    running (healthy)
 instagram-redis-1       running (healthy)
 instagram-minio-1       running (healthy)
-instagram-zipkin-1      running (healthy)
+instagram-loki-1        running (healthy)
+instagram-tempo-1       running (healthy)
+instagram-prometheus-1  running (healthy)
+instagram-grafana-1     running (healthy)
 instagram-backend-1     running (healthy)
 instagram-frontend-1    running (healthy)
 ```
@@ -315,27 +388,30 @@ docker compose up --build
 
 | Service | Host Port | URL |
 |---------|-----------|-----|
-| Frontend (nginx) | 3000 | http://localhost:3000 |
+| Frontend (nginx) | 5173 | http://localhost:5173 |
 | Backend API | 8080 | http://localhost:8080 |
 | Swagger UI | 8080 | http://localhost:8080/swagger-ui.html |
 | PostgreSQL | 5432 | `psql -h localhost -U instagram` |
 | MinIO API | 9000 | http://localhost:9000 |
 | MinIO Console | 9001 | http://localhost:9001 |
 | Redis | 6379 | `redis-cli -h localhost` |
-| Zipkin UI | 9411 | http://localhost:9411 |
+| Grafana | 3000 | http://localhost:3000 |
+| Prometheus | 9090 | http://localhost:9090 |
+| Loki | 3100 | http://localhost:3100 |
+| Tempo | 3200 | http://localhost:3200 |
 
 ### Startup Order
 
 Docker enforces this via healthchecks:
-`postgres` + `redis` + `minio` + `zipkin` → `backend` → `frontend`
+`postgres` + `redis` + `minio` + `loki` + `prometheus` → `tempo` + `grafana` → `backend` → `frontend`
 ```
 
 ## Checklist
 
 - [ ] Update `docker-compose.yml` to include all services:
   - [ ] `backend` (depends on `postgres`, `redis`)
-  - [ ] `frontend` (depends on `backend`)
-  - [ ] `postgres`, `minio`, `redis`, `zipkin`
+  - [ ] `frontend` (depends on `backend`), published on host port `5173` (not `3000` — Grafana already owns that)
+  - [ ] `postgres`, `minio`, `redis`, `loki`, `tempo`, `prometheus`, `grafana`
 - [ ] Add `healthcheck` blocks for all services
 - [ ] `backend`'s `environment:` block passes through every variable the app actually reads from `backend/.env` (`MINIO_BUCKET`, `CORS_ALLOWED_ORIGINS` → `APP_CORS_ALLOWED_ORIGINS`, `FRONTEND_URL`, `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, `JWT_SECRET`, `JWT_RSA_PRIVATE_KEY`/`JWT_RSA_PUBLIC_KEY`) — see Notes / Gotchas for the two that need a different name or don't belong here
 - [ ] Document startup order and port mapping in `README.md`
@@ -356,9 +432,9 @@ Docker enforces this via healthchecks:
 
    Passing result: every service shows `running (healthy)`.
 
-3. Open `http://localhost:3000` in a browser. The React app loads and the login page is visible.
+3. Open `http://localhost:5173` in a browser. The React app loads and the login page is visible.
 
-4. Navigate directly to `http://localhost:3000/search` in the browser (or paste the URL after a page load). The app should load, not show a browser 404.
+4. Navigate directly to `http://localhost:5173/search` in the browser (or paste the URL after a page load). The app should load, not show a browser 404.
 
 5. Run the smoke script:
 
@@ -400,8 +476,9 @@ Docker enforces this via healthchecks:
   - `MINIO_BUCKET`, `FRONTEND_URL`, `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, and the `JWT_RSA_*` keys all have explicit `${VAR}` placeholders in the base (always-active) `application.yml`, so passing them through under their existing names works regardless of `SPRING_PROFILES_ACTIVE`.
   - `CORS_ALLOWED_ORIGINS` does **not** have a placeholder in the base `application.yml` — only `application-prod.yml` reads it. Under the default `local` profile it silently does nothing unless set as `APP_CORS_ALLOWED_ORIGINS` instead, which binds directly to the `app.cors.allowed-origins` property via Spring's relaxed env-var binding. The Compose file above sources it from `CORS_ALLOWED_ORIGINS` in `.env` (so the `.env` file stays self-describing) but exposes it to the container as `APP_CORS_ALLOWED_ORIGINS`.
   - `JWT_SECRET` is not read anywhere in the codebase — auth is signed with the RSA key pair only. It's passed through for parity with `backend/.env`, but treat it as dead configuration until that file is cleaned up.
-  - `ZIPKIN_ENDPOINT` (in `backend/.env`) doesn't match any Spring property either — the app's tracing config (`management.otlp.tracing.endpoint`) reads `OTEL_ENDPOINT`, and only the OTLP Micrometer bridge is on the classpath (no Zipkin reporter dependency), so the `MANAGEMENT_ZIPKIN_TRACING_ENDPOINT` env var in this Compose file is currently a no-op too. Tracing export is a pre-existing gap, not something this task fixes — the `zipkin` service still starts and its UI is reachable, it just won't receive spans yet.
+  - `ZIPKIN_ENDPOINT` (in `backend/.env`) doesn't match any Spring property and should be ignored — the app's tracing config (`management.otlp.tracing.endpoint`) reads `OTEL_ENDPOINT` (only the OTLP Micrometer bridge is on the classpath; there's no Zipkin reporter dependency). This Compose file sets `OTEL_ENDPOINT: http://tempo:4318` on the `backend` service, which is the correct, working wire-up — spans land in the `tempo` service already in this stack and are queryable from Grafana's Explore view (select the Tempo datasource). There is no separate `zipkin` service.
   - `NVD_API_KEY` is deliberately **not** in the `backend` service's environment. It's a Maven-only secret consumed by the OWASP dependency-check plugin at build/CI time (see [TASK-10.19](TASK-10.19-owasp-dependency-check.md)), not by the running Spring Boot process — it has no effect inside the container and doesn't belong in `.env`/`.env.example` for this Compose file.
+  - **Grafana already owns host port `3000`.** That's why the `frontend` service in this file publishes on `5173` instead of the more conventional `3000`/`80` — pick a different free port if you'd rather keep `5173` for the non-Docker Vite dev server.
 
 - **Windows line endings in `.env`.** If `.env` was created in a Windows text editor, it may have CRLF line endings. Some Docker versions on Windows handle this fine; others do not. If environment variables appear empty inside the container, convert the file to LF: in VS Code, click `CRLF` in the status bar and select `LF`, then save.
 

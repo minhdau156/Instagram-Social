@@ -19,6 +19,9 @@ RUN mvn package -DskipTests -q
 #Stage 2 : Run
 FROM eclipse-temurin:21-jre-alpine AS run
 
+#curl is required by the compose healthcheck; alpine's jre image doesn't ship it
+RUN apk add --no-cache curl
+
 #Create a group and a non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
