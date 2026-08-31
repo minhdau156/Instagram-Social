@@ -57,6 +57,24 @@ JWT_RSA_PRIVATE_KEY=change-this-to-a-base64-pkcs8-private-key
 JWT_RSA_PUBLIC_KEY=change-this-to-a-base64-x509-public-key
 SPRING_PROFILES_ACTIVE=local
 
+# Bucket the backend creates/uses in MinIO for uploaded media.
+MINIO_BUCKET=instagram-media
+
+# Browser-facing URLs. Point these at the dockerized frontend's host port (3000),
+# not the 5173 Vite dev-server port used when running `npm run dev` outside Docker.
+FRONTEND_URL=http://localhost:3000
+CORS_ALLOWED_ORIGINS=http://localhost:3000
+
+# Google OAuth2 login (Spring Security oauth2Login). Get these from the Google
+# Cloud Console; register http://localhost:8080/login/oauth2/code/google as a
+# redirect URI.
+GOOGLE_CLIENT_ID=change-this-to-a-google-oauth-client-id
+GOOGLE_CLIENT_SECRET=change-this-to-a-google-oauth-client-secret
+
+# Legacy/unused — no code currently reads this (auth is RSA-signed JWTs only).
+# Kept for parity with backend/.env; safe to omit once that file is cleaned up.
+JWT_SECRET=change-this-to-a-random-secret
+
 # ── Frontend ──────────────────────────────────────────────────────────────────
 # Vite bakes this value into the bundle at build time.
 VITE_API_BASE_URL=http://localhost:8080
@@ -173,6 +191,16 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
+      MINIO_BUCKET: ${MINIO_BUCKET:-instagram-media}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      # app.cors.allowed-origins has no placeholder in the base (local-profile)
+      # application.yml, so it must be set via its relaxed-binding env var name
+      # (APP_CORS_ALLOWED_ORIGINS) rather than the raw CORS_ALLOWED_ORIGINS name
+      # used in application-prod.yml. See Notes / Gotchas.
+      APP_CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
       JWT_RSA_PRIVATE_KEY: ${JWT_RSA_PRIVATE_KEY}
       JWT_RSA_PUBLIC_KEY: ${JWT_RSA_PUBLIC_KEY}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
@@ -309,6 +337,7 @@ Docker enforces this via healthchecks:
   - [ ] `frontend` (depends on `backend`)
   - [ ] `postgres`, `minio`, `redis`, `zipkin`
 - [ ] Add `healthcheck` blocks for all services
+- [ ] `backend`'s `environment:` block passes through every variable the app actually reads from `backend/.env` (`MINIO_BUCKET`, `CORS_ALLOWED_ORIGINS` → `APP_CORS_ALLOWED_ORIGINS`, `FRONTEND_URL`, `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, `JWT_SECRET`, `JWT_RSA_PRIVATE_KEY`/`JWT_RSA_PUBLIC_KEY`) — see Notes / Gotchas for the two that need a different name or don't belong here
 - [ ] Document startup order and port mapping in `README.md`
 
 ## How to Verify
@@ -366,6 +395,13 @@ Docker enforces this via healthchecks:
 - **Volumes persist data between restarts.** `docker compose down` stops containers but keeps the `postgres_data` and `minio_data` volumes. To start completely fresh (useful when testing migrations or resetting dev state), use `docker compose down -v`.
 
 - **`VITE_API_BASE_URL` must point to where the browser can reach the backend.** Inside the Docker network, `backend` is a valid hostname; from the browser on the host machine, the backend is at `http://localhost:8080`. Because Vite bakes this value into the JS bundle, the value used at build time must be the URL the browser (not another container) uses to reach the API. For local development, `http://localhost:8080` is correct.
+
+- **`backend/.env` has more variables than the app currently reads at runtime — reconcile with care, don't copy blindly:**
+  - `MINIO_BUCKET`, `FRONTEND_URL`, `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, and the `JWT_RSA_*` keys all have explicit `${VAR}` placeholders in the base (always-active) `application.yml`, so passing them through under their existing names works regardless of `SPRING_PROFILES_ACTIVE`.
+  - `CORS_ALLOWED_ORIGINS` does **not** have a placeholder in the base `application.yml` — only `application-prod.yml` reads it. Under the default `local` profile it silently does nothing unless set as `APP_CORS_ALLOWED_ORIGINS` instead, which binds directly to the `app.cors.allowed-origins` property via Spring's relaxed env-var binding. The Compose file above sources it from `CORS_ALLOWED_ORIGINS` in `.env` (so the `.env` file stays self-describing) but exposes it to the container as `APP_CORS_ALLOWED_ORIGINS`.
+  - `JWT_SECRET` is not read anywhere in the codebase — auth is signed with the RSA key pair only. It's passed through for parity with `backend/.env`, but treat it as dead configuration until that file is cleaned up.
+  - `ZIPKIN_ENDPOINT` (in `backend/.env`) doesn't match any Spring property either — the app's tracing config (`management.otlp.tracing.endpoint`) reads `OTEL_ENDPOINT`, and only the OTLP Micrometer bridge is on the classpath (no Zipkin reporter dependency), so the `MANAGEMENT_ZIPKIN_TRACING_ENDPOINT` env var in this Compose file is currently a no-op too. Tracing export is a pre-existing gap, not something this task fixes — the `zipkin` service still starts and its UI is reachable, it just won't receive spans yet.
+  - `NVD_API_KEY` is deliberately **not** in the `backend` service's environment. It's a Maven-only secret consumed by the OWASP dependency-check plugin at build/CI time (see [TASK-10.19](TASK-10.19-owasp-dependency-check.md)), not by the running Spring Boot process — it has no effect inside the container and doesn't belong in `.env`/`.env.example` for this Compose file.
 
 - **Windows line endings in `.env`.** If `.env` was created in a Windows text editor, it may have CRLF line endings. Some Docker versions on Windows handle this fine; others do not. If environment variables appear empty inside the container, convert the file to LF: in VS Code, click `CRLF` in the status bar and select `LF`, then save.
 
