@@ -10,6 +10,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { PageLoader } from './components/common/PageLoader';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
 import { AdminRoute } from './components/common/AdminRoute';
 import { SuperAdminRoute } from './components/common/SuperAdminRoute';
@@ -63,7 +64,7 @@ export default function App() {
               <Route path="/login" element={<ErrorBoundary><LoginPage /></ErrorBoundary>} />
               <Route path="/register" element={<ErrorBoundary><RegisterPage /></ErrorBoundary>} />
               <Route path="/forgot-password" element={<ErrorBoundary><ForgotPasswordPage /></ErrorBoundary>} />
-              {/* <Route path="/reset-password" element={<ErrorBoundary><ResetPasswordPage /></ErrorBoundary>} /> */}
+              <Route path="/reset-password" element={<ErrorBoundary><ResetPasswordPage /></ErrorBoundary>} />
               <Route path="/oauth2/callback" element={<OAuth2CallbackPage />} />
               <Route path="/posts/:postId" element={<PostPage />} />
               <Route path="/p/:postId" element={<PostPage />} />
