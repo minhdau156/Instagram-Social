@@ -25,11 +25,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.instagram.adapter.out.persistence.repository.IdempotencyKeyJpaRepository;
 import com.instagram.domain.exception.InvalidCredentialsException;
+import com.instagram.domain.exception.PasswordResetTokenExpiredException;
 import com.instagram.domain.exception.UserAlreadyExistsException;
 import com.instagram.domain.model.AuthResult;
 import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.User;
 import com.instagram.domain.model.UserStatus;
+import com.instagram.adapter.in.web.dto.request.PasswordResetConfirmRequest;
+import com.instagram.adapter.in.web.dto.request.PasswordResetRequest;
 import com.instagram.domain.port.in.ConfirmPasswordResetUseCase;
 import com.instagram.domain.port.in.GetUserProfileUseCase;
 import com.instagram.domain.port.in.LoginUseCase;
@@ -277,6 +280,89 @@ public class AuthControllerIT {
 
 		// Assert
 		verify(refreshTokenUseCase, times(1)).refreshToken(any(RefreshTokenUseCase.Command.class));
+	}
+
+	@Test
+	void requestPasswordReset_validEmail_returns200() throws Exception {
+		// Arrange
+		PasswordResetRequest request = new PasswordResetRequest("minh@gmail.com");
+
+		// Act
+		mockMvc.perform(post("/api/v1/auth/password-reset/request")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isOk());
+
+		// Assert
+		verify(requestPasswordResetUseCase, times(1))
+				.requestPasswordReset(any(RequestPasswordResetUseCase.Command.class));
+	}
+
+	@Test
+	void requestPasswordReset_invalidEmail_returns400() throws Exception {
+		// Arrange
+		PasswordResetRequest request = new PasswordResetRequest("not-an-email");
+
+		// Act
+		mockMvc.perform(post("/api/v1/auth/password-reset/request")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void confirmPasswordReset_validRequest_returns200() throws Exception {
+		// Arrange
+		PasswordResetConfirmRequest request = new PasswordResetConfirmRequest("a-valid-token", "NewSecurePass123!");
+
+		// Act
+		mockMvc.perform(post("/api/v1/auth/password-reset/confirm")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isOk());
+
+		// Assert
+		verify(confirmPasswordResetUseCase, times(1))
+				.confirmPasswordReset(any(ConfirmPasswordResetUseCase.Command.class));
+	}
+
+	@Test
+	void confirmPasswordReset_blankToken_returns400() throws Exception {
+		// Arrange
+		PasswordResetConfirmRequest request = new PasswordResetConfirmRequest("", "NewSecurePass123!");
+
+		// Act
+		mockMvc.perform(post("/api/v1/auth/password-reset/confirm")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void confirmPasswordReset_shortPassword_returns400() throws Exception {
+		// Arrange
+		PasswordResetConfirmRequest request = new PasswordResetConfirmRequest("a-valid-token", "short");
+
+		// Act
+		mockMvc.perform(post("/api/v1/auth/password-reset/confirm")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void confirmPasswordReset_expiredOrInvalidToken_returns400() throws Exception {
+		// Arrange
+		PasswordResetConfirmRequest request = new PasswordResetConfirmRequest("a-valid-token", "NewSecurePass123!");
+		org.mockito.Mockito.doThrow(new PasswordResetTokenExpiredException())
+				.when(confirmPasswordResetUseCase)
+				.confirmPasswordReset(any(ConfirmPasswordResetUseCase.Command.class));
+
+		// Act
+		mockMvc.perform(post("/api/v1/auth/password-reset/confirm")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isBadRequest());
 	}
 
 }

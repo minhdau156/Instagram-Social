@@ -3,9 +3,13 @@ package com.instagram.application.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,11 +19,14 @@ import com.instagram.domain.port.out.*;
 import io.micrometer.core.instrument.Counter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.instagram.domain.exception.InvalidCredentialsException;
+import com.instagram.domain.exception.PasswordResetTokenExpiredException;
 import com.instagram.domain.exception.UserAlreadyExistsException;
 import com.instagram.domain.exception.UserNotFoundException;
 import com.instagram.domain.port.in.rbac.AssignDefaultRoleUseCase;
@@ -43,6 +50,8 @@ public class UserServiceTest {
     private AssignDefaultRoleUseCase assignRoleUseCase;
     @Mock
     private Counter usersRegisteredCounter;
+    @Mock
+    private PasswordResetTokenRepository passwordResetTokenRepository;
     @InjectMocks
     private UserService userService;
 
@@ -364,5 +373,118 @@ public class UserServiceTest {
         assertThrows(UserNotFoundException.class, () -> userService.getUserProfile(new GetUserProfileUseCase.Query("minh", UUID.randomUUID())));
     }
 
+    // PASSWORD RESET — REQUEST
+
+    @Test
+    void requestPasswordReset_knownEmail_savesTokenAndSendsEmail() {
+        // GIVEN
+        ReflectionTestUtils.setField(userService, "tokenExpiryMinutes", 30);
+        var command = new RequestPasswordResetUseCase.Command("[EMAIL_ADDRESS]");
+        var user = User.builder()
+                .id(UUID.randomUUID())
+                .username("testuser")
+                .email("[EMAIL_ADDRESS]")
+                .passwordHash("hashedPassword")
+                .fullName("TestUser")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build();
+
+        when(userRepository.findByEmail(command.email())).thenReturn(Optional.of(user));
+        when(passwordResetTokenRepository.save(any(PasswordResetToken.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // ACT
+        userService.requestPasswordReset(command);
+
+        // ASSERT
+        verify(passwordResetTokenRepository).save(any(PasswordResetToken.class));
+        verify(emailPort).sendPasswordResetEmail(eq(command.email()), any());
+    }
+
+    @Test
+    void requestPasswordReset_unknownEmail_doesNothing() {
+        // GIVEN
+        var command = new RequestPasswordResetUseCase.Command("[EMAIL_ADDRESS]");
+        when(userRepository.findByEmail(command.email())).thenReturn(Optional.empty());
+
+        // ACT
+        userService.requestPasswordReset(command);
+
+        // ASSERT
+        verifyNoInteractions(passwordResetTokenRepository);
+        verifyNoInteractions(emailPort);
+    }
+
+    // PASSWORD RESET — CONFIRM
+
+    @Test
+    void confirmPasswordReset_validToken_updatesPasswordAndMarksUsed() {
+        // GIVEN
+        UUID tokenId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        var command = new ConfirmPasswordResetUseCase.Command("raw-token", "newPassword123");
+        var token = new PasswordResetToken(tokenId, userId, "irrelevant-hash",
+                OffsetDateTime.now().plusMinutes(30), null, OffsetDateTime.now());
+        var user = User.builder()
+                .id(userId)
+                .username("testuser")
+                .email("[EMAIL_ADDRESS]")
+                .passwordHash("oldHash")
+                .fullName("TestUser")
+                .status(UserStatus.ACTIVE)
+                .privacyLevel(PrivacyLevel.PUBLIC)
+                .isVerified(false)
+                .build();
+
+        when(passwordResetTokenRepository.findByTokenHash(any())).thenReturn(Optional.of(token));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(passwordHashPort.hash(command.newPassword())).thenReturn("newHash");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // ACT
+        userService.confirmPasswordReset(command);
+
+        // ASSERT
+        ArgumentCaptor<User> savedUserCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(savedUserCaptor.capture());
+        assertEquals("newHash", savedUserCaptor.getValue().getPasswordHash());
+        verify(passwordResetTokenRepository).markUsed(tokenId);
+    }
+
+    @Test
+    void confirmPasswordReset_unknownToken_throws() {
+        // GIVEN
+        var command = new ConfirmPasswordResetUseCase.Command("raw-token", "newPassword123");
+        when(passwordResetTokenRepository.findByTokenHash(any())).thenReturn(Optional.empty());
+
+        // ASSERT
+        assertThrows(PasswordResetTokenExpiredException.class, () -> userService.confirmPasswordReset(command));
+    }
+
+    @Test
+    void confirmPasswordReset_usedToken_throws() {
+        // GIVEN
+        var command = new ConfirmPasswordResetUseCase.Command("raw-token", "newPassword123");
+        var token = new PasswordResetToken(UUID.randomUUID(), UUID.randomUUID(), "irrelevant-hash",
+                OffsetDateTime.now().plusMinutes(30), OffsetDateTime.now(), OffsetDateTime.now());
+        when(passwordResetTokenRepository.findByTokenHash(any())).thenReturn(Optional.of(token));
+
+        // ASSERT
+        assertThrows(PasswordResetTokenExpiredException.class, () -> userService.confirmPasswordReset(command));
+    }
+
+    @Test
+    void confirmPasswordReset_expiredToken_throws() {
+        // GIVEN
+        var command = new ConfirmPasswordResetUseCase.Command("raw-token", "newPassword123");
+        var token = new PasswordResetToken(UUID.randomUUID(), UUID.randomUUID(), "irrelevant-hash",
+                OffsetDateTime.now().minusMinutes(1), null, OffsetDateTime.now().minusMinutes(31));
+        when(passwordResetTokenRepository.findByTokenHash(any())).thenReturn(Optional.of(token));
+
+        // ASSERT
+        assertThrows(PasswordResetTokenExpiredException.class, () -> userService.confirmPasswordReset(command));
+    }
 
 }

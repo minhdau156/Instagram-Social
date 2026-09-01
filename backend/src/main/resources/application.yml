@@ -1,6 +1,6 @@
 server:
   port: 8080
-  compression: 
+  compression:
     enabled: true
     min-response-size: 1024
     mime-types:
@@ -20,10 +20,10 @@ management:
         include: health, info, metrics, prometheus
   endpoint:
     health:
-      show-details: when-authorized   # Only admins see full health details
+      show-details: when-authorized # Only admins see full health details
   metrics:
     tags:
-      application: ${spring.application.name}  # Adds app="instagram" label to every metric
+      application: ${spring.application.name} # Adds app="instagram" label to every metric
   tracing:
     sampling:
       probability: 1.0
@@ -52,13 +52,13 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none          # Flyway manages DDL — Hibernate only validates
+      ddl-auto: none # Flyway manages DDL — Hibernate only validates
 
   batch:
     jdbc:
-      initialize-schema: never   # Flyway creates the BATCH_* tables
+      initialize-schema: never # Flyway creates the BATCH_* tables
     job:
-      enabled: false             # do not run jobs on startup — run on demand via API
+      enabled: false # do not run jobs on startup — run on demand via API
 
   flyway:
     enabled: true
@@ -76,29 +76,39 @@ spring:
             scope: email, profile
             # Spring auto-sets redirect-uri to: {baseUrl}/login/oauth2/code/google
             # Add http://localhost:8080/login/oauth2/code/google in Google Console
-  
+
   datasource:
     hikari:
       # Formula: (cpu_cores * 2) + 1; capped at 10 for local dev to avoid
       # overwhelming Postgres with connections on a shared developer machine.
       # Raise to 15-20 in production once connection metrics are observed.
       maximum-pool-size: 10
-      minimum-idle: 10          # fixed-size pool — avoids idle-connection teardown churn
+      minimum-idle: 10 # fixed-size pool — avoids idle-connection teardown churn
       connection-timeout: 30000 # ms — how long a thread waits for a free connection
-      idle-timeout: 600000      # ms — how long an idle connection is kept (10 min)
-      max-lifetime: 1800000     # ms — max age of a connection (30 min), below Postgres default
+      idle-timeout: 600000 # ms — how long an idle connection is kept (10 min)
+      max-lifetime: 1800000 # ms — max age of a connection (30 min), below Postgres default
       pool-name: InstagramPool
-  
+
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
-      
+
   cache:
     type: redis
     redis:
       time-to-live: 60000
-  
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USER:noreply@localhost}
+    password: ${SMTP_PASS:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SMTP_AUTH:false}
+          starttls:
+            enable: ${SMTP_STARTTLS:false}
 
 springdoc:
   api-docs:
@@ -111,12 +121,13 @@ springdoc:
 
 app:
   jwt:
-    rsa-private-key: ${JWT_RSA_PRIVATE_KEY}         # set via env var in prod
-    rsa-public-key:  ${JWT_RSA_PUBLIC_KEY}         # set via env var in prod
-    access-token-expiry-ms: 900000        # 15 minutes
-    refresh-token-expiry-ms: 604800000    # 7 days
+    rsa-private-key: ${JWT_RSA_PRIVATE_KEY} # set via env var in prod
+    rsa-public-key: ${JWT_RSA_PUBLIC_KEY} # set via env var in prod
+    access-token-expiry-ms: 900000 # 15 minutes
+    refresh-token-expiry-ms: 604800000 # 7 days
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
-
+  password-reset:
+    token-expiry-minutes: 30
 
   minio:
     endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
@@ -126,7 +137,7 @@ app:
     cdn-base-url: ${CDN_BASE_URL:${MINIO_ENDPOINT:http://localhost:9000}}
 
 sentry:
-  dsn: ${SENTRY_DSN:}                # Empty by default — disables Sentry if not set
+  dsn: ${SENTRY_DSN:} # Empty by default — disables Sentry if not set
   traces-sample-rate: 0.1
   environment: ${SPRING_PROFILES_ACTIVE:local}
   release: ${APP_VERSION:local}
@@ -145,7 +156,7 @@ bucket4j:
             - capacity: 5
               time: 10
               unit: minutes
-              refill-speed: interval   # refill all tokens at once after the window
+              refill-speed: interval # refill all tokens at once after the window
 
     # ── 2. Login: 10 requests per IP per 1 minute ──────────────────────────────
     - cache-name: rate-limit-buckets
@@ -159,13 +170,13 @@ bucket4j:
 
     # ── 3. All other endpoints: 200 requests per IP per 1 minute ───────────────
     - cache-name: rate-limit-buckets
-      url: /api/v1/.*           # regex — matches everything under /api/v1/
+      url: /api/v1/.* # regex — matches everything under /api/v1/
       rate-limits:
         - bandwidths:
             - capacity: 200
               time: 1
               unit: minutes
-              refill-speed: greedy      # tokens refill continuously (smoother)
+              refill-speed: greedy # tokens refill continuously (smoother)
 
   # The HTTP response sent when the bucket is empty
   http-response-body: >

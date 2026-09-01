@@ -1,15 +1,24 @@
 package com.instagram.application.service;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Base64;
 import java.util.Collection;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.instagram.domain.exception.InvalidCredentialsException;
 import com.instagram.domain.exception.PasswordResetTokenExpiredException;
@@ -18,6 +27,7 @@ import com.instagram.domain.exception.UserNotFoundException;
 import com.instagram.domain.model.AuthResult;
 import com.instagram.domain.model.Follow;
 import com.instagram.domain.model.FollowStatus;
+import com.instagram.domain.model.PasswordResetToken;
 import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.User;
 import com.instagram.domain.model.UserProfile;
@@ -39,6 +49,7 @@ import com.instagram.domain.port.in.user.SearchUsersUseCase;
 import com.instagram.domain.port.out.EmailPort;
 import com.instagram.domain.port.out.FollowRepository;
 import com.instagram.domain.port.out.PasswordHashPort;
+import com.instagram.domain.port.out.PasswordResetTokenRepository;
 import com.instagram.domain.port.out.TokenPort;
 import com.instagram.domain.port.out.UserRepository;
 import com.instagram.domain.port.out.UserStatsRepository;
@@ -55,6 +66,10 @@ public class UserService
 
     /** Role embedded in the access token. Roles are expanded in Phase 2. */
     private static final String DEFAULT_ROLE = "USER";
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final int TOKEN_BYTES = 64;
+    @Value("${app.password-reset.token-expiry-minutes:30}")
+    private int tokenExpiryMinutes;
 
     /** Access token lifetime in seconds (15 minutes). */
     private static final long ACCESS_TOKEN_EXPIRES_IN = 900L;
@@ -67,11 +82,12 @@ public class UserService
     private final FollowRepository followRepository;
     private final AssignDefaultRoleUseCase assignDefaultRoleUseCase;
     private final Counter usersRegisteredCounter;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     public UserService(UserRepository userRepository, PasswordHashPort passwordHashPort,
             TokenPort tokenPort, EmailPort emailPort, UserStatsRepository userStatsRepository,
             FollowRepository followRepository, AssignDefaultRoleUseCase assignDefaultRoleUseCase,
-            Counter usersRegisteredCounter) {
+            Counter usersRegisteredCounter, PasswordResetTokenRepository passwordResetTokenRepository) {
         this.userRepository = userRepository;
         this.passwordHashPort = passwordHashPort;
         this.tokenPort = tokenPort;
@@ -80,6 +96,7 @@ public class UserService
         this.followRepository = followRepository;
         this.assignDefaultRoleUseCase = assignDefaultRoleUseCase;
         this.usersRegisteredCounter = usersRegisteredCounter;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
     // ── RegisterUserUseCase ──────────────────────────────────────────────────
@@ -169,6 +186,7 @@ public class UserService
     // ── RequestPasswordResetUseCase ──────────────────────────────────────────
 
     @Override
+    @Transactional
     public void requestPasswordReset(RequestPasswordResetUseCase.Command command) {
         // Silent no-op when email is unknown — prevents user enumeration.
         Optional<User> userOpt = userRepository.findByEmail(command.email());
@@ -176,13 +194,20 @@ public class UserService
             log.debug("requestPasswordReset() - no account found for email, ignoring silently");
             return;
         }
+        byte[] bytes = new byte[TOKEN_BYTES];
+        SECURE_RANDOM.nextBytes(bytes);
+        String resetToken = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
 
-        String resetToken = UUID.randomUUID().toString();
-
-        // TODO (TASK-1.12): persist resetToken in password_reset_tokens table via
-        // PasswordResetTokenRepository. Stubbed here to unblock domain wiring.
-        log.info("requestPasswordReset() - reset token generated for userId={} [stub: not persisted]",
-                userOpt.get().getId());
+        OffsetDateTime now = OffsetDateTime.now();
+        PasswordResetToken token = new PasswordResetToken(
+                    UUID.randomUUID(),
+                    userOpt.get().getId(),
+                    hashToken(resetToken),
+                    now.plus(tokenExpiryMinutes, ChronoUnit.MINUTES),
+                    null,
+                    now
+            );
+        passwordResetTokenRepository.save(token);
 
         emailPort.sendPasswordResetEmail(command.email(), resetToken);
     }
@@ -190,36 +215,32 @@ public class UserService
     // ── ConfirmPasswordResetUseCase ──────────────────────────────────────────
 
     @Override
+    @Transactional
     public void confirmPasswordReset(ConfirmPasswordResetUseCase.Command command) {
-        // TODO (TASK-1.12): load token record from password_reset_tokens via
-        // PasswordResetTokenRepository. Stub: no persistence in Phase 1, so any
-        // token presented here is treated as not found / expired.
-        log.warn("confirmPasswordReset() - PasswordResetTokenRepository not yet implemented; " +
-                "throwing PasswordResetTokenExpiredException as stub behaviour");
-        throw new PasswordResetTokenExpiredException();
+        PasswordResetToken token = passwordResetTokenRepository.findByTokenHash(hashToken(command.token()))
+                .orElseThrow(PasswordResetTokenExpiredException::new);
 
-        /*
-         * ── Replace the stub above with this block once TASK-1.12 is complete ──
-         *
-         * PasswordResetToken tokenRecord = passwordResetTokenRepository
-         * .findByToken(command.token())
-         * .orElseThrow(PasswordResetTokenExpiredException::new);
-         *
-         * if (tokenRecord.isExpired()) {
-         * throw new PasswordResetTokenExpiredException();
-         * }
-         *
-         * User user = userRepository.findById(tokenRecord.userId())
-         * .orElseThrow(() -> UserNotFoundException.withId(tokenRecord.userId()));
-         *
-         * String newHash = passwordHashPort.hash(command.newPassword());
-         * User updated = user.withUpdatedPasswordHash(newHash);
-         * userRepository.save(updated);
-         *
-         * // Invalidate the used token so it cannot be replayed.
-         * passwordResetTokenRepository.delete(tokenRecord.token());
-         * ── end replacement block ──
-         */
+        if (!token.isValid()) {
+            throw new PasswordResetTokenExpiredException();
+        }
+
+        User user = userRepository.findById(token.userId())
+                .orElseThrow(() -> UserNotFoundException.withId(token.userId()));
+
+        String hashedPassword = passwordHashPort.hash(command.newPassword());
+        user = user.withUpdatedPasswordHash(hashedPassword);
+        userRepository.save(user);
+        passwordResetTokenRepository.markUsed(token.id());
+    }
+
+    private static String hashToken(String rawToken) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(rawToken.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 algorithm not available", e);
+        }
     }
 
     // ── GetUserProfileUseCase ────────────────────────────────────────────────
