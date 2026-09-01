@@ -6,12 +6,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,5 +52,14 @@ class SmtpEmailAdapterTest {
         assertEquals(toEmail, message.getTo()[0]);
         assertTrue(message.getText().contains("http://localhost:5173/reset-password?token=" + resetToken));
         assertTrue(message.getText().contains("valid for 30 minutes"));
+    }
+
+    @Test
+    void sendPasswordResetEmail_mailSenderThrows_doesNotPropagate() {
+        // Given
+        doThrow(new MailSendException("smtp down")).when(mailSender).send(any(SimpleMailMessage.class));
+
+        // When / Then
+        assertDoesNotThrow(() -> adapter.sendPasswordResetEmail("test@example.com", "token123"));
     }
 }

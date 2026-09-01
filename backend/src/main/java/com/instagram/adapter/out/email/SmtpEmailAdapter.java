@@ -3,6 +3,7 @@ package com.instagram.adapter.out.email;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.instagram.domain.port.out.EmailPort;
@@ -29,6 +30,7 @@ public class SmtpEmailAdapter implements EmailPort {
     private String fromAddress;
 
     @Override
+    @Async("emailExecutor")
     public void sendPasswordResetEmail(String toEmail, String resetToken) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromAddress);
@@ -42,8 +44,13 @@ public class SmtpEmailAdapter implements EmailPort {
                 "If you did not request this, you can safely ignore this email."
         );
 
-        mailSender.send(message);
-        log.info("Password reset email sent to {}", toEmail);
+        try {
+            mailSender.send(message);
+            log.info("Password reset email sent to {}", toEmail);
+        } catch (Exception e) {
+            log.error("Failed to send password reset email to {}", toEmail, e);
+        }
     }
+
 
 }
