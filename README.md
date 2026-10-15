@@ -6,7 +6,11 @@ A full-stack social media platform inspired by Instagram. Users can share photos
 
 ## Screenshots
 
-<!-- TODO: add 2-3 screenshots or a short GIF (feed, profile, chat) and a live demo link once hosted -->
+| Login | Profile | Post detail |
+|---|---|---|
+| ![Login page](docs/screenshots/login.jpg) | ![Profile page](docs/screenshots/profile.jpg) | ![Post detail with comments](docs/screenshots/post-detail.jpg) |
+
+No live demo is hosted yet. Run it locally — see [First-Time Local Setup](#first-time-local-setup).
 
 ## Status
 
