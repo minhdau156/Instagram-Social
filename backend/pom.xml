@@ -218,12 +218,6 @@
             <version>7.9.0</version>
         </dependency>
 
-        <!-- Actuator: /actuator/health, /actuator/metrics, /actuator/prometheus -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-
         <!-- Prometheus registry: translates Micrometer metrics into the Prometheus scrape format -->
         <dependency>
             <groupId>io.micrometer</groupId>
