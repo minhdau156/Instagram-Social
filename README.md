@@ -1,8 +1,26 @@
-# Instagram-Social-
+# Instagram Social
 
-![CI](https://github.com/minhdau156/Instagram-Social-/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/minhdau156/Instagram-Social/actions/workflows/ci.yml/badge.svg)](https://github.com/minhdau156/Instagram-Social/actions/workflows/ci.yml)
 
 A full-stack social media platform inspired by Instagram. Users can share photos and videos, follow each other, like and comment on posts, and chat in real time.
+
+## Screenshots
+
+<!-- TODO: add 2-3 screenshots or a short GIF (feed, profile, chat) and a live demo link once hosted -->
+
+## Status
+
+- ✅ Phase 0 — Foundation & Infrastructure
+- ✅ Phase 1 — Auth & User Management
+- ✅ Phase 2 — Posts & Media
+- ✅ Phase 3 — Social Graph (Follow/Unfollow)
+- ✅ Phase 4 — Interactions (Likes, Comments, Saves, Shares)
+- ✅ Phase 5 — Feed & Discovery
+- ✅ Phase 6 — Direct Messaging (WebSocket)
+- ✅ Phase 7 — Notifications
+- ✅ Phase 8 — Search
+- ✅ Phase 9 — Content Moderation & Admin
+- 🚧 Phase 10 — Performance, Security & Polish (in progress)
 
 ## Tech Stack
 
@@ -64,22 +82,6 @@ frontend/src/
 ├── App.tsx       # Root: QueryClient + ThemeProvider + Router
 └── theme.ts      # MUI theme tokens
 ```
-
-## Features
-
-Built across 10 development phases:
-
-0. Foundation & Infrastructure
-1. Auth & User Management
-2. Posts & Media
-3. Social Graph (Follow/Unfollow)
-4. Interactions (Likes, Comments, Saves, Shares)
-5. Feed & Discovery
-6. Direct Messaging (WebSocket)
-7. Notifications
-8. Search
-9. Content Moderation & Admin
-10. Performance, Security & Polish
 
 ## First-Time Local Setup
 
