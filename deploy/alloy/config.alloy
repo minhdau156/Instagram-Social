@@ -1,0 +1,16 @@
+prometheus.scrape "backend" {
+    targets      = [{__address__ = "backend:8080"}]
+    metrics_path = "/actuator/prometheus"
+    forward_to   = [prometheus.remote_write.production.receiver]
+}
+
+prometheus.remote_write "production" {
+    endpoint {
+        url = sys.env("GC_PROM_URL")
+
+        basic_auth {
+            username = sys.env("GC_PROM_USER")
+            password = sys.env("GC_API_KEY")
+        }
+    }
+}

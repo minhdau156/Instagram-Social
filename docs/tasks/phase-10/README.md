@@ -99,6 +99,7 @@ Every task is tagged with a **Level**:
 | [TASK-10.50](TASK-10.50-architecture-diagrams-mermaid.md) | Architecture & flow diagrams (Mermaid) | Core | ⬜ |
 | [TASK-10.51](TASK-10.51-oom-heap-dump-lab.md) | Diagnose an `OutOfMemoryError` from a heap dump | Warm-up | ⬜ |
 | [TASK-10.52](TASK-10.52-logging-best-practices.md) | Logging best practices audit | Warm-up | ⬜ |
+| [TASK-10.54](TASK-10.54-production-deployment-ec2-grafana-cloud.md) | Production deployment (AWS EC2 + Grafana Cloud observability) | Core | ⬜ |
 
 ---
 
