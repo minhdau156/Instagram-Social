@@ -94,7 +94,7 @@ export default function App() {
           <GlobalNavigation />
           <Routes>
             <Route element={<AppShell />}>
-              <Route index element={<Navigate to="/" replace />} />
+              <Route index element={<Navigate to="/home" replace />} />
               <Route
                 path="/login"
                 element={
@@ -165,7 +165,7 @@ export default function App() {
                     </ErrorBoundary>
                   }
                 />
-                <Route path="/" element={<HomePage />} />
+                <Route path="/home" element={<HomePage />} />
                 <Route path="/explore" element={<ExplorePage />} />
                 <Route
                   path="/messages"
