@@ -1,11 +1,11 @@
-${DOMAIN} {
+{$DOMAIN} {
     # Bắt tất cả các request bắt đầu bằng /api hoặc /api/
-    handle /api* {
+    handle /api* /ws* /oauth2/* /login/oauth2/* {
         reverse_proxy backend:8080
     }
 
     # Bắt tất cả các request còn lại (Frontend, static files...)
     handle {
-        reverse_proxy frontend:3000
+        reverse_proxy frontend:80
     }
 }

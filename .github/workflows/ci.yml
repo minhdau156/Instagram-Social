@@ -130,4 +130,4 @@ jobs:
           push: true
           tags: ${{ steps.meta-frontend.outputs.tags }}
           build-args: |
-            VITE_API_URL=http://localhost:8080
+            VITE_API_URL=https://instagram-by-minhdau156.duckdns.org
