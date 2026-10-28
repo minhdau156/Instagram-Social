@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { InfiniteScroll } from "../../components/common/InfiniteScroll";
 import { useState } from "react";
 import { PostDetailModal } from "../../components/posts/PostDetailModal";
+import { mediaUrl } from "../../lib/media";
 import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
 
 export default function ExplorePage() {
@@ -119,7 +120,7 @@ export default function ExplorePage() {
           >
             {posts.map((post, index) => {
               const imageUrl =
-                `https://instagram-by-minhdau156.duckdns.org/instagram-media/${post.mediaItems?.[index]?.mediaUrl}` ||
+                mediaUrl(post.mediaItems?.[index]?.mediaUrl) ||
                 "https://via.placeholder.com/300?text=No+Media";
               return (
                 <ImageListItem

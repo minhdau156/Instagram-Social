@@ -13,6 +13,7 @@ import { PostDetailModal } from "./PostDetailModal";
 import { ReportDialog } from "../moderation/ReportDialog";
 import { usersApi } from "../../api/usersApi";
 import { useMutation } from "@tanstack/react-query";
+import { mediaUrl } from "../../lib/media";
 
 
 export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
@@ -71,7 +72,7 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             <Box sx={{ position: 'relative' }}>
                 <CardMedia
                     component="img"
-                    image={`https://instagram-by-minhdau156.duckdns.org/instagram-media/${post.mediaItems?.[mediaIndex]?.mediaUrl}`}
+                    image={mediaUrl(post.mediaItems?.[mediaIndex]?.mediaUrl)}
                     loading="lazy"
                     sx={{ aspectRatio: '1/1', objectFit: 'cover' }}
                 />

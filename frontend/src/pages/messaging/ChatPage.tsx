@@ -15,8 +15,7 @@ import { useWebSocketContext } from '../../context/WebSocketContext';
 import { useAuth } from '../../hooks/useAuth';
 import { MessageBubble } from '../../components/messaging/MessageBubble';
 import { TypingIndicator } from '../../components/messaging/TypingIndicator';
-
-const MINIO_BASE = 'https://instagram-by-minhdau156.duckdns.org/instagram-media';
+import { MEDIA_BASE_URL as MINIO_BASE } from '../../lib/media';
 
 interface ChatPageProps {
     conversationId: string;

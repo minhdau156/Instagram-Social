@@ -1,16 +1,19 @@
 {$DOMAIN} {
-    # Bắt tất cả các request bắt đầu bằng /api hoặc /api/
-    handle /api* /ws* /oauth2/* /login/oauth2/* {
+    # Bắt tất cả các request bắt đầu bằng /api, /ws, /oauth2, /login/oauth2
+    # (inline matcher chỉ nhận 1 path, nên dùng named matcher cho nhiều path)
+    @backend path /api* /ws* /oauth2/* /login/oauth2/*
+    handle @backend {
         reverse_proxy backend:8080
+    }
+
+    # MinIO bucket: presigned upload URL + ảnh public
+    # Không có "/" để khớp cả /instagram-media?location= (MinIO client lấy region của bucket)
+    handle /instagram-media* {
+        reverse_proxy minio:9000
     }
 
     # Bắt tất cả các request còn lại (Frontend, static files...)
     handle {
         reverse_proxy frontend:80
     }
-
-    handle /instagram-media/* {
-        reverse_proxy minio:9000
-    }
-
 }

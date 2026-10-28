@@ -10,6 +10,7 @@ import { LikersTooltip } from './LikersTooltip';
 import { CommentSection } from '../comment/CommentSection';
 import { useMutation } from '@tanstack/react-query';
 import { usersApi } from '../../api/usersApi';
+import { mediaUrl } from '../../lib/media';
 
 interface PostDetailModalProps {
     post: Post;
@@ -43,7 +44,7 @@ export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose,
                     borderColor: 'divider'
                 }}>
                     <img
-                        src={`https://instagram-by-minhdau156.duckdns.org/instagram-media/${post.mediaItems?.[0]?.mediaUrl}`}
+                        src={mediaUrl(post.mediaItems?.[0]?.mediaUrl)}
                         alt="Post media"
                         style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                     />

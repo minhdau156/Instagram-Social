@@ -3,6 +3,7 @@ import { Favorite, ChatBubble } from "@mui/icons-material";
 import { useState } from "react";
 import { Post } from "../../types/post";
 import { PostDetailModal } from "./PostDetailModal";
+import { mediaUrl } from "../../lib/media";
 
 export const PostGrid: React.FC<{ posts: Post[] }> = ({ posts }) => {
     const [selected, setSelected] = useState<Post | null>(null);
@@ -10,7 +11,7 @@ export const PostGrid: React.FC<{ posts: Post[] }> = ({ posts }) => {
         <>
             <ImageList cols={3} gap={4}>
                 {posts.map((post, index) => {
-                    const imageUrl = `https://instagram-by-minhdau156.duckdns.org/instagram-media/${post.mediaItems?.[index]?.mediaUrl}` || 'https://via.placeholder.com/300?text=No+Media';
+                    const imageUrl = mediaUrl(post.mediaItems?.[index]?.mediaUrl) || 'https://via.placeholder.com/300?text=No+Media';
                     return (
                         <ImageListItem
                             key={post.id}
