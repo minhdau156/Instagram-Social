@@ -50,7 +50,7 @@ services:
       # NOTE: the code reads app.minio.endpoint (base application.yml, env
       # var MINIO_ENDPOINT) — application-prod.yml's app.storage.minio.url
       # is a dead/unused property path. Use MINIO_ENDPOINT, not MINIO_URL.
-      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ENDPOINT: https://${DOMAIN}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       MINIO_BUCKET: instagram-media

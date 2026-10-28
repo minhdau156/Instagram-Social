@@ -8,4 +8,9 @@
     handle {
         reverse_proxy frontend:80
     }
+
+    handle /instagram-media/* {
+        reverse_proxy minio:9000
+    }
+
 }
