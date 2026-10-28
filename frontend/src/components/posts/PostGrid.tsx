@@ -10,7 +10,7 @@ export const PostGrid: React.FC<{ posts: Post[] }> = ({ posts }) => {
         <>
             <ImageList cols={3} gap={4}>
                 {posts.map((post, index) => {
-                    const imageUrl = `http://localhost:9000/instagram-media/${post.mediaItems?.[index]?.mediaUrl}` || 'https://via.placeholder.com/300?text=No+Media';
+                    const imageUrl = `https://instagram-by-minhdau156.duckdns.org/instagram-media/${post.mediaItems?.[index]?.mediaUrl}` || 'https://via.placeholder.com/300?text=No+Media';
                     return (
                         <ImageListItem
                             key={post.id}

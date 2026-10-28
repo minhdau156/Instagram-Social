@@ -43,7 +43,7 @@ export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose,
                     borderColor: 'divider'
                 }}>
                     <img
-                        src={`http://localhost:9000/instagram-media/${post.mediaItems?.[0]?.mediaUrl}`}
+                        src={`https://instagram-by-minhdau156.duckdns.org/instagram-media/${post.mediaItems?.[0]?.mediaUrl}`}
                         alt="Post media"
                         style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                     />

@@ -71,7 +71,7 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             <Box sx={{ position: 'relative' }}>
                 <CardMedia
                     component="img"
-                    image={`http://localhost:9000/instagram-media/${post.mediaItems?.[mediaIndex]?.mediaUrl}`}
+                    image={`https://instagram-by-minhdau156.duckdns.org/instagram-media/${post.mediaItems?.[mediaIndex]?.mediaUrl}`}
                     loading="lazy"
                     sx={{ aspectRatio: '1/1', objectFit: 'cover' }}
                 />

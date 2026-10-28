@@ -16,7 +16,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { MessageBubble } from '../../components/messaging/MessageBubble';
 import { TypingIndicator } from '../../components/messaging/TypingIndicator';
 
-const MINIO_BASE = 'http://localhost:9000/instagram-media';
+const MINIO_BASE = 'https://instagram-by-minhdau156.duckdns.org/instagram-media';
 
 interface ChatPageProps {
     conversationId: string;

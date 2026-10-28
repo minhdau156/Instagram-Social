@@ -119,7 +119,7 @@ export default function ExplorePage() {
           >
             {posts.map((post, index) => {
               const imageUrl =
-                `http://localhost:9000/instagram-media/${post.mediaItems?.[index]?.mediaUrl}` ||
+                `https://instagram-by-minhdau156.duckdns.org/instagram-media/${post.mediaItems?.[index]?.mediaUrl}` ||
                 "https://via.placeholder.com/300?text=No+Media";
               return (
                 <ImageListItem
