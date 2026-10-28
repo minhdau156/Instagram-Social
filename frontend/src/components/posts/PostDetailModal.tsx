@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Dialog, Box, Typography, IconButton, Avatar, Stack, Divider } from '@mui/material';
-import { ChatBubbleOutline } from '@mui/icons-material';
+import { ChatBubbleOutline, Close } from '@mui/icons-material';
 import { Post } from '../../types/post';
 import { useAuth } from '../../hooks/useAuth';
 import { LikeButton } from './LikeButton';
@@ -32,6 +32,22 @@ export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose,
     const postUser = data;
     return (
         <Dialog open={true} onClose={onClose} fullScreen>
+            {/* Close button — fullScreen dialog has no backdrop to click */}
+            <IconButton
+                aria-label="Close"
+                onClick={onClose}
+                sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    zIndex: 1,
+                    bgcolor: 'rgba(0, 0, 0, 0.5)',
+                    color: '#fff',
+                    '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.7)' },
+                }}
+            >
+                <Close />
+            </IconButton>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, height: '100vh' }}>
                 {/* Left Side - Media */}
                 <Box sx={{
