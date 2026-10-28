@@ -1,4 +1,4 @@
-import { AppBar, Badge, Box, Container, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography, alpha } from '@mui/material';
+import { AppBar, Avatar, Badge, Box, Container, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Tooltip, Typography, alpha } from '@mui/material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import BlockIcon from '@mui/icons-material/Block';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
@@ -96,49 +96,85 @@ function AppShellContent() {
 
           {/* Right Navigation */}
           {profile?.user && (
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <NavLink to="/explore" aria-label="Explore" style={{ textDecoration: 'none', color: 'inherit' }}>
-                {({ isActive }) => (
-                  <IconButton color="inherit" component="span">
-                    {isActive ? <ExploreIcon /> : <ExploreOutlinedIcon />}
-                  </IconButton>
-                )}
-              </NavLink>
-              <NavLink to="/saved" aria-label="Saved posts" style={{ textDecoration: 'none', color: 'inherit' }}>
-                {({ isActive }) => (
-                  <IconButton color="inherit" component="span">
-                    {isActive ? <BookmarkIcon /> : <BookmarkBorderIcon />}
-                  </IconButton>
-                )}
-              </NavLink>
-              <NavLink to="/messages" aria-label="Messages" style={{ textDecoration: 'none', color: 'inherit' }}>
-                {({ isActive }) => (
-                  <Badge badgeContent={unreadCount} color="error" max={99}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Tooltip title="Explore">
+                <NavLink to="/explore" aria-label="Explore" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  {({ isActive }) => (
                     <IconButton color="inherit" component="span">
-                      {isActive ? <MailIcon /> : <MailOutlineIcon />}
+                      {isActive ? <ExploreIcon /> : <ExploreOutlinedIcon />}
                     </IconButton>
-                  </Badge>
-                )}
-              </NavLink>
+                  )}
+                </NavLink>
+              </Tooltip>
+              <Tooltip title="Saved posts">
+                <NavLink to="/saved" aria-label="Saved posts" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  {({ isActive }) => (
+                    <IconButton color="inherit" component="span">
+                      {isActive ? <BookmarkIcon /> : <BookmarkBorderIcon />}
+                    </IconButton>
+                  )}
+                </NavLink>
+              </Tooltip>
+              <Tooltip title="Messages">
+                <NavLink to="/messages" aria-label="Messages" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  {({ isActive }) => (
+                    <Badge badgeContent={unreadCount} color="error" max={99}>
+                      <IconButton color="inherit" component="span">
+                        {isActive ? <MailIcon /> : <MailOutlineIcon />}
+                      </IconButton>
+                    </Badge>
+                  )}
+                </NavLink>
+              </Tooltip>
 
-              <UnreadBadge
-                unreadCount={unreadCountNotification}
-                onClick={(e) => {
-                  setAnchorEl(e.currentTarget);
-                }}
-              />
-              <IconButton
-                color="inherit"
-                aria-label="Settings"
-                onClick={(e) => setSettingsAnchorEl(e.currentTarget)}
-              >
-                <SettingsIcon />
-              </IconButton>
-              <IconButton color="inherit"
-                aria-label="Create Post"
-                onClick={() => setOpenCreateModal(true)}>
-                <AddIcon />
-              </IconButton>
+              {/* UnreadBadge doesn't forward refs, so the span gives Tooltip something to anchor to */}
+              <Tooltip title="Notifications">
+                <span>
+                  <UnreadBadge
+                    unreadCount={unreadCountNotification}
+                    onClick={(e) => {
+                      setAnchorEl(e.currentTarget);
+                    }}
+                  />
+                </span>
+              </Tooltip>
+              <Tooltip title="Settings">
+                <IconButton
+                  color="inherit"
+                  aria-label="Settings"
+                  onClick={(e) => setSettingsAnchorEl(e.currentTarget)}
+                >
+                  <SettingsIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Create post">
+                <IconButton color="inherit"
+                  aria-label="Create Post"
+                  onClick={() => setOpenCreateModal(true)}>
+                  <AddIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Profile">
+                <NavLink to="/profile" aria-label="Profile" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  {({ isActive }) => (
+                    <IconButton color="inherit" component="span" sx={{ p: 0.5 }}>
+                      <Avatar
+                        src={profile.user.avatarUrl ?? undefined}
+                        alt={profile.user.username}
+                        sx={{
+                          width: 28,
+                          height: 28,
+                          fontSize: 14,
+                          border: 2,
+                          borderColor: isActive ? 'primary.main' : 'transparent',
+                        }}
+                      >
+                        {profile.user.username[0]?.toUpperCase()}
+                      </Avatar>
+                    </IconButton>
+                  )}
+                </NavLink>
+              </Tooltip>
             </Box>
           )}
         </Toolbar>
