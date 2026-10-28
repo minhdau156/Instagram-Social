@@ -10,6 +10,9 @@ export const mediaApi = {
 
     // Direct PUT to MinIO — no auth headers needed, use plain fetch/axios
     uploadToMinio: async (presignedUrl: string, file: File): Promise<void> => {
-        await fetch(presignedUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
+        const res = await fetch(presignedUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
+        if (!res.ok) {
+            throw new Error(`Upload to MinIO failed: ${res.status} ${await res.text()}`);
+        }
     },
 }

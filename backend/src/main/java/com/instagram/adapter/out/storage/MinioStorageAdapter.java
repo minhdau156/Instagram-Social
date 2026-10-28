@@ -66,6 +66,7 @@ public class MinioStorageAdapter implements MediaStoragePort {
                             .expiry((int) expiry.toSeconds(), TimeUnit.SECONDS)
                             .build());
         } catch (Exception e) {
+            log.error("Failed to generate presigned put URL bucket={} key={}", bucket, key, e);
             throw new MediaUploadException("Failed to generate presigned put URL for MinIO");
         }
     }

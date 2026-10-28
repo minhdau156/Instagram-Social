@@ -18,7 +18,7 @@ spring:
 app:
   storage:
     minio:
-      url: ${MINIO_URL}
+      url: ${MINIO_ENDPOINT}
       access-key: ${MINIO_ACCESS_KEY}
       secret-key: ${MINIO_SECRET_KEY}
       bucket: ${MINIO_BUCKET}
