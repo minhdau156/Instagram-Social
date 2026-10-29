@@ -13,8 +13,9 @@ export const PostGrid: React.FC<{ posts: Post[] }> = ({ posts }) => {
                 {posts.map((post) => {
                     const firstMedia = post.mediaItems?.[0];
                     const isVideo = firstMedia?.mediaType === 'VIDEO';
-                    const thumbnailSrc = mediaUrl(isVideo ? firstMedia?.thumbnailUrl : firstMedia?.mediaUrl);
-                    const videoSrc = isVideo ? mediaUrl(firstMedia?.mediaUrl) : undefined;
+                    const thumbnailKey = isVideo ? firstMedia?.thumbnailUrl : firstMedia?.mediaUrl;
+                    const thumbnailSrc = thumbnailKey ? mediaUrl(thumbnailKey) : undefined;
+                    const videoSrc = isVideo && firstMedia?.mediaUrl ? mediaUrl(firstMedia.mediaUrl) : undefined;
                     const placeholder = 'https://via.placeholder.com/300?text=No+Media';
                     return (
                         <ImageListItem

@@ -59,11 +59,24 @@ export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose,
                     borderRight: 1,
                     borderColor: 'divider'
                 }}>
-                    <img
-                        src={mediaUrl(post.mediaItems?.[0]?.mediaUrl)}
-                        alt="Post media"
-                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                    />
+                    {post.mediaItems?.[0]?.mediaType === 'VIDEO' ? (
+                        <video
+                            src={mediaUrl(post.mediaItems[0].mediaUrl)}
+                            poster={post.mediaItems[0].thumbnailUrl ? mediaUrl(post.mediaItems[0].thumbnailUrl) : undefined}
+                            controls
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                        />
+                    ) : (
+                        <img
+                            src={mediaUrl(post.mediaItems?.[0]?.mediaUrl)}
+                            alt="Post media"
+                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                        />
+                    )}
                 </Box>
 
                 {/* Right Side - Details & Comments */}
