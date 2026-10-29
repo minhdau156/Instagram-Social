@@ -3,6 +3,7 @@ import { useComments } from "../../hooks/comment/useComments";
 import { Alert, Button, CircularProgress, List, Typography } from "@mui/material";
 import { CommentItem } from "./CommentItem";
 import { CommentInput } from "./CommentInput";
+import { useAuth } from "../../hooks/useAuth";
 
 
 interface CommentSectionProps {
@@ -11,6 +12,7 @@ interface CommentSectionProps {
 }
 
 export function CommentSection({ postId, autoFocus }: CommentSectionProps) {
+    const { profile } = useAuth();
     const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useComments(postId);
     const observer = useRef<IntersectionObserver | null>(null);
     const lastElementRef = useCallback((node: HTMLDivElement | null) => {
@@ -49,7 +51,7 @@ export function CommentSection({ postId, autoFocus }: CommentSectionProps) {
                     const isLastItem = index === comments.length - 1;
                     return (
                         <div ref={isLastItem ? lastElementRef : null} key={comment.id}>
-                            <CommentItem comment={comment} postId={postId} />
+                            <CommentItem comment={comment} postId={postId} currentUserId={profile?.user.id} />
                         </div>
                     );
                 })}
