@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/minhdau156/Instagram-Social/actions/workflows/ci.yml/badge.svg)](https://github.com/minhdau156/Instagram-Social/actions/workflows/ci.yml)
 
+**🔗 Live demo:** [instagram-by-minhdau156.duckdns.org](https://instagram-by-minhdau156.duckdns.org/)
+
 A full-stack social media platform inspired by Instagram. Users can share photos and videos, follow each other, like and comment on posts, and chat in real time.
 
 ## Screenshots
@@ -10,7 +12,7 @@ A full-stack social media platform inspired by Instagram. Users can share photos
 |---|---|---|
 | ![Login page](docs/screenshots/login.jpg) | ![Profile page](docs/screenshots/profile.jpg) | ![Post detail with comments](docs/screenshots/post-detail.jpg) |
 
-No live demo is hosted yet. Run it locally — see [First-Time Local Setup](#first-time-local-setup).
+Live demo above, or run it locally — see [First-Time Local Setup](#first-time-local-setup).
 
 ## Status
 
