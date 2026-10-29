@@ -35,10 +35,10 @@ No live demo is hosted yet. Run it locally — see [First-Time Local Setup](#fir
 | ORM | Spring Data JPA / Hibernate |
 | Database | PostgreSQL 15 |
 | DB Migration | Flyway |
-| Auth | Spring Security + JWT + OAuth2 (Google, Facebook) |
+| Auth | Spring Security + JWT + OAuth2 (Google) |
 | Real-time | Spring WebSocket (STOMP) |
-| Caching | Redis, Caffeine |
-| File Storage | MinIO (local) / AWS S3 (production) |
+| Caching | Redis (`@Cacheable` — feed, profile, comments, …), Caffeine (Bucket4j rate-limit buckets) |
+| File Storage | MinIO (local and production, proxied through Caddy) |
 | API Docs | SpringDoc OpenAPI (Swagger UI) |
 | Frontend Framework | React 18 + TypeScript |
 | Build Tool | Vite |
@@ -86,6 +86,16 @@ frontend/src/
 ├── App.tsx       # Root: QueryClient + ThemeProvider + Router
 └── theme.ts      # MUI theme tokens
 ```
+
+## Deployment
+
+Production runs as a single EC2 instance (`t4g.small`, ARM/Graviton) behind Caddy, which is the one public entry point and routes by path to the backend, MinIO, or the frontend. Full breakdown and the "why" behind each decision: [docs/diagrams.md](docs/diagrams.md) and the [ec2-deployment skill](.agents/skills/ec2-deployment/).
+
+![Deployment architecture](deploy/Architecture.png)
+
+| EC2 instance | Instance details | Security group |
+|---|---|---|
+| ![EC2 instance list](deploy/ec2/Screenshot%202026-10-29%20120055.png) | ![EC2 instance summary](deploy/ec2/Screenshot%202026-10-29%20120112.png) | ![Security group rules](deploy/ec2/Screenshot%202026-10-29%20120141.png) |
 
 ## First-Time Local Setup
 
