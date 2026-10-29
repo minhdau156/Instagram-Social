@@ -125,4 +125,5 @@ k6 run k6/scenarios/<scenario>.js
 - Product spec: `docs/prd/`
 - Development plan: `docs/plan.md`
 - Database schema: `docs/database/schema.sql`
+- Architecture & flow diagrams: `docs/diagrams.md`
 - Troubleshooting: `docs/troubleshooting.md`

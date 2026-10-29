@@ -46,6 +46,11 @@ Each skill folder contains:
 | [jpa-patterns](jpa-patterns/) | JPA/Hibernate patterns (N+1, lazy loading, transactions) |
 | [logging-patterns](logging-patterns/) | Structured logging (JSON), SLF4J, MDC, AI-friendly formats |
 
+### Deployment & Infrastructure
+| Skill | Description |
+|-------|-------------|
+| [ec2-deployment](ec2-deployment/) | This project's actual prod topology: single EC2 host, Docker Compose, Caddy routing, multi-arch images for Graviton, Grafana Cloud observability |
+
 ## Adding a New Skill
 
 ### Before You Start
