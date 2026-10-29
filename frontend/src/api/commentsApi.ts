@@ -3,7 +3,7 @@ import { api } from './client';
 
 const BASE = '/api/v1';
 
-type CursorPage<T> = { items: T[]; nextCursor: string | null; hasMore: boolean };
+export type CursorPage<T> = { items: T[]; nextCursor: string | null; hasMore: boolean };
 
 export async function getComments(postId: string, cursor: string | null = null, size = 20): Promise<CursorPage<Comment>> {
     const params: Record<string, unknown> = { size };

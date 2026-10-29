@@ -6,11 +6,13 @@ import {
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { Comment } from "../../types/comment";
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ReplyIcon from '@mui/icons-material/Reply';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useEditComment } from "../../hooks/comment/useEditComment";
 import { useDeleteComment } from "../../hooks/comment/useDeleteComment";
+import { useLikeComment } from "../../hooks/comment/useLikeComment";
 import { useReplies } from "../../hooks/comment/useReplies";
 import { CommentInput } from "./CommentInput";
 import { useQueryClient } from "@tanstack/react-query";
@@ -25,6 +27,7 @@ export function CommentItem({ comment, postId, currentUserId }: CommentItemProps
     const queryClient = useQueryClient();
     const editMutation = useEditComment(comment.id, postId);
     const deleteMutation = useDeleteComment(comment.id, postId);
+    const likeMutation = useLikeComment(comment.id, postId, comment.parentId);
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -61,7 +64,18 @@ export function CommentItem({ comment, postId, currentUserId }: CommentItemProps
 
                 {!isEditing && (
                     <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
-                        <IconButton size="small"><FavoriteBorderIcon fontSize="small" /></IconButton>
+                        <IconButton
+                            size="small"
+                            disabled={likeMutation.isPending}
+                            aria-label={comment.isLikedByCurrentUser ? 'Unlike comment' : 'Like comment'}
+                            onClick={() => likeMutation.mutate(comment.isLikedByCurrentUser)}
+                        >
+                            {comment.isLikedByCurrentUser ? (
+                                <FavoriteIcon color="error" fontSize="small" />
+                            ) : (
+                                <FavoriteBorderIcon fontSize="small" />
+                            )}
+                        </IconButton>
                         <IconButton size="small" onClick={() => {
                             if (!showReplies && comment.replyCount > 0) setShowReplies(true);
                             setIsReplying(!isReplying);
