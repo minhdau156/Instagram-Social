@@ -8,12 +8,16 @@ import { useForm, Controller } from "react-hook-form";
 import { usersApi } from "../../api/usersApi";
 import { PostGrid } from "../../components/posts/PostGrid";
 import { usePosts } from "../../hooks/post/usePosts";
+import { FollowerDialog } from "../../components/follow/FollowerDialog";
+import { FollowingDialog } from "../../components/follow/FollowingDialog";
 
 export const ProfilePage = () => {
 
     const { profile, isLoading } = useAuth();
     const { data } = usePosts(profile?.user.id || '');
     const posts = data?.pages?.flatMap((page) => page.content) || [];
+    const [followersOpen, setFollowersOpen] = useState(false);
+    const [followingOpen, setFollowingOpen] = useState(false);
 
     const [open, setOpen] = useState(false);
     const { control, handleSubmit, formState: { errors } } = useForm({
@@ -23,6 +27,8 @@ export const ProfilePage = () => {
             isPrivate: profile?.user.isPrivate || false,
         }
     });
+
+    const username = profile?.user?.username || '';
 
 
 
@@ -70,6 +76,7 @@ export const ProfilePage = () => {
                 <Box style={{ marginTop: "5rem", borderTop: "1px solid #e5e5e5" }}>
                     <PostGrid posts={posts} />
                 </Box>
+
 
             </Container >
 
@@ -119,6 +126,17 @@ export const ProfilePage = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <FollowerDialog
+                        username={username!}
+                        open={followersOpen}
+                        setOpen={setFollowersOpen}
+            />
+            <FollowingDialog
+                        username={username!}
+                        open={followingOpen}
+                        setOpen={setFollowingOpen}
+            />
         </>
     );
 };

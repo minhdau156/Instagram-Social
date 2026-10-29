@@ -17,7 +17,7 @@ export const UserListItem = ({ user, currentUsername, setOpen }: UserListItemPro
     return (
         <ListItem >
             <ListItemAvatar>
-                <Link component={RouterLink} to={`/${user.username}`} onClick={() => setOpen(false)} underline="none">
+                <Link component={RouterLink} to={`/${user.username}/bio`} onClick={() => setOpen(false)} underline="none">
                     <Avatar src={user.profilePictureUrl || undefined} alt={user.username} />
                 </Link>
             </ListItemAvatar>
