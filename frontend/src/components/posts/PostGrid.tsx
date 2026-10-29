@@ -10,8 +10,12 @@ export const PostGrid: React.FC<{ posts: Post[] }> = ({ posts }) => {
     return (
         <>
             <ImageList cols={3} gap={4}>
-                {posts.map((post, index) => {
-                    const imageUrl = mediaUrl(post.mediaItems?.[index]?.mediaUrl) || 'https://via.placeholder.com/300?text=No+Media';
+                {posts.map((post) => {
+                    const firstMedia = post.mediaItems?.[0];
+                    const isVideo = firstMedia?.mediaType === 'VIDEO';
+                    const thumbnailSrc = mediaUrl(isVideo ? firstMedia?.thumbnailUrl : firstMedia?.mediaUrl);
+                    const videoSrc = isVideo ? mediaUrl(firstMedia?.mediaUrl) : undefined;
+                    const placeholder = 'https://via.placeholder.com/300?text=No+Media';
                     return (
                         <ImageListItem
                             key={post.id}
@@ -22,7 +26,18 @@ export const PostGrid: React.FC<{ posts: Post[] }> = ({ posts }) => {
                                 '&:hover .overlay': { opacity: 1 }
                             }}
                         >
-                            <img src={imageUrl} loading="lazy" style={{ aspectRatio: '1/1', objectFit: 'cover' }} alt="Post thumbnail" />
+                            {isVideo ? (
+                                <video
+                                    src={videoSrc}
+                                    poster={thumbnailSrc || undefined}
+                                    muted
+                                    playsInline
+                                    preload="metadata"
+                                    style={{ aspectRatio: '1/1', objectFit: 'cover' }}
+                                />
+                            ) : (
+                                <img src={thumbnailSrc || placeholder} loading="lazy" style={{ aspectRatio: '1/1', objectFit: 'cover' }} alt="Post thumbnail" />
+                            )}
                             <Box
                                 className="overlay"
                                 sx={{
