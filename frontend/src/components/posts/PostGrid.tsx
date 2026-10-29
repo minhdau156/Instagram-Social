@@ -34,7 +34,7 @@ export const PostGrid: React.FC<{ posts: Post[] }> = ({ posts }) => {
                                     muted
                                     playsInline
                                     preload="metadata"
-                                    style={{ aspectRatio: '1/1', objectFit: 'cover' }}
+                                    style={{ width: '100%', height: '100%', display: 'block', aspectRatio: '1/1', objectFit: 'cover' }}
                                 />
                             ) : (
                                 <img src={thumbnailSrc || placeholder} loading="lazy" style={{ aspectRatio: '1/1', objectFit: 'cover' }} alt="Post thumbnail" />
