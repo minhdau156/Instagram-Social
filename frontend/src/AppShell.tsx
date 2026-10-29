@@ -51,7 +51,7 @@ function AppShellContent() {
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
           <Box
             component={Link}
-            to="/posts"
+            to="/home"
             sx={{
               display: 'flex',
               alignItems: 'center',
