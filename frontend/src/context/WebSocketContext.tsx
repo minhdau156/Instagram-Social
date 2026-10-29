@@ -25,13 +25,16 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const typingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
+  const URL = `${import.meta.env.VITE_CDN_BASE_URL || 'http://localhost:9000'}`;
+  
+
   // Single STOMP client for the entire session
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     if (!token) return;
 
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws', null, { transports: ['websocket'] }),
+      webSocketFactory: () => new SockJS(`${URL}/ws`, null, { transports: ['websocket'] }),
       connectHeaders: { Authorization: `Bearer ${token}` },
       reconnectDelay: 5000,
       onConnect: () => setIsConnected(true),
