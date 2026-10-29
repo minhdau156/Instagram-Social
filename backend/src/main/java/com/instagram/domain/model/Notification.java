@@ -67,6 +67,10 @@ public class Notification {
         return isRead;
     }
 
+    public void setRead(boolean read) {
+        this.isRead = read;
+    }
+
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }

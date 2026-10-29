@@ -187,6 +187,10 @@ public class Comment {
         return isLikedByCurrentUser;
     }
 
+    public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+        this.isLikedByCurrentUser = likedByCurrentUser;
+    }
+
     public Comment withIsLikedByCurrentUser(boolean isLikedByCurrentUser) {
         return this.copy().isLikedByCurrentUser(isLikedByCurrentUser).build();
     }
