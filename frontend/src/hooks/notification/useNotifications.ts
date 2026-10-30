@@ -1,11 +1,11 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { notificationsApi } from "../../api/notificationsApi";
 import { useAuth } from "../useAuth";
-import { useUnreadNotifications } from "./useUnreadNotifications";
+import { useWebSocketContext } from "../../context/WebSocketContext";
 
 export const useNotifications = () => {
     const { isAuthenticated } = useAuth();
-    const { setUnreadCountNotification } = useUnreadNotifications();
+    const { setUnreadCountNotification } = useWebSocketContext();
     const queryClient = useQueryClient();
     const { data, isError, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
         queryKey: ['notifications'],

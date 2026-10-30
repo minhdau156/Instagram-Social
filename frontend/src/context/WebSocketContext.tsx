@@ -9,6 +9,9 @@ interface WebSocketContextValue {
   isConnected: boolean;
   totalUnreadCount: number | null;
   typingUserIds: string[];
+  unreadCountNotification: number;
+  resetCount: () => void;
+  setUnreadCountNotification: React.Dispatch<React.SetStateAction<number>>;
   sendTyping: (conversationId: string, isTyping: boolean) => void;
   setActiveConversationId: (id: string | null) => void;
 }
@@ -22,6 +25,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [typingUserIds, setTypingUserIds] = useState<string[]>([]);
   const [totalUnreadCount, setTotalUnreadCount] = useState<number | null>(null);
+  const [unreadCountNotification, setUnreadCountNotification] = useState(0);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const typingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
@@ -133,6 +137,24 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     return () => sub.unsubscribe();
   }, [isConnected, profile?.user.id, queryClient]);
 
+  // Global notification subscription (nav badge)
+  useEffect(() => {
+    const client = clientRef.current;
+    if (!client || !isConnected) return;
+
+    const sub = client.subscribe(
+      '/user/topic/notifications',
+      (_frame) => {
+        setUnreadCountNotification(prev => prev + 1);
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      }
+    );
+
+    return () => sub.unsubscribe();
+  }, [isConnected, queryClient]);
+
+  const resetCount = () => setUnreadCountNotification(0);
+
   const sendTyping = (convId: string, isTyping: boolean) => {
     const client = clientRef.current;
     if (!client?.connected) return;
@@ -143,7 +165,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <WebSocketContext.Provider value={{ isConnected, totalUnreadCount, typingUserIds, sendTyping, setActiveConversationId }}>
+    <WebSocketContext.Provider value={{ isConnected, totalUnreadCount, typingUserIds, unreadCountNotification, resetCount, setUnreadCountNotification, sendTyping, setActiveConversationId }}>
       {children}
     </WebSocketContext.Provider>
   );

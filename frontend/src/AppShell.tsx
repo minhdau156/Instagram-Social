@@ -16,7 +16,6 @@ import { useAuth } from './hooks/useAuth';
 import { WebSocketProvider, useWebSocketContext } from './context/WebSocketContext';
 import { useConversations } from './hooks/messaging/useConversations';
 import { useState } from 'react';
-import { useUnreadNotifications } from './hooks/notification/useUnreadNotifications';
 import { UnreadBadge } from './components/notifications/UnreadBadge';
 import { NotificationDropdown } from './components/notifications/NotificationDropdown';
 import { SearchBar } from './components/search/SearchBar';
@@ -32,13 +31,12 @@ export default function AppShell() {
 
 function AppShellContent() {
   const { profile } = useAuth();
-  const { totalUnreadCount } = useWebSocketContext();
+  const { totalUnreadCount, unreadCountNotification } = useWebSocketContext();
   useConversations();
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [openCreateModal, setOpenCreateModal] = useState(false);
-  const { unreadCountNotification } = useUnreadNotifications();
   const navigate = useNavigate();
   const {logout} = useAuth();
 
