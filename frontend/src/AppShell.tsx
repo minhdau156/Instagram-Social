@@ -9,6 +9,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
 import AddIcon from '@mui/icons-material/Add';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
@@ -39,6 +40,7 @@ function AppShellContent() {
   const [openCreateModal, setOpenCreateModal] = useState(false);
   const { unreadCountNotification } = useUnreadNotifications();
   const navigate = useNavigate();
+  const {logout} = useAuth();
 
 
   const unreadCount = totalUnreadCount;
@@ -207,6 +209,10 @@ function AppShellContent() {
         <MenuItem onClick={() => { navigate('/settings/blocked'); setSettingsAnchorEl(null); }}>
           <ListItemIcon><BlockIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Blocked Accounts</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={async () => { await logout(); setSettingsAnchorEl(null); }}>
+          <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Log Out</ListItemText>
         </MenuItem>
       </Menu>
     </Box>
