@@ -43,6 +43,8 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     const { profile } = useAuth()
 
     const hasMultipleMedia = post.mediaItems && post.mediaItems.length > 1;
+    const currentMedia = post.mediaItems?.[mediaIndex];
+    const isVideo = currentMedia?.mediaType === 'VIDEO';
 
     const handleNextMedia = () => {
         if (post.mediaItems && mediaIndex < post.mediaItems.length - 1) {
@@ -70,12 +72,24 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             />
             {/* Carousel for multiple media */}
             <Box sx={{ position: 'relative' }}>
-                <CardMedia
-                    component="img"
-                    image={mediaUrl(post.mediaItems?.[mediaIndex]?.mediaUrl)}
-                    loading="lazy"
-                    sx={{ aspectRatio: '1/1', objectFit: 'cover' }}
-                />
+                {isVideo ? (
+                    <video
+                        src={mediaUrl(currentMedia?.mediaUrl)}
+                        poster={currentMedia?.thumbnailUrl ? mediaUrl(currentMedia.thumbnailUrl) : undefined}
+                        controls
+                        muted
+                        playsInline
+                        preload="metadata"
+                        style={{ width: '100%', display: 'block', aspectRatio: '1/1', objectFit: 'cover' }}
+                    />
+                ) : (
+                    <CardMedia
+                        component="img"
+                        image={mediaUrl(currentMedia?.mediaUrl)}
+                        loading="lazy"
+                        sx={{ aspectRatio: '1/1', objectFit: 'cover' }}
+                    />
+                )}
                 {hasMultipleMedia && mediaIndex > 0 && (
                     <IconButton
                         onClick={handlePrevMedia}

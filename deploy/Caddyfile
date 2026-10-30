@@ -1,7 +1,7 @@
 {$DOMAIN} {
     # Bắt tất cả các request bắt đầu bằng /api, /ws, /oauth2, /login/oauth2
     # (inline matcher chỉ nhận 1 path, nên dùng named matcher cho nhiều path)
-    @backend path /api* /ws* /oauth2/* /login/oauth2/*
+    @backend path /api* /ws* /oauth2/authorization/* /login/oauth2/*
     handle @backend {
         reverse_proxy backend:8080
     }

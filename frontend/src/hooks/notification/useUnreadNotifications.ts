@@ -11,7 +11,7 @@ export const useUnreadNotifications = () => {
         const token = localStorage.getItem('accessToken');
         if (!token) return;
         const client = new Client({
-            webSocketFactory: () => new SockJS('http://localhost:8080/ws', null, { transports: ['websocket'] }),
+            webSocketFactory: () => new SockJS('https://instagram-by-minhdau156.duckdns.org/ws', null, { transports: ['websocket'] }),
             connectHeaders: { Authorization: `Bearer ${token}` },
             reconnectDelay: 5000,
             onConnect: () => {
