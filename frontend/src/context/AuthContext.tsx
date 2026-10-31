@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react";
 import { AuthTokens, LoginPayload, RegisterPayload } from "../types/auth";
 import { UserProfile } from "../types/user";
 import { authApi } from "../api/authApi";
@@ -6,6 +6,7 @@ import { usersApi } from "../api/usersApi";
 
 interface AuthContextValue {
     profile: UserProfile | null;
+    setProfile: Dispatch<SetStateAction<UserProfile | null>>;
     tokens: AuthTokens | null;
     isLoading: boolean;
     isAuthenticated: boolean;
@@ -72,7 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ profile, tokens, isLoading, isAuthenticated, isAdmin, login, register, logout }}>
+        <AuthContext.Provider value={{ profile, setProfile, tokens, isLoading, isAuthenticated, isAdmin, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );

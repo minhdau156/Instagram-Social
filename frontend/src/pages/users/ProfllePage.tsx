@@ -5,9 +5,9 @@ import { PageLoader } from "../../components/common/PageLoader";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 
-import { usersApi } from "../../api/usersApi";
 import { PostGrid } from "../../components/posts/PostGrid";
 import { usePosts } from "../../hooks/post/usePosts";
+import { useUpdateMe } from "../../hooks/user/useUpdateMe";
 import { FollowerDialog } from "../../components/follow/FollowerDialog";
 import { FollowingDialog } from "../../components/follow/FollowingDialog";
 
@@ -15,6 +15,7 @@ export const ProfilePage = () => {
 
     const { profile, isLoading } = useAuth();
     const { data } = usePosts(profile?.user.id || '');
+    const updateMe = useUpdateMe();
     const posts = data?.pages?.flatMap((page) => page.content) || [];
     const [followersOpen, setFollowersOpen] = useState(false);
     const [followingOpen, setFollowingOpen] = useState(false);
@@ -32,17 +33,14 @@ export const ProfilePage = () => {
 
 
 
-    const onSubmit = async (data: any) => {
-        try {
-            usersApi.updateMe({
-                fullName: data.fullName,
-                bio: data.bio || null,
-                isPrivate: data.isPrivate || false
-            });
-            setOpen(false);
-        } catch (error) {
-            console.error("Update profile failed:", error);
-        }
+    const onSubmit = (data: any) => {
+        updateMe.mutate({
+            fullName: data.fullName,
+            bio: data.bio || null,
+            isPrivate: data.isPrivate || false
+        }, {
+            onSuccess: () => setOpen(false),
+        });
     };
 
     if (isLoading) {
@@ -120,9 +118,9 @@ export const ProfilePage = () => {
                     </Stack>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => { setOpen(false) }} disabled={isLoading}>Cancel</Button>
-                    <Button type="submit" form="edit-profile-form" disabled={isLoading}>
-                        {isLoading ? <CircularProgress color="inherit" size="20px" /> : "Save"}
+                    <Button onClick={() => { setOpen(false) }} disabled={updateMe.isPending}>Cancel</Button>
+                    <Button type="submit" form="edit-profile-form" disabled={updateMe.isPending}>
+                        {updateMe.isPending ? <CircularProgress color="inherit" size="20px" /> : "Save"}
                     </Button>
                 </DialogActions>
             </Dialog>
