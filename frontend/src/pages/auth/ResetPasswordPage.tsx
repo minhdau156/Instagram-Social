@@ -53,6 +53,7 @@ export const ResetPasswordPage = () => {
                             {...field}
                             label="New password"
                             variant="outlined"
+                            type="password"
                             fullWidth
                             error={!!errors.newPassword}
                             helperText={errors.newPassword?.message}
