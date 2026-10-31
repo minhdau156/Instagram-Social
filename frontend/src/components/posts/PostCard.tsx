@@ -60,130 +60,133 @@ export const PostCard: React.FC<{ post: Post }> = ({ post }) => {
 
     return (
         <Card sx={{ maxWidth: 600, mb: 2 }}>
-            <CardHeader
-                avatar={<Avatar src={user?.avatarUrl ? user?.avatarUrl : undefined} imgProps={{ loading: 'lazy' }} />}
-                title={<Typography fontWeight="bold">{user?.username}</Typography>}
-                subheader={post.location}
-                action={
-                    <IconButton onClick={(e) => setMenuAnchorEl(e.currentTarget)}>
-                        <MoreVert />
-                    </IconButton>
-                }
-            />
-            {/* Carousel for multiple media */}
-            <Box sx={{ position: 'relative' }}>
-                {isVideo ? (
-                    <video
-                        src={mediaUrl(currentMedia?.mediaUrl)}
-                        poster={currentMedia?.thumbnailUrl ? mediaUrl(currentMedia.thumbnailUrl) : undefined}
-                        controls
-                        muted
-                        playsInline
-                        preload="metadata"
-                        style={{ width: '100%', display: 'block', aspectRatio: '1/1', objectFit: 'cover' }}
-                    />
-                ) : (
-                    <CardMedia
-                        component="img"
-                        image={mediaUrl(currentMedia?.mediaUrl)}
-                        loading="lazy"
-                        sx={{ aspectRatio: '1/1', objectFit: 'cover' }}
-                    />
-                )}
-                {hasMultipleMedia && mediaIndex > 0 && (
-                    <IconButton
-                        onClick={handlePrevMedia}
-                        sx={{ position: 'absolute', top: '50%', left: 8, transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.7)', '&:hover': { bgcolor: 'white' } }}
-                    >
-                        <ChevronLeft />
-                    </IconButton>
-                )}
-                {hasMultipleMedia && mediaIndex < post.mediaItems.length - 1 && (
-                    <IconButton
-                        onClick={handleNextMedia}
-                        sx={{ position: 'absolute', top: '50%', right: 8, transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.7)', '&:hover': { bgcolor: 'white' } }}
-                    >
-                        <ChevronRight />
-                    </IconButton>
-                )}
-            </Box>
-            <CardContent>
-                {/* Action row */}
-                <Box sx={{ display: 'flex', alignItems: 'center', px: 1, py: 0.5 }}>
-                    {/* Left: Like, Comment trigger, Share */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                        <LikeButton
-                            postId={post.id}
-                            liked={post.likedByCurrentUser || undefined}
-                            likeCount={post.likeCount}
-                            disabled={!profile?.user}
-                        />
-                        <IconButton
-                            size="small"
-                            aria-label="Comment on post"
-                            onClick={() => handleOpenDetail(true)}   // opens PostDetailModal with comment auto-focus
-                        >
-                            <ChatBubbleOutlineIcon />
+            <Box onClick={() => handleOpenDetail(false)} sx={{ cursor: 'pointer' }}>
+                <CardHeader
+                    avatar={<Avatar src={user?.avatarUrl ? user?.avatarUrl : undefined} imgProps={{ loading: 'lazy' }} />}
+                    title={<Typography fontWeight="bold">{user?.username}</Typography>}
+                    subheader={post.location}
+                    action={
+                        <IconButton onClick={(e) => { e.stopPropagation(); setMenuAnchorEl(e.currentTarget); }}>
+                            <MoreVert />
                         </IconButton>
-                        <ShareMenu postId={post.id} disabled={!profile?.user} />
-                    </Box>
-
-                    {/* Spacer */}
-                    <Box sx={{ flexGrow: 1 }} />
-
-                    {/* Right: Save */}
-                    <SaveButton
-                        postId={post.id}
-                        saved={post.savedByCurrentUser ?? false}
-                        disabled={!profile?.user}
-                    />
-                </Box>
-                {post.likeCount > 0 && (
-                    <LikersTooltip
-                        postId={post.id}
-                        likeCount={post.likeCount}
-                    />
-                )}
-                {post.commentCount > 0 && (
-                    <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ px: 2, cursor: 'pointer' }}
-                        onClick={() => handleOpenDetail(false)}
-                    >
-                        View all {post.commentCount} comments
-                    </Typography>
-                )}
-
-
-                {/* Truncated caption with toggle */}
-                <Box sx={{ mb: 1 }}>
-                    <Typography component="span" fontWeight="bold" sx={{ mr: 1 }}>
-                        {user?.username}
-                    </Typography>
-                    <Typography
-                        component="span"
-                        sx={{
-                            display: expanded ? 'block' : '-webkit-box',
-                            WebkitLineClamp: expanded ? 'none' : 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                            whiteSpace: 'pre-wrap'
-                        }}
-                    >
-                        {post.caption}
-                    </Typography>
-                    {!expanded && post.caption && post.caption.length > 80 && (
-                        <Button size="small" onClick={() => setExpanded(true)} sx={{ p: 0, minWidth: 'auto', textTransform: 'none', color: 'text.secondary' }}>
-                            more
-                        </Button>
+                    }
+                />
+                {/* Carousel for multiple media */}
+                <Box sx={{ position: 'relative' }}>
+                    {isVideo ? (
+                        <video
+                            src={mediaUrl(currentMedia?.mediaUrl)}
+                            poster={currentMedia?.thumbnailUrl ? mediaUrl(currentMedia.thumbnailUrl) : undefined}
+                            controls
+                            muted
+                            playsInline
+                            preload="metadata"
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ width: '100%', display: 'block', aspectRatio: '1/1', objectFit: 'cover' }}
+                        />
+                    ) : (
+                        <CardMedia
+                            component="img"
+                            image={mediaUrl(currentMedia?.mediaUrl)}
+                            loading="lazy"
+                            sx={{ aspectRatio: '1/1', objectFit: 'cover' }}
+                        />
+                    )}
+                    {hasMultipleMedia && mediaIndex > 0 && (
+                        <IconButton
+                            onClick={(e) => { e.stopPropagation(); handlePrevMedia(); }}
+                            sx={{ position: 'absolute', top: '50%', left: 8, transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.7)', '&:hover': { bgcolor: 'white' } }}
+                        >
+                            <ChevronLeft />
+                        </IconButton>
+                    )}
+                    {hasMultipleMedia && mediaIndex < post.mediaItems.length - 1 && (
+                        <IconButton
+                            onClick={(e) => { e.stopPropagation(); handleNextMedia(); }}
+                            sx={{ position: 'absolute', top: '50%', right: 8, transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.7)', '&:hover': { bgcolor: 'white' } }}
+                        >
+                            <ChevronRight />
+                        </IconButton>
                     )}
                 </Box>
+                <CardContent>
+                    {/* Action row */}
+                    <Box onClick={(e) => e.stopPropagation()} sx={{ display: 'flex', alignItems: 'center', px: 1, py: 0.5 }}>
+                        {/* Left: Like, Comment trigger, Share */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
+                            <LikeButton
+                                postId={post.id}
+                                liked={post.likedByCurrentUser || undefined}
+                                likeCount={post.likeCount}
+                                disabled={!profile?.user}
+                            />
+                            <IconButton
+                                size="small"
+                                aria-label="Comment on post"
+                                onClick={() => handleOpenDetail(true)}   // opens PostDetailModal with comment auto-focus
+                            >
+                                <ChatBubbleOutlineIcon />
+                            </IconButton>
+                            <ShareMenu postId={post.id} disabled={!profile?.user} />
+                        </Box>
 
-                <Typography variant="caption" color="text.secondary">
-                    {new Date(post.createdAt).toLocaleDateString()}
-                </Typography>
-            </CardContent>
+                        {/* Spacer */}
+                        <Box sx={{ flexGrow: 1 }} />
+
+                        {/* Right: Save */}
+                        <SaveButton
+                            postId={post.id}
+                            saved={post.savedByCurrentUser ?? false}
+                            disabled={!profile?.user}
+                        />
+                    </Box>
+                    {post.likeCount > 0 && (
+                        <LikersTooltip
+                            postId={post.id}
+                            likeCount={post.likeCount}
+                        />
+                    )}
+                    {post.commentCount > 0 && (
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ px: 2, cursor: 'pointer' }}
+                            onClick={(e) => { e.stopPropagation(); handleOpenDetail(false); }}
+                        >
+                            View all {post.commentCount} comments
+                        </Typography>
+                    )}
+
+
+                    {/* Truncated caption with toggle */}
+                    <Box sx={{ mb: 1 }}>
+                        <Typography component="span" fontWeight="bold" sx={{ mr: 1 }}>
+                            {user?.username}
+                        </Typography>
+                        <Typography
+                            component="span"
+                            sx={{
+                                display: expanded ? 'block' : '-webkit-box',
+                                WebkitLineClamp: expanded ? 'none' : 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                                whiteSpace: 'pre-wrap'
+                            }}
+                        >
+                            {post.caption}
+                        </Typography>
+                        {!expanded && post.caption && post.caption.length > 80 && (
+                            <Button size="small" onClick={(e) => { e.stopPropagation(); setExpanded(true); }} sx={{ p: 0, minWidth: 'auto', textTransform: 'none', color: 'text.secondary' }}>
+                                more
+                            </Button>
+                        )}
+                    </Box>
+
+                    <Typography variant="caption" color="text.secondary">
+                        {new Date(post.createdAt).toLocaleDateString()}
+                    </Typography>
+                </CardContent>
+            </Box>
 
             {openDetail && (
                 <PostDetailModal
