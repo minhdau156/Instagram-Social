@@ -29,7 +29,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const typingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  const URL = `${import.meta.env.VITE_CDN_BASE_URL || 'http://localhost:9000'}`;
+  const URL = `${import.meta.env.VITE_CDN_BASE_URL || 'http://localhost:8080'}`;
   
 
   // Single STOMP client for the entire session
