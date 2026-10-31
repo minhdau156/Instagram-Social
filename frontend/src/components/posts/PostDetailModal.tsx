@@ -1,6 +1,9 @@
-import React, { useEffect } from 'react';
-import { Dialog, Box, Typography, IconButton, Avatar, Stack, Divider } from '@mui/material';
-import { ChatBubbleOutline, Close } from '@mui/icons-material';
+import React, { useEffect, useState } from 'react';
+import {
+    Dialog, Box, Typography, IconButton, Avatar, Stack, Divider,
+    DialogTitle, DialogContent, DialogContentText, DialogActions, Button, CircularProgress
+} from '@mui/material';
+import { ChatBubbleOutline, Close, DeleteOutline } from '@mui/icons-material';
 import { Post } from '../../types/post';
 import { useAuth } from '../../hooks/useAuth';
 import { LikeButton } from './LikeButton';
@@ -11,6 +14,7 @@ import { CommentSection } from '../comment/CommentSection';
 import { useMutation } from '@tanstack/react-query';
 import { usersApi } from '../../api/usersApi';
 import { mediaUrl } from '../../lib/media';
+import { useDeletePost } from '../../hooks/post/useDeletePost';
 
 interface PostDetailModalProps {
     post: Post;
@@ -21,6 +25,9 @@ interface PostDetailModalProps {
 
 export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose, autoFocusComment }) => {
     const { profile } = useAuth();
+    const isOwner = profile?.user.id === post.userId;
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const deleteMutation = useDeletePost();
 
     const { data, mutate } = useMutation({
         mutationFn: () => usersApi.getUserById(post.userId),
@@ -90,9 +97,9 @@ export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose,
 
                     {/* Comments Area (Caption + Comments) */}
                     <Box sx={{ p: 2, flexGrow: 1, overflowY: 'auto' }}>
-                        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+                        <Stack direction="row" spacing={2} sx={{ mb: 2, alignItems: 'flex-start' }}>
                             <Avatar src={postUser?.avatarUrl || undefined}>{String(post.userId).charAt(0)}</Avatar>
-                            <Box>
+                            <Box sx={{ flexGrow: 1 }}>
                                 <Typography component="span" fontWeight="bold" sx={{ mr: 1 }}>
                                     {postUser?.username}
                                 </Typography>
@@ -103,6 +110,11 @@ export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose,
                                     {new Date(post.createdAt).toLocaleDateString()}
                                 </Typography>
                             </Box>
+                            {isOwner && (
+                                <IconButton size="small" aria-label="Delete post" onClick={() => setDeleteDialogOpen(true)}>
+                                    <DeleteOutline fontSize="small" />
+                                </IconButton>
+                            )}
                         </Stack>
                         <Divider sx={{ my: 2 }} />
                         <CommentSection postId={post.id} autoFocus={autoFocusComment} />
@@ -152,6 +164,29 @@ export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose,
                     </Box>
                 </Box>
             </Box>
+
+            {/* Delete confirmation */}
+            <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+                <DialogTitle>Delete Post?</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>Are you sure you want to delete this post? This action cannot be undone.</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteDialogOpen(false)} color="inherit">Cancel</Button>
+                    <Button
+                        color="error"
+                        disabled={deleteMutation.isPending}
+                        onClick={() => deleteMutation.mutate(post.id, {
+                            onSuccess: () => {
+                                setDeleteDialogOpen(false);
+                                onClose();
+                            },
+                        })}
+                    >
+                        {deleteMutation.isPending ? <CircularProgress size={20} /> : 'Delete'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Dialog>
     );
 };

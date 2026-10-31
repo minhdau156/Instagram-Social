@@ -8,6 +8,7 @@ export const useDeletePost = () => {
         mutationFn: (postId: string) => postApi.deletePost(postId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['posts'] });
+            queryClient.invalidateQueries({ queryKey: ['homeFeed'] });
         },
     });
 };
