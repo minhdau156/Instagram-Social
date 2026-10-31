@@ -5,6 +5,7 @@ import com.instagram.domain.port.out.MediaStoragePort.PartETag;
 import com.instagram.domain.port.out.MediaStoragePort.PartInfo;
 import com.instagram.infrastructure.config.MultipartMinioClient;
 import io.minio.GetPresignedObjectUrlArgs;
+import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.messages.Part;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,9 @@ class MinioStorageAdapterTest {
     @Mock
     private MultipartMinioClient minioClient;
 
+    @Mock
+    private MinioClient presignMinioClient;
+
     private MinioStorageAdapter adapter;
 
     private static final String BUCKET = "media";
@@ -37,7 +41,7 @@ class MinioStorageAdapterTest {
 
     @BeforeEach
     void setUp() {
-        adapter = new MinioStorageAdapter(minioClient, BUCKET, ENDPOINT, CDN_BASE_URL);
+        adapter = new MinioStorageAdapter(minioClient, presignMinioClient, BUCKET, ENDPOINT, CDN_BASE_URL);
     }
 
     // ── getPublicUrl ──────────────────────────────────────────────────────────
@@ -83,7 +87,7 @@ class MinioStorageAdapterTest {
     @Test
     void generatePresignedPutUrl_delegatesToMinioAndReturnsUrl() throws Exception {
         String expectedUrl = "https://minio.example.com/presigned?X-Amz-Signature=abc";
-        when(minioClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
+        when(presignMinioClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
                 .thenReturn(expectedUrl);
 
         String url = adapter.generatePresignedPutUrl("images/photo.jpg", Duration.ofMinutes(15));
@@ -93,7 +97,7 @@ class MinioStorageAdapterTest {
 
     @Test
     void generatePresignedPutUrl_throwsMediaUploadExceptionOnFailure() throws Exception {
-        when(minioClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
+        when(presignMinioClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
                 .thenThrow(new RuntimeException("MinIO error"));
 
         assertThatThrownBy(() -> adapter.generatePresignedPutUrl("key", Duration.ofMinutes(5)))
@@ -128,7 +132,7 @@ class MinioStorageAdapterTest {
     @Test
     void generatePresignedPartUrl_returnsUrlFromMinio() throws Exception {
         String expectedUrl = "https://minio.example.com/presigned-part?partNumber=1";
-        when(minioClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
+        when(presignMinioClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
                 .thenReturn(expectedUrl);
 
         String url = adapter.generatePresignedPartUrl("video/clip.mp4", "upload-id-xyz", 1, Duration.ofMinutes(30));
@@ -138,7 +142,7 @@ class MinioStorageAdapterTest {
 
     @Test
     void generatePresignedPartUrl_throwsMediaUploadExceptionOnFailure() throws Exception {
-        when(minioClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
+        when(presignMinioClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
                 .thenThrow(new RuntimeException("network error"));
 
         assertThatThrownBy(() -> adapter.generatePresignedPartUrl("key", "uid", 1, Duration.ofMinutes(5)))
