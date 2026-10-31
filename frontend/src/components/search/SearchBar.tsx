@@ -73,6 +73,7 @@ export const SearchBar = ({ onNavigate }: SearchBarProps) => {
 
             {focused && query.trim().length === 0 && (
                 <Paper
+                    onMouseDown={(e) => e.preventDefault()}
                     sx={{
                         position: 'absolute',
                         top: '100%',
@@ -93,6 +94,7 @@ export const SearchBar = ({ onNavigate }: SearchBarProps) => {
 
             {focused && query.trim().length > 0 && (
                 <Paper
+                    onMouseDown={(e) => e.preventDefault()}
                     sx={{
                         position: 'absolute',
                         top: '100%',
