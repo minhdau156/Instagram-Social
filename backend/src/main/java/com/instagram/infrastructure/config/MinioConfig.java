@@ -10,13 +10,20 @@ import io.minio.MinioClient;
 @Configuration
 public class MinioConfig {
 
+    // Used only to generate presigned URLs the browser calls directly, so it must be
+    // built from a browser-reachable endpoint — never app.minio.endpoint, which in
+    // local dev is the Docker-internal "minio" hostname the browser can't resolve.
+    // region() is required here: without it, the SDK calls GetBucketLocation against
+    // this endpoint on first use to auto-detect the region, and that call runs from
+    // the backend process — which can't actually reach this browser-facing endpoint.
     @Bean
-    public MinioClient minioClient(
-            @Value("${app.minio.endpoint}") String endpoint,
+    public MinioClient presignMinioClient(
+            @Value("${app.minio.cdn-base-url}") String cdnBaseUrl,
             @Value("${app.minio.access-key}") String accessKey,
             @Value("${app.minio.secret-key}") String secretKey) {
         return MinioClient.builder()
-                .endpoint(endpoint)
+                .endpoint(cdnBaseUrl)
+                .region("us-east-1")
                 .credentials(accessKey, secretKey)
                 .build();
     }

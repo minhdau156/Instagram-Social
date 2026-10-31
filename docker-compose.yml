@@ -17,7 +17,9 @@ services:
       retries: 5
 
   minio:
-    image: minio/minio
+    # Docker Hub blocks anonymous/free pulls of the official minio/minio repo;
+    # pgsty/minio mirrors the same releases and is freely pullable.
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
     restart: always
     ports:
       - "9000:9000"
@@ -142,6 +144,9 @@ services:
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      # Presigned upload URLs are handed to the browser, which can't resolve the
+      # Docker-internal "minio" hostname above — point them at the host-mapped port instead.
+      CDN_BASE_URL: ${CDN_BASE_URL:-http://localhost:9000}
       OTEL_ENDPOINT: http://tempo:4318
       LOKI_URL: http://loki:3100
       MINIO_BUCKET: ${MINIO_BUCKET:-instagram-media}

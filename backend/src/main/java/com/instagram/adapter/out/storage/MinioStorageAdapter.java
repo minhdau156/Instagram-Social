@@ -14,6 +14,7 @@ import com.instagram.domain.port.out.MediaStoragePort;
 import com.instagram.infrastructure.config.MultipartMinioClient;
 
 import io.minio.GetPresignedObjectUrlArgs;
+import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.http.Method;
 import io.minio.messages.Part;
@@ -26,15 +27,18 @@ import java.util.stream.Collectors;
 public class MinioStorageAdapter implements MediaStoragePort {
 
     private final MultipartMinioClient minioClient;
+    private final MinioClient presignMinioClient;
     private final String bucket;
     private final String endpoint;
     private final String cdnBaseUrl;
 
     public MinioStorageAdapter(MultipartMinioClient minioClient,
+            MinioClient presignMinioClient,
             @Value("${app.minio.bucket}") String bucket,
             @Value("${app.minio.endpoint}") String endpoint,
             @Value("${app.minio.cdn-base-url}") String cdnBaseUrl) {
         this.minioClient = minioClient;
+        this.presignMinioClient = presignMinioClient;
         this.bucket = bucket;
         this.endpoint = endpoint;
         this.cdnBaseUrl = cdnBaseUrl;
@@ -58,7 +62,7 @@ public class MinioStorageAdapter implements MediaStoragePort {
     @Override
     public String generatePresignedPutUrl(String key, Duration expiry) {
         try {
-            return minioClient.getPresignedObjectUrl(
+            return presignMinioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.PUT)
                             .bucket(bucket)
@@ -88,7 +92,7 @@ public class MinioStorageAdapter implements MediaStoragePort {
     @Override
     public String generatePresignedPartUrl(String key, String uploadId, int partNumber, Duration expiry) {
         try {
-            return minioClient.getPresignedObjectUrl(
+            return presignMinioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.PUT)
                             .bucket(bucket)
