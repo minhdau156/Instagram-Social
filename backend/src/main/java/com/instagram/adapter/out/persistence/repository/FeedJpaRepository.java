@@ -13,12 +13,13 @@ public interface FeedJpaRepository extends JpaRepository<PostJpaEntity, UUID> {
 
     @Query(value = """
             SELECT p.* FROM posts p
-            JOIN follows f ON f.following_id = p.user_id
-            WHERE f.follower_id = :userId
+            LEFT JOIN follows f ON f.following_id = p.user_id
+              AND f.follower_id = :userId
               AND f.is_approved = true
-              AND (:cursor IS NULL OR p.id < :cursor)
+            WHERE p.user_id <> :userId
               AND p.deleted_at IS NULL
-            ORDER BY p.created_at DESC
+              AND (:cursor IS NULL OR p.id < :cursor)
+            ORDER BY CASE WHEN f.following_id IS NOT NULL THEN 0 ELSE 1 END, p.created_at DESC
             LIMIT :limit
             """, nativeQuery = true)
 

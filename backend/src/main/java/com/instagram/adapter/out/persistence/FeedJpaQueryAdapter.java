@@ -46,13 +46,15 @@ public class FeedJpaQueryAdapter implements FeedRepository {
                     .map(this::toDomain)
                     .toList();
         }
-        String sql = "SELECT p.* FROM posts p JOIN follows f ON f.following_id = p.user_id " +
-                "WHERE f.follower_id = :userId " +
+        String sql = "SELECT p.* FROM posts p " +
+                "LEFT JOIN follows f ON f.following_id = p.user_id " +
+                "AND f.follower_id = :userId " +
                 "AND f.is_approved = true " +
-                "AND (:cursor IS NULL OR p.id < :cursor) " +
+                "WHERE p.user_id <> :userId " +
                 "AND p.deleted_at IS NULL " +
+                "AND (:cursor IS NULL OR p.id < :cursor) " +
                 "AND p.user_id NOT IN (:excludedIds) " +
-                "ORDER BY p.created_at DESC " +
+                "ORDER BY CASE WHEN f.following_id IS NOT NULL THEN 0 ELSE 1 END, p.created_at DESC " +
                 "LIMIT :limit";
         Query nativeQuery = em.createNativeQuery(sql, PostJpaEntity.class);
         nativeQuery.setParameter("userId", userId);
