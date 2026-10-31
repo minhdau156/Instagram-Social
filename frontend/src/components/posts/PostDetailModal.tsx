@@ -3,7 +3,7 @@ import {
     Dialog, Box, Typography, IconButton, Avatar, Stack, Divider,
     DialogTitle, DialogContent, DialogContentText, DialogActions, Button, CircularProgress
 } from '@mui/material';
-import { ChatBubbleOutline, Close, DeleteOutline } from '@mui/icons-material';
+import { ChatBubbleOutline, Close, DeleteOutline, ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { Post } from '../../types/post';
 import { useAuth } from '../../hooks/useAuth';
 import { LikeButton } from './LikeButton';
@@ -28,6 +28,23 @@ export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose,
     const isOwner = profile?.user.id === post.userId;
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const deleteMutation = useDeletePost();
+
+    const [mediaIndex, setMediaIndex] = useState(0);
+    const hasMultipleMedia = post.mediaItems && post.mediaItems.length > 1;
+    const currentMedia = post.mediaItems?.[mediaIndex];
+    const isVideo = currentMedia?.mediaType === 'VIDEO';
+
+    const handleNextMedia = () => {
+        if (post.mediaItems && mediaIndex < post.mediaItems.length - 1) {
+            setMediaIndex(prev => prev + 1);
+        }
+    };
+
+    const handlePrevMedia = () => {
+        if (mediaIndex > 0) {
+            setMediaIndex(prev => prev - 1);
+        }
+    };
 
     const { data, mutate } = useMutation({
         mutationFn: () => usersApi.getUserById(post.userId),
@@ -64,12 +81,13 @@ export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose,
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRight: 1,
-                    borderColor: 'divider'
+                    borderColor: 'divider',
+                    position: 'relative'
                 }}>
-                    {post.mediaItems?.[0]?.mediaType === 'VIDEO' ? (
+                    {isVideo ? (
                         <video
-                            src={mediaUrl(post.mediaItems[0].mediaUrl)}
-                            poster={post.mediaItems[0].thumbnailUrl ? mediaUrl(post.mediaItems[0].thumbnailUrl) : undefined}
+                            src={mediaUrl(currentMedia?.mediaUrl)}
+                            poster={currentMedia?.thumbnailUrl ? mediaUrl(currentMedia.thumbnailUrl) : undefined}
                             controls
                             autoPlay
                             muted
@@ -79,10 +97,27 @@ export const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, onClose,
                         />
                     ) : (
                         <img
-                            src={mediaUrl(post.mediaItems?.[0]?.mediaUrl)}
+                            src={mediaUrl(currentMedia?.mediaUrl)}
                             alt="Post media"
                             style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                         />
+                    )}
+                    {/* Carousel for multiple media */}
+                    {hasMultipleMedia && mediaIndex > 0 && (
+                        <IconButton
+                            onClick={handlePrevMedia}
+                            sx={{ position: 'absolute', top: '50%', left: 8, transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.7)', '&:hover': { bgcolor: 'white' } }}
+                        >
+                            <ChevronLeft />
+                        </IconButton>
+                    )}
+                    {hasMultipleMedia && mediaIndex < post.mediaItems.length - 1 && (
+                        <IconButton
+                            onClick={handleNextMedia}
+                            sx={{ position: 'absolute', top: '50%', right: 8, transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.7)', '&:hover': { bgcolor: 'white' } }}
+                        >
+                            <ChevronRight />
+                        </IconButton>
                     )}
                 </Box>
 
