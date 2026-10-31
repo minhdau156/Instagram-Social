@@ -44,6 +44,7 @@ public class AuditLogJpaEntity {
     private UUID entityId;
 
     @Column(columnDefinition = "JSONB")
+    @ColumnTransformer(write = "?::jsonb")
     private String metadata;
 
     @Column(name = "ip_address", columnDefinition = "inet")
