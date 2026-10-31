@@ -15,16 +15,18 @@ export const CreatePostModal: React.FC<{ open: boolean; onClose: () => void }> =
         const [location, setLocation] = useState('');
         const createPost = useCreatePost();
 
+        const canEditSingleImage = files.length === 1 && files[0]?.type.startsWith('image/');
+
         const onSaveCrop = (blob: Blob) => {
             const file = new File([blob], files[0].name, { type: files[0].type });
-            setFiles([file]);
+            setFiles(prev => [file, ...prev.slice(1)]);
             setActiveStep(2);
         };
 
         const handleSubmit = async () => {
-            if (!files[0]) return;
+            if (files.length === 0) return;
             await createPost.mutateAsync({
-                file: files[0], payload: { caption, location }
+                files, payload: { caption, location }
             });
             alert('Post created successfully');
             onClose();
@@ -47,7 +49,7 @@ export const CreatePostModal: React.FC<{ open: boolean; onClose: () => void }> =
                 <DialogContent>
 
                     {activeStep == 0 && <MediaPicker onFilesSelected={setFiles} />}
-                    {activeStep == 1 && files[0].type.startsWith('image/') && <MediaCropEditor imageSrc={URL.createObjectURL(files[0])} onCancel={onClose} onSave={onSaveCrop} />}
+                    {activeStep == 1 && canEditSingleImage && <MediaCropEditor imageSrc={URL.createObjectURL(files[0])} onCancel={onClose} onSave={onSaveCrop} />}
                     {activeStep == 2 && (
                         <Stack>
                             <CaptionEditor value={caption} onChange={setCaption} />
@@ -58,10 +60,10 @@ export const CreatePostModal: React.FC<{ open: boolean; onClose: () => void }> =
                 </DialogContent>
                 <DialogActions>
                     <DialogActions>
-                        {activeStep > 0 && <Button onClick={() => setActiveStep(s => s - 1)}>Back</Button>}
+                        {activeStep > 0 && <Button onClick={() => setActiveStep(s => (s === 2 && !canEditSingleImage) ? 0 : s - 1)}>Back</Button>}
                         {files.length === 0 && activeStep > 0 ? <Typography color='error'>You should select a media file first</Typography>
                             : activeStep < steps.length - 1 ?
-                                <Button variant="contained" onClick={() => setActiveStep(s => s + 1)}>Next</Button>
+                                <Button variant="contained" onClick={() => setActiveStep(s => s === 0 ? (canEditSingleImage ? 1 : 2) : s + 1)}>Next</Button>
                                 : <Button variant="contained" onClick={handleSubmit} loading={createPost.isPending}>Share</Button>}
                     </DialogActions>
                 </DialogActions>

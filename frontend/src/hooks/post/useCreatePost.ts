@@ -9,25 +9,27 @@ export const useCreatePost = () => {
     return useMutation({
         mutationFn: async (data: {
             payload: { location?: string; caption?: string };
-            file: File
+            files: File[]
         }) => {
-            //get the pre-signed url from the backend
-            const { presignedUrl, mediaKey } = await mediaApi.getUploadUrl(data.file.name,
-                data.file.type);
-            //upload the file to minio
-            await mediaApi.uploadToMinio(presignedUrl, data.file);
+            const mediaItems = await Promise.all(data.files.map(async (file, index) => {
+                //get the pre-signed url from the backend
+                const { presignedUrl, mediaKey } = await mediaApi.getUploadUrl(file.name, file.type);
+                //upload the file to minio
+                await mediaApi.uploadToMinio(presignedUrl, file);
+                return {
+                    mediaKey,
+                    mediaType: file.type.startsWith('video/') ? 'VIDEO' : 'IMAGE' as MediaType,
+                    sortOrder: String(index)
+                };
+            }));
             //create the post
             return postApi.createPost({
                 ...data.payload,
-                mediaItems: [{
-                    mediaKey,
-                    mediaType: data.file.type.startsWith('video/') ? 'VIDEO' : 'IMAGE' as MediaType,
-                    sortOrder: "0"
-                }]
+                mediaItems
             });
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['posts'] });
         }
     })
-}   
+}
