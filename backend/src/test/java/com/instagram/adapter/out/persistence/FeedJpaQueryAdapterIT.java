@@ -75,11 +75,13 @@ class FeedJpaQueryAdapterIT extends PostgresIntegrationTest {
     }
 
     @Test
-    void findHomeFeed_returnsOnlyFollowedUsersPosts() {
+    void findHomeFeed_returnsFollowedPostsFirstThenEveryoneElse() {
         List<PostJpaEntity> feed = feedJpaRepository.findHomeFeed(follower.getId(), null, 20);
 
-        assertThat(feed).hasSize(2);
-        assertThat(feed).allMatch(p -> p.getUserId().equals(followed.getId()));
+        assertThat(feed).hasSize(3);
+        assertThat(feed.get(0).getUserId()).isEqualTo(followed.getId());
+        assertThat(feed.get(1).getUserId()).isEqualTo(followed.getId());
+        assertThat(feed.get(2).getUserId()).isEqualTo(stranger.getId());
     }
 
     @Test
