@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.SessionFactory;
@@ -23,6 +24,7 @@ import com.instagram.adapter.out.persistence.entity.PostJpaEntity;
 import com.instagram.adapter.out.persistence.entity.UserJpaEntity;
 import com.instagram.adapter.out.persistence.repository.FeedJpaRepository;
 import com.instagram.adapter.out.persistence.repository.PostJpaRepository;
+import com.instagram.domain.model.Post;
 import com.instagram.domain.model.PostStatus;
 import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.UserStatus;
