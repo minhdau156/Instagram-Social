@@ -104,6 +104,38 @@ class FeedJpaQueryAdapterIT extends PostgresIntegrationTest {
     }
 
     @Test
+    void getHomeFeed_withExcludedUsersAndNullCursor_doesNotThrow() {
+        // Exercises the raw EntityManager native-query branch (excludedIds non-empty),
+        // which bypasses Spring Data's parameter binding. Postgres previously failed
+        // with "could not determine data type of parameter" for a null UUID cursor
+        // used only in a bare "? IS NULL" check with no other type context.
+        BlockFilter withBlockFilter = mock(BlockFilter.class);
+        when(withBlockFilter.getExcludedUserIds(any())).thenReturn(Set.of(UUID.randomUUID()));
+        FeedJpaQueryAdapter adapterWithBlocks = new FeedJpaQueryAdapter(
+                feedJpaRepository, postJpaRepository, withBlockFilter, tem.getEntityManager());
+
+        List<Post> feed = adapterWithBlocks.getHomeFeed(follower.getId(), null, 20);
+
+        assertThat(feed).hasSize(3);
+        assertThat(feed.get(0).getUserId()).isEqualTo(followed.getId());
+        assertThat(feed.get(1).getUserId()).isEqualTo(followed.getId());
+        assertThat(feed.get(2).getUserId()).isEqualTo(stranger.getId());
+    }
+
+    @Test
+    void getExploreFeed_withExcludedUsersAndNullCursor_doesNotThrow() {
+        BlockFilter withBlockFilter = mock(BlockFilter.class);
+        when(withBlockFilter.getExcludedUserIds(any())).thenReturn(Set.of(UUID.randomUUID()));
+        FeedJpaQueryAdapter adapterWithBlocks = new FeedJpaQueryAdapter(
+                feedJpaRepository, postJpaRepository, withBlockFilter, tem.getEntityManager());
+
+        List<Post> explore = adapterWithBlocks.getExploreFeed(follower.getId(), null, 20);
+
+        assertThat(explore).hasSize(1);
+        assertThat(explore.get(0).getUserId()).isEqualTo(stranger.getId());
+    }
+
+    @Test
     void getHomeFeed_noN1_statementCountBelowThreshold() {
         // Seed 5 additional posts (7 total from followed). With the old N+1
         // (entity.getUser().getId()), this would fire 1 list query + 7 lazy-load

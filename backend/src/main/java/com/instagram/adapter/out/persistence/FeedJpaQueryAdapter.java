@@ -52,7 +52,7 @@ public class FeedJpaQueryAdapter implements FeedRepository {
                 "AND f.is_approved = true " +
                 "WHERE p.user_id <> :userId " +
                 "AND p.deleted_at IS NULL " +
-                "AND (:cursor IS NULL OR p.id < :cursor) " +
+                "AND (CAST(:cursor AS uuid) IS NULL OR p.id < :cursor) " +
                 "AND p.user_id NOT IN (:excludedIds) " +
                 "ORDER BY CASE WHEN f.following_id IS NOT NULL THEN 0 ELSE 1 END, p.created_at DESC " +
                 "LIMIT :limit";
@@ -84,7 +84,7 @@ public class FeedJpaQueryAdapter implements FeedRepository {
                 "AND p.user_id NOT IN (:excludedIds) " +
                 "AND p.user_id <> :userId " +
                 "AND p.deleted_at IS NULL " +
-                "AND (:cursor IS NULL OR p.id < :cursor) " +
+                "AND (CAST(:cursor AS uuid) IS NULL OR p.id < :cursor) " +
                 "ORDER BY (p.like_count + p.comment_count) DESC, p.created_at DESC " +
                 "LIMIT :limit";
         Query nativeQuery = em.createNativeQuery(sql, PostJpaEntity.class);
