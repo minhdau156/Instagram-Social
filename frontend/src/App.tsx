@@ -1,4 +1,4 @@
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { Box, CssBaseline, ThemeProvider } from "@mui/material";
 import {
   BrowserRouter,
   Navigate,
@@ -74,7 +74,14 @@ const HashtagPage = React.lazy(() => import("./pages/search/HashtagPage"));
 
 function ChatRoute() {
   const { conversationId } = useParams<{ conversationId: string }>();
-  return conversationId ? <ChatPage conversationId={conversationId} /> : null;
+  if (!conversationId) return null;
+  // ChatPage fills 100% of its parent; give it the viewport height minus the 64px app bar
+  // so the input bar sits at the bottom of the screen instead of right under the messages.
+  return (
+    <Box sx={{ height: "calc(100dvh - 64px)" }}>
+      <ChatPage conversationId={conversationId} />
+    </Box>
+  );
 }
 
 function GlobalNavigation() {
