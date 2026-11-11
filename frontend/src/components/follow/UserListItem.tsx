@@ -23,7 +23,7 @@ export const UserListItem = ({ user, currentUsername, setOpen }: UserListItemPro
             </ListItemAvatar>
             <ListItemText
                 primary={
-                    <Link component={RouterLink} to={`/${user.username}`} onClick={() => setOpen(false)} underline="none" color="inherit" fontWeight="bold">
+                    <Link component={RouterLink} to={`/${user.username}/bio`} onClick={() => setOpen(false)} underline="none" color="inherit" fontWeight="bold">
                         {user.username}
                     </Link>
                 }
