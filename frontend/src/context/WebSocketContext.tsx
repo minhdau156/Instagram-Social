@@ -34,9 +34,10 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
   const URL = `${import.meta.env.VITE_CDN_BASE_URL || 'http://localhost:8080'}`;
 
-  // Nav badge total — derived from the per-conversation counts so the two can never disagree
+  // Nav badge: number of conversations with unread messages (not the number of unread messages),
+  // derived from the per-conversation counts so the two can never disagree
   const totalUnreadCount = useMemo(
-    () => (conversations ? conversations.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0) : null),
+    () => (conversations ? conversations.filter((c) => (c.unreadCount ?? 0) > 0).length : null),
     [conversations]
   );
 
