@@ -1,8 +1,9 @@
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { InfiniteData, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
+import { useConversations } from '../hooks/messaging/useConversations';
 import type { Conversation, Message } from '../types/messaging';
 
 interface WebSocketContextValue {
@@ -21,16 +22,31 @@ const WebSocketContext = createContext<WebSocketContextValue | null>(null);
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const { profile } = useAuth();
+  const { conversations } = useConversations();
   const clientRef = useRef<Client | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [typingUserIds, setTypingUserIds] = useState<string[]>([]);
-  const [totalUnreadCount, setTotalUnreadCount] = useState<number | null>(null);
   const [unreadCountNotification, setUnreadCountNotification] = useState(0);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  // Read inside STOMP callbacks, which would otherwise see a stale activeConversationId
+  const activeConversationIdRef = useRef<string | null>(null);
   const typingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const URL = `${import.meta.env.VITE_CDN_BASE_URL || 'http://localhost:8080'}`;
-  
+
+  // Nav badge total — derived from the per-conversation counts so the two can never disagree
+  const totalUnreadCount = useMemo(
+    () => (conversations ? conversations.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0) : null),
+    [conversations]
+  );
+
+  // Every conversation to listen on: the user's list, plus the open chat in case it isn't in the list yet.
+  // Joined into a string so the subscriptions below are only rebuilt when the set of ids actually changes.
+  const conversationIdsKey = useMemo(() => {
+    const ids = new Set<string>(conversations?.map((c) => c.id));
+    if (activeConversationId) ids.add(activeConversationId);
+    return Array.from(ids).sort().join(',');
+  }, [conversations, activeConversationId]);
 
   // Single STOMP client for the entire session
   useEffect(() => {
@@ -55,33 +71,63 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Subscribe to conversation messages and typing when a chat is open
+  useEffect(() => {
+    activeConversationIdRef.current = activeConversationId;
+  }, [activeConversationId]);
+
+  // Opening a chat reads it — clear its badge immediately instead of waiting for the mark-read round trip
+  useEffect(() => {
+    if (!activeConversationId) return;
+    queryClient.setQueryData<Conversation[]>(['conversations'], (old) =>
+      old?.map((conv) => (conv.id === activeConversationId ? { ...conv, unreadCount: 0 } : conv))
+    );
+  }, [activeConversationId, queryClient]);
+
+  // Live messages for every conversation: appends to the chat's message cache and keeps the
+  // list's last-message preview and unread badge current, not only for the chat that is open
   useEffect(() => {
     const client = clientRef.current;
-    if (!client || !isConnected || !activeConversationId) return;
+    const myUserId = profile?.user.id;
+    if (!client || !isConnected || !myUserId || !conversationIdsKey) return;
 
-    const msgSub = client.subscribe(
-      `/topic/conversations/${activeConversationId}`,
-      (frame) => {
+    const subs = conversationIdsKey.split(',').map((convId) =>
+      client.subscribe(`/topic/conversations/${convId}`, (frame) => {
         const message: Message = JSON.parse(frame.body);
-        if (message.senderId === profile?.user.id) return;
+        const isOwn = message.senderId === myUserId;
+        const isOpen = activeConversationIdRef.current === convId;
 
-        queryClient.setQueryData<InfiniteData<Message[]>>(
-          ['messages', activeConversationId],
-          (old) => {
+        // Own messages are already in the cache through useSendMessage's optimistic update
+        if (!isOwn) {
+          queryClient.setQueryData<InfiniteData<Message[]>>(['messages', convId], (old) => {
             if (!old) return old;
             const [firstPage, ...rest] = old.pages;
             return { ...old, pages: [[message, ...(firstPage ?? [])], ...rest] };
-          }
-        );
+          });
+        }
 
+        // Only someone else's message in a chat that isn't open counts as unread;
+        // the open chat is marked read by ChatPage as soon as the message lands
         queryClient.setQueryData<Conversation[]>(['conversations'], (old) =>
           old?.map((conv) =>
-            conv.id === activeConversationId ? { ...conv, lastMessage: message } : conv
-          ) ?? []
+            conv.id === convId
+              ? {
+                  ...conv,
+                  lastMessage: message,
+                  unreadCount: isOwn || isOpen ? conv.unreadCount : (conv.unreadCount ?? 0) + 1,
+                }
+              : conv
+          )
         );
-      }
+      })
     );
+
+    return () => subs.forEach((sub) => sub.unsubscribe());
+  }, [conversationIdsKey, isConnected, profile?.user.id, queryClient]);
+
+  // Typing indicator for the chat that is open
+  useEffect(() => {
+    const client = clientRef.current;
+    if (!client || !isConnected || !activeConversationId) return;
 
     const typingSub = client.subscribe(
       `/topic/conversations/${activeConversationId}/typing`,
@@ -106,36 +152,29 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     );
 
     return () => {
-      msgSub.unsubscribe();
       typingSub.unsubscribe();
       setTypingUserIds([]);
     };
-  }, [activeConversationId, isConnected, queryClient, profile?.user.id]);
+  }, [activeConversationId, isConnected]);
 
-  // Global unread-count subscription (nav badge)
+  // Server-confirmed unread count after a mark-read; also syncs the user's other tabs and devices.
+  // Spring resolves "/user/topic/..." to this session — the user id must not be in the path.
   useEffect(() => {
     const client = clientRef.current;
-    const userId = profile?.user.id;
-    if (!client || !isConnected || !userId) return;
+    if (!client || !isConnected) return;
 
-    const sub = client.subscribe(
-      `/user/${userId}/topic/unread-count`,
-      (frame) => {
-        const { conversationId: convId, unreadCount } = JSON.parse(frame.body) as {
-          conversationId: string;
-          unreadCount: number;
-        };
-        const updated = queryClient.setQueryData<Conversation[]>(['conversations'], (old) =>
-          old?.map((conv) => conv.id === convId ? { ...conv, unreadCount } : conv) ?? []
-        );
-        if (updated) {
-          setTotalUnreadCount(updated.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0));
-        }
-      }
-    );
+    const sub = client.subscribe('/user/topic/unread-count', (frame) => {
+      const { conversationId, unreadCount } = JSON.parse(frame.body) as {
+        conversationId: string;
+        unreadCount: number;
+      };
+      queryClient.setQueryData<Conversation[]>(['conversations'], (old) =>
+        old?.map((conv) => (conv.id === conversationId ? { ...conv, unreadCount } : conv))
+      );
+    });
 
     return () => sub.unsubscribe();
-  }, [isConnected, profile?.user.id, queryClient]);
+  }, [isConnected, queryClient]);
 
   // Global notification subscription (nav badge)
   useEffect(() => {

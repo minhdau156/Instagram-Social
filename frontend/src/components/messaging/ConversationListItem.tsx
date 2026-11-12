@@ -6,11 +6,10 @@ interface ConversationListItemProps {
     conversation: Conversation,
     currentUserId?: string,
     isSelected: boolean,
-    isClick: boolean,
     onClick: () => void
 }
 
-export function ConversationListItem({ conversation, isSelected, onClick, isClick }: ConversationListItemProps) {
+export function ConversationListItem({ conversation, isSelected, onClick }: ConversationListItemProps) {
     const displayName = conversation.isGroup
         ? (conversation.name ?? 'Group')
         : (conversation.eachOtherName ?? 'Unknown');
@@ -20,10 +19,10 @@ export function ConversationListItem({ conversation, isSelected, onClick, isClic
         <ListItemButton selected={isSelected} onClick={onClick}>
             <ListItemAvatar>
                 <Badge
-                    badgeContent={isClick ? 0 : conversation.unreadCount}
+                    badgeContent={conversation.unreadCount}
                     color="primary"
                     overlap="circular"
-                    invisible={conversation.unreadCount === 0}
+                    invisible={!conversation.unreadCount}
                 >
                     {conversation.isGroup ? (
                         <Avatar><GroupIcon /></Avatar>
