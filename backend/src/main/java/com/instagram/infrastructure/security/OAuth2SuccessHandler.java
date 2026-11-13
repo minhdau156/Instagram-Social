@@ -12,9 +12,11 @@ import org.springframework.stereotype.Component;
 
 import com.instagram.domain.model.PrivacyLevel;
 import com.instagram.domain.model.User;
+import com.instagram.domain.model.UserStats;
 import com.instagram.domain.model.UserStatus;
 import com.instagram.domain.port.out.TokenPort;
 import com.instagram.domain.port.out.UserRepository;
+import com.instagram.domain.port.out.UserStatsRepository;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,10 +32,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final UserRepository userRepository;
     private final TokenPort tokenPort;
+    private final UserStatsRepository userStatRepository;
 
-    public OAuth2SuccessHandler(UserRepository userRepository, TokenPort tokenPort) {
+    public OAuth2SuccessHandler(UserRepository userRepository, TokenPort tokenPort, UserStatsRepository userStatRepository) {
         this.userRepository = userRepository;
         this.tokenPort = tokenPort;
+        this.userStatRepository = userStatRepository;
     }
 
     @Override
@@ -60,6 +64,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                     .build();
             return userRepository.save(newUser); // returns persisted User with generated ID
         });
+
+        // Initialize user stats
+        userStatRepository.create(UserStats.zero(resolvedUser.getId()));
 
         String accessToken = tokenPort.generateAccessToken(resolvedUser.getId(), null);
         String refreshToken = tokenPort.generateRefreshToken(resolvedUser.getId());
