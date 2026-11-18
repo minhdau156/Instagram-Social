@@ -3,6 +3,8 @@ package com.instagram.adapter.out.persistence.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,4 +27,16 @@ public abstract class BaseJpaEntity {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+
+    @PrePersist
+    protected void prePersist() {
+        OffsetDateTime now = OffsetDateTime.now();
+        if (createdAt == null) createdAt = now;
+        if (updatedAt == null) updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void preUpdate() {
+        if (updatedAt == null) updatedAt = OffsetDateTime.now();
+    }
 }

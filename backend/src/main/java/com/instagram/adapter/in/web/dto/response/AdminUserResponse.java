@@ -20,7 +20,9 @@ public record AdminUserResponse(
                 user.getFullName(),
                 user.getStatus() != null ? user.getStatus().name() : null,
                 user.isVerified(),
-                user.getCreatedAt().toString(),
+                user.getCreatedAt() != null
+        ? user.getCreatedAt().toString()
+        : null,
                 user.getLastLoginAt() != null ? user.getLastLoginAt().toString() : null);
     }
 }
