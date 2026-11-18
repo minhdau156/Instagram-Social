@@ -37,6 +37,7 @@ import com.instagram.domain.port.in.admin.UnsuspendUserUseCase;
 import com.instagram.domain.port.in.search.SearchUsersUseCase;
 import com.instagram.domain.port.in.user.FindAllUserUseCase;
 import com.instagram.domain.port.in.user.GetUserUseCase;
+import com.instagram.domain.port.out.UserRepository;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
@@ -58,7 +59,7 @@ public class AdminController {
     private final FindAllUserUseCase findUserUseCase;
     private final GetUserUseCase getUserUseCase;
     private final SearchUsersUseCase searchUsersUseCase;
-    private final UserPersistenceAdapter userPersistenceAdapter;
+    private final UserRepository userRepository;
 
     @Nullable
     private UUID currentUserIdOrNull() {
@@ -136,7 +137,7 @@ public class AdminController {
             @RequestParam(defaultValue = "20") int size) {
         log.debug("searchUsers username={} page={} size={}", username, page, size);
         if (username == null || username.isBlank()) {
-            return ResponseEntity.ok(ApiResponse.ok(userPersistenceAdapter.findAll(page, size).stream()
+            return ResponseEntity.ok(ApiResponse.ok(userRepository.findAll(page, size).stream()
                     .map(AdminUserResponse::from)
                     .collect(Collectors.toList())));
         }

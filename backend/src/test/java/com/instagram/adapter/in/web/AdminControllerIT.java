@@ -39,6 +39,7 @@ import com.instagram.domain.port.in.admin.UnsuspendUserUseCase;
 import com.instagram.domain.port.in.search.SearchUsersUseCase;
 import com.instagram.domain.port.in.user.FindAllUserUseCase;
 import com.instagram.domain.port.in.user.GetUserUseCase;
+import com.instagram.domain.port.out.UserRepository;
 import com.instagram.infrastructure.security.JwtTokenProvider;
 import com.instagram.infrastructure.security.OAuth2SuccessHandler;
 import com.instagram.infrastructure.security.SecurityConfig;
@@ -71,6 +72,8 @@ public class AdminControllerIT {
     private GetUserUseCase getUserUseCase;
     @MockBean
     private SearchUsersUseCase searchUsersUseCase;
+    @MockBean 
+    private UserRepository userRepository;
 
     
 
