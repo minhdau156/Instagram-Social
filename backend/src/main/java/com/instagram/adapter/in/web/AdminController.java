@@ -26,6 +26,7 @@ import com.instagram.adapter.in.web.dto.response.AdminUserResponse;
 import com.instagram.adapter.in.web.dto.response.ApiResponse;
 import com.instagram.adapter.in.web.dto.response.ReportResponse;
 import com.instagram.adapter.in.web.dto.response.UserResponse;
+import com.instagram.adapter.out.persistence.UserPersistenceAdapter;
 import com.instagram.domain.model.Report;
 import com.instagram.domain.model.ReportStatus;
 import com.instagram.domain.model.User;
@@ -57,6 +58,7 @@ public class AdminController {
     private final FindAllUserUseCase findUserUseCase;
     private final GetUserUseCase getUserUseCase;
     private final SearchUsersUseCase searchUsersUseCase;
+    private final UserPersistenceAdapter userPersistenceAdapter;
 
     @Nullable
     private UUID currentUserIdOrNull() {
@@ -133,6 +135,11 @@ public class AdminController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         log.debug("searchUsers username={} page={} size={}", username, page, size);
+        if (username == null || username.isBlank()) {
+            return ResponseEntity.ok(ApiResponse.ok(userPersistenceAdapter.findAll(page, size).stream()
+                    .map(AdminUserResponse::from)
+                    .collect(Collectors.toList())));
+        }
         List<User> users = searchUsersUseCase
                 .searchUsers(new SearchUsersUseCase.Query(username, currentUserId(), page, size));
         if (CollectionUtils.isEmpty(users)) {
