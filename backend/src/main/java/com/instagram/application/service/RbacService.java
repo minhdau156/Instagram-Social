@@ -49,9 +49,9 @@ public class RbacService implements AssignDefaultRoleUseCase, AssignRoleToUserUs
     @Transactional
     @PreAuthorize("hasAuthority('ROLE_ASSIGN')")
     @Caching(evict = {
-            @CacheEvict(value = "userPermissions", key = "'userPermissions:' + command.targetUserId"),
-            @CacheEvict(value = "userRoles", key = "'userRoles:' + command.targetUserId")
-    })
+        @CacheEvict(value = "userPermissions", key = "'userPermissions:' + #p0.targetUserId"),
+        @CacheEvict(value = "userRoles",       key = "'userRoles:' + #p0.targetUserId")
+})
     public Set<Role> assignRoleToUser(AssignRoleToUserUseCase.Command command) {
         Role role = roleRepository.findByName(command.roleName())
                 .orElseThrow(() -> new RoleNotFoundException(command.roleName()));
@@ -83,9 +83,10 @@ public class RbacService implements AssignDefaultRoleUseCase, AssignRoleToUserUs
     @Transactional
     @PreAuthorize("hasAuthority('ROLE_ASSIGN')")
     @Caching(evict = {
-            @CacheEvict(value = "userPermissions", key = "'userPermissions:' + command.targetUserId"),
-            @CacheEvict(value = "userRoles", key = "'userRoles:' + command.targetUserId")
-    })
+        @CacheEvict(value = "userPermissions", key = "'userPermissions:' + #p0.targetUserId"),
+        @CacheEvict(value = "userRoles",       key = "'userRoles:' + #p0.targetUserId")
+})
+
     public void revokeRoleFromUser(RevokeRoleFromUserUseCase.Command command) {
         Role role = roleRepository.findByName(command.roleName())
                 .orElseThrow(() -> new RoleNotFoundException(command.roleName()));
@@ -126,13 +127,13 @@ public class RbacService implements AssignDefaultRoleUseCase, AssignRoleToUserUs
 
     @Override
     @PreAuthorize("hasAuthority('ROLE_VIEW')")
-    @Cacheable(value = "userRoles", key = "'userRoles:' + #query.targetUserId")
+    @Cacheable(value = "userRoles", key = "'userRoles:' + #p0.targetUserId")
     public Set<Role> getUserRoles(GetUserRolesUseCase.Query query) {
         return roleRepository.findRolesByUserId(query.targetUserId());
     }
 
     @Override
-    @Cacheable(value = "userPermissions", key = "'userPermissions:' + query.userId")
+    @Cacheable(value = "userPermissions", key = "'userPermissions:' + #p0.userId")
     public Set<PermissionName> getUserPermissions(GetUserPermissionsUseCase.Query query) {
         Set<PermissionName> permissions = roleRepository.findPermissionNamesByUserId(query.userId());
         if (permissions == null) {
